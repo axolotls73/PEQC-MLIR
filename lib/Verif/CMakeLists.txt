@@ -1,0 +1,18 @@
+add_mlir_dialect_library(MLIRVerif
+        VerifTypes.cpp
+        VerifDialect.cpp
+        VerifOps.cpp
+        VerifPasses.cpp
+
+        ADDITIONAL_HEADER_DIRS
+        ${PROJECT_SOURCE_DIR}/include/Verif
+
+        DEPENDS
+        MLIRVerifOpsIncGen
+        MLIRVerifPassesIncGen
+
+        LINK_LIBS PUBLIC
+        MLIRIR
+        MLIRInferTypeOpInterface
+        MLIRFuncDialect
+        )
