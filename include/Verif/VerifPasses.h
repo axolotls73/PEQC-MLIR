@@ -5,8 +5,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#ifndef INTERP_INTERPPASSES_H
-#define INTERP_INTERPPASSES_H
+#ifndef VERIF_VERIFPASSES_H
+#define VERIF_VERIFPASSES_H
 
 #include "Verif/VerifDialect.h"
 #include "Verif/VerifOps.h"

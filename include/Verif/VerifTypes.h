@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef INTERP_INTERPTYPES_H
-#define INTERP_INTERPTYPES_H
+#ifndef VERIF_VERIFTYPES_H
+#define VERIF_VERIFTYPES_H
 
 #include "mlir/IR/BuiltinTypes.h"
 
 #define GET_TYPEDEF_CLASSES
 #include "Verif/VerifOpsTypes.h.inc"
 
-#endif // INTERP_INTERPTYPES_H
+#endif // VERIF_VERIFTYPES_H

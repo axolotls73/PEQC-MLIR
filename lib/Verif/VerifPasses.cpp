@@ -14,7 +14,7 @@
 #include "Verif/VerifPasses.h"
 
 namespace mlir::verif {
-#define GEN_PASS_DEF_INTERPSWITCHBARFOO
+#define GEN_PASS_DEF_VERIFSWITCHBARFOO
 #include "Verif/VerifPasses.h.inc"
 
 namespace {

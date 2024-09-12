@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef INTERP_INTERPOPS_H
-#define INTERP_INTERPOPS_H
+#ifndef VERIF_VERIFOPS_H
+#define VERIF_VERIFOPS_H
 
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Dialect.h"
@@ -18,4 +18,4 @@
 #define GET_OP_CLASSES
 #include "Verif/VerifOps.h.inc"
 
-#endif // INTERP_INTERPOPS_H
+#endif // VERIF_VERIFOPS_H

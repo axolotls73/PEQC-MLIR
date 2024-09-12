@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef INTERP_TYPES
-#define INTERP_TYPES
+#ifndef VERIF_TYPES
+#define VERIF_TYPES
 
 include "mlir/IR/AttrTypeBase.td"
 include "Verif/VerifDialect.td"
@@ -28,4 +28,4 @@ def Verif_CustomType : Verif_Type<"Custom", "custom"> {
     let assemblyFormat = "`<` $value `>`";
 }
 
-#endif // INTERP_TYPES
+#endif // VERIF_TYPES

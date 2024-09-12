@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef INTERP_DIALECT
-#define INTERP_DIALECT
+#ifndef VERIF_DIALECT
+#define VERIF_DIALECT
 
 include "mlir/IR/OpBase.td"
 
@@ -38,4 +38,4 @@ def Verif_Dialect : Dialect {
 class Verif_Op<string mnemonic, list<Trait> traits = []> :
         Op<Verif_Dialect, mnemonic, traits>;
 
-#endif // INTERP_DIALECT
+#endif // VERIF_DIALECT

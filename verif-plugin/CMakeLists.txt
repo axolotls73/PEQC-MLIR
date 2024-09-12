@@ -14,5 +14,5 @@ add_llvm_library(VerifPlugin
 target_include_directories(
         VerifPlugin
         PRIVATE
-        "${INTERP_BINARY_DIR}/include"
+        "${VERIF_BINARY_DIR}/include"
 )

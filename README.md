@@ -26,7 +26,7 @@ cmake -G Ninja `$LLVM_SRC_DIR/llvm` \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_TARGETS_TO_BUILD=host \
     -DLLVM_ENABLE_PROJECTS=mlir \
-    -DLLVM_EXTERNAL_PROJECTS=verif-dialect -DLLVM_EXTERNAL_INTERP_DIALECT_SOURCE_DIR=../
+    -DLLVM_EXTERNAL_PROJECTS=verif-dialect -DLLVM_EXTERNAL_VERIF_DIALECT_SOURCE_DIR=../
 cmake --build . --target check-verif
 ```
 Here, `$LLVM_SRC_DIR` needs to point to the root of the monorepo.

@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef INTERP_PASS
-#define INTERP_PASS
+#ifndef VERIF_PASS
+#define VERIF_PASS
 
 include "mlir/Pass/PassBase.td"
 
@@ -27,4 +27,4 @@ def VerifSwitchBarFoo: Pass<"verif-switch-bar-foo", "::mlir::ModuleOp"> {
   }];
 }
 
-#endif // INTERP_PASS
+#endif // VERIF_PASS

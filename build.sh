@@ -4,7 +4,7 @@ LLVM_REPO=/opt/mlir-air/llvm
 BUILD_DIR=$LLVM_REPO/build
 INSTALL_DIR=$LLVM_REPO/install
 
-rm -r build
+rm -r build CMakeFiles
 mkdir build && cd build
 cmake -G Ninja .. \
   -DLLVM_DIR=$LLVM_REPO/build/lib/cmake/llvm \

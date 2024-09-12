@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef INTERP_OPS
-#define INTERP_OPS
+#ifndef VERIF_OPS
+#define VERIF_OPS
 
 include "Verif/VerifTypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
@@ -40,4 +40,4 @@ def Verif_FooOp : Verif_Op<"foo", [Pure,
     }];
 }
 
-#endif // INTERP_OPS
+#endif // VERIF_OPS

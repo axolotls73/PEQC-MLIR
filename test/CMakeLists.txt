@@ -9,7 +9,7 @@ configure_lit_site_cfg(
         ${CMAKE_CURRENT_SOURCE_DIR}/lit.cfg.py
 )
 
-set(INTERP_TEST_DEPENDS
+set(VERIF_TEST_DEPENDS
         FileCheck count not
         verif-opt
         verif-translate
@@ -18,9 +18,9 @@ set(INTERP_TEST_DEPENDS
 
 add_lit_testsuite(check-verif "Running the verif regression tests"
         ${CMAKE_CURRENT_BINARY_DIR}
-        DEPENDS ${INTERP_TEST_DEPENDS}
+        DEPENDS ${VERIF_TEST_DEPENDS}
         )
 set_target_properties(check-verif PROPERTIES FOLDER "Tests")
 
-add_lit_testsuites(INTERP ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${INTERP_TEST_DEPENDS})
+add_lit_testsuites(VERIF ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${VERIF_TEST_DEPENDS})
 

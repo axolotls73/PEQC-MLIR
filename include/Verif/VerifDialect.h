@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef INTERP_INTERPDIALECT_H
-#define INTERP_INTERPDIALECT_H
+#ifndef VERIF_VERIFDIALECT_H
+#define VERIF_VERIFDIALECT_H
 
 #include "mlir/Bytecode/BytecodeOpInterface.h"
 #include "mlir/IR/Dialect.h"
 
 #include "Verif/VerifOpsDialect.h.inc"
 
-#endif // INTERP_INTERPDIALECT_H
+#endif // VERIF_VERIFDIALECT_H
