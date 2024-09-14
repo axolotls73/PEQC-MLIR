@@ -1,6 +1,18 @@
-add_mlir_dialect(VerifOps verif)
+set(LLVM_TARGET_DEFINITIONS VerifOps.td)
+mlir_tablegen(VerifOps.h.inc -gen-op-decls)
+mlir_tablegen(VerifOps.cpp.inc -gen-op-defs)
+mlir_tablegen(VerifDialect.h.inc -gen-dialect-decls -dialect=verif)
+mlir_tablegen(VerifDialect.cpp.inc -gen-dialect-defs -dialect=verif)
+add_public_tablegen_target(MLIRVerifOpsIncGen)
+
+set(LLVM_TARGET_DEFINITIONS VerifTypes.td)
+mlir_tablegen(VerifTypes.h.inc -gen-typedef-decls)
+mlir_tablegen(VerifTypes.cpp.inc -gen-typedef-defs)
+add_public_tablegen_target(MLIRVerifTypesIncGen)
+
 add_mlir_doc(VerifDialect VerifDialect Verif/ -gen-dialect-doc)
 add_mlir_doc(VerifOps VerifOps Verif/ -gen-op-doc)
+add_mlir_doc(VerifTypes VerifTypes Verif/ -gen-typedef-doc)
 
 set(LLVM_TARGET_DEFINITIONS VerifPasses.td)
 mlir_tablegen(VerifPasses.h.inc --gen-pass-decls)

@@ -8,6 +8,7 @@
 
 #include "Verif/VerifOps.h"
 #include "Verif/VerifDialect.h"
+#include "Verif/VerifTypes.h"
 
 #define GET_OP_CLASSES
 #include "Verif/VerifOps.cpp.inc"

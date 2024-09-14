@@ -16,11 +16,11 @@
 using namespace mlir::verif;
 
 #define GET_TYPEDEF_CLASSES
-#include "Verif/VerifOpsTypes.cpp.inc"
+#include "Verif/VerifTypes.cpp.inc"
 
 void VerifDialect::registerTypes() {
   addTypes<
 #define GET_TYPEDEF_LIST
-#include "Verif/VerifOpsTypes.cpp.inc"
+#include "Verif/VerifTypes.cpp.inc"
       >();
 }

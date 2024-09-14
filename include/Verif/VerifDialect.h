@@ -12,6 +12,6 @@
 #include "mlir/Bytecode/BytecodeOpInterface.h"
 #include "mlir/IR/Dialect.h"
 
-#include "Verif/VerifOpsDialect.h.inc"
+#include "Verif/VerifDialect.h.inc"
 
 #endif // VERIF_VERIFDIALECT_H

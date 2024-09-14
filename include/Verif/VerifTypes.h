@@ -12,6 +12,6 @@
 #include "mlir/IR/BuiltinTypes.h"
 
 #define GET_TYPEDEF_CLASSES
-#include "Verif/VerifOpsTypes.h.inc"
+#include "Verif/VerifTypes.h.inc"
 
 #endif // VERIF_VERIFTYPES_H

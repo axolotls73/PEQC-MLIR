@@ -13,7 +13,7 @@
 using namespace mlir;
 using namespace mlir::verif;
 
-#include "Verif/VerifOpsDialect.cpp.inc"
+#include "Verif/VerifDialect.cpp.inc"
 
 //===----------------------------------------------------------------------===//
 // Verif dialect.
