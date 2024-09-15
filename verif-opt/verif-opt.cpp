@@ -14,7 +14,7 @@
 
 #include "Verif/VerifDialect.h"
 #include "Verif/VerifPasses.h"
-#include "air-c/air/Dialect/AIR/AIRDialect.h"
+#include "air/Dialect/AIR/AIRDialect.h"
 
 int main(int argc, char **argv) {
   // mlir::registerAllPasses();
