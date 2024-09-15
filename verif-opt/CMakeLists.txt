@@ -6,6 +6,7 @@ set(LIBS
         MLIRArithDialect
         MLIROptLib
         MLIRVerif
+        AIRDialect
         )
 add_llvm_executable(verif-opt verif-opt.cpp)
 
