@@ -10,7 +10,7 @@
 #define VERIF_TYPES
 
 include "mlir/IR/AttrTypeBase.td"
-include "Verif/VerifDialect.td"
+include "Dialect/VerifDialect.td"
 
 //===----------------------------------------------------------------------===//
 // Verif type definitions
@@ -27,5 +27,14 @@ def Verif_CustomType : Verif_Type<"Custom", "custom"> {
     let parameters = (ins StringRefParameter<"the custom value">:$value);
     let assemblyFormat = "`<` $value `>`";
 }
+
+def Verif_Ptr : Verif_Type<"Ptr", "ptr"> {
+    let summary = "";
+    let description = "";
+    //TODO: how to make this index
+    let parameters = (ins "int":$dims);
+    let assemblyFormat = "`<` $dims `>`";
+}
+
 
 #endif // VERIF_TYPES

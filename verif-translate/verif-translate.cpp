@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "Verif/VerifDialect.h"
+#include "Dialect/VerifDialect.h"
 #include "mlir/IR/DialectRegistry.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/InitAllTranslations.h"

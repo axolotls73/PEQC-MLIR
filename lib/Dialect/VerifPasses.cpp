@@ -11,11 +11,12 @@
 #include "mlir/Support/LogicalResult.h"
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
 
-#include "Verif/VerifPasses.h"
+#include "Dialect/VerifPasses.h"
 
 namespace mlir::verif {
 #define GEN_PASS_DEF_VERIFSWITCHBARFOO
-#include "Verif/VerifPasses.h.inc"
+#define GEN_PASS_DEF_VERIFCONVERTADD
+#include "Dialect/VerifPasses.h.inc"
 
 namespace {
 class VerifSwitchBarFooRewriter : public OpRewritePattern<func::FuncOp> {
@@ -42,6 +43,17 @@ public:
     FrozenRewritePatternSet patternSet(std::move(patterns));
     if (failed(applyPatternsAndFoldGreedily(getOperation(), patternSet)))
       signalPassFailure();
+  }
+};
+
+
+class VerifConvertAdd
+    : public impl::VerifConvertAddBase<VerifConvertAdd> {
+public:
+  using impl::VerifConvertAddBase<VerifConvertAdd>::VerifConvertAddBase;
+
+  void runOnOperation() final {
+
   }
 };
 } // namespace

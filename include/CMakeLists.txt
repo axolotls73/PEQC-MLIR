@@ -1,1 +1,3 @@
-add_subdirectory(Verif)
+add_subdirectory(Dialect)
+# add_subdirectory(Conversion)
+# add_subdirectory(Translate)

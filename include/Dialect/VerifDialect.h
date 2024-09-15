@@ -1,4 +1,4 @@
-//===- VerifOps.cpp - Verif dialect ops ---------------*- C++ -*-===//
+//===- VerifDialect.h - Verif dialect -----------------*- C++ -*-===//
 //
 // This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,9 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "Verif/VerifOps.h"
-#include "Verif/VerifDialect.h"
-#include "Verif/VerifTypes.h"
+#ifndef VERIF_VERIFDIALECT_H
+#define VERIF_VERIFDIALECT_H
 
-#define GET_OP_CLASSES
-#include "Verif/VerifOps.cpp.inc"
+#include "mlir/Bytecode/BytecodeOpInterface.h"
+#include "mlir/IR/Dialect.h"
+
+#include "Dialect/VerifDialect.h.inc"
+
+#endif // VERIF_VERIFDIALECT_H

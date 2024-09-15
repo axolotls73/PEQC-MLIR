@@ -27,4 +27,10 @@ def VerifSwitchBarFoo: Pass<"verif-switch-bar-foo", "::mlir::ModuleOp"> {
   }];
 }
 
+def VerifConvertAdd: Pass<"verif-convert-add"> {
+  let summary = "";
+  let description = [{
+  }];
+}
+
 #endif // VERIF_PASS

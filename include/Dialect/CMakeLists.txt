@@ -10,9 +10,9 @@ mlir_tablegen(VerifTypes.h.inc -gen-typedef-decls)
 mlir_tablegen(VerifTypes.cpp.inc -gen-typedef-defs)
 add_public_tablegen_target(MLIRVerifTypesIncGen)
 
-add_mlir_doc(VerifDialect VerifDialect Verif/ -gen-dialect-doc)
-add_mlir_doc(VerifOps VerifOps Verif/ -gen-op-doc)
-add_mlir_doc(VerifTypes VerifTypes Verif/ -gen-typedef-doc)
+add_mlir_doc(VerifDialect VerifDialect Dialect/ -gen-dialect-doc)
+add_mlir_doc(VerifOps VerifOps Dialect/ -gen-op-doc)
+add_mlir_doc(VerifTypes VerifTypes Dialect/ -gen-typedef-doc)
 
 set(LLVM_TARGET_DEFINITIONS VerifPasses.td)
 mlir_tablegen(VerifPasses.h.inc --gen-pass-decls)
