@@ -19,6 +19,7 @@ target_link_libraries(verif-translate
   MLIRSPIRVDialect
   MLIRTranslateLib
   MLIRSupport
+  ${libpast}
   )
 
 mlir_check_link_libraries(verif-translate)

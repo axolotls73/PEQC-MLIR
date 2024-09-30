@@ -7,11 +7,13 @@ Original template taken from the example Standalone dialect in `llvm/mlir/exampl
 
 ## Building
 
-If you're using the mlir-air docker, this should work out-of-the-box:
+To build, set the following paths in `build.sh`:
+
+- `AIR_REPO`: path to mlir-air repo, assumes the llvm installation has been built with `-DLLVM_INSTALL_UTILS=ON`.
+- `PAST_DIR`: path to PAST directory in pocc-devel repo
+
+The just run:
 
 ```sh
 ./build.sh
 ```
-If you're not, you'll need to modify `LLVM_REPO` to point to your llvm installation.
-This assumes your llvm installation has been built with `-DLLVM_INSTALL_UTILS=ON`.
-

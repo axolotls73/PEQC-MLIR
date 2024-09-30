@@ -43,10 +43,13 @@ include_directories(${AIR_DIR}/mlir/include)
 include_directories(${AIR_DIR}/build-pcie/mlir/include)
 include_directories(${VERIF_SOURCE_DIR}/include)
 include_directories(${VERIF_BINARY_DIR}/include)
+include_directories(${PAST_DIR}/past/include)
 link_directories(${LLVM_BUILD_LIBRARY_DIR})
 link_directories(${AIR_DIR}/build-pcie/lib)
 link_directories(${AIR_DIR}/build-pcie/mlir/lib)
 add_definitions(${LLVM_DEFINITIONS})
+
+set(libpast ${PAST_DIR}/past/.libs/libpast.so)
 
 add_subdirectory(include)
 add_subdirectory(lib)
