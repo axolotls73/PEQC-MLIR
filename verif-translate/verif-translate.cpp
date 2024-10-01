@@ -305,9 +305,28 @@ class PastTranslator {
   // scf
 
   s_past_node_t* translate(scf::ForOp op) {
-
+    ///TODO: can i assume that it's always the first/only block arg here?
+    s_symbol_t* iterator = getVarSymbol(op.getRegion().getArgument(0), "for_iter");
+    return past_node_for_create(
+      past_node_binary_create(past_assign,
+        past_node_varref_create(iterator),
+        past_node_varref_create(getVarSymbol(op.getOperand(0)))
+      ),
+      past_node_binary_create(past_lt,
+        past_node_varref_create(iterator),
+        past_node_varref_create(getVarSymbol(op.getOperand(1)))
+      ),
+      iterator,
+      past_node_binary_create(past_addassign,
+        past_node_varref_create(iterator),
+        past_node_varref_create(getVarSymbol(op.getOperand(2)))
+      ),
+      translate(op.getRegion())
+    );
   }
 
+  // just takes the iterator values, don't care about those
+  ///TODO: care about return value?
   s_past_node_t* translate(scf::YieldOp op) {
     return nullptr;
   }
@@ -366,9 +385,9 @@ class PastTranslator {
         if (!ret) ret = cur = translate(&op);
         else {
           cur->next = translate(&op);
-          cur = cur->next;
+          if (cur) cur = cur->next;
         }
-        while (cur->next) cur = cur->next;
+        while (cur && cur->next) cur = cur->next;
       }
     }
     return ret;
@@ -388,6 +407,8 @@ class PastTranslator {
     else if (auto o = dyn_cast<arith::MulIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MulFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::LoadOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
@@ -406,7 +427,7 @@ class PastTranslator {
 
     ///TODO: find a better way to interface btwn FILE and ostream?
     std::string filename = "translate_temp" + //file weirdness when testing. dumb hack
-        std::to_string(std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1)) + ".txt";
+        std::to_string(std::chrono::system_clock::now().time_since_epoch() / std::chrono::nanoseconds(1)) + ".txt";
     auto file = std::fopen(filename.c_str(), "w");
     past_pprint(file, res);
     std::ifstream infile(filename);
