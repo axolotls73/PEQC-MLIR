@@ -51,16 +51,30 @@ namespace verif {
 
 class PastTranslator {
 
+  //options
+  bool declare_variables = true;
+
   symbol_table_t* symbolTable = symbol_table_malloc();
   std::unordered_map<Value, std::string> valueNames;
 
+  // assuming FuncOp sym_names are unique since I can't find a
+  // hash function for ops.
+  std::unordered_map<std::string, std::vector<s_symbol_t*>*> functionReturnVars;
+
+  class FuncRetVal : public Value {
+    public:
+    FuncRetVal(Type type) {
+      setType(type);
+    }
+  };
+
   int varSuffix = 0;
 
-  symbol_t* getSymbol(std::string name) {
+  s_symbol_t* getSymbol(std::string name) {
     return symbol_get_or_insert(symbolTable, name.c_str(), nullptr);
   }
 
-  symbol_t* getVarSymbol(Value val, std::string name = "var") {
+  s_symbol_t* getVarSymbol(Value val, std::string name = "var") {
     //value in map already
     if (valueNames.find(val) != valueNames.end()) {
       auto symbol = symbol_get_or_insert
@@ -74,15 +88,17 @@ class PastTranslator {
     return symbol_get_or_insert(symbolTable, symbolName.c_str(), nullptr);
   }
 
-  s_past_node_t* getVar(Value val, std::string name = "var") {
-    return past_node_varref_create(getVarSymbol(val, name));
+  s_past_node_t* getVarDecl(Type type, s_symbol_t* var) {
+    if (declare_variables)
+      return past_node_vardecl_create(
+        past_node_varref_create(getTypeSymbol(type)),
+        past_node_varref_create(var)
+      );
+    else return past_node_varref_create(var);
   }
 
   s_past_node_t* getVarDecl(Value val, std::string name = "var") {
-    return past_node_vardecl_create(
-      past_node_varref_create(getTypeSymbol(val.getType())),
-      getVar(val, name)
-    );
+    return getVarDecl(val.getType(), getVarSymbol(val, name));
   }
 
   s_symbol_t* getTypeSymbol(const Type& t) {
@@ -90,8 +106,6 @@ class PastTranslator {
   }
 
   std::string getTypeName(const Type& t) {
-    const char* type = nullptr;
-
     if (t.isIndex()) return "int";
 
     else if (t.isInteger()) {
@@ -139,7 +153,7 @@ class PastTranslator {
 
   // type varname = assignval;
   s_past_node_t* getDeclareAndAssign(Type type, const char* varname,
-        Value varvalue, s_past_node_t* assignval) {
+            Value varvalue, s_past_node_t* assignval) {
     return past_node_statement_create(
         past_node_binary_create(past_assign,
           past_node_vardecl_create(
@@ -147,6 +161,8 @@ class PastTranslator {
             past_node_varref_create(getVarSymbol(varvalue, varname))),
           assignval));
   }
+
+
 
 
   // builtin
@@ -162,6 +178,7 @@ class PastTranslator {
     ///TODO: function to chain node over iterator
     s_past_node_t* funcArgs = nullptr;
     s_past_node_t* cur = nullptr;
+    // add args
     for (auto arg : op.getRegion().getArguments()) {
       if (!funcArgs) funcArgs = cur = getVarDecl(arg, "func_arg");
       else {
@@ -169,10 +186,21 @@ class PastTranslator {
         cur = cur->next;
       }
     }
+    // add results as args
+    auto vec = new std::vector<s_symbol_t*>();
+    functionReturnVars[op.getSymName().str()] = vec;
+    for (auto type : op.getResultTypes()) {
+      s_symbol_t* sym = getSymbol("func_arg_ret_" + std::to_string(varSuffix++));
+      (*vec).push_back(sym);
+      if (!funcArgs) funcArgs = cur = getVarDecl(type, sym);
+      else {
+        cur->next = getVarDecl(type, sym);
+        cur = cur->next;
+      }
+    }
 
-    assert(op.getNumResults() == 1);
     s_past_node_t* ret = past_node_fundecl_create(
-      past_node_varref_create(getTypeSymbol(op.getResultTypes()[0])),
+      past_node_varref_create(getSymbol("void")),
       past_node_varref_create(getSymbol(op.getSymName().str())),
       funcArgs,
       translate(op.getRegion())
@@ -181,32 +209,108 @@ class PastTranslator {
   }
 
   s_past_node_t* translate(func::ReturnOp& op) {
-    assert(op.getNumOperands() == 1);
-    return past_node_statement_create(
-      past_node_keyword_create(e_past_keyword_return_value,
-        getVar(op.getOperand(0))));
+    auto func = op.getParentOp<func::FuncOp>();
+    assert(func);
+
+    s_past_node_t* ret = nullptr;
+    s_past_node_t* cur = nullptr;
+
+    auto getSymVar = [this](s_symbol_t* s, Value v) {
+      return past_node_statement_create(
+        past_node_binary_create(past_assign,
+          past_node_varref_create(s),
+          past_node_varref_create(getVarSymbol(v))
+        )
+      );
+    };
+
+    int i = 0;
+    assert(functionReturnVars.find(func.getSymName().str()) != functionReturnVars.end());
+    for (s_symbol_t* sym : *(functionReturnVars.find(func.getSymName().str())->second)) {
+      if (!ret) ret = cur = getSymVar(sym, op.getOperand(i));
+      else {
+        cur->next = getSymVar(sym, op.getOperand(i));
+        cur = cur->next;
+      }
+      i++;
+    }
+
+    cur->next = past_node_statement_create(
+      past_node_keyword_create(e_past_keyword_return, nullptr)
+    );
+    return ret;
+    // assert(op.getNumOperands() == 1);
+    // return past_node_statement_create(
+    //   past_node_keyword_create(e_past_keyword_return_value,
+    //     getVar(op.getOperand(0))));
   }
 
 
   // arith
 
-  s_past_node_t* translate(arith::ConstantOp& op, const Type& type, u_past_value_data_t val) {
+  s_past_node_t* translateConstant(arith::ConstantOp& op, const Type& type, u_past_value_data_t val) {
     OpResult res = op->getResult(0);
     return getDeclareAndAssign(type, "arith_const", res, past_node_value_create(getTypePast(type), val));
   }
 
   s_past_node_t* translate(arith::ConstantIntOp& op) {
     u_past_value_data_t val = { .intval = op.value() };
-    return translate(op, op.getResult().getType(), val);
+    return translateConstant(op, op.getResult().getType(), val);
   }
 
+  s_past_node_t* translateArithBinop
+            (const char* resultName, const cs_past_node_type_t* pastType,
+             Value res, Value lhs, Value rhs) {
+    return getDeclareAndAssign(res.getType(), resultName, res,
+        past_node_binary_create(pastType,
+          past_node_varref_create(getVarSymbol(lhs)),
+          past_node_varref_create(getVarSymbol(rhs))));
+  }
 
   s_past_node_t* translate(arith::AddIOp& op) {
-    return getDeclareAndAssign(op.getResult().getType(), "arith_addi", op.getResult(),
-        past_node_binary_create(past_add,
-          past_node_varref_create(getVarSymbol(op.getOperand(0))),
-          past_node_varref_create(getVarSymbol(op.getOperand(1)))));
+    return translateArithBinop("arith_addi", past_add, op.getResult(), op.getOperand(0), op.getOperand(1));
   }
+  s_past_node_t* translate(arith::AddFOp& op) {
+    return translateArithBinop("arith_addf", past_add, op.getResult(), op.getOperand(0), op.getOperand(1));
+  }
+  s_past_node_t* translate(arith::MulIOp& op) {
+    return translateArithBinop("arith_muli", past_mul, op.getResult(), op.getOperand(0), op.getOperand(1));
+  }
+  s_past_node_t* translate(arith::MulFOp& op) {
+    return translateArithBinop("arith_mulf", past_mul, op.getResult(), op.getOperand(0), op.getOperand(1));
+  }
+  // s_past_node_t* translate(arith::Div& op) {
+  //   return translateArithBinop("arith_divi", past_div, op.getResult(), op.getOperand(0), op.getOperand(1));
+  // }
+  s_past_node_t* translate(arith::DivFOp& op) {
+    return translateArithBinop("arith_divf", past_div, op.getResult(), op.getOperand(0), op.getOperand(1));
+  }
+
+  // scf
+
+  s_past_node_t* translate(scf::ForOp) {
+
+  }
+
+
+  // memref
+
+  s_past_node_t* translate(memref::AllocOp) {
+
+  }
+
+  s_past_node_t* translate(memref::LoadOp) {
+
+  }
+
+  s_past_node_t* translate(memref::StoreOp) {
+
+  }
+
+  s_past_node_t* translate(memref::CopyOp) {
+
+  }
+
 
   // returns a linked list of the translation of the contained blocks'
   // operations, chained
@@ -221,6 +325,7 @@ class PastTranslator {
           cur->next = translate(&op);
           cur = cur->next;
         }
+        while (cur->next) cur = cur->next;
       }
     }
     return ret;
@@ -235,6 +340,10 @@ class PastTranslator {
     else if (auto o = dyn_cast<func::ReturnOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::ConstantIntOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::AddIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::AddFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::MulIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::MulFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
     else {
       llvm::errs() << "idk " << op->getName() << "\n";
       exit(1);
@@ -249,19 +358,20 @@ class PastTranslator {
     s_past_node_t* res = translator.translate(op);
 
     ///TODO: find a better way to interface btwn FILE and ostream?
-    auto file = std::fopen("translate_temp.txt", "w");
+    std::string filename = "translate_temp" + //file weirdness when testing. dumb hack
+        std::to_string(std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1)) + ".txt";
+    auto file = std::fopen(filename.c_str(), "w");
     past_pprint(file, res);
-    std::ifstream infile("translate_temp.txt");
-    std::string outstr((std::istreambuf_iterator<char>(infile)),
-                       (std::istreambuf_iterator<char>()));
+    std::ifstream infile(filename);
     std::fclose(file);
-    std::remove("translate_temp.txt");
+    std::remove(filename.c_str());
+
+    output << "#pragma pocc-region-start\n";
     std::string line;
     while (std::getline(infile, line)) {
       output << line << "\n";
     }
-
-    output << outstr;
+    output << "#pragma pocc-region-end\n";
     return success();
   }
 
