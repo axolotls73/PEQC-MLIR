@@ -131,8 +131,14 @@ class PastTranslator {
       return ret;
     }
 
+    ///TODO: change to use node type
     else if (auto tm = dyn_cast<MemRefType>(t)) {
-
+      std::string ret = getTypeName(tm.getElementType());
+      assert(tm.getNumDynamicDims() == 0);
+      for (int i = 0; i < tm.getRank(); i++) {
+        ret += "*";
+      }
+      return ret;
     }
     assert(0);
   }
@@ -140,6 +146,8 @@ class PastTranslator {
   e_past_value_type_t getTypePast(const Type& t) {
     // llvm::errs() << "getTypePast: " << t << "\n";
     // llvm::errs() << "  " << t.getIntOrFloatBitWidth() << "\n";
+    if (t.isIndex()) return e_past_value_int;
+
     if (t.isInteger() && t.getIntOrFloatBitWidth() == 32) {
       // llvm::errs() << "  " << dyn_cast<IntegerType>(t).getSignedness() << "\n";
       if (dyn_cast<IntegerType>(t).getSignedness() ==
@@ -235,9 +243,12 @@ class PastTranslator {
       i++;
     }
 
-    cur->next = past_node_statement_create(
+    s_past_node_t* end = past_node_statement_create(
       past_node_keyword_create(e_past_keyword_return, nullptr)
     );
+
+    if (cur) cur->next = end;
+    else ret = end;
     return ret;
     // assert(op.getNumOperands() == 1);
     // return past_node_statement_create(
@@ -254,6 +265,11 @@ class PastTranslator {
   }
 
   s_past_node_t* translate(arith::ConstantIntOp& op) {
+    u_past_value_data_t val = { .intval = op.value() };
+    return translateConstant(op, op.getResult().getType(), val);
+  }
+
+  s_past_node_t* translate(arith::ConstantIndexOp& op) {
     u_past_value_data_t val = { .intval = op.value() };
     return translateConstant(op, op.getResult().getType(), val);
   }
@@ -288,27 +304,54 @@ class PastTranslator {
 
   // scf
 
-  s_past_node_t* translate(scf::ForOp) {
+  s_past_node_t* translate(scf::ForOp op) {
 
+  }
+
+  s_past_node_t* translate(scf::YieldOp op) {
+    return nullptr;
   }
 
 
   // memref
 
-  s_past_node_t* translate(memref::AllocOp) {
-
+  s_past_node_t* translate(memref::AllocOp op) {
+    return past_node_statement_create(getVarDecl(op.getResult()));
   }
 
-  s_past_node_t* translate(memref::LoadOp) {
-
+  s_past_node_t* getArrayAccess(Value arr, OperandRange ops) {
+    s_past_node_t* ret = nullptr;
+    for (auto op : ops) {
+      if (!ret) {
+        ret = past_node_binary_create(past_arrayref,
+          past_node_varref_create(getVarSymbol(arr)),
+          past_node_varref_create(getVarSymbol(op))
+        );
+      }
+      else {
+        ret = past_node_binary_create(past_arrayref,
+          ret,
+          past_node_varref_create(getVarSymbol(op))
+        );
+      }
+    }
+    return ret;
   }
 
-  s_past_node_t* translate(memref::StoreOp) {
-
+  s_past_node_t* translate(memref::LoadOp op) {
+    return past_node_statement_create(
+      past_node_binary_create(past_assign,
+        past_node_varref_create(getVarSymbol(op.getResult())),
+        getArrayAccess(op.getOperand(0), op.getOperands().drop_front(1))
+    ));
   }
 
-  s_past_node_t* translate(memref::CopyOp) {
-
+  s_past_node_t* translate(memref::StoreOp op) {
+    return past_node_statement_create(
+      past_node_binary_create(past_assign,
+        getArrayAccess(op.getOperand(1), op.getOperands().drop_front(2)),
+        past_node_varref_create(getVarSymbol(op.getOperand(0)))
+    ));
   }
 
 
@@ -339,11 +382,15 @@ class PastTranslator {
     else if (auto o = dyn_cast<func::FuncOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<func::ReturnOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::ConstantIntOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::ConstantIndexOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::AddIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::AddFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MulIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MulFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<memref::LoadOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
     else {
       llvm::errs() << "idk " << op->getName() << "\n";
       exit(1);
