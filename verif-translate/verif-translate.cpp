@@ -88,6 +88,11 @@ class PastTranslator {
     return symbol_get_or_insert(symbolTable, symbolName.c_str(), nullptr);
   }
 
+  s_symbol_t* getTempVarSymbol(std::string name = "var") {
+    std::string symbolName = name + "_" + std::to_string(varSuffix++);
+    return symbol_get_or_insert(symbolTable, symbolName.c_str(), nullptr);
+  }
+
   s_past_node_t* getVarDecl(Type type, s_symbol_t* var) {
     if (declare_variables)
       return past_node_vardecl_create(
@@ -117,13 +122,13 @@ class PastTranslator {
           break;
         case IntegerType::SignednessSemantics::Unsigned:
         case IntegerType::SignednessSemantics::Signless:
-          ret += "unsigned ";
+          // ret += "unsigned ";
           break;
       }
 
       switch (it.getWidth()) {
         case 32:
-          ret += "long ";
+          // ret += "long ";
           break;
         default: assert(0);
       }
@@ -135,9 +140,10 @@ class PastTranslator {
     else if (auto tm = dyn_cast<MemRefType>(t)) {
       std::string ret = getTypeName(tm.getElementType());
       assert(tm.getNumDynamicDims() == 0);
-      for (int i = 0; i < tm.getRank(); i++) {
-        ret += "*";
-      }
+      // for (int i = 0; i < tm.getRank(); i++) {
+      //   ret += "*";
+      // }
+      ret += "*";
       return ret;
     }
     assert(0);
@@ -170,6 +176,78 @@ class PastTranslator {
           assignval));
   }
 
+  s_past_node_t* getArrayAccess(s_symbol_t* arr, std::vector<s_symbol_t*> ops) {
+    s_past_node_t* ret = nullptr;
+    for (auto op : ops) {
+      if (!ret) {
+        ret = past_node_binary_create(past_arrayref,
+          past_node_varref_create(arr),
+          past_node_varref_create(op)
+        );
+      }
+      else {
+        ret = past_node_binary_create(past_arrayref,
+          ret,
+          past_node_varref_create(op)
+        );
+      }
+    }
+    return ret;
+  }
+
+  s_past_node_t* getArrayAccess(Value arr, OperandRange ops) {
+    std::vector<s_symbol_t*> vops;
+    for (auto o : ops) {
+      vops.push_back(getVarSymbol(o));
+    }
+    return getArrayAccess(getVarSymbol(arr), vops);
+  }
+
+
+  s_past_node_t* getArrayCopy(const MemRefType& type, s_symbol_t* src, s_symbol_t* dst,
+          llvm::ArrayRef<int64_t> dims, std::vector<s_symbol_t*> itervars) {
+
+    auto iter = getTempVarSymbol("copy_iter");
+    itervars.push_back(iter);
+
+    s_past_node_t* body = nullptr;
+    if (dims.size() == 1) {
+      body = past_node_statement_create(
+        past_node_binary_create(past_assign,
+          getArrayAccess(dst, itervars),
+          getArrayAccess(src, itervars)
+        )
+      );
+    }
+    else {
+      body = getArrayCopy(type, src, dst, dims.drop_front(1), itervars);
+    }
+
+    return past_node_for_create(
+      past_node_binary_create(past_assign,
+        past_node_varref_create(iter),
+        past_node_value_create_from_int(0)
+      ),
+      past_node_binary_create(past_lt,
+        past_node_varref_create(iter),
+        past_node_value_create_from_longlong(dims[0])
+      ),
+      iter,
+      past_node_binary_create(past_addassign,
+        past_node_varref_create(iter),
+        past_node_value_create_from_int(1)
+      ),
+      body
+    );
+  }
+
+  s_past_node_t* getArrayCopy(const MemRefType& type, s_symbol_t* src, s_symbol_t* dst) {
+    auto dims = type.getShape();
+    assert(dims.size() > 0);
+
+    return getArrayCopy(type, src, dst, dims, std::vector<s_symbol_t*>());
+  }
+
 
 
 
@@ -198,7 +276,7 @@ class PastTranslator {
     auto vec = new std::vector<s_symbol_t*>();
     functionReturnVars[op.getSymName().str()] = vec;
     for (auto type : op.getResultTypes()) {
-      s_symbol_t* sym = getSymbol("func_arg_ret_" + std::to_string(varSuffix++));
+      s_symbol_t* sym = getTempVarSymbol("func_arg_ret");
       (*vec).push_back(sym);
       if (!funcArgs) funcArgs = cur = getVarDecl(type, sym);
       else {
@@ -223,13 +301,20 @@ class PastTranslator {
     s_past_node_t* ret = nullptr;
     s_past_node_t* cur = nullptr;
 
-    auto getSymVar = [this](s_symbol_t* s, Value v) {
-      return past_node_statement_create(
-        past_node_binary_create(past_assign,
-          past_node_varref_create(s),
-          past_node_varref_create(getVarSymbol(v))
-        )
-      );
+    auto getSymVar = [this](s_symbol_t* returned, Value val) {
+      auto type = val.getType();
+      // temporary: treat scalars as arrays for copy
+      if (!dyn_cast<MemRefType>(type))
+        return past_node_statement_create(
+          past_node_binary_create(past_assign,
+            past_node_binary_create(past_arrayref,
+              past_node_varref_create(returned),
+              past_node_value_create_from_int(0)
+            ),
+            past_node_varref_create(getVarSymbol(val))
+          )
+        );
+      return getArrayCopy(dyn_cast<MemRefType>(type), getVarSymbol(val), returned);
     };
 
     int i = 0;
@@ -338,25 +423,6 @@ class PastTranslator {
     return past_node_statement_create(getVarDecl(op.getResult()));
   }
 
-  s_past_node_t* getArrayAccess(Value arr, OperandRange ops) {
-    s_past_node_t* ret = nullptr;
-    for (auto op : ops) {
-      if (!ret) {
-        ret = past_node_binary_create(past_arrayref,
-          past_node_varref_create(getVarSymbol(arr)),
-          past_node_varref_create(getVarSymbol(op))
-        );
-      }
-      else {
-        ret = past_node_binary_create(past_arrayref,
-          ret,
-          past_node_varref_create(getVarSymbol(op))
-        );
-      }
-    }
-    return ret;
-  }
-
   s_past_node_t* translate(memref::LoadOp op) {
     return past_node_statement_create(
       past_node_binary_create(past_assign,
@@ -371,6 +437,12 @@ class PastTranslator {
         getArrayAccess(op.getOperand(1), op.getOperands().drop_front(2)),
         past_node_varref_create(getVarSymbol(op.getOperand(0)))
     ));
+  }
+
+  s_past_node_t* translate(memref::CopyOp op) {
+    auto type = dyn_cast<MemRefType>(op.getOperand(0).getType());
+    assert(type);
+    return getArrayCopy(type, getVarSymbol(op.getOperand(0)), getVarSymbol(op.getOperand(1)));
   }
 
 
@@ -412,6 +484,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::LoadOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<memref::CopyOp>(op)) res = translate(o);
     else {
       llvm::errs() << "idk " << op->getName() << "\n";
       exit(1);
