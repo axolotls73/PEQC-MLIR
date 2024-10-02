@@ -141,19 +141,20 @@ public:
 };
 
 // copy paste! mlir-air/mlir/lib/Conversion/AIRToAsyncPass.cpp:532
-class ExecuteOpConversion : public OpConversionPattern<xilinx::air::ExecuteOp> {
+class VerifAirExecuteRewriter : public OpRewritePattern<xilinx::air::ExecuteOp> {
 public:
-  using OpConversionPattern<xilinx::air::ExecuteOp>::OpConversionPattern;
+  using OpRewritePattern<xilinx::air::ExecuteOp>::OpRewritePattern;
 
   LogicalResult
-  matchAndRewrite(xilinx::air::ExecuteOp op, OpAdaptor adaptor,
-                  ConversionPatternRewriter &rewriter) const override {
+  matchAndRewrite(xilinx::air::ExecuteOp op,
+                  PatternRewriter &rewriter) const final {
 
     SmallVector<Type, 4> resultTypes;
     for (unsigned i = 1; i < op->getNumResults(); ++i)
       resultTypes.push_back(op->getResult(i).getType());
 
-    SmallVector<Value, 4> dependencies = adaptor.getAsyncDependencies();
+    SmallVector<Value, 4> dependencies = op.getAsyncDependencies();
+    // SmallVector<Value, 4> dependencies = adaptor.getAsyncDependencies();
     SmallVector<Value, 4> operands;
     auto newOp = rewriter.create<async::ExecuteOp>(
         op->getLoc(), resultTypes, dependencies, operands,
@@ -175,7 +176,7 @@ public:
     for (unsigned i = 1; i < op->getNumResults(); ++i) {
       auto r = newOp.getResult(i);
       auto await = rewriter.create<async::AwaitOp>(op->getLoc(), r);
-      // op.getResult(i).replaceAllUsesWith(await.getResult());
+      op.getResult(i).replaceAllUsesWith(await.getResult());
       results.push_back(await.getResult());
     }
     // rewriter.eraseOp(op);
@@ -195,7 +196,8 @@ public:
     mlir::RewritePatternSet patterns(context);
     patterns.clear();
 
-    patterns.add<VerifScfParRewriter, ExecuteOpConversion>(context);
+    patterns.add<VerifScfParRewriter>(context);
+    patterns.add<VerifAirExecuteRewriter>(context);
 
     applyPatternsAndFoldGreedily(getOperation(), std::move(patterns));
   }
