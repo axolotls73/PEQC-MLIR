@@ -27,10 +27,11 @@ def VerifSwitchBarFoo: Pass<"verif-switch-bar-foo", "::mlir::ModuleOp"> {
   }];
 }
 
-def VerifConvertAdd: Pass<"verif-convert-add"> {
+def VerifLowerToAsync: Pass<"verif-lower-to-async", "::mlir::ModuleOp"> {
   let summary = "";
   let description = [{
   }];
+  let dependentDialects = ["async::AsyncDialect"];
 }
 
 #endif // VERIF_PASS

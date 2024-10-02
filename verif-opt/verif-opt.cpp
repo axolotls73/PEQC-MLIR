@@ -21,8 +21,14 @@ int main(int argc, char **argv) {
   mlir::verif::registerPasses();
 
   mlir::DialectRegistry registry;
-  registry.insert<mlir::verif::VerifDialect,
-                  mlir::arith::ArithDialect, mlir::func::FuncDialect>();
+  registry.insert<
+      mlir::verif::VerifDialect,
+      mlir::arith::ArithDialect,
+      mlir::scf::SCFDialect,
+      mlir::func::FuncDialect,
+      mlir::memref::MemRefDialect,
+      mlir::async::AsyncDialect
+    >();
 
   registry.insert<xilinx::air::airDialect>();
 

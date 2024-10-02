@@ -15,4 +15,8 @@ add_mlir_dialect_library(MLIRVerif
         MLIRIR
         MLIRInferTypeOpInterface
         MLIRFuncDialect
+        # AIRDialect
+
+        LINK_LIBS PRIVATE
+        AIRDialect
         )
