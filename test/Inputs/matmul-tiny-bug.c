@@ -6,6 +6,7 @@ void matmul_on_memref(int** A, int** B, int** C) {
       for (int k = 0; k < 10; k++)
         C[i][j] += A[i][k] * B[k][j];
     }
+  C[5][6] = 42;
 }
 {
   matmul_on_memref(A, B, C);

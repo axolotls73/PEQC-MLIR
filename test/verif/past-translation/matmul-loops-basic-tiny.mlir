@@ -1,5 +1,14 @@
-// RUN: verif-translate --translate-to-past %s -o %t; /data-host-share/pocc-devel/ir/past/src/pastchecker %t %t
-// RUN: verif-translate --translate-to-past %s -o %t; /data-host-share/pocc-devel/ir/past/src/pastchecker %t %S/../../Inputs/matmul-tiny.c func_arg_ret_2
+// RUN: verif-translate --translate-to-past %s -o %t && \
+// RUN: %S/../../add_epilogue.sh %t %S/../../Inputs/matmul-tiny-epilogue.c %t-2 && \
+// RUN: pastchecker %t-2 %t-2 A,B,C | grep "YES"
+
+// RUN: verif-translate --translate-to-past %s -o %t && \
+// RUN: %S/../../add_epilogue.sh %t %S/../../Inputs/matmul-tiny-epilogue.c %t-2 && \
+// RUN: pastchecker %t-2 %S/../../Inputs/matmul-tiny.c A,B,C | grep "YES"
+
+// RUN: verif-translate --translate-to-past %s -o %t && \
+// RUN: %S/../../add_epilogue.sh %t %S/../../Inputs/matmul-tiny-epilogue.c %t-2 && \
+// RUN: pastchecker %t-2 %S/../../Inputs/matmul-tiny-bug.c A,B,C | not grep "YES"
 
 module {
   func.func @matmul_on_memref(%arg0: memref<10x10xi32>, %arg1: memref<10x10xi32>) -> memref<10x10xi32> {
