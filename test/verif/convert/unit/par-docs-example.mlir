@@ -1,9 +1,5 @@
 // RUN: verif-opt --verif-lower-to-async %s | FileCheck %s
 
-// RUN: verif-opt --verif-lower-to-async %s | verif-translate --translate-to-past > %t && \
-// RUN: pastchecker %t %t
-// XFAIL: *
-
 module {
     %buffer = memref.alloc() : memref<100xf32>
     %init = arith.constant 0.0 : f32

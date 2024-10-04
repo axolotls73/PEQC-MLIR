@@ -31,6 +31,8 @@ config.test_exec_root = os.path.join(config.verif_obj_root, "test")
 
 config.substitutions.append(("%PATH%", config.environment["PATH"]))
 config.substitutions.append(("%shlibext", config.llvm_shlib_ext))
+config.substitutions.append(("%testroot", config.test_source_root))
+config.substitutions.append(("%inputs", os.path.join(config.test_source_root, "Inputs")))
 
 llvm_config.with_system_environment(["HOME", "INCLUDE", "LIB", "TMP", "TEMP"])
 
