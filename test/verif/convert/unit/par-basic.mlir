@@ -1,4 +1,4 @@
-// RUN: verif-opt --verif-lower-to-async %s | FileCheck %s
+// RUN: verif-opt --verif-scf-parallel-to-async %s | FileCheck %s
 
 module {
     %c0 = arith.constant 0 : index

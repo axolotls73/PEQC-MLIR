@@ -11,24 +11,15 @@
 
 include "mlir/Pass/PassBase.td"
 
-def VerifSwitchBarFoo: Pass<"verif-switch-bar-foo", "::mlir::ModuleOp"> {
-  let summary = "Switches the name of a FuncOp named `bar` to `foo` and folds.";
+def VerifScfParallelToAsync: Pass<"verif-scf-parallel-to-async", "::mlir::ModuleOp"> {
+  let summary = "Convert acf.parallel to scf.for and async.execute";
   let description = [{
-    Switches the name of a FuncOp named `bar` to `foo` and folds.
-    ```
-    func.func @bar() {
-      return
-    }
-    // Gets transformed to:
-    func.func @foo() {
-      return
-    }
-    ```
   }];
+  let dependentDialects = ["async::AsyncDialect"];
 }
 
-def VerifLowerToAsync: Pass<"verif-lower-to-async", "::mlir::ModuleOp"> {
-  let summary = "";
+def VerifAirExecuteToAsync: Pass<"verif-air-execute-to-async", "::mlir::ModuleOp"> {
+  let summary = "Convert air.execute to async.execute";
   let description = [{
   }];
   let dependentDialects = ["async::AsyncDialect"];

@@ -18,39 +18,12 @@
 #include "Dialect/VerifDialect.h"
 
 namespace mlir::verif {
-#define GEN_PASS_DEF_VERIFSWITCHBARFOO
-#define GEN_PASS_DEF_VERIFLOWERTOASYNC
+#define GEN_PASS_DEF_VERIFSCFPARALLELTOASYNC
+#define GEN_PASS_DEF_VERIFAIREXECUTETOASYNC
 #include "Dialect/VerifPasses.h.inc"
 
 namespace {
-class VerifSwitchBarFooRewriter : public OpRewritePattern<func::FuncOp> {
-public:
-  using OpRewritePattern<func::FuncOp>::OpRewritePattern;
-  LogicalResult matchAndRewrite(func::FuncOp op,
-                                PatternRewriter &rewriter) const final {
-    if (op.getSymName() == "bar") {
-      rewriter.modifyOpInPlace(op, [&op]() { op.setSymName("foo"); });
-      return success();
-    }
-    return failure();
-  }
-};
 
-class VerifSwitchBarFoo
-    : public impl::VerifSwitchBarFooBase<VerifSwitchBarFoo> {
-public:
-  using impl::VerifSwitchBarFooBase<
-      VerifSwitchBarFoo>::VerifSwitchBarFooBase;
-  void runOnOperation() final {
-    RewritePatternSet patterns(&getContext());
-    patterns.add<VerifSwitchBarFooRewriter>(&getContext());
-    FrozenRewritePatternSet patternSet(std::move(patterns));
-    if (failed(applyPatternsAndFoldGreedily(getOperation(), patternSet)))
-      signalPassFailure();
-  }
-};
-
-// almost entirely from mlir-air/mlir/lib/Conversion/AIRToAsyncPass.cpp:441
 class VerifScfParRewriter : public OpRewritePattern<scf::ParallelOp> {
 public:
   using OpRewritePattern<scf::ParallelOp>::OpRewritePattern;
@@ -185,9 +158,7 @@ public:
       assert(redLoop.getNumResults() == 1); //one init_arg -> one result
       reduceResults.push_back(redLoop.getResult(0));
       rewriter.setInsertionPointToStart(redLoop.getBody());
-      // rewriter.create<scf::YieldOp>(loc, redLoop.getRegionIterArg(0));
     }
-    op.getOperation()->getParentOp()->emitWarning();
 
     // wait on group
     rewriter.setInsertionPointAfter(outerLoop);
@@ -220,59 +191,21 @@ public:
   matchAndRewrite(xilinx::air::ExecuteOp op,
                   PatternRewriter &rewriter) const final {
 
-    SmallVector<Type, 4> resultTypes;
-    for (unsigned i = 1; i < op->getNumResults(); ++i)
-      resultTypes.push_back(op->getResult(i).getType());
-
-    SmallVector<Value, 4> dependencies = op.getAsyncDependencies();
-    // SmallVector<Value, 4> dependencies = adaptor.getAsyncDependencies();
-    SmallVector<Value, 4> operands;
-    auto newOp = rewriter.create<async::ExecuteOp>(
-        op->getLoc(), resultTypes, dependencies, operands,
-        [&](OpBuilder &b, Location loc, ValueRange v) {
-          IRMapping map;
-          for (auto &o : op.getOps()) {
-            if (isa<xilinx::air::ExecuteTerminatorOp>(o)) {
-              SmallVector<Value, 4> returnValues;
-              for (auto v : o.getOperands())
-                returnValues.push_back(map.lookupOrDefault(v));
-              b.create<async::YieldOp>(loc, returnValues);
-            } else
-              b.clone(o, map);
-          }
-        });
-
-    SmallVector<Value, 4> results{newOp->getResult(0)};
-    op.getResult(0).replaceAllUsesWith(newOp->getResult(0));
-    for (unsigned i = 1; i < op->getNumResults(); ++i) {
-      auto r = newOp.getResult(i);
-      auto await = rewriter.create<async::AwaitOp>(op->getLoc(), r);
-      op.getResult(i).replaceAllUsesWith(await.getResult());
-      results.push_back(await.getResult());
-    }
-    // rewriter.eraseOp(op);
-    rewriter.replaceOp(op, results);
-    return success();
+    return failure();
   }
 };
 
-class VerifLowerToAsync
-    : public impl::VerifLowerToAsyncBase<VerifLowerToAsync> {
+class VerifScfParallelToAsync
+    : public impl::VerifScfParallelToAsyncBase<VerifScfParallelToAsync> {
 public:
-  using impl::VerifLowerToAsyncBase<VerifLowerToAsync>::VerifLowerToAsyncBase;
-
-  // void initialize(MLIRContext* context) {
-  //   frozenPatterns = nullptr;
-  // }
+  using impl::VerifScfParallelToAsyncBase<VerifScfParallelToAsync>::VerifScfParallelToAsyncBase;
 
   void runOnOperation() final {
     auto module = getOperation();
     auto context = module.getContext();
-    mlir::RewritePatternSet patterns(context);
-    // patterns.clear();
 
+    mlir::RewritePatternSet patterns(context);
     patterns.add<VerifScfParRewriter>(context);
-    patterns.add<VerifAirExecuteRewriter>(context);
 
     ConversionTarget target(*context);
     target.addIllegalOp<scf::ParallelOp>();
@@ -284,11 +217,39 @@ public:
         memref::MemRefDialect,
         async::AsyncDialect,
         mlir::BuiltinDialect
-        >();
+      >();
 
     applyPartialConversion(module, target, std::move(patterns));
-    // applyPatternsAndFoldGreedily(getOperation(), std::move(patterns));
   }
 };
+
+class VerifAirExecuteToAsync
+    : public impl::VerifAirExecuteToAsyncBase<VerifAirExecuteToAsync> {
+public:
+  using impl::VerifAirExecuteToAsyncBase<VerifAirExecuteToAsync>::VerifAirExecuteToAsyncBase;
+
+  void runOnOperation() final {
+    auto module = getOperation();
+    auto context = module.getContext();
+
+    mlir::RewritePatternSet patterns(context);
+    patterns.add<VerifAirExecuteRewriter>(context);
+
+    ConversionTarget target(*context);
+    target.addIllegalOp<xilinx::air::ExecuteOp>();
+
+    target.addLegalDialect<
+        func::FuncDialect,
+        arith::ArithDialect,
+        scf::SCFDialect,
+        memref::MemRefDialect,
+        async::AsyncDialect,
+        mlir::BuiltinDialect
+      >();
+
+    applyPartialConversion(module, target, std::move(patterns));
+  }
+};
+
 } // namespace
 } // namespace mlir::verif

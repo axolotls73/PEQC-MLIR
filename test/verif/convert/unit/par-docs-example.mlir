@@ -1,4 +1,4 @@
-// RUN: verif-opt --verif-lower-to-async %s | FileCheck %s
+// RUN: verif-opt --verif-scf-parallel-to-async %s | FileCheck %s
 
 module {
     %buffer = memref.alloc() : memref<100xf32>
