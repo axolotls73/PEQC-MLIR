@@ -12,8 +12,10 @@ To build, set the following paths in `build.sh`:
 - `AIR_REPO`: path to mlir-air repo, assumes the llvm installation has been built with `-DLLVM_INSTALL_UTILS=ON`.
 - `PAST_DIR`: path to PAST directory in pocc-devel repo
 
-The just run:
+Then just run:
 
 ```sh
 ./build.sh
 ```
+
+The tests in `tests/` assume `pastchecker` is in your `PATH`.

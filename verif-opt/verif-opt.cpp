@@ -19,6 +19,7 @@
 int main(int argc, char **argv) {
   // mlir::registerAllPasses();
   mlir::verif::registerPasses();
+  mlir::registerAsyncParallelForPass();
 
   mlir::DialectRegistry registry;
   registry.insert<
@@ -27,7 +28,9 @@ int main(int argc, char **argv) {
       mlir::scf::SCFDialect,
       mlir::func::FuncDialect,
       mlir::memref::MemRefDialect,
-      mlir::async::AsyncDialect
+      mlir::async::AsyncDialect,
+      mlir::bufferization::BufferizationDialect,
+      mlir::tensor::TensorDialect
     >();
 
   registry.insert<xilinx::air::airDialect>();
