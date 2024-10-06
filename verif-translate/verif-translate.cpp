@@ -88,22 +88,30 @@ class PastTranslator {
     return symbol_get_or_insert(symbolTable, symbolName.c_str(), nullptr);
   }
 
+  // give the second value the same symbol as the first, return symbol
+  s_symbol_t* getAndMapSymbol(Value exists, Value newval) {
+    assert(valueNames.find(exists) != valueNames.end());
+    std::string ret = valueNames.find(exists)->second;
+    valueNames[newval] = ret;
+    return symbol_get_or_insert(symbolTable, ret.c_str(), nullptr);
+  }
+
   s_symbol_t* getTempVarSymbol(std::string name = "var") {
     std::string symbolName = name + "_" + std::to_string(varSuffix++);
     return symbol_get_or_insert(symbolTable, symbolName.c_str(), nullptr);
   }
 
-  s_past_node_t* getVarDecl(Type type, s_symbol_t* var) {
+  s_past_node_t* getVarDecl(s_symbol_t* type, s_symbol_t* var) {
     if (declare_variables)
       return past_node_vardecl_create(
-        past_node_varref_create(getTypeSymbol(type)),
+        past_node_varref_create(type),
         past_node_varref_create(var)
       );
     else return past_node_varref_create(var);
   }
 
   s_past_node_t* getVarDecl(Value val, std::string name = "var") {
-    return getVarDecl(val.getType(), getVarSymbol(val, name));
+    return getVarDecl(getTypeSymbol(val.getType()), getVarSymbol(val, name));
   }
 
   s_symbol_t* getTypeSymbol(const Type& t) {
@@ -163,6 +171,28 @@ class PastTranslator {
         return e_past_value_ulongint;
     }
     assert(0);
+  }
+
+  // returns node at start of list
+  s_past_node_t* nodeChain(std::vector<s_past_node_t*> nodes) {
+    s_past_node_t* start = nullptr;
+    s_past_node_t* end = nullptr;
+    for (auto n : nodes) {
+      assert(n);
+      if (!start) start = end = n;
+      else {
+        end->next = n;
+        end = end->next;
+      }
+      while (end && end->next) end = end->next;
+    }
+    return start;
+  }
+
+  s_past_node_t* getNodeListEnd(s_past_node_t* nodeList) {
+    auto end = nodeList;
+    while (end && end->next) end = end->next;
+    return end;
   }
 
   // type varname = assignval;
@@ -278,9 +308,9 @@ class PastTranslator {
     for (auto type : op.getResultTypes()) {
       s_symbol_t* sym = getTempVarSymbol("func_arg_ret");
       (*vec).push_back(sym);
-      if (!funcArgs) funcArgs = cur = getVarDecl(type, sym);
+      if (!funcArgs) funcArgs = cur = getVarDecl(getTypeSymbol(type), sym);
       else {
-        cur->next = getVarDecl(type, sym);
+        cur->next = getVarDecl(getTypeSymbol(type), sym);
         cur = cur->next;
       }
     }
@@ -369,100 +399,129 @@ class PastTranslator {
   }
 
   s_past_node_t* translate(arith::AddIOp& op) {
-    return translateArithBinop("arith_addi", past_add, op.getResult(), op.getOperand(0), op.getOperand(1));
+    return translateArithBinop("arith_addi", past_add, op.getResult(), op.getLhs(), op.getRhs());
   }
   s_past_node_t* translate(arith::AddFOp& op) {
-    return translateArithBinop("arith_addf", past_add, op.getResult(), op.getOperand(0), op.getOperand(1));
+    return translateArithBinop("arith_addf", past_add, op.getResult(), op.getLhs(), op.getRhs());
   }
   s_past_node_t* translate(arith::MulIOp& op) {
-    return translateArithBinop("arith_muli", past_mul, op.getResult(), op.getOperand(0), op.getOperand(1));
+    return translateArithBinop("arith_muli", past_mul, op.getResult(), op.getLhs(), op.getRhs());
   }
   s_past_node_t* translate(arith::MulFOp& op) {
-    return translateArithBinop("arith_mulf", past_mul, op.getResult(), op.getOperand(0), op.getOperand(1));
+    return translateArithBinop("arith_mulf", past_mul, op.getResult(), op.getLhs(), op.getRhs());
   }
   // s_past_node_t* translate(arith::Div& op) {
-  //   return translateArithBinop("arith_divi", past_div, op.getResult(), op.getOperand(0), op.getOperand(1));
+  //   return translateArithBinop("arith_divi", past_div, op.getResult(), op.getLhs(), op.getRhs());
   // }
   s_past_node_t* translate(arith::DivFOp& op) {
-    return translateArithBinop("arith_divf", past_div, op.getResult(), op.getOperand(0), op.getOperand(1));
+    return translateArithBinop("arith_divf", past_div, op.getResult(), op.getLhs(), op.getRhs());
   }
 
   // scf
 
   s_past_node_t* translate(scf::ForOp op) {
-    ///TODO: can i assume that it's always the first/only block arg here?
-    s_symbol_t* iterator = getVarSymbol(op.getRegion().getArgument(0), "for_iter");
-    return past_node_for_create(
+    s_symbol_t* iterator = getVarSymbol(op.getInductionVar(), "for_iter");
+    std::vector<s_past_node_t*> stmts;
+
+    //handle loop-carried variables
+    llvm::errs() << op.getResults().size() << " " << op.getInitArgs().size() << " " << op.getInits().size() << "\n" ;
+    assert(op.getResults().size() == op.getInitArgs().size() && \
+        op.getInitArgs().size() == op.getInits().size()); // verifier should catch this
+    auto resIter = op.getResults().begin();
+    auto initIter = op.getInits().begin();
+    for (auto iv : op.getRegionIterArgs()) {
+      Value res = *resIter++;
+      Value init = *initIter++;
+
+      // assign initial value
+      stmts.push_back(
+        past_node_statement_create(
+          past_node_binary_create(past_assign,
+            getVarDecl(iv, "for_iter_arg"),
+            past_node_varref_create(getVarSymbol(init)))));
+      // map to corresponding result
+      getAndMapSymbol(iv, res);
+    }
+
+    stmts.push_back(past_node_for_create(
       past_node_binary_create(past_assign,
-        past_node_varref_create(iterator),
-        past_node_varref_create(getVarSymbol(op.getOperand(0)))
+        getVarDecl(getTypeSymbol(op.getInductionVar().getType()), iterator),
+        past_node_varref_create(getVarSymbol(op.getLowerBound()))
       ),
       past_node_binary_create(past_lt,
         past_node_varref_create(iterator),
-        past_node_varref_create(getVarSymbol(op.getOperand(1)))
+        past_node_varref_create(getVarSymbol(op.getUpperBound()))
       ),
       iterator,
       past_node_binary_create(past_addassign,
         past_node_varref_create(iterator),
-        past_node_varref_create(getVarSymbol(op.getOperand(2)))
+        past_node_varref_create(getVarSymbol(op.getStep()))
       ),
-      translate(op.getRegion())
-    );
+      translate(op.getRegion())));
+      return nodeChain(stmts);
   }
 
-  // just takes the iterator values, don't care about those
-  ///TODO: care about return value?
+  // set loop-carried vars equal to yield operands
   s_past_node_t* translate(scf::YieldOp op) {
-    return nullptr;
+    if (op.getOperands().size() == 0)
+      return nullptr;
+
+    std::vector<s_past_node_t*> stmts;
+    auto loop = dyn_cast<scf::ForOp>(op.getOperation()->getParentOp());
+    assert(loop && (loop.getRegionIterArgs().size() == op.getResults().size()));
+    auto resIter = op.getResults().begin();
+    for (auto iv : loop.getRegionIterArgs()) {
+      Value res = *resIter++;
+      stmts.push_back(
+        past_node_statement_create(
+          past_node_binary_create(past_assign,
+            past_node_varref_create(getVarSymbol(iv)),
+            past_node_varref_create(getVarSymbol(res)))));
+    }
+    return nodeChain(stmts);
   }
 
 
   // memref
 
   s_past_node_t* translate(memref::AllocOp op) {
-    return past_node_statement_create(getVarDecl(op.getResult()));
+    return past_node_statement_create(getVarDecl(op.getResult(), "memref_alloc"));
   }
 
   s_past_node_t* translate(memref::LoadOp op) {
     return past_node_statement_create(
       past_node_binary_create(past_assign,
         past_node_varref_create(getVarSymbol(op.getResult())),
-        getArrayAccess(op.getOperand(0), op.getOperands().drop_front(1))
+        getArrayAccess(op.getMemRef(), op.getIndices())
     ));
   }
 
   s_past_node_t* translate(memref::StoreOp op) {
     return past_node_statement_create(
       past_node_binary_create(past_assign,
-        getArrayAccess(op.getOperand(1), op.getOperands().drop_front(2)),
-        past_node_varref_create(getVarSymbol(op.getOperand(0)))
+        getArrayAccess(op.getMemRef(), op.getIndices()),
+        past_node_varref_create(getVarSymbol(op.getValueToStore()))
     ));
   }
 
   s_past_node_t* translate(memref::CopyOp op) {
-    auto type = dyn_cast<MemRefType>(op.getOperand(0).getType());
+    auto type = dyn_cast<MemRefType>(op.getSource().getType());
     assert(type);
-    return getArrayCopy(type, getVarSymbol(op.getOperand(0)), getVarSymbol(op.getOperand(1)));
+    return getArrayCopy(type, getVarSymbol(op.getSource()), getVarSymbol(op.getTarget()));
   }
 
 
   // returns a linked list of the translation of the contained blocks'
   // operations, chained
   s_past_node_t* translate(Region& region) {
-    s_past_node_t* ret = nullptr;
-    s_past_node_t* cur = nullptr;
-
+    std::vector<s_past_node_t*> stmts;
     for(Block& block : region.getBlocks()) {
       for (Operation& op : block.getOperations()) {
-        if (!ret) ret = cur = translate(&op);
-        else {
-          cur->next = translate(&op);
-          if (cur) cur = cur->next;
-        }
-        while (cur && cur->next) cur = cur->next;
+        if (auto stmt = translate(&op))
+          stmts.push_back(stmt);
       }
     }
-    return ret;
+    return nodeChain(stmts);
   }
 
   public:
