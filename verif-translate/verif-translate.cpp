@@ -61,14 +61,11 @@ class PastTranslator {
   // hash function for ops.
   std::unordered_map<std::string, std::vector<s_symbol_t*>*> functionReturnVars;
 
-  class FuncRetVal : public Value {
-    public:
-    FuncRetVal(Type type) {
-      setType(type);
-    }
-  };
-
   int varSuffix = 0;
+  int semaphoreId = 0;
+
+  std::unordered_map<Value, s_symbol_t*> asyncGroupIndex;
+  std::vector<s_past_node_t*> newFunctionDecls;
 
   s_symbol_t* getSymbol(std::string name) {
     return symbol_get_or_insert(symbolTable, name.c_str(), nullptr);
@@ -278,13 +275,35 @@ class PastTranslator {
     return getArrayCopy(type, src, dst, dims, std::vector<s_symbol_t*>());
   }
 
+  s_past_node_t* getAsyncSetFinished(s_symbol_t* semaphore) {
+    s_past_node_t* args = past_node_varref_create(semaphore);
+    args->next = past_node_varref_create(getSymbol("PAST_TASK_FINISHED"));
+    return past_node_statement_create(
+      past_node_funcall_create(
+        past_node_varref_create(getSymbol("_past_ai_api_concurrent_set_semaphore_value")),
+        args
+    ));
+  }
+
 
 
 
   // builtin
 
   s_past_node_t* translate(ModuleOp& op) {
-    s_past_node_t* ret = past_node_root_create(symbolTable, translate(op.getRegion()));
+    // if it's not a function, wrap in block
+    auto body = translate(op.getRegion());
+    if (!past_node_is_a(body, past_fundecl)) {
+      body = past_node_block_create(body);
+    }
+
+    // prepend new functions generated
+    s_past_node_t* moduleStart = nodeChain(newFunctionDecls);
+    s_past_node_t* moduleEnd = getNodeListEnd(moduleStart);
+
+    if (moduleEnd) moduleEnd->next = body;
+    else moduleStart = body;
+    s_past_node_t* ret = past_node_root_create(symbolTable, moduleStart);
     return ret;
   }
 
@@ -424,7 +443,6 @@ class PastTranslator {
     std::vector<s_past_node_t*> stmts;
 
     //handle loop-carried variables
-    llvm::errs() << op.getResults().size() << " " << op.getInitArgs().size() << " " << op.getInits().size() << "\n" ;
     assert(op.getResults().size() == op.getInitArgs().size() && \
         op.getInitArgs().size() == op.getInits().size()); // verifier should catch this
     auto resIter = op.getResults().begin();
@@ -492,22 +510,87 @@ class PastTranslator {
     return past_node_statement_create(
       past_node_binary_create(past_assign,
         past_node_varref_create(getVarSymbol(op.getResult())),
-        getArrayAccess(op.getMemRef(), op.getIndices())
-    ));
+        getArrayAccess(op.getMemRef(), op.getIndices())));
   }
 
   s_past_node_t* translate(memref::StoreOp op) {
     return past_node_statement_create(
       past_node_binary_create(past_assign,
         getArrayAccess(op.getMemRef(), op.getIndices()),
-        past_node_varref_create(getVarSymbol(op.getValueToStore()))
-    ));
+        past_node_varref_create(getVarSymbol(op.getValueToStore()))));
   }
 
   s_past_node_t* translate(memref::CopyOp op) {
     auto type = dyn_cast<MemRefType>(op.getSource().getType());
     assert(type);
     return getArrayCopy(type, getVarSymbol(op.getSource()), getVarSymbol(op.getTarget()));
+  }
+
+  s_past_node_t* translate(async::CreateGroupOp op) {
+    std::vector<s_past_node_t*> stmts;
+    // declare buffer
+    stmts.push_back(past_node_statement_create(
+      past_node_binary_create(past_vardecl,
+        past_node_varref_create(getSymbol("int*")),
+        past_node_varref_create(getVarSymbol(op.getResult(), "async_group")))));
+
+    // save current index (0) into buffer in map
+    auto groupIndex = getTempVarSymbol("async_group_index");
+    asyncGroupIndex[op.getResult()] = groupIndex;
+    stmts.push_back(past_node_statement_create(
+      past_node_binary_create(past_assign,
+        getVarDecl(getSymbol("int"), groupIndex),
+        past_node_value_create_from_int(0))));
+    return nodeChain(stmts);
+  }
+
+  s_past_node_t* translate(async::AddToGroupOp) {
+    return past_node_value_create_from_int(1);
+  }
+
+  s_past_node_t* translate(async::AwaitAllOp) {
+    return past_node_value_create_from_int(2);
+  }
+
+  s_past_node_t* translate(async::ExecuteOp op) {
+    auto funcName = getTempVarSymbol("async_exec_func");
+    auto funcBody = translate(op.getRegion());
+    auto funcEnd = funcBody;
+    while (funcEnd->next) funcEnd = funcEnd->next;
+    funcEnd->next = getAsyncSetFinished(getVarSymbol(op.getToken(), "async_token"));
+
+    std::vector<s_past_node_t*> params;
+    params.push_back(getVarDecl(getSymbol("int"), getVarSymbol(op.getToken())));
+    newFunctionDecls.push_back(
+      past_node_fundecl_create(
+        past_node_varref_create(getSymbol("void")),
+        past_node_varref_create(funcName),
+        nodeChain(params),
+        funcBody));
+
+    std::vector<s_past_node_t*> args;
+    for (auto decl : params) {
+      assert(past_node_is_a(decl, past_vardecl));
+      args.push_back(past_clone_subtree(
+        PAST_NODE_AS(decl, binary)->rhs));
+    }
+
+    std::vector<s_past_node_t*> stmts;
+    stmts.push_back(past_node_statement_create(
+      past_node_binary_create(past_assign,
+        getVarDecl(getSymbol("int"), getVarSymbol(op.getToken(), "async_token")),
+        past_node_unary_create(past_inc_after,
+          past_node_varref_create(getSymbol("_past_global_semaphore_id"))))));
+    stmts.push_back(past_node_statement_create(
+      past_node_funcall_create(
+        past_node_varref_create(funcName),
+        nodeChain(args))));
+    return nodeChain(stmts);
+  }
+
+  s_past_node_t* translate(async::YieldOp op) {
+
+    return past_node_value_create_from_int(3);
   }
 
 
@@ -544,6 +627,11 @@ class PastTranslator {
     else if (auto o = dyn_cast<memref::LoadOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::CopyOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<async::CreateGroupOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<async::AddToGroupOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<async::AwaitAllOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<async::ExecuteOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<async::YieldOp>(op)) res = translate(o);
     else {
       llvm::errs() << "idk " << op->getName() << "\n";
       exit(1);
@@ -594,7 +682,8 @@ int main(int argc, char **argv) {
             mlir::arith::ArithDialect,
             mlir::scf::SCFDialect,
             mlir::func::FuncDialect,
-            mlir::memref::MemRefDialect
+            mlir::memref::MemRefDialect,
+            mlir::async::AsyncDialect
           >();
       });
 
