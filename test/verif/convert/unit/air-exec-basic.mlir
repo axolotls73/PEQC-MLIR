@@ -1,5 +1,4 @@
 // RUN: verif-opt --verif-air-execute-to-async %s | FileCheck %s
-// XFAIL: *
 
 module {
 // CHECK: async.execute

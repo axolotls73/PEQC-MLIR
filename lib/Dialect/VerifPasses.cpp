@@ -107,8 +107,8 @@ public:
     // handle reduce
     auto reduceop = op.getBody()->getTerminator();
     SmallVector<Value> reduceResults;
-    for (auto [res, region, init] :
-          llvm::zip(reduceop->getOperands(), reduceop->getRegions(), op.getInitVals())) {
+    for (auto [res, region, init] : llvm::zip(
+          reduceop->getOperands(), reduceop->getRegions(), op.getInitVals())) {
 
       // make a buffer to store values to reduce
       rewriter.setInsertionPoint(outerLoop);
@@ -179,19 +179,19 @@ public:
   LogicalResult
   matchAndRewrite(xilinx::air::ExecuteOp op, OpAdaptor adaptor,
                   ConversionPatternRewriter &rewriter) const final {
-    SmallVector<Type, 4> resultTypes;
+    SmallVector<Type> resultTypes;
     for (unsigned i = 1; i < op->getNumResults(); ++i)
       resultTypes.push_back(op->getResult(i).getType());
 
-    SmallVector<Value, 4> dependencies = adaptor.getAsyncDependencies();
-    SmallVector<Value, 4> operands;
+    SmallVector<Value> dependencies = adaptor.getAsyncDependencies();
+    SmallVector<Value> operands;
     auto newOp = rewriter.create<async::ExecuteOp>(
         op->getLoc(), resultTypes, dependencies, operands,
         [&](OpBuilder &b, Location loc, ValueRange v) {
           IRMapping map;
           for (auto &o : op.getOps()) {
             if (isa<xilinx::air::ExecuteTerminatorOp>(o)) {
-              SmallVector<Value, 4> returnValues;
+              SmallVector<Value> returnValues;
               for (auto v : o.getOperands())
                 returnValues.push_back(map.lookupOrDefault(v));
               b.create<async::YieldOp>(loc, returnValues);
@@ -200,15 +200,13 @@ public:
           }
         });
 
-    SmallVector<Value, 4> results{newOp->getResult(0)};
+    SmallVector<Value> results{newOp->getResult(0)};
     op.getResult(0).replaceAllUsesWith(newOp->getResult(0));
     for (unsigned i = 1; i < op->getNumResults(); ++i) {
       auto r = newOp.getResult(i);
       auto await = rewriter.create<async::AwaitOp>(op->getLoc(), r);
-      // op.getResult(i).replaceAllUsesWith(await.getResult());
       results.push_back(await.getResult());
     }
-    // rewriter.eraseOp(op);
     rewriter.replaceOp(op, results);
     return success();
   }
@@ -237,8 +235,9 @@ public:
         async::AsyncDialect,
         mlir::BuiltinDialect
       >();
+    ///TODO: apply ^ to greedy rewriter somehow? target w/ no passes?
 
-    applyPartialConversion(module, target, std::move(patterns));
+    applyPatternsAndFoldGreedily(module, std::move(patterns));
   }
 };
 
