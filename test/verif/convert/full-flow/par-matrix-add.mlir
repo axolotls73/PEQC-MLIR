@@ -1,4 +1,7 @@
-// RUN: verif-opt --verif-scf-parallel-to-async %s | FileCheck %s
+// RUN: split-file %s %t && \
+// RUN: verif-opt --verif-scf-parallel-to-async %t/input.mlir | FileCheck %s
+
+//--- input.mlir
 
 module {
     func.func @madd(%A: memref<128x128xi32>, %B: memref<128x128xi32>) -> (memref<128x128xi32>) {
@@ -20,3 +23,21 @@ module {
         return %C : memref<128x128xi32>
     }
 }
+
+//--- epilogue.c
+
+{
+  madd(A, B, C);
+}
+
+//--- compare.c
+
+#pragma pocc-region-start
+{
+  for (int i = 0; i < 128; i++) {
+    for (int j = 0; j < 128; j++) {
+        C[i][j] + A[i][j] + B[i][j];
+    }
+  }
+}
+#pragma pocc-region-end

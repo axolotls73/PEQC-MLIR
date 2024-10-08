@@ -42,7 +42,10 @@ module {
 
 #pragma pocc-region-start
 {
-  res1 = 9;
-  res2 = 18;
+  for (int i = 0; i < 128; i++) {
+    for (int j = 0; j < 128; j++) {
+        C[i][j] + A[i][j] + B[i][j];
+    }
+  }
 }
 #pragma pocc-region-end
