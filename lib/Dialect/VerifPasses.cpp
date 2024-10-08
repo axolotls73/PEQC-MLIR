@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 // #include "mlir/Dialect/Func/IR/FuncOps.h"
 // #include "mlir/Dialect/MemRef/IR/MemRef.h"
+#include "llvm/ADT/STLExtras.h"
 #include "mlir/InitAllDialects.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Rewrite/FrozenRewritePatternSet.h"
@@ -38,17 +39,9 @@ public:
 
     // create nested for loops
     uint64_t totalTripCount = 1;
-    auto step = op.getStep().begin();
-    auto lowerBound = op.getLowerBound().begin();
-    auto upperBound = op.getUpperBound().begin();
-    auto ivs = op.getInductionVars().begin();
     SmallVector<scf::ForOp> loops;
-
-    for (int i = 0, e = op.getNumLoops(); i < e; i++) {
-      Value sv = *step++;
-      Value lbv = *lowerBound++;
-      Value ubv = *upperBound++;
-      Value iv = *ivs++;
+    for (auto [i, sv, lbv, ubv, iv] : llvm::enumerate(
+          op.getStep(), op.getLowerBound(), op.getUpperBound(), op.getInductionVars())) {
 
       // get buffer index either from the enclosing loop or the original value (0)
       Value indexArg;
@@ -113,10 +106,9 @@ public:
 
     // handle reduce
     auto reduceop = op.getBody()->getTerminator();
-    auto reduceRegions = reduceop->getRegions().begin();
-    auto inits = op.getInitVals().begin();
     SmallVector<Value> reduceResults;
-    for (auto res : reduceop->getOperands()) {
+    for (auto [res, region, init] : llvm::zip(
+          reduceop->getOperands(), reduceop->getRegions(), op.getInitVals())) {
 
       // make a buffer to store values to reduce
       rewriter.setInsertionPoint(outerLoop);
@@ -129,14 +121,11 @@ public:
 
       // reduction loop at the end
       rewriter.setInsertionPointAfter(outerLoop);
-      assert(reduceRegions != reduceop->getRegions().end()); //should be enforced by the verifier but just in case
-      auto &redRegion = *reduceRegions++;
-      if (redRegion.getBlocks().size() != 1) {
+      if (region.getBlocks().size() != 1) {
         reduceop->emitWarning("scf.reduce regions can only have 1 block");
         return failure();
       }
-      auto &redBlock = redRegion.getBlocks().front();
-      auto init = *inits++;
+      auto &redBlock = region.getBlocks().front();
       auto redLoop = rewriter.create<scf::ForOp>
           (loc, cst_0, cst_tc, cst_1, init,
           [&](OpBuilder& b, Location loc, Value iterVal, ValueRange accums) {
@@ -183,15 +172,43 @@ public:
 };
 
 // copy paste! mlir-air/mlir/lib/Conversion/AIRToAsyncPass.cpp:532
-class VerifAirExecuteRewriter : public OpRewritePattern<xilinx::air::ExecuteOp> {
+class VerifAirExecuteRewriter : public OpConversionPattern<xilinx::air::ExecuteOp> {
 public:
-  using OpRewritePattern<xilinx::air::ExecuteOp>::OpRewritePattern;
+  using OpConversionPattern<xilinx::air::ExecuteOp>::OpConversionPattern;
 
   LogicalResult
-  matchAndRewrite(xilinx::air::ExecuteOp op,
-                  PatternRewriter &rewriter) const final {
+  matchAndRewrite(xilinx::air::ExecuteOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const final {
+    SmallVector<Type> resultTypes;
+    for (unsigned i = 1; i < op->getNumResults(); ++i)
+      resultTypes.push_back(op->getResult(i).getType());
 
-    return failure();
+    SmallVector<Value> dependencies = adaptor.getAsyncDependencies();
+    SmallVector<Value> operands;
+    auto newOp = rewriter.create<async::ExecuteOp>(
+        op->getLoc(), resultTypes, dependencies, operands,
+        [&](OpBuilder &b, Location loc, ValueRange v) {
+          IRMapping map;
+          for (auto &o : op.getOps()) {
+            if (isa<xilinx::air::ExecuteTerminatorOp>(o)) {
+              SmallVector<Value> returnValues;
+              for (auto v : o.getOperands())
+                returnValues.push_back(map.lookupOrDefault(v));
+              b.create<async::YieldOp>(loc, returnValues);
+            } else
+              b.clone(o, map);
+          }
+        });
+
+    SmallVector<Value> results{newOp->getResult(0)};
+    op.getResult(0).replaceAllUsesWith(newOp->getResult(0));
+    for (unsigned i = 1; i < op->getNumResults(); ++i) {
+      auto r = newOp.getResult(i);
+      auto await = rewriter.create<async::AwaitOp>(op->getLoc(), r);
+      results.push_back(await.getResult());
+    }
+    rewriter.replaceOp(op, results);
+    return success();
   }
 };
 
@@ -218,8 +235,9 @@ public:
         async::AsyncDialect,
         mlir::BuiltinDialect
       >();
+    ///TODO: apply ^ to greedy rewriter somehow? target w/ no passes?
 
-    applyPartialConversion(module, target, std::move(patterns));
+    applyPatternsAndFoldGreedily(module, std::move(patterns));
   }
 };
 
@@ -232,8 +250,27 @@ public:
     auto module = getOperation();
     auto context = module.getContext();
 
+    TypeConverter converter;
+    converter.addConversion([&](Type type) -> std::optional<Type> {
+      // convert air::AsyncTokenType to async::TokenType
+      if (auto t = type.dyn_cast<xilinx::air::AsyncTokenType>())
+        return async::TokenType::get(context);
+      if (auto t = type.dyn_cast<MemRefType>())
+        if (t.getMemorySpaceAsInt() != 0)
+          return MemRefType::get(t.getShape(), t.getElementType(),
+                                 t.getLayout(), 0);
+      return type;
+    });
+    auto addUnrealizedCast = [](OpBuilder &builder, Type type,
+                                ValueRange inputs, Location loc) {
+      auto cast = builder.create<UnrealizedConversionCastOp>(loc, type, inputs);
+      return std::optional<Value>(cast.getResult(0));
+    };
+    converter.addSourceMaterialization(addUnrealizedCast);
+    converter.addTargetMaterialization(addUnrealizedCast);
+
     mlir::RewritePatternSet patterns(context);
-    patterns.add<VerifAirExecuteRewriter>(context);
+    patterns.add<VerifAirExecuteRewriter>(converter, context);
 
     ConversionTarget target(*context);
     target.addIllegalOp<xilinx::air::ExecuteOp>();
