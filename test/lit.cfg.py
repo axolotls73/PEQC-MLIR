@@ -34,6 +34,9 @@ config.substitutions.append(("%shlibext", config.llvm_shlib_ext))
 config.substitutions.append(("%testroot", config.test_source_root))
 config.substitutions.append(("%inputs", os.path.join(config.test_source_root, "Inputs")))
 
+# pastchecker with arguments
+config.substitutions.append(("%pastchecker", "pastchecker --enable-preprocessor --timing-mode --verbose"))
+
 llvm_config.with_system_environment(["HOME", "INCLUDE", "LIB", "TMP", "TEMP"])
 
 llvm_config.use_default_substitutions()

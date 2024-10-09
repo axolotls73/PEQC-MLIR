@@ -1,14 +1,14 @@
-// RUN: verif-translate --translate-to-past %s -o %t && \
-// RUN: %testroot/add_epilogue.sh %t %inputs/matmul-tiny-epilogue.c %t-2 && \
-// RUN: pastchecker %t-2 %t-2 A,B,C | grep "YES"
+// RUN: split-file %s %t && \
+// RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
+// RUN: %testroot/add_epilogue.sh %t/result.c %testroot/Inputs/matmul-tiny-epilogue.c %t/translation.c %testroot/..
 
-// RUN: verif-translate --translate-to-past %s -o %t && \
-// RUN: %testroot/add_epilogue.sh %t %inputs/matmul-tiny-epilogue.c %t-2 && \
-// RUN: pastchecker %t-2 %inputs/matmul-tiny.c A,B,C | grep "YES"
+// RUN: %pastchecker --enable-preprocessor %t/translation.c %t/translation.c A,B,C | grep YES
 
-// RUN: verif-translate --translate-to-past %s -o %t && \
-// RUN: %testroot/add_epilogue.sh %t %inputs/matmul-tiny-epilogue.c %t-2 && \
-// RUN: pastchecker %t-2 %inputs/matmul-tiny-bug.c A,B,C | not grep "YES"
+// RUN: %pastchecker %t/translation.c %inputs/matmul-tiny.c A,B,C | grep YES
+
+// RUN: %pastchecker %t/translation.c %inputs/matmul-tiny-bug.c A,B,C | not grep YES
+
+//--- input.mlir
 
 module {
   func.func @matmul_on_memref(%arg0: memref<10x10xi32>, %arg1: memref<10x10xi32>) -> memref<10x10xi32> {

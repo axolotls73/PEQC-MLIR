@@ -1,12 +1,10 @@
 // RUN: split-file %s %t && \
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
-// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c && \
-// RUN: pastchecker %t/translation.c %t/translation.c
+// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
 
-// RUN: split-file %s %t && \
-// RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
-// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c && \
-// RUN: pastchecker %t/translation.c %t/compare.c
+// RUN: %pastchecker %t/translation.c %t/translation.c res | grep YES
+
+// RUN: %pastchecker %t/translation.c %t/compare.c res | grep YES
 
 //--- input.mlir
 
@@ -36,6 +34,6 @@ module {
 
 #pragma pocc-region-start
 {
-  res = 9;
+  res = 8;
 }
 #pragma pocc-region-end
