@@ -65,6 +65,7 @@ class PastTranslator {
   int semaphoreId = 0;
 
   std::unordered_map<Value, s_symbol_t*> asyncGroupIndex;
+
   std::vector<s_past_node_t*> newFunctionDecls;
 
   s_symbol_t* getSymbol(std::string name) {
@@ -275,14 +276,48 @@ class PastTranslator {
     return getArrayCopy(type, src, dst, dims, std::vector<s_symbol_t*>());
   }
 
-  s_past_node_t* getAsyncSetFinished(s_symbol_t* semaphore) {
-    s_past_node_t* args = past_node_varref_create(semaphore);
-    args->next = past_node_varref_create(getSymbol("PAST_TASK_FINISHED"));
+  s_past_node_t* getPastWaitFinished(s_symbol_t* semaphore) {
+    std::vector<s_past_node_t*> args = {
+      past_node_varref_create(semaphore),
+      past_node_varref_create(getSymbol("PAST_TASK_FINISHED"))
+    };
     return past_node_statement_create(
       past_node_funcall_create(
-        past_node_varref_create(getSymbol("_past_ai_api_concurrent_set_semaphore_value")),
-        args
-    ));
+        past_node_varref_create(getSymbol("PAST_WAIT_SEMAPHORE")),
+        nodeChain(args)));
+  }
+
+  s_past_node_t* getPastWaitFinished(s_symbol_t* semaphore_arr, s_symbol_t* size) {
+    std::vector<s_past_node_t*> args = {
+      past_node_varref_create(semaphore_arr),
+      past_node_varref_create(size),
+      past_node_varref_create(getSymbol("PAST_TASK_FINISHED"))
+    };
+    return past_node_statement_create(
+      past_node_funcall_create(
+        past_node_varref_create(getSymbol("PAST_WAIT_SEMAPHORE_ALL")),
+        nodeChain(args)));
+  }
+
+  s_past_node_t* getPastSetFinished(s_symbol_t* semaphore) {
+    std::vector<s_past_node_t*> args = {
+      past_node_varref_create(semaphore),
+      past_node_varref_create(getSymbol("PAST_TASK_FINISHED"))
+    };
+    return past_node_statement_create(
+      past_node_funcall_create(
+        past_node_varref_create(getSymbol("PAST_SET_SEMAPHORE")),
+        nodeChain(args)));
+  }
+
+  s_past_node_t* getPastNewSemaphore(s_symbol_t* semaphoreName) {
+    std::vector<s_past_node_t*> args = {
+      past_node_varref_create(semaphoreName)
+    };
+    return past_node_statement_create(
+      past_node_funcall_create(
+        past_node_varref_create(getSymbol("PAST_NEW_SEMAPHORE")),
+        nodeChain(args)));
   }
 
 
@@ -544,55 +579,64 @@ class PastTranslator {
     return nodeChain(stmts);
   }
 
-  s_past_node_t* translate(async::AddToGroupOp) {
-    return past_node_value_create_from_int(1);
-  }
-
-  s_past_node_t* translate(async::AwaitAllOp) {
-    return past_node_value_create_from_int(2);
-  }
-
-  s_past_node_t* translate(async::ExecuteOp op) {
-    auto funcName = getTempVarSymbol("async_exec_func");
-    auto funcBody = translate(op.getRegion());
-    auto funcEnd = funcBody;
-    while (funcEnd->next) funcEnd = funcEnd->next;
-    funcEnd->next = getAsyncSetFinished(getVarSymbol(op.getToken(), "async_token"));
-
-    std::vector<s_past_node_t*> params;
-    params.push_back(getVarDecl(getSymbol("int"), getVarSymbol(op.getToken())));
-    newFunctionDecls.push_back(
-      past_node_fundecl_create(
-        past_node_varref_create(getSymbol("void")),
-        past_node_varref_create(funcName),
-        nodeChain(params),
-        funcBody));
-
-    std::vector<s_past_node_t*> args;
-    for (auto decl : params) {
-      assert(past_node_is_a(decl, past_vardecl));
-      args.push_back(past_clone_subtree(
-        PAST_NODE_AS(decl, binary)->rhs));
-    }
-
+  s_past_node_t* translate(async::AddToGroupOp op) {
     std::vector<s_past_node_t*> stmts;
-    stmts.push_back(past_node_statement_create(
-      past_node_binary_create(past_assign,
-        getVarDecl(getSymbol("int"), getVarSymbol(op.getToken(), "async_token")),
+    s_symbol_t* groupIndex = asyncGroupIndex.find(op.getGroup())->second;
+    // set group[group_index] = k
+    stmts.push_back(
+      past_node_statement_create(
+        past_node_binary_create(past_assign,
+          getArrayAccess(
+            getVarSymbol(op.getGroup()),
+            std::vector{groupIndex}),
+          past_node_varref_create(getVarSymbol(op.getOperand())))));
+    // increment group index
+    stmts.push_back(
+      past_node_statement_create(
         past_node_unary_create(past_inc_after,
-          past_node_varref_create(getSymbol("_past_global_semaphore_id"))))));
-    stmts.push_back(past_node_statement_create(
-      past_node_funcall_create(
-        past_node_varref_create(funcName),
-        nodeChain(args))));
+          past_node_varref_create(groupIndex))));
     return nodeChain(stmts);
   }
 
-  s_past_node_t* translate(async::YieldOp op) {
-
-    return past_node_value_create_from_int(3);
+  s_past_node_t* translate(async::AwaitAllOp op) {
+    s_symbol_t* groupIndex = asyncGroupIndex.find(op.getOperand())->second;
+    return past_node_statement_create(
+      getPastWaitFinished(
+        getVarSymbol(op.getOperand()),
+        groupIndex));
   }
 
+  s_past_node_t* translate(async::ExecuteOp op) {
+    std::vector<s_past_node_t*> nodes;
+    std::vector<s_past_node_t*> body;
+
+    // wait on all dependencies
+    for (auto dep : op.getDependencies()) {
+      body.push_back(
+        getPastWaitFinished(getVarSymbol(dep)));
+    }
+
+    // get semaphore value of token
+    nodes.push_back(getPastNewSemaphore(getVarSymbol(op.getToken())));
+
+    // translate body, set semaphore to finished after
+    body.push_back(translate(op.getBodyRegion()));
+    body.push_back(getPastSetFinished(getVarSymbol(op.getToken())));
+
+    nodes.push_back(
+      past_node_pragma_create(
+        past_node_varref_create(getSymbol("peqc async_execute")),
+        nullptr));
+    nodes.push_back(
+      past_node_block_create(
+        nodeChain(body)));
+    return nodeChain(nodes);
+  }
+
+  s_past_node_t* translate(async::YieldOp op) {
+    assert(op.getNumOperands() == 0);
+    return nullptr;
+  }
 
   // returns a linked list of the translation of the contained blocks'
   // operations, chained
@@ -655,6 +699,7 @@ class PastTranslator {
     std::remove(filename.c_str());
 
     output << "#pragma pocc-region-start\n";
+    output << "#include \"/data-host-share/verif-dialect/verif-translate/interp_macros.h\"\n";
     std::string line;
     while (std::getline(infile, line)) {
       output << line << "\n";
