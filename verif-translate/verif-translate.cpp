@@ -27,6 +27,7 @@
 #include "mlir/Tools/ParseUtilities.h"
 
 #include "Dialect/VerifDialect.h"
+#include "Dialect/VerifUtil.h"
 
 #include <cstdio>
 #include <iterator>
@@ -34,15 +35,6 @@
 #include <iostream>
 #include "past/past.h"
 #include "past/pprint.h"
-
-
-///TODO: this stuff has to exist somewhere in llvm, value hashmap??
-template<>
-struct std::hash<mlir::Value> {
-  std::size_t operator()(const mlir::Value& v) const noexcept {
-    return mlir::hash_value(v);
-  }
-};
 
 
 namespace mlir {
@@ -699,7 +691,6 @@ class PastTranslator {
     std::remove(filename.c_str());
 
     output << "#pragma pocc-region-start\n";
-    output << "#include \"/data-host-share/verif-dialect/verif-translate/interp_macros.h\"\n";
     std::string line;
     while (std::getline(infile, line)) {
       output << line << "\n";
