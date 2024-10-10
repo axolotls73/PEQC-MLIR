@@ -17,6 +17,7 @@
 
 #include "Dialect/VerifPasses.h"
 #include "Dialect/VerifDialect.h"
+#include "Dialect/VerifUtil.h"
 
 namespace mlir::verif {
 #define GEN_PASS_DEF_VERIFSCFPARALLELTOASYNC
@@ -179,35 +180,105 @@ public:
   LogicalResult
   matchAndRewrite(xilinx::air::ExecuteOp op, OpAdaptor adaptor,
                   ConversionPatternRewriter &rewriter) const final {
-    SmallVector<Type> resultTypes;
-    for (unsigned i = 1; i < op->getNumResults(); ++i)
-      resultTypes.push_back(op->getResult(i).getType());
 
+    auto &blocks = op.getBodyRegion().getBlocks();
+    assert(blocks.size() == 1);
+    auto loc = op.getLoc();
+    IRMapping mapper;
+    Value cst_1 = rewriter.create<arith::ConstantIndexOp>(loc, 1);
+
+    // handle results:
+    //   if memref: find original definition, move outside
+    //      of execute op if it's inside.
+    //   if non-memref: store in memref allocated outside,
+    //      load before all uses
+    std::vector<Value> removeDef;
+    std::unordered_map<Value, Value> resToMemref;
+    for (auto [termarg, res] :
+          llvm::zip_equal(blocks.front().getTerminator()->getOperands(), op.getResults())) {
+      if (auto memreftype = dyn_cast<MemRefType>(termarg.getType())) {
+        auto def = dyn_cast<memref::AllocOp>(termarg.getDefiningOp());
+        if (!def) {
+          termarg.getDefiningOp()->emitWarning("unsupported non-alloc defining op for an air.execute termargult");
+          return failure();
+        }
+        def.emitWarning();
+        // if termarg's def is outside of op, don't need to redefine or remove anything
+        if (!op.getOperation()->isProperAncestor(def)) continue;
+
+        removeDef.push_back(termarg);
+        Value newval = rewriter.create<memref::AllocOp>
+            (loc,  memreftype).getResult();
+        mapper.map(termarg, newval);
+        res.replaceAllUsesWith(newval);
+      }
+      else if (termarg.getType().isa<IndexType>() ||
+               termarg.getType().isa<IntegerType>()) {
+        Value newmr = rewriter.create<memref::AllocOp>
+            (loc,  MemRefType::Builder({1}, termarg.getType())).getResult();
+        resToMemref[termarg] = newmr;
+
+        SmallVector<OpOperand*> usesToReplace;
+        SmallVector<Value> replaceValues;
+        for (auto &use : res.getUses()) {
+          rewriter.setInsertionPoint(use.getOwner());
+          auto newval = rewriter.create<memref::LoadOp>
+              (loc, res.getType(), newmr, SmallVector<Value>{cst_1}).getResult();
+          usesToReplace.push_back(&use);
+          replaceValues.push_back(newval);
+        }
+        for (auto [use, val] : llvm::zip(usesToReplace, replaceValues)) {
+          rewriter.modifyOpInPlace(op, [&](){
+            (*use).assign(val);
+          });
+        }
+      }
+      else {
+        llvm::errs() << "unsupported type for air.execute result: " << termarg.getType() << "\n";
+        return failure();
+      }
+    }
+
+    rewriter.setInsertionPoint(op);
     SmallVector<Value> dependencies = adaptor.getAsyncDependencies();
     SmallVector<Value> operands;
-    auto newOp = rewriter.create<async::ExecuteOp>(
-        op->getLoc(), resultTypes, dependencies, operands,
+    auto asyncExec = rewriter.create<async::ExecuteOp>(
+        op->getLoc(), SmallVector<Type>{}, dependencies, operands,
         [&](OpBuilder &b, Location loc, ValueRange v) {
-          IRMapping map;
           for (auto &o : op.getOps()) {
+
+            // don't clone if op defines a memref we don't need
+            // (memref.alloc only)
+            bool remove = false;
+            for (auto rem : removeDef) {
+              if (llvm::find(o.getResults(), rem) != o.getResults().end()){
+                remove = true;
+                break;
+              }
+            }
+            if (remove) continue;
+
             if (isa<xilinx::air::ExecuteTerminatorOp>(o)) {
-              SmallVector<Value> returnValues;
-              for (auto v : o.getOperands())
-                returnValues.push_back(map.lookupOrDefault(v));
-              b.create<async::YieldOp>(loc, returnValues);
+              // non-memref results: copy into memref
+              for (auto res : o.getOperands()) {
+                if (dyn_cast<MemRefType>(res.getType())) continue;
+                assert(resToMemref.find(res) != resToMemref.end());
+                auto mr = resToMemref.find(res)->second;
+                auto mappedval = mapper.lookup(res);
+                auto mrop = rewriter.create<memref::StoreOp>
+                    (loc, mappedval, mr, SmallVector<Value>{cst_1});
+              }
+
+              // empty yield
+              b.create<async::YieldOp>(loc, SmallVector<Value>{});
             } else
-              b.clone(o, map);
+              b.clone(o, mapper);
           }
         });
 
-    SmallVector<Value> results{newOp->getResult(0)};
-    op.getResult(0).replaceAllUsesWith(newOp->getResult(0));
-    for (unsigned i = 1; i < op->getNumResults(); ++i) {
-      auto r = newOp.getResult(i);
-      auto await = rewriter.create<async::AwaitOp>(op->getLoc(), r);
-      results.push_back(await.getResult());
-    }
-    rewriter.replaceOp(op, results);
+
+    rewriter.eraseOp(op);
+    op.getOperation()->getParentOp()->emitWarning();
     return success();
   }
 };

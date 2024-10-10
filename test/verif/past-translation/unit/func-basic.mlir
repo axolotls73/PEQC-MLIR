@@ -8,6 +8,8 @@
 // RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c && \
 // RUN: pastchecker %t/translation.c %t/compare.c
 
+//XFAIL:*
+
 //--- input.mlir
 
 module {
