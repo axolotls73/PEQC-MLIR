@@ -172,7 +172,57 @@ public:
   }
 };
 
-// copy paste! mlir-air/mlir/lib/Conversion/AIRToAsyncPass.cpp:532
+
+class VerifAirWaitAllRewriter : public OpConversionPattern<xilinx::air::WaitAllOp> {
+public:
+  using OpConversionPattern<xilinx::air::WaitAllOp>::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(xilinx::air::WaitAllOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const final {
+    auto loc = op.getLoc();
+
+    // llvm::errs() << "=== PROCESSING: \n";
+    // op.emitWarning();
+    // llvm::errs() << "===\n";
+
+    auto asyncExec = rewriter.create<async::ExecuteOp>(
+        op->getLoc(), SmallVector<Type>{}, adaptor.getAsyncDependencies(), SmallVector<Value>{},
+        [&](OpBuilder &b, Location loc, ValueRange v) {
+          b.create<async::YieldOp>(loc, SmallVector<Value>{});
+        });
+
+    // old implementation using groups
+
+    // create group
+    // auto groupsize = op.getOperands().size();
+    // auto sizeval = rewriter.create<arith::ConstantIndexOp>(loc, groupsize).getResult();
+    // auto groupval = rewriter.create<async::CreateGroupOp>(loc, sizeval).getResult();
+
+    // // add operands to group
+    // for (Value token : op.getOperands()) {
+    //   rewriter.create<async::AddToGroupOp>(loc, token, groupval);
+    // }
+
+    // // wait on group
+    // rewriter.create<async::AwaitAllOp>(loc, groupval);
+
+    // rewriter.eraseOp(op);
+
+    // drop to remove dangling uses when this pass is complete?
+    ///TODO: figure out how to fix that error without doing this, i have to be
+    /// using the api wrong somehow
+    rewriter.modifyOpInPlace(op, [&](){
+      for (auto &o : op.getAsyncDependenciesMutable()) {
+        o.drop();
+      }
+    });
+    rewriter.replaceOp(op, asyncExec);
+    return success();
+  }
+};
+
+
 class VerifAirExecuteRewriter : public OpConversionPattern<xilinx::air::ExecuteOp> {
 public:
   using OpConversionPattern<xilinx::air::ExecuteOp>::OpConversionPattern;
@@ -186,6 +236,10 @@ public:
     auto loc = op.getLoc();
     IRMapping mapper;
     Value cst_1 = rewriter.create<arith::ConstantIndexOp>(loc, 1);
+
+    // llvm::errs() << "=== PROCESSING: \n";
+    // op.emitWarning();
+    // llvm::errs() << "===\n";
 
     // handle results:
     //   if memref: find original definition, move outside
@@ -202,7 +256,7 @@ public:
           termarg.getDefiningOp()->emitWarning("unsupported non-alloc defining op for an air.execute termargult");
           return failure();
         }
-        def.emitWarning();
+        // def.emitWarning();
         // if termarg's def is outside of op, don't need to redefine or remove anything
         if (!op.getOperation()->isProperAncestor(def)) continue;
 
@@ -213,7 +267,8 @@ public:
         res.replaceAllUsesWith(newval);
       }
       else if (termarg.getType().isa<IndexType>() ||
-               termarg.getType().isa<IntegerType>()) {
+               termarg.getType().isa<IntegerType>() ||
+               termarg.getType().isa<FloatType>()) {
         Value newmr = rewriter.create<memref::AllocOp>
             (loc,  MemRefType::Builder({1}, termarg.getType())).getResult();
         resToMemref[termarg] = newmr;
@@ -265,8 +320,7 @@ public:
                 assert(resToMemref.find(res) != resToMemref.end());
                 auto mr = resToMemref.find(res)->second;
                 auto mappedval = mapper.lookup(res);
-                auto mrop = rewriter.create<memref::StoreOp>
-                    (loc, mappedval, mr, SmallVector<Value>{cst_1});
+                rewriter.create<memref::StoreOp>(loc, mappedval, mr, SmallVector<Value>{cst_1});
               }
 
               // empty yield
@@ -276,9 +330,9 @@ public:
           }
         });
 
-
+    rewriter.replaceAllUsesWith(op.getAsyncToken(), asyncExec.getToken());
     rewriter.eraseOp(op);
-    op.getOperation()->getParentOp()->emitWarning();
+    // op.getOperation()->getParentOp()->emitWarning();
     return success();
   }
 };
@@ -308,7 +362,8 @@ public:
       >();
     ///TODO: apply ^ to greedy rewriter somehow? target w/ no passes?
 
-    applyPatternsAndFoldGreedily(module, std::move(patterns));
+    auto res = applyPatternsAndFoldGreedily(module, std::move(patterns));
+    if (res.failed()) return signalPassFailure();
   }
 };
 
@@ -341,7 +396,10 @@ public:
     converter.addTargetMaterialization(addUnrealizedCast);
 
     mlir::RewritePatternSet patterns(context);
-    patterns.add<VerifAirExecuteRewriter>(converter, context);
+    patterns.add<
+        VerifAirExecuteRewriter,
+        VerifAirWaitAllRewriter
+      >(converter, context);
 
     ConversionTarget target(*context);
     target.addIllegalOp<xilinx::air::ExecuteOp>();
@@ -355,7 +413,8 @@ public:
         mlir::BuiltinDialect
       >();
 
-    applyPartialConversion(module, target, std::move(patterns));
+    auto res = applyPartialConversion(module, target, std::move(patterns));
+    if (res.failed()) return signalPassFailure();
   }
 };
 
