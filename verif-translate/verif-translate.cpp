@@ -350,16 +350,9 @@ class PastTranslator {
   // func
 
   s_past_node_t* translate(func::FuncOp& op) {
-    ///TODO: function to chain node over iterator
-    s_past_node_t* funcArgs = nullptr;
-    s_past_node_t* cur = nullptr;
-    // add args
+    std::vector<s_past_node_t*> args;
     for (auto arg : op.getRegion().getArguments()) {
-      if (!funcArgs) funcArgs = cur = getVarDecl(arg, "func_arg");
-      else {
-        cur->next = getVarDecl(arg, "func_arg");
-        cur = cur->next;
-      }
+      args.push_back(getVarDecl(arg, "func_arg"));
     }
     // add results as args
     auto vec = new std::vector<s_symbol_t*>();
@@ -367,17 +360,14 @@ class PastTranslator {
     for (auto type : op.getResultTypes()) {
       s_symbol_t* sym = getTempVarSymbol("func_arg_ret");
       (*vec).push_back(sym);
-      if (!funcArgs) funcArgs = cur = getVarDecl(getTypeSymbol(type), sym);
-      else {
-        cur->next = getVarDecl(getTypeSymbol(type), sym);
-        cur = cur->next;
-      }
+      // args.push_back(getVarDecl(getTypeSymbol(type), sym));
+      args.push_back(getVarDecl(getSymbol("int*"), sym));
     }
 
     s_past_node_t* ret = past_node_fundecl_create(
       past_node_varref_create(getSymbol("void")),
       past_node_varref_create(getSymbol(op.getSymName().str())),
-      funcArgs,
+      nodeChain(args),
       translate(op.getRegion())
     );
     return ret;
