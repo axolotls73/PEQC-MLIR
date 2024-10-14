@@ -6,8 +6,6 @@
 
 // RUN: %pastchecker %t/translation.c %t/compare.c res1,res2 | grep YES
 
-//XFAIL:*
-
 //--- input.mlir
 
 module {

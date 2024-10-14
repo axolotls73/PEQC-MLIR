@@ -2,16 +2,17 @@
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
 // RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
 
+// cat %t/result.c | FileCheck %s
+
 // RUN: %pastchecker %t/translation.c %t/translation.c res | grep YES
 
 // RUN: %pastchecker %t/translation.c %t/compare.c res | grep YES
 
-//XFAIL:*
-
 //--- input.mlir
 
 module {
-    func.func @func_test () -> i32 {
+// CHECK: void for_loop_carried
+    func.func @for_loop_carried () -> i32 {
         %c_0 = arith.constant 0 : i32
         %c_1 = arith.constant 1 : i32
         %c_0i = arith.constant 0 : index
@@ -28,7 +29,7 @@ module {
 //--- epilogue.c
 
 {
-  func_test(res_arr);
+  for_loop_carried(res_arr);
   res = res_arr[0];
 }
 

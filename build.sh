@@ -2,7 +2,6 @@
 
 AIR_REPO=/opt/mlir-air
 PAST_DIR=/root/data-host-share/pocc-devel/ir/past
-export CMAKE_PREFIX_PATH=$PAST_DIR/past/.libs
 LLVM_REPO=$AIR_REPO/llvm
 BUILD_DIR=$LLVM_REPO/build
 INSTALL_DIR=$LLVM_REPO/install
