@@ -1,5 +1,3 @@
-// RUN: echo ASYNC TEMP DIR %t
-
 // RUN: split-file %s %t && \
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
 // RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
