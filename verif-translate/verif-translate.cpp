@@ -134,6 +134,19 @@ class PastTranslator {
       return ret;
     }
 
+    else if (t.isIntOrFloat()) {
+      auto it = dyn_cast<FloatType>(t);
+      assert(it); //ints caught above
+
+      std::string ret = "";
+      switch (it.getWidth()) {
+        case 32:
+          break;
+      }
+      ret += "float";
+      return ret;
+    }
+
     ///TODO: change to use node type
     else if (auto tm = dyn_cast<MemRefType>(t)) {
       std::string ret = getTypeName(tm.getElementType());
@@ -536,7 +549,7 @@ class PastTranslator {
   s_past_node_t* translate(memref::LoadOp op) {
     return past_node_statement_create(
       past_node_binary_create(past_assign,
-        past_node_varref_create(getVarSymbol(op.getResult())),
+        getVarDecl(op.getResult(), "memref_load"),
         getArrayAccess(op.getMemRef(), op.getIndices())));
   }
 
