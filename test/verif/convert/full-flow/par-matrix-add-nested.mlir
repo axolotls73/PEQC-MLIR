@@ -1,10 +1,10 @@
 // RUN: split-file %s %t && \
-// RUN: verif-opt --verif-scf-parallel-to-async %t/input.mlir | FileCheck %s --check-prefix=CONV
-
-// RUN: split-file %s %t && \
 // RUN: verif-opt --verif-scf-parallel-to-async %t/input.mlir > %t/conversion.mlir && \
-// RUN: verif-translate --translate-to-past %t/conversion.mlir | FileCheck %s --check-prefix=TRAN
-//XFAIL:*
+// RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
+// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
+
+// RUN: cat %t/conversion.mlir | FileCheck %s --check-prefix=CONV
+
 //--- input.mlir
 
 module {
@@ -35,6 +35,9 @@ module {
 //--- epilogue.c
 
 {
+  float* A;
+  float* B;
+  float* C;
   madd(A, B, C);
 }
 
@@ -42,6 +45,9 @@ module {
 
 #pragma pocc-region-start
 {
+  float* A;
+  float* B;
+  float* C;
   for (int i = 0; i < 128; i++) {
     for (int j = 0; j < 128; j++) {
         C[i][j] + A[i][j] + B[i][j];
