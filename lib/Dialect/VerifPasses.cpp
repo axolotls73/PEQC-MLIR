@@ -24,6 +24,8 @@ namespace mlir::verif {
 #define GEN_PASS_DEF_VERIFAIREXECUTETOASYNC
 #include "Dialect/VerifPasses.h.inc"
 
+#define DEBUG_TYPE "verif-convert"
+
 namespace {
 
 class VerifScfParRewriter : public OpRewritePattern<scf::ParallelOp> {
@@ -209,14 +211,6 @@ public:
 
     // rewriter.eraseOp(op);
 
-    // drop to remove dangling uses when this pass is complete?
-    ///TODO: figure out how to fix that error without doing this, i have to be
-    /// using the api wrong somehow
-    rewriter.modifyOpInPlace(op, [&](){
-      for (auto &o : op.getAsyncDependenciesMutable()) {
-        o.drop();
-      }
-    });
     rewriter.replaceOp(op, asyncExec);
     return success();
   }
@@ -237,9 +231,7 @@ public:
     IRMapping mapper;
     Value cst_1 = rewriter.create<arith::ConstantIndexOp>(loc, 1);
 
-    // llvm::errs() << "=== PROCESSING: \n";
-    // op.emitWarning();
-    // llvm::errs() << "===\n";
+    SmallVector<Value> results;
 
     // handle results:
     //   if memref: find original definition, move outside
@@ -250,6 +242,7 @@ public:
     std::unordered_map<Value, Value> resToMemref;
     for (auto [termarg, res] :
           llvm::zip_equal(blocks.front().getTerminator()->getOperands(), op.getResults())) {
+
       if (auto memreftype = dyn_cast<MemRefType>(termarg.getType())) {
         auto def = dyn_cast<memref::AllocOp>(termarg.getDefiningOp());
         if (!def) {
@@ -263,8 +256,9 @@ public:
         removeDef.push_back(termarg);
         Value newval = rewriter.create<memref::AllocOp>
             (loc,  memreftype).getResult();
-        mapper.map(termarg, newval);
-        res.replaceAllUsesWith(newval);
+        results.push_back(newval);
+        // mapper.map(termarg, newval);
+        // res.replaceAllUsesWith(newval);
       }
       else if (termarg.getType().isa<IndexType>() ||
                termarg.getType().isa<IntegerType>() ||
@@ -287,6 +281,7 @@ public:
             (*use).assign(val);
           });
         }
+        results.push_back(newmr);
       }
       else {
         llvm::errs() << "unsupported type for air.execute result: " << termarg.getType() << "\n";
@@ -300,8 +295,8 @@ public:
     auto asyncExec = rewriter.create<async::ExecuteOp>(
         op->getLoc(), SmallVector<Type>{}, dependencies, operands,
         [&](OpBuilder &b, Location loc, ValueRange v) {
-          for (auto &o : op.getOps()) {
 
+          for (auto &o : op.getOps()) {
             // don't clone if op defines a memref we don't need
             // (memref.alloc only)
             bool remove = false;
@@ -329,10 +324,8 @@ public:
               b.clone(o, mapper);
           }
         });
-
-    rewriter.replaceAllUsesWith(op.getAsyncToken(), asyncExec.getToken());
-    rewriter.eraseOp(op);
-    // op.getOperation()->getParentOp()->emitWarning();
+    results.insert(results.begin(), asyncExec.getToken());
+    rewriter.replaceOp(op, results);
     return success();
   }
 };
@@ -402,7 +395,6 @@ public:
       >(converter, context);
 
     ConversionTarget target(*context);
-    target.addIllegalOp<xilinx::air::ExecuteOp>();
 
     target.addLegalDialect<
         func::FuncDialect,

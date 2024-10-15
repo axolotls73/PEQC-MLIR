@@ -1,5 +1,3 @@
-//XFAIL:*
-
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-air-execute-to-async %t/input.mlir > %t/conversion.mlir 2> %t/STDERR.txt
 
