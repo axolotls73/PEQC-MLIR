@@ -573,10 +573,9 @@ class PastTranslator {
 
   s_past_node_t* translate(async::AwaitAllOp op) {
     s_symbol_t* groupIndex = asyncGroupIndex.find(op.getOperand())->second;
-    return past_node_statement_create(
-      getPastWaitFinished(
+    return getPastWaitFinished(
         getVarSymbol(op.getOperand()),
-        groupIndex));
+        groupIndex);
   }
 
   s_past_node_t* translate(async::ExecuteOp op) {
@@ -590,7 +589,7 @@ class PastTranslator {
     }
 
     // get semaphore value of token
-    nodes.push_back(getPastNewSemaphore(getVarSymbol(op.getToken())));
+    nodes.push_back(getPastNewSemaphore(getVarSymbol(op.getToken(), "execute_token")));
 
     // translate body, set semaphore to finished after
     body.push_back(translate(op.getBodyRegion()));
