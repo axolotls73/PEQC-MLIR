@@ -236,49 +236,27 @@ class PastTranslator {
     return getArrayAccess(getVarSymbol(arr), vops);
   }
 
-
-  s_past_node_t* getArrayCopy(const MemRefType& type, s_symbol_t* src, s_symbol_t* dst,
-          llvm::ArrayRef<int64_t> dims, std::vector<s_symbol_t*> itervars) {
-
-    auto iter = getTempVarSymbol("copy_iter");
-    itervars.push_back(iter);
-
-    s_past_node_t* body = nullptr;
-    if (dims.size() == 1) {
-      body = past_node_statement_create(
-        past_node_binary_create(past_assign,
-          getArrayAccess(dst, itervars),
-          getArrayAccess(src, itervars)
-        )
-      );
-    }
-    else {
-      body = getArrayCopy(type, src, dst, dims.drop_front(1), itervars);
-    }
-
-    return past_node_for_create(
-      past_node_binary_create(past_assign,
-        past_node_varref_create(iter),
-        past_node_value_create_from_int(0)
-      ),
-      past_node_binary_create(past_lt,
-        past_node_varref_create(iter),
-        past_node_value_create_from_longlong(dims[0])
-      ),
-      iter,
-      past_node_binary_create(past_addassign,
-        past_node_varref_create(iter),
-        past_node_value_create_from_int(1)
-      ),
-      body
-    );
-  }
-
+  // macro call: COPY_[N]D(src, 0, [size of dim 1], ... 0, [size of dim N], dst, 0, [size of dim 1], ... 0, [size of dim N])
   s_past_node_t* getArrayCopy(const MemRefType& type, s_symbol_t* src, s_symbol_t* dst) {
     auto dims = type.getShape();
     assert(dims.size() > 0);
+    std::vector<s_past_node_t*> args;
+    args.push_back(past_node_varref_create(src));
+    for (auto dim : dims) {
+      args.push_back(past_node_value_create_from_int(0));
+    }
+    args.push_back(past_node_varref_create(dst));
+    for (auto dim : dims) {
+      args.push_back(past_node_value_create_from_int(0));
+    }
+    for (auto dim : dims) {
+      args.push_back(past_node_value_create_from_longlong(dim));
+    }
 
-    return getArrayCopy(type, src, dst, dims, std::vector<s_symbol_t*>());
+    return past_node_statement_create(
+      past_node_funcall_create(
+        past_node_varref_create(getSymbol("_past_array_copy_" + std::to_string(dims.size()) + "d")),
+        nodeChain(args)));
   }
 
   s_past_node_t* getPastWaitFinished(s_symbol_t* semaphore) {

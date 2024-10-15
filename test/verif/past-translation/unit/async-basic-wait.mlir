@@ -25,6 +25,7 @@ module {
             memref.store %5, %a[%0] : memref<1xi32>
             async.yield
         }
+        async.await %token : !async.token
         %ret = memref.load %a[%0] : memref<1xi32>
         return %ret : i32
     }
@@ -32,6 +33,7 @@ module {
 
 //--- epilogue.c
 
+#pragma peqc async_execute
 {
   int res_arr[1];
   async_test(res_arr);
