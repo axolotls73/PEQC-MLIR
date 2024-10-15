@@ -27,3 +27,17 @@ void __internal_initialize_semaphores() {
     for (int _sem_index = 0; _sem_index < arr_size; _sem_index++) \
       _past_ai_api_concurrent_wait_until_semaphore(sem, val); \
   } while(0)
+
+void _past_array_copy_1d(int* src, int srcs, int* dst, int dsts, int N) {
+  for (int i = 0; i < N; i++) {
+    dst[i + dsts] = src[i + srcs];
+  }
+}
+
+void _past_array_copy_2d(int** src, int srcs1, int srcs2, int** dst, int dsts1, int dsts2, int N1, int N2) {
+  for (int i = 0; i < N1; i++) {
+    for (int j = 0; j < N2; j++) {
+      dst[i + dsts1][j + dsts2] = src[i + srcs1][j + srcs2];
+    }
+  }
+}
