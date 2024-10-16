@@ -23,10 +23,8 @@ void __internal_initialize_semaphores() {
   _past_ai_api_concurrent_wait_until_semaphore(sem, val)
 
 #define PAST_WAIT_SEMAPHORE_ALL(sem, arr_size, val) \
-  do { \
-    for (int _sem_index = 0; _sem_index < arr_size; _sem_index++) \
-      _past_ai_api_concurrent_wait_until_semaphore(sem[_sem_index], val); \
-  } while(0)
+  for (int _sem_index = 0; _sem_index < arr_size; _sem_index++) \
+    _past_ai_api_concurrent_wait_until_semaphore(sem[_sem_index], val)
 
 void _past_array_copy_1d(int* src, int srcs, int* dst, int dsts, int N) {
   for (int i = 0; i < N; i++) {
