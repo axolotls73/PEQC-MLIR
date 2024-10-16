@@ -4,7 +4,7 @@ int PAST_TASK_INIT = 0;
 int PAST_TASK_FINISHED = 1;
 
 int* __past_internal_semaphores;
-int max_nb_threads = 10;
+int max_nb_threads = 200;
 
 void __internal_initialize_semaphores() {
   _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads);
@@ -25,7 +25,7 @@ void __internal_initialize_semaphores() {
 #define PAST_WAIT_SEMAPHORE_ALL(sem, arr_size, val) \
   do { \
     for (int _sem_index = 0; _sem_index < arr_size; _sem_index++) \
-      _past_ai_api_concurrent_wait_until_semaphore(sem, val); \
+      _past_ai_api_concurrent_wait_until_semaphore(sem[_sem_index], val); \
   } while(0)
 
 void _past_array_copy_1d(int* src, int srcs, int* dst, int dsts, int N) {
