@@ -25,6 +25,7 @@
 #include "mlir/Tools/mlir-translate/Translation.h"
 // #include "mlir/Parser/Parser.h"
 #include "mlir/Tools/ParseUtilities.h"
+#include "air/Dialect/AIR/AIRDialect.h"
 
 #include "Dialect/VerifDialect.h"
 #include "Dialect/VerifUtil.h"
@@ -162,6 +163,14 @@ class PastTranslator {
       // }
       ret += "*";
       return ret;
+    }
+
+    ///TODO: remove!! workaround!!
+    else if (auto tt = dyn_cast<xilinx::air::AsyncTokenType>(t)) {
+      return "int";
+    }
+    else if (auto tt = dyn_cast<async::TokenType>(t)) {
+      return "int";
     }
     assert(0);
   }
@@ -621,6 +630,12 @@ class PastTranslator {
     return nullptr;
   }
 
+///TODO: workaround!!
+  s_past_node_t* translate(UnrealizedConversionCastOp op) {
+    getAndMapSymbol(op.getOperand(0), op.getResult(0));
+    return nullptr;
+  }
+
   // returns a linked list of the translation of the contained blocks'
   // operations, chained
   s_past_node_t* translate(Region& region) {
@@ -660,6 +675,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<async::AwaitAllOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::ExecuteOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::YieldOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<UnrealizedConversionCastOp>(op)) res = translate(o);
     else {
       op->emitError("unknown operation");
       exit(1);
@@ -711,7 +727,8 @@ int main(int argc, char **argv) {
             mlir::scf::SCFDialect,
             mlir::func::FuncDialect,
             mlir::memref::MemRefDialect,
-            mlir::async::AsyncDialect
+            mlir::async::AsyncDialect,
+            xilinx::air::airDialect
           >();
       });
 
