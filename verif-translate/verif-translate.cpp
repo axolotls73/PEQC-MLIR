@@ -36,6 +36,8 @@
 #include "past/past.h"
 #include "past/pprint.h"
 
+#define DEBUG_TYPE "verif-translate"
+
 
 namespace mlir {
 namespace verif {
@@ -109,6 +111,10 @@ class PastTranslator {
   }
 
   std::string getTypeName(const Type& t) {
+    LLVM_DEBUG(
+      llvm::errs() << "gettypename: " << t << "\n";
+    );
+
     if (t.isIndex()) return "int";
 
     else if (t.isInteger()) {
@@ -181,7 +187,7 @@ class PastTranslator {
     s_past_node_t* start = nullptr;
     s_past_node_t* end = nullptr;
     for (auto n : nodes) {
-      assert(n);
+      if (!n) continue;
       if (!start) start = end = n;
       else {
         end->next = n;
@@ -514,6 +520,11 @@ class PastTranslator {
     return past_node_statement_create(getVarDecl(op.getResult(), "memref_alloc"));
   }
 
+  ///TODO: check for use-after-free bugs?
+  s_past_node_t* translate(memref::DeallocOp op) {
+    return nullptr;
+  }
+
   s_past_node_t* translate(memref::LoadOp op) {
     return past_node_statement_create(
       past_node_binary_create(past_assign,
@@ -640,6 +651,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<memref::DeallocOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::LoadOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::CopyOp>(op)) res = translate(o);
@@ -649,7 +661,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<async::ExecuteOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::YieldOp>(op)) res = translate(o);
     else {
-      llvm::errs() << "idk " << op->getName() << "\n";
+      op->emitError("unknown operation");
       exit(1);
     }
     return res;
