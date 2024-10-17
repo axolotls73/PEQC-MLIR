@@ -63,6 +63,10 @@ class PastTranslator {
 
   std::vector<s_past_node_t*> newFunctionDecls;
 
+  // if value is declared in block, add this statement to the end of the block.
+  // dumb hack for subview copy back.
+  std::unordered_map<Value, s_past_node_t*> blockAddAtEnd;
+
   s_symbol_t* getSymbol(std::string name) {
     return symbol_get_or_insert(symbolTable, name.c_str(), nullptr);
   }
@@ -213,6 +217,12 @@ class PastTranslator {
     return end;
   }
 
+  void nodeListClone(std::vector<s_past_node_t*>& list) {
+    for (int i = 0; i < list.size(); i++) {
+      list[i] = past_clone_subtree(list[i]);
+    }
+  }
+
   // type varname = assignval;
   s_past_node_t* getDeclareAndAssign(Type type, const char* varname,
             Value varvalue, s_past_node_t* assignval) {
@@ -249,6 +259,33 @@ class PastTranslator {
       vops.push_back(getVarSymbol(o));
     }
     return getArrayAccess(getVarSymbol(arr), vops);
+  }
+
+  s_past_node_t* getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
+        std::vector<s_past_node_t*> src_offsets, std::vector<s_past_node_t*> dst_offsets,
+        std::vector<s_past_node_t*> sizes) {
+    assert(src_offsets.size() == dst_offsets.size() &&
+           src_offsets.size() == sizes.size() &&
+           src_offsets.size() > 0);
+    auto numdims = src_offsets.size();
+
+    std::vector<s_past_node_t*> args;
+    args.push_back(past_node_varref_create(src));
+    for (auto offs : src_offsets) {
+      args.push_back(offs);
+    }
+    args.push_back(past_node_varref_create(dst));
+    for (auto offs : dst_offsets) {
+      args.push_back(offs);
+    }
+    for (auto size : sizes) {
+      args.push_back(size);
+    }
+
+    return past_node_statement_create(
+      past_node_funcall_create(
+        past_node_varref_create(getSymbol("_past_array_copy_" + std::to_string(numdims) + "d")),
+        nodeChain(args)));
   }
 
   // macro call: COPY_[N]D(src, 0, [size of dim 1], ... 0, [size of dim N], dst, 0, [size of dim 1], ... 0, [size of dim N])
@@ -554,6 +591,70 @@ class PastTranslator {
     return getArrayCopy(type, getVarSymbol(op.getSource()), getVarSymbol(op.getTarget()));
   }
 
+  s_past_node_t* translate(memref::SubViewOp op) {
+    std::vector<s_past_node_t*> stmts;
+
+    auto getFoldResultNode = [&](OpFoldResult res) {
+      if (res.is<Value>()) {
+        return past_node_varref_create(getVarSymbol(res.get<Value>()));
+      }
+      else if (res.is<Attribute>()) {
+        auto attr = cast_or_null<IntegerAttr>(res.get<Attribute>());
+        if (!attr) {
+          op.emitError("expected IntegerAttr in memref.subview");
+          exit(1);
+        }
+        return past_node_value_create_from_longlong(attr.getInt());
+      }
+      else {
+        assert(0 && "unexpected type");
+      }
+    };
+
+    for (auto stride : op.getMixedStrides()) {
+      if (!stride.is<Attribute>() ||
+          !cast_or_null<IntegerAttr>(stride.get<Attribute>()) ||
+          cast<IntegerAttr>(stride.get<Attribute>()).getInt() != 1) {
+        op.emitError("memref.subview: only stride 1 supported");
+        exit(1);
+      }
+    }
+
+    // declare new var for subview
+    stmts.push_back(
+      past_node_statement_create(
+        getVarDecl(op.getResult(), "subview")));
+
+    // copy to subview var
+    std::vector<s_past_node_t*> src_offsets;
+    std::vector<s_past_node_t*> dst_offsets;
+    for (auto offs : op.getMixedOffsets()) {
+      src_offsets.push_back(getFoldResultNode(offs));
+      dst_offsets.push_back(past_node_value_create_from_int(0));
+    }
+
+    std::vector<s_past_node_t*> sizes;
+    for (auto size : op.getMixedSizes()) {
+      sizes.push_back(getFoldResultNode(size));
+    }
+
+    stmts.push_back(getArrayCopy(
+        getVarSymbol(op.getSource()), getVarSymbol(op.getResult()),
+        src_offsets, dst_offsets, sizes));
+
+    nodeListClone(src_offsets);
+    nodeListClone(dst_offsets);
+    nodeListClone(sizes);
+
+    // add to end of block: copy back from subview
+    auto copyback = getArrayCopy(
+        getVarSymbol(op.getResult()), getVarSymbol(op.getSource()),
+        dst_offsets, src_offsets, sizes);
+    blockAddAtEnd[op.getResult()] = copyback;
+
+    return nodeChain(stmts);
+  }
+
   s_past_node_t* translate(async::CreateGroupOp op) {
     std::vector<s_past_node_t*> stmts;
     // declare buffer
@@ -645,6 +746,34 @@ class PastTranslator {
         if (auto stmt = translate(&op))
           stmts.push_back(stmt);
       }
+
+      // if value in blockAddAtEnd is declared in block,
+      // add associated statement here
+      std::vector<Value> toremove;
+      for (auto &b : blockAddAtEnd) {
+        Value val = b.first;
+        // if (llvm::find(block.getOperations(), *(val.getDefiningOp())) !=
+        //     block.getOperations().end()) {
+        ///TODO: there's GOTTA be a better way to do this...
+        auto valDefinedInBlock = [](Block& block, Value val) {
+          for (auto &op : block.getOperations()) {
+            auto o = &op;
+            for (auto res : o->getResults()) {
+              if (val == res) return true;
+            }
+          }
+          return false;
+        };
+        if (valDefinedInBlock(block, val)) {
+          llvm::errs() << b.first << " " << b.second << "\n";
+          // assert(0);
+          stmts.push_back(b.second);
+          toremove.push_back(val);
+        }
+      }
+      for (auto val : toremove) {
+        blockAddAtEnd.erase(val);
+      }
     }
     return nodeChain(stmts);
   }
@@ -670,6 +799,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<memref::LoadOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::CopyOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<memref::SubViewOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::CreateGroupOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::AddToGroupOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::AwaitAllOp>(op)) res = translate(o);
