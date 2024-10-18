@@ -175,6 +175,81 @@ public:
 };
 
 
+// pattern for scf.parallel above doesn't work for ops w/ iter_args of
+// async.token or air.async.token type b/c you can't put them in memrefs:
+// convert pattern that waits on all tokens to remove iter_args + scf.reduce nodes
+class VerifScfTokenConverter : public OpConversionPattern<scf::ParallelOp> {
+public:
+  using OpConversionPattern<scf::ParallelOp>::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(scf::ParallelOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const final {
+
+    // pattern match the one specific thing I support
+    auto match = [](scf::ParallelOp op) {
+      return true;
+
+      if (op.getRegionIterArgs().size() > 1) return false;
+      if (op.getLoopRegions().size() > 1) return false;
+      auto region = op.getLoopRegions()[0];
+      if (region->getBlocks().size() > 1) return false;
+      auto reduceop = region->getBlocks().front().getTerminator();
+      auto blockops =
+          reduceop->getRegions()[0].getBlocks().front().getOperations().begin();
+
+      auto const &waitop = dyn_cast<xilinx::air::WaitAllOp>(*blockops++);
+      if (!waitop) return false;
+
+      auto const &retop = dyn_cast<scf::ReduceReturnOp>(*blockops++);
+      if (!retop) return false;
+
+      return true;
+    };
+    if (!match(op)) return failure();
+
+    auto loc = op.getLoc();
+
+    ///TODO: make this tripcount
+    Value size = rewriter.create<arith::ConstantIndexOp>(loc, 100).getResult();
+    Value group = rewriter.create<async::CreateGroupOp>(loc, size).getResult();
+
+    auto newop = rewriter.create<scf::ParallelOp>(op.getLoc(),
+        op.getLowerBound(), op.getUpperBound(), op.getStep(),
+        [&](OpBuilder& b, Location loc, ValueRange vals) {
+          for (auto &o : op.getBody()->getOperations()) {
+            if (isa<scf::ReduceOp>(o)) {
+              auto reducereturn = o.getBlock()->getTerminator();
+              ///TODO: use typeconverter here???
+              auto newtoken = b.create<UnrealizedConversionCastOp>
+                  (loc, async::TokenType(), reducereturn->getResult(0)).getResult(0);
+              b.create<async::AddToGroupOp>(loc, newtoken, group);
+              b.create<scf::ReduceOp>(loc, SmallVector<Value>{});
+
+              break;
+            }
+
+            // b.clone(o);
+          }
+        });
+    // newop.emitWarning();
+    // assert(0);
+    rewriter.setInsertionPointAfter(newop);
+    auto newtoken = rewriter.create<async::ExecuteOp>(op.getLoc(),
+        SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
+        [&](OpBuilder& b, Location loc, ValueRange _vals) {
+          b.create<async::AwaitAllOp>(loc, group);
+        }).getToken();
+
+    assert(op.getNumResults() == 1);
+    // rewriter.eraseOp(op);
+    rewriter.replaceOp(op, SmallVector<Value>{newtoken});
+    op.getOperation()->getParentOfType<ModuleOp>().emitWarning();
+    return success();
+  }
+};
+
+
 class VerifAirWaitAllRewriter : public OpConversionPattern<xilinx::air::WaitAllOp> {
 public:
   using OpConversionPattern<xilinx::air::WaitAllOp>::OpConversionPattern;
@@ -182,7 +257,7 @@ public:
   LogicalResult
   matchAndRewrite(xilinx::air::WaitAllOp op, OpAdaptor adaptor,
                   ConversionPatternRewriter &rewriter) const final {
-    auto loc = op.getLoc();
+    // auto loc = op.getLoc();
 
     // llvm::errs() << "=== PROCESSING: \n";
     // op.emitWarning();
@@ -339,11 +414,34 @@ public:
     auto module = getOperation();
     auto context = module.getContext();
 
-    mlir::RewritePatternSet patterns(context);
-    patterns.add<VerifScfParRewriter>(context);
+    ///TODO: pull this out into a function
+    TypeConverter converter;
+    converter.addConversion([&](Type type) -> std::optional<Type> {
+      // convert air::AsyncTokenType to async::TokenType
+      if (auto t = type.dyn_cast<xilinx::air::AsyncTokenType>())
+        return async::TokenType::get(context);
+      if (auto t = type.dyn_cast<MemRefType>())
+        if (t.getMemorySpaceAsInt() != 0)
+          return MemRefType::get(t.getShape(), t.getElementType(),
+                                 t.getLayout(), 0);
+      return type;
+    });
+    auto addUnrealizedCast = [](OpBuilder &builder, Type type,
+                                ValueRange inputs, Location loc) {
+      auto cast = builder.create<UnrealizedConversionCastOp>(loc, type, inputs);
+      return std::optional<Value>(cast.getResult(0));
+    };
+    converter.addSourceMaterialization(addUnrealizedCast);
+    converter.addTargetMaterialization(addUnrealizedCast);
 
     ConversionTarget target(*context);
-    target.addIllegalOp<scf::ParallelOp>();
+    target.addDynamicallyLegalOp<scf::ParallelOp>([](scf::ParallelOp op) {
+      for (auto arg : op.getResults()) {
+        if (arg.getType().isa<xilinx::air::AsyncTokenType, async::TokenType>())
+          return false;
+      }
+      return true;
+    });
 
     target.addLegalDialect<
         func::FuncDialect,
@@ -351,9 +449,19 @@ public:
         scf::SCFDialect,
         memref::MemRefDialect,
         async::AsyncDialect,
-        mlir::BuiltinDialect
+        mlir::BuiltinDialect,
+        xilinx::air::airDialect
       >();
     ///TODO: apply ^ to greedy rewriter somehow? target w/ no passes?
+
+    // RewritePatternSet scfpatterns(context);
+    // scfpatterns.add<VerifScfTokenConverter>(context);
+
+    // auto convertres = applyFullConversion(module, target, std::move(scfpatterns));
+    // if (convertres.failed()) return signalPassFailure();
+
+    RewritePatternSet patterns(context);
+    patterns.add<VerifScfParRewriter>(context);
 
     auto res = applyPatternsAndFoldGreedily(module, std::move(patterns));
     if (res.failed()) return signalPassFailure();
