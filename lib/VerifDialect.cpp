@@ -6,14 +6,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "Dialect/VerifDialect.h"
-#include "Dialect/VerifOps.h"
-#include "Dialect/VerifTypes.h"
+#include "VerifDialect.h"
+#include "VerifOps.h"
+#include "VerifTypes.h"
 
 using namespace mlir;
 using namespace mlir::verif;
 
-#include "Dialect/VerifDialect.cpp.inc"
+#include "VerifDialect.cpp.inc"
 
 //===----------------------------------------------------------------------===//
 // Verif dialect.
@@ -22,7 +22,7 @@ using namespace mlir::verif;
 void VerifDialect::initialize() {
   addOperations<
 #define GET_OP_LIST
-#include "Dialect/VerifOps.cpp.inc"
+#include "VerifOps.cpp.inc"
       >();
   registerTypes();
 }

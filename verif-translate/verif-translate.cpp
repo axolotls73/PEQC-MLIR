@@ -27,8 +27,8 @@
 #include "mlir/Tools/ParseUtilities.h"
 #include "air/Dialect/AIR/AIRDialect.h"
 
-#include "Dialect/VerifDialect.h"
-#include "Dialect/VerifUtil.h"
+#include "VerifDialect.h"
+#include "VerifUtil.h"
 
 #include <cstdio>
 #include <iterator>

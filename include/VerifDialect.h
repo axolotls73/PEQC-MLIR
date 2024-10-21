@@ -1,4 +1,4 @@
-//===- VerifTypes.h - Verif dialect types -------------*- C++ -*-===//
+//===- VerifDialect.h - Verif dialect -----------------*- C++ -*-===//
 //
 // This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef VERIF_VERIFTYPES_H
-#define VERIF_VERIFTYPES_H
+#ifndef VERIF_VERIFDIALECT_H
+#define VERIF_VERIFDIALECT_H
 
-#include "mlir/IR/BuiltinTypes.h"
+#include "mlir/Bytecode/BytecodeOpInterface.h"
+#include "mlir/IR/Dialect.h"
 
-#define GET_TYPEDEF_CLASSES
-#include "Dialect/VerifTypes.h.inc"
+#include "VerifDialect.h.inc"
 
-#endif // VERIF_VERIFTYPES_H
+#endif // VERIF_VERIFDIALECT_H

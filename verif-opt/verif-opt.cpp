@@ -12,8 +12,8 @@
 #include "mlir/Support/FileUtilities.h"
 #include "mlir/Tools/mlir-opt/MlirOptMain.h"
 
-#include "Dialect/VerifDialect.h"
-#include "Dialect/VerifPasses.h"
+#include "VerifDialect.h"
+#include "VerifPasses.h"
 #include "air/Dialect/AIR/AIRDialect.h"
 
 int main(int argc, char **argv) {

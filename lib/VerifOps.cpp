@@ -6,10 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "Dialect/VerifOps.h"
-#include "Dialect/VerifDialect.h"
-#include "Dialect/VerifTypes.h"
+#include "VerifOps.h"
+#include "VerifDialect.h"
+#include "VerifTypes.h"
 
 #define GET_OP_CLASSES
-#include "Dialect/VerifOps.cpp.inc"
+#include "VerifOps.cpp.inc"
 

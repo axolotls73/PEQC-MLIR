@@ -6,9 +6,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "Dialect/VerifTypes.h"
+#include "VerifTypes.h"
 
-#include "Dialect/VerifDialect.h"
+#include "VerifDialect.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/DialectImplementation.h"
 #include "llvm/ADT/TypeSwitch.h"
@@ -16,11 +16,11 @@
 using namespace mlir::verif;
 
 #define GET_TYPEDEF_CLASSES
-#include "Dialect/VerifTypes.cpp.inc"
+#include "VerifTypes.cpp.inc"
 
 void VerifDialect::registerTypes() {
   addTypes<
 #define GET_TYPEDEF_LIST
-#include "Dialect/VerifTypes.cpp.inc"
+#include "VerifTypes.cpp.inc"
       >();
 }

@@ -15,14 +15,14 @@
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
 #include "air/Dialect/AIR/AIRDialect.h"
 
-#include "Dialect/VerifPasses.h"
-#include "Dialect/VerifDialect.h"
-#include "Dialect/VerifUtil.h"
+#include "VerifPasses.h"
+#include "VerifDialect.h"
+#include "VerifUtil.h"
 
 namespace mlir::verif {
 #define GEN_PASS_DEF_VERIFSCFPARALLELTOASYNC
 #define GEN_PASS_DEF_VERIFAIREXECUTETOASYNC
-#include "Dialect/VerifPasses.h.inc"
+#include "VerifPasses.h.inc"
 
 #define DEBUG_TYPE "verif-convert"
 

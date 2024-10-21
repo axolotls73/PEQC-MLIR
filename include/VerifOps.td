@@ -9,7 +9,7 @@
 #ifndef VERIF_OPS
 #define VERIF_OPS
 
-include "Dialect/VerifTypes.td"
+include "VerifTypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/IR/OpBase.td"

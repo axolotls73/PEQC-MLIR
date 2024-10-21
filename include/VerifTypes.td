@@ -10,7 +10,7 @@
 #define VERIF_TYPES
 
 include "mlir/IR/AttrTypeBase.td"
-include "Dialect/VerifDialect.td"
+include "VerifDialect.td"
 
 //===----------------------------------------------------------------------===//
 // Verif type definitions

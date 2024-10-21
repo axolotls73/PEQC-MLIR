@@ -15,9 +15,9 @@
 #include "mlir/Interfaces/InferTypeOpInterface.h"
 #include "mlir/Interfaces/SideEffectInterfaces.h"
 
-#include "Dialect/VerifTypes.h"
+#include "VerifTypes.h"
 
 #define GET_OP_CLASSES
-#include "Dialect/VerifOps.h.inc"
+#include "VerifOps.h.inc"
 
 #endif // VERIF_VERIFOPS_H
