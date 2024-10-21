@@ -28,7 +28,7 @@ namespace mlir::verif {
 
 namespace {
 
-class VerifScfParRewriter : public OpRewritePattern<scf::ParallelOp> {
+class VerifScfParPattern : public OpRewritePattern<scf::ParallelOp> {
 public:
   using OpRewritePattern<scf::ParallelOp>::OpRewritePattern;
 
@@ -175,7 +175,38 @@ public:
 };
 
 
-class VerifAirWaitAllRewriter : public OpConversionPattern<xilinx::air::WaitAllOp> {
+class VerifScfParallelToAsync
+    : public impl::VerifScfParallelToAsyncBase<VerifScfParallelToAsync> {
+public:
+  using impl::VerifScfParallelToAsyncBase<VerifScfParallelToAsync>::VerifScfParallelToAsyncBase;
+
+  void runOnOperation() final {
+    auto module = getOperation();
+    auto context = module.getContext();
+
+    mlir::RewritePatternSet patterns(context);
+    patterns.add<VerifScfParPattern>(context);
+
+    ConversionTarget target(*context);
+    target.addIllegalOp<scf::ParallelOp>();
+
+    target.addLegalDialect<
+        func::FuncDialect,
+        arith::ArithDialect,
+        scf::SCFDialect,
+        memref::MemRefDialect,
+        async::AsyncDialect,
+        mlir::BuiltinDialect
+      >();
+    ///TODO: apply ^ to greedy rewriter somehow? target w/ no passes?
+
+    auto res = applyPatternsAndFoldGreedily(module, std::move(patterns));
+    if (res.failed()) return signalPassFailure();
+  }
+};
+
+
+class VerifAirWaitAllPattern : public OpConversionPattern<xilinx::air::WaitAllOp> {
 public:
   using OpConversionPattern<xilinx::air::WaitAllOp>::OpConversionPattern;
 
@@ -184,32 +215,11 @@ public:
                   ConversionPatternRewriter &rewriter) const final {
     auto loc = op.getLoc();
 
-    // llvm::errs() << "=== PROCESSING: \n";
-    // op.emitWarning();
-    // llvm::errs() << "===\n";
-
     auto asyncExec = rewriter.create<async::ExecuteOp>(
         op->getLoc(), SmallVector<Type>{}, adaptor.getAsyncDependencies(), SmallVector<Value>{},
         [&](OpBuilder &b, Location loc, ValueRange v) {
           b.create<async::YieldOp>(loc, SmallVector<Value>{});
         });
-
-    // old implementation using groups
-
-    // create group
-    // auto groupsize = op.getOperands().size();
-    // auto sizeval = rewriter.create<arith::ConstantIndexOp>(loc, groupsize).getResult();
-    // auto groupval = rewriter.create<async::CreateGroupOp>(loc, sizeval).getResult();
-
-    // // add operands to group
-    // for (Value token : op.getOperands()) {
-    //   rewriter.create<async::AddToGroupOp>(loc, token, groupval);
-    // }
-
-    // // wait on group
-    // rewriter.create<async::AwaitAllOp>(loc, groupval);
-
-    // rewriter.eraseOp(op);
 
     rewriter.replaceOp(op, asyncExec);
     return success();
@@ -217,7 +227,7 @@ public:
 };
 
 
-class VerifAirExecuteRewriter : public OpConversionPattern<xilinx::air::ExecuteOp> {
+class VerifAirExecutePattern : public OpConversionPattern<xilinx::air::ExecuteOp> {
 public:
   using OpConversionPattern<xilinx::air::ExecuteOp>::OpConversionPattern;
 
@@ -330,35 +340,6 @@ public:
   }
 };
 
-class VerifScfParallelToAsync
-    : public impl::VerifScfParallelToAsyncBase<VerifScfParallelToAsync> {
-public:
-  using impl::VerifScfParallelToAsyncBase<VerifScfParallelToAsync>::VerifScfParallelToAsyncBase;
-
-  void runOnOperation() final {
-    auto module = getOperation();
-    auto context = module.getContext();
-
-    mlir::RewritePatternSet patterns(context);
-    patterns.add<VerifScfParRewriter>(context);
-
-    ConversionTarget target(*context);
-    target.addIllegalOp<scf::ParallelOp>();
-
-    target.addLegalDialect<
-        func::FuncDialect,
-        arith::ArithDialect,
-        scf::SCFDialect,
-        memref::MemRefDialect,
-        async::AsyncDialect,
-        mlir::BuiltinDialect
-      >();
-    ///TODO: apply ^ to greedy rewriter somehow? target w/ no passes?
-
-    auto res = applyPatternsAndFoldGreedily(module, std::move(patterns));
-    if (res.failed()) return signalPassFailure();
-  }
-};
 
 class VerifAirExecuteToAsync
     : public impl::VerifAirExecuteToAsyncBase<VerifAirExecuteToAsync> {
@@ -390,8 +371,8 @@ public:
 
     mlir::RewritePatternSet patterns(context);
     patterns.add<
-        VerifAirExecuteRewriter,
-        VerifAirWaitAllRewriter
+        VerifAirExecutePattern,
+        VerifAirWaitAllPattern
       >(converter, context);
 
     ConversionTarget target(*context);
