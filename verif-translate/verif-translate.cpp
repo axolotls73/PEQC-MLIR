@@ -274,9 +274,17 @@ class PastTranslator {
     for (auto offs : src_offsets) {
       args.push_back(offs);
     }
+    // strides: all 1
+    for (int i = 0; i < src_offsets.size(); i++) {
+      args.push_back(past_node_value_create_from_int(1));
+    }
     args.push_back(past_node_varref_create(dst));
     for (auto offs : dst_offsets) {
       args.push_back(offs);
+    }
+    // strides: all 1
+    for (int i = 0; i < dst_offsets.size(); i++) {
+      args.push_back(past_node_value_create_from_int(1));
     }
     for (auto size : sizes) {
       args.push_back(size);
@@ -297,9 +305,15 @@ class PastTranslator {
     for (auto dim : dims) {
       args.push_back(past_node_value_create_from_int(0));
     }
+    for (auto dim : dims) {
+      args.push_back(past_node_value_create_from_int(1));
+    }
     args.push_back(past_node_varref_create(dst));
     for (auto dim : dims) {
       args.push_back(past_node_value_create_from_int(0));
+    }
+    for (auto dim : dims) {
+      args.push_back(past_node_value_create_from_int(1));
     }
     for (auto dim : dims) {
       args.push_back(past_node_value_create_from_longlong(dim));

@@ -5,7 +5,7 @@ module {
 // CHECK: int* [[VAR2:.*]];
     %a = memref.alloc() : memref<2x4xi32>
     %b = memref.alloc() : memref<2x4xi32>
-// CHECK: _past_array_copy_2d([[VAR1]], 0, 0, [[VAR2]], 0, 0, 2, 4)
+// CHECK: _past_array_copy_2d([[VAR1]], 0, 0, 1, 1, [[VAR2]], 0, 0, 1, 1, 2, 4)
 
 // COM: old loop-based copy
 // COM: CHECK: for ([[VARI1:.*]] =
