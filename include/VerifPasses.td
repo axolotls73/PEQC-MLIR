@@ -25,4 +25,10 @@ def VerifAirExecuteToAsync: Pass<"verif-air-execute-to-async", "::mlir::ModuleOp
   let dependentDialects = ["async::AsyncDialect"];
 }
 
+def VerifAirToScfPar: Pass<"verif-air-to-scf-par", "::mlir::ModuleOp"> {
+  let summary = "Convert air.laaunch, air.segment, and air.herd to scf.parallel";
+  let description = [{
+  }];
+}
+
 #endif // VERIF_PASS
