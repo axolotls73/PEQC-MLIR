@@ -1,10 +1,11 @@
 
-int global_semaphore_counter = 1;
+int __past_ai_global_nocheck_global_semaphore_counter = 1;
 int PAST_TASK_INIT = 0;
 int PAST_TASK_FINISHED = 1;
 
 int* __past_internal_semaphores;
 int max_nb_threads = 200;
+void* __past_ai_global_nocheck_global_async_task_arguments;
 
 void __internal_initialize_semaphores() {
   _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads);
@@ -14,7 +15,7 @@ void __internal_initialize_semaphores() {
 }
 
 #define PAST_NEW_SEMAPHORE(sem) \
-  sem = global_semaphore_counter++
+  sem = __past_ai_global_nocheck_global_semaphore_counter++
 
 #define PAST_SET_SEMAPHORE(sem, val) \
   _past_ai_api_concurrent_set_semaphore_value(sem, val)
