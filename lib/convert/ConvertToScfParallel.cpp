@@ -61,10 +61,16 @@ public:
                                 ConversionPatternRewriter &rewriter) const final {
     auto loc = op.getLoc();
 
+    // create lower bound (0) and step (1) for all dimensions
     Value cst0 = rewriter.create<arith::ConstantIndexOp>(loc, 0);
     Value cst1 = rewriter.create<arith::ConstantIndexOp>(loc, 1);
+    SmallVector<Value> lb, step;
+    for (unsigned int i = 0; i < op.getNumDims(); i++) {
+      lb.push_back(cst0);
+      step.push_back(cst1);
+    }
     auto parop = rewriter.create<scf::ParallelOp>(loc,
-        SmallVector<Value>{cst0, cst0}, op.getSizes(), SmallVector<Value>{cst1, cst1},
+        lb, op.getSizes(), step,
         [&](OpBuilder& b, Location loc, ValueRange ivs) {
 
           // herd arguments are: iterator, upper bounds, args
@@ -149,8 +155,8 @@ public:
       >();
 
     target.addIllegalOp<
-        xilinx::air::LaunchOp,
-        xilinx::air::SegmentOp,
+        // xilinx::air::LaunchOp,
+        // xilinx::air::SegmentOp,
         xilinx::air::HerdOp
       >();
 
