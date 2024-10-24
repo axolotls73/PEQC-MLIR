@@ -61,6 +61,18 @@ public:
                                 ConversionPatternRewriter &rewriter) const final {
     auto loc = op.getLoc();
 
+    // handle async
+    SmallVector<Value> newresults;
+    if (op.getResults().size() > 0) {
+      auto asyncExec = rewriter.create<async::ExecuteOp>(
+        op->getLoc(), SmallVector<Type>{}, op.getAsyncDependencies(), SmallVector<Value>{},
+        [&](OpBuilder &b, Location loc, ValueRange v) {
+          b.create<async::YieldOp>(loc, SmallVector<Value>{});
+        });
+      newresults.push_back(asyncExec.getResult(0));
+      rewriter.setInsertionPointToStart(asyncExec.getBody());
+    }
+
     // create lower bound (0) and step (1) for all dimensions
     Value cst0 = rewriter.create<arith::ConstantIndexOp>(loc, 0);
     Value cst1 = rewriter.create<arith::ConstantIndexOp>(loc, 1);
@@ -103,7 +115,12 @@ public:
 
     // op.getOperation()->getParentOfType<ModuleOp>().emitWarning();
 
-    rewriter.eraseOp(op);
+    if (op.getResults().size() > 0) {
+      rewriter.replaceOp(op, newresults);
+    }
+    else {
+      rewriter.eraseOp(op);
+    }
     return success();
   }
 };
