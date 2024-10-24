@@ -11,31 +11,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/InitLLVM.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/raw_ostream.h"
-
-#include "mlir/IR/DialectRegistry.h"
-#include "mlir/IR/Operation.h"
-#include "mlir/InitAllDialects.h"
-#include "mlir/InitAllTranslations.h"
-#include "mlir/Support/LogicalResult.h"
-#include "mlir/Support/FileUtilities.h"
-#include "mlir/Tools/mlir-translate/MlirTranslateMain.h"
-#include "mlir/Tools/mlir-translate/Translation.h"
-// #include "mlir/Parser/Parser.h"
-#include "mlir/Tools/ParseUtilities.h"
-#include "air/Dialect/AIR/AIRDialect.h"
-
-#include "VerifDialect.h"
-#include "VerifUtil.h"
-
-#include <cstdio>
 #include <iterator>
 #include <fstream>
 #include <iostream>
 #include "past/past.h"
 #include "past/pprint.h"
+
+#include "mlir/IR/BuiltinDialect.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
+#include "mlir/Dialect/MemRef/IR/MemRef.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Dialect/Async/IR/Async.h"
+#include "air/Dialect/AIR/AIRDialect.h"
+
+#include "mlir/Tools/mlir-translate/MlirTranslateMain.h"
+#include "mlir/Tools/mlir-translate/Translation.h"
+
+#include "VerifDialect.h"
+#include "VerifUtil.h"
 
 #define DEBUG_TYPE "verif-translate"
 
@@ -856,8 +850,6 @@ class PastTranslator {
 
 
 int main(int argc, char **argv) {
-
-  mlir::registerAllTranslations();
 
   mlir::TranslateFromMLIRRegistration withdescription(
       "translate-to-past", "todo",
