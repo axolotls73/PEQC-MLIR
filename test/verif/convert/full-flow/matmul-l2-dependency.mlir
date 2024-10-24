@@ -1,4 +1,6 @@
-//XFAIL: *
+// XFAIL: *
+// COM: not a priority to support scf.parallel returning a token right
+// COM: now, can return to this and par-token-iter later
 
 // COM: same as in ../examples/
 

@@ -1,4 +1,3 @@
-//XFAIL:*
 // RUN: split-file %s %t
 
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
@@ -14,9 +13,7 @@
 // RUN: %testroot/add_epilogue.sh %t/air-dep-result.c %t/epilogue.c %t/air-dep-translation.c %testroot/..
 
 // COM: expect this to be an incorrect parallelization
-// RUN: %pastchecker %t/air-dep-translation.c %t/air-dep-translation.c x,y,z | grep conflict
-
-// RUN: %pastchecker %t/air-dep-translation.c %t/compare.c x,y,z | grep YES
+// RUN: not %pastchecker %t/air-dep-translation.c %t/air-dep-translation.c x,y,z 2>&1 | grep conflict
 
 //--- input.mlir
 

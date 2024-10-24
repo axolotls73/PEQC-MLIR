@@ -4,7 +4,7 @@ int PAST_TASK_INIT = 0;
 int PAST_TASK_FINISHED = 1;
 
 int* __past_internal_semaphores;
-int max_nb_threads = 200;
+int max_nb_threads = 2000;
 void* __past_ai_global_nocheck_global_async_task_arguments;
 
 void __internal_initialize_semaphores() {

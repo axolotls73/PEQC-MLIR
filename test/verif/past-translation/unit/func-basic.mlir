@@ -1,14 +1,10 @@
 // RUN: split-file %s %t && \
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
-// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c && \
-// RUN: pastchecker %t/translation.c %t/translation.c
+// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
 
-// RUN: split-file %s %t && \
-// RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
-// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c && \
-// RUN: pastchecker %t/translation.c %t/compare.c
+// RUN: %pastchecker %t/translation.c %t/translation.c
 
-//XFAIL:*
+// RUN: %pastchecker %t/translation.c %t/compare.c
 
 //--- input.mlir
 
