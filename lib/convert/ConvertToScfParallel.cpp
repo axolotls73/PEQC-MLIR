@@ -6,16 +6,18 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "llvm/ADT/STLExtras.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Support/LogicalResult.h"
 
-#include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/Dialect/MemRef/IR/MemRef.h"
+#include "mlir/IR/BuiltinDialect.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
+#include "mlir/Dialect/MemRef/IR/MemRef.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/Async/IR/Async.h"
 #include "air/Dialect/AIR/AIRDialect.h"
-#include "llvm/ADT/STLExtras.h"
 
 #include "VerifPasses.h"
 #include "VerifDialect.h"
@@ -136,18 +138,23 @@ public:
       >(converter, context);
 
     ConversionTarget target(*context);
-
     target.addLegalDialect<
         func::FuncDialect,
         arith::ArithDialect,
         scf::SCFDialect,
         memref::MemRefDialect,
-        async::AsyncDialect
-        // ,
-        // mlir::BuiltinDialect
+        async::AsyncDialect,
+        xilinx::air::airDialect,
+        mlir::BuiltinDialect
       >();
 
-    auto res = applyPartialConversion(module, target, std::move(patterns));
+    target.addIllegalOp<
+        xilinx::air::LaunchOp,
+        xilinx::air::SegmentOp,
+        xilinx::air::HerdOp
+      >();
+
+    auto res = applyFullConversion(module, target, std::move(patterns));
     if (res.failed()) return signalPassFailure();
   }
 };

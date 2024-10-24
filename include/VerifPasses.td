@@ -29,6 +29,7 @@ def VerifAirToScfPar: Pass<"verif-air-to-scf-par", "::mlir::ModuleOp"> {
   let summary = "Convert air.laaunch, air.segment, and air.herd to scf.parallel";
   let description = [{
   }];
+  let dependentDialects = ["scf::SCFDialect"];
 }
 
 #endif // VERIF_PASS
