@@ -31,14 +31,93 @@ namespace mlir::verif {
 
 namespace {
 
+static void createScfPar(Operation& op, ConversionPatternRewriter& rewriter, IRMapping& mapper,
+      OperandRange sizes, Region::BlockArgListType bodyargs, OperandRange asyncdeps,
+      llvm::iterator_range<mlir::Region::OpIterator> opops) {
+  auto loc = op.getLoc();
+
+  // handle async
+  SmallVector<Value> newresults;
+  if (op.getResults().size() > 0) {
+    auto asyncExec = rewriter.create<async::ExecuteOp>(
+      loc, SmallVector<Type>{}, asyncdeps, SmallVector<Value>{},
+      [&](OpBuilder &b, Location loc, ValueRange v) {
+        b.create<async::YieldOp>(loc, SmallVector<Value>{});
+      });
+    newresults.push_back(asyncExec.getResult(0));
+    rewriter.setInsertionPointToStart(asyncExec.getBody());
+  }
+
+  // add scf.parallel
+  auto numsizes = sizes.size();
+  if (numsizes > 0) {
+
+    // create lower bound (0) and step (1) for all dimensions
+    Value cst0 = rewriter.create<arith::ConstantIndexOp>(loc, 0);
+    Value cst1 = rewriter.create<arith::ConstantIndexOp>(loc, 1);
+    SmallVector<Value> lb, step;
+    for (unsigned int i = 0; i < numsizes; i++) {
+      lb.push_back(cst0);
+      step.push_back(cst1);
+    }
+    auto parop = rewriter.create<scf::ParallelOp>(loc,
+        lb, sizes, step,
+        [&](OpBuilder& b, Location loc, ValueRange ivs) {
+
+          // map new iterators to corresponding block args
+          for (auto [argval, herdval] : llvm::zip_equal(
+              ivs, bodyargs.drop_back(bodyargs.size() - numsizes))) {
+            mapper.map(herdval, argval);
+          }
+
+          b.create<scf::ReduceOp>(loc);
+        });
+    rewriter.setInsertionPointToStart(parop.getBody());
+  }
+
+  for (auto &o : opops) {
+    if (isa<xilinx::air::HerdTerminatorOp,
+            xilinx::air::SegmentTerminatorOp,
+            xilinx::air::LaunchTerminatorOp>(o)) continue;
+
+    rewriter.clone(o, mapper);
+  }
+
+  if (op.getResults().size() > 0) {
+    rewriter.replaceOp(&op, newresults);
+  }
+  else {
+    rewriter.eraseOp(&op);
+  }
+}
+
 class VerifLaunchPattern : public OpConversionPattern<xilinx::air::LaunchOp> {
 public:
   using OpConversionPattern<xilinx::air::LaunchOp>::OpConversionPattern;
 
   LogicalResult matchAndRewrite(xilinx::air::LaunchOp op, OpAdaptor adaptor,
                                 ConversionPatternRewriter &rewriter) const final {
-    //
-    return failure();
+
+    // make var map
+    IRMapping mapper;
+    auto numsizes = op.getSizes().size();
+    SmallVector<Value> argvals;
+    // order: iter vals, sizes, op operands
+    for (auto s : op.getSizes()) {
+      argvals.push_back(s);
+    }
+    for (auto o : op.getLaunchOperands()) {
+      argvals.push_back(o);
+    }
+    // map block operands except iter vals
+    for (auto [argval, mapval] : llvm::zip_equal(
+        argvals, op.getBodyRegion().getArguments().drop_front(numsizes))) {
+      mapper.map(mapval, argval);
+    }
+
+    createScfPar(*op.getOperation(), rewriter, mapper,
+        op.getSizes(), op.getBodyRegion().getArguments(), op.getAsyncDependencies(), op.getOps());
+    return success();
   }
 };
 
@@ -226,7 +305,7 @@ public:
 
     mlir::RewritePatternSet patterns(context);
     patterns.add<
-        // VerifLaunchPattern,
+        VerifLaunchPattern,
         VerifSegmentPattern,
         VerifHerdPattern
       >(converter, context);
@@ -243,7 +322,7 @@ public:
       >();
 
     target.addIllegalOp<
-        // xilinx::air::LaunchOp,
+        xilinx::air::LaunchOp,
         xilinx::air::SegmentOp,
         xilinx::air::HerdOp
       >();
