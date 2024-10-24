@@ -1,5 +1,7 @@
 //XFAIL: *
 
+// COM: same as in ../examples/
+
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-air-execute-to-async --verif-scf-parallel-to-async %t/input.mlir > %t/conversion.mlir 2> %t/STDERR.txt
 
