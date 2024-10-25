@@ -40,8 +40,11 @@ namespace verif {
 
 class PastTranslator {
 
+  private:
+
   //options
   bool declare_variables = true;
+  bool all_arrays_global = true;
 
   symbol_table_t* symbolTable = symbol_table_malloc();
   std::unordered_map<Value, std::string> valueNames;
@@ -55,6 +58,7 @@ class PastTranslator {
 
   std::unordered_map<Value, s_symbol_t*> asyncGroupIndex;
 
+  std::vector<s_past_node_t*> newGlobalDecls;
   std::vector<s_past_node_t*> newFunctionDecls;
 
   // if value is declared in block, add this statement to the end of the block.
@@ -93,16 +97,33 @@ class PastTranslator {
   }
 
   s_past_node_t* getVarDecl(s_symbol_t* type, s_symbol_t* var) {
+    return past_node_vardecl_create(
+      past_node_varref_create(type),
+      past_node_varref_create(var));
+  }
+
+  s_past_node_t* declareVar(s_symbol_t* type, s_symbol_t* var) {
+    auto isarray = [](char* s) {
+      return s[strlen(s) - 1] == '*';
+    };
+    if (all_arrays_global && isarray(type->name_str)) {
+      newGlobalDecls.push_back(
+        past_node_statement_create(
+          getVarDecl(type, var)
+      ));
+      return past_node_varref_create(var);
+    }
     if (declare_variables)
-      return past_node_vardecl_create(
-        past_node_varref_create(type),
-        past_node_varref_create(var)
-      );
+      return getVarDecl(type, var);
     else return past_node_varref_create(var);
   }
 
   s_past_node_t* getVarDecl(Value val, std::string name = "var") {
     return getVarDecl(getTypeSymbol(val.getType()), getVarSymbol(val, name));
+  }
+
+  s_past_node_t* declareVar(Value val, std::string name = "var") {
+    return declareVar(getTypeSymbol(val.getType()), getVarSymbol(val, name));
   }
 
   s_symbol_t* getTypeSymbol(const Type& t) {
@@ -375,8 +396,9 @@ class PastTranslator {
       body = past_node_block_create(body);
     }
 
-    // prepend new functions generated
-    s_past_node_t* moduleStart = nodeChain(newFunctionDecls);
+    // prepend new functions and globals generated
+    newGlobalDecls.insert(newGlobalDecls.end(), newFunctionDecls.begin(), newFunctionDecls.end());
+    s_past_node_t* moduleStart = nodeChain(newGlobalDecls);
     s_past_node_t* moduleEnd = getNodeListEnd(moduleStart);
 
     if (moduleEnd) moduleEnd->next = body;
@@ -523,7 +545,7 @@ class PastTranslator {
       stmts.push_back(
         past_node_statement_create(
           past_node_binary_create(past_assign,
-            getVarDecl(iv, "for_iter_arg"),
+            declareVar(iv, "for_iter_arg"),
             past_node_varref_create(getVarSymbol(init)))));
       // map to corresponding result
       getAndMapSymbol(iv, res);
@@ -531,7 +553,7 @@ class PastTranslator {
 
     stmts.push_back(past_node_for_create(
       past_node_binary_create(past_assign,
-        getVarDecl(getTypeSymbol(op.getInductionVar().getType()), iterator),
+        declareVar(getTypeSymbol(op.getInductionVar().getType()), iterator),
         past_node_varref_create(getVarSymbol(op.getLowerBound()))
       ),
       past_node_binary_create(past_lt,
@@ -571,7 +593,7 @@ class PastTranslator {
   // memref
 
   s_past_node_t* translate(memref::AllocOp op) {
-    return past_node_statement_create(getVarDecl(op.getResult(), "memref_alloc"));
+    return past_node_statement_create(declareVar(op.getResult(), "memref_alloc"));
   }
 
   ///TODO: check for use-after-free bugs?
@@ -582,7 +604,7 @@ class PastTranslator {
   s_past_node_t* translate(memref::LoadOp op) {
     return past_node_statement_create(
       past_node_binary_create(past_assign,
-        getVarDecl(op.getResult(), "memref_load"),
+        declareVar(op.getResult(), "memref_load"),
         getArrayAccess(op.getMemRef(), op.getIndices())));
   }
 
@@ -631,7 +653,7 @@ class PastTranslator {
     // declare new var for subview
     stmts.push_back(
       past_node_statement_create(
-        getVarDecl(op.getResult(), "subview")));
+        declareVar(op.getResult(), "subview")));
 
     // copy to subview var
     std::vector<s_past_node_t*> src_offsets;
@@ -676,7 +698,7 @@ class PastTranslator {
     asyncGroupIndex[op.getResult()] = groupIndex;
     stmts.push_back(past_node_statement_create(
       past_node_binary_create(past_assign,
-        getVarDecl(getSymbol("int"), groupIndex),
+        declareVar(getSymbol("int"), groupIndex),
         past_node_value_create_from_int(0))));
     return nodeChain(stmts);
   }
@@ -751,8 +773,13 @@ class PastTranslator {
     std::vector<s_past_node_t*> stmts;
     for(Block& block : region.getBlocks()) {
       for (Operation& op : block.getOperations()) {
-        if (auto stmt = translate(&op))
+        if (auto stmt = translate(&op)) {
+          // work around a parser rule not being implemented
+          // if (past_node_is_a(stmt, past_statement) &&
+          //     past_node_is_a(PAST_NODE_AS(stmt, statement)->body, past_varref))
+          //   continue;
           stmts.push_back(stmt);
+        }
       }
 
       // if value in blockAddAtEnd is declared in block,
@@ -815,7 +842,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<async::YieldOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<UnrealizedConversionCastOp>(op)) res = translate(o);
     else {
-      op->emitError("unknown operation");
+      op->emitError("verif-translate: unknown operation");
       exit(1);
     }
     return res;

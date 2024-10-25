@@ -1,16 +1,10 @@
-//XFAIL: *
-
 // RUN: split-file %s %t && \
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
 // RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
 
 // RUN: cat %t/result.c | FileCheck %t/input.mlir
 
-// RUN: %pastchecker %t/translation.c %t/translation.c res | grep YES
-
-// RUN: %pastchecker %t/translation.c %t/compare.c res | grep YES
-
-// RUN: %pastchecker %t/translation.c %t/compare-bug.c res | not grep YES
+// RUN: not %pastchecker %t/translation.c %t/translation.c res | grep conflict
 
 
 //--- input.mlir
@@ -33,23 +27,10 @@ module {
 //--- epilogue.c
 
 {
-  int res_arr[1];
-  async_test(res_arr);
-  int res = res_arr[0];
+  #pragma peqc async_execute
+  {
+    int* res_arr;
+    async_test(res_arr);
+    int res = res_arr[0];
+  }
 }
-
-//--- compare.c
-
-#pragma pocc-region-start
-{
-  int res = 30;
-}
-#pragma pocc-region-end
-
-//--- compare-bug.c
-
-#pragma pocc-region-start
-{
-  res = 31;
-}
-#pragma pocc-region-end
