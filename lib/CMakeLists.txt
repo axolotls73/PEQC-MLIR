@@ -2,6 +2,9 @@ add_mlir_dialect_library(MLIRVerif
         VerifTypes.cpp
         VerifDialect.cpp
         VerifOps.cpp
+        convert/ConvertToAsync.cpp
+        convert/ConvertToScfParallel.cpp
+        convert/ConvertMem.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include/Verif
@@ -19,5 +22,3 @@ add_mlir_dialect_library(MLIRVerif
         LINK_LIBS PRIVATE
         AIRDialect
         )
-
-add_subdirectory(convert)

@@ -213,8 +213,6 @@ public:
   LogicalResult
   matchAndRewrite(xilinx::air::WaitAllOp op, OpAdaptor adaptor,
                   ConversionPatternRewriter &rewriter) const final {
-    auto loc = op.getLoc();
-
     auto asyncExec = rewriter.create<async::ExecuteOp>(
         op->getLoc(), SmallVector<Type>{}, adaptor.getAsyncDependencies(), SmallVector<Value>{},
         [&](OpBuilder &b, Location loc, ValueRange v) {

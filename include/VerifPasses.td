@@ -32,4 +32,11 @@ def VerifAirToScfPar: Pass<"verif-air-to-scf-par", "::mlir::ModuleOp"> {
   let dependentDialects = ["scf::SCFDialect", "async::AsyncDialect"];
 }
 
+def VerifDmaToMemref: Pass<"verif-dma-to-memref", "::mlir::ModuleOp"> {
+  let summary = "Convert air.laaunch, air.segment, and air.herd to scf.parallel";
+  let description = [{
+  }];
+  let dependentDialects = ["memref::MemRefDialect", "async::AsyncDialect"];
+}
+
 #endif // VERIF_PASS
