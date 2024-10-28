@@ -49,6 +49,18 @@ public:
       return failure();
     }
 
+    // handle async
+    SmallVector<Value> newresults;
+    if (op.getResults().size() > 0) {
+      auto asyncExec = rewriter.create<async::ExecuteOp>(
+        loc, SmallVector<Type>{}, op.getAsyncDependencies(), SmallVector<Value>{},
+        [&](OpBuilder &b, Location loc, ValueRange v) {
+          b.create<async::YieldOp>(loc, SmallVector<Value>{});
+        });
+      newresults.push_back(asyncExec.getResult(0));
+      rewriter.setInsertionPointToStart(asyncExec.getBody());
+    }
+
     // get subview if offsets etc are present
     auto createSubview =
         [&](TypedValue<MemRefType> val, OperandRange offsets, OperandRange sizes, OperandRange strides) {
@@ -64,8 +76,13 @@ public:
     dst = createSubview(dst, op.getDstOffsets(), op.getDstSizes(), op.getDstStrides());
 
     rewriter.create<memref::CopyOp>(loc, src, dst);
-    rewriter.eraseOp(op);
 
+    if (!op.getResults().empty()) {
+      rewriter.replaceOp(op, newresults);
+    }
+    else {
+      rewriter.eraseOp(op);
+    }
     return success();
   }
 };
@@ -79,10 +96,29 @@ public:
     auto module = getOperation();
     auto context = module.getContext();
 
+    TypeConverter converter;
+    converter.addConversion([&](Type type) -> std::optional<Type> {
+      // convert air::AsyncTokenType to async::TokenType
+      if (auto t = type.dyn_cast<xilinx::air::AsyncTokenType>())
+        return async::TokenType::get(context);
+      if (auto t = type.dyn_cast<MemRefType>())
+        if (t.getMemorySpaceAsInt() != 0)
+          return MemRefType::get(t.getShape(), t.getElementType(),
+                                 t.getLayout(), 0);
+      return type;
+    });
+    auto addUnrealizedCast = [](OpBuilder &builder, Type type,
+                                ValueRange inputs, Location loc) {
+      auto cast = builder.create<UnrealizedConversionCastOp>(loc, type, inputs);
+      return std::optional<Value>(cast.getResult(0));
+    };
+    converter.addSourceMaterialization(addUnrealizedCast);
+    converter.addTargetMaterialization(addUnrealizedCast);
+
     mlir::RewritePatternSet patterns(context);
     patterns.add<
         VerifDMAPattern
-      >(context);
+      >(converter, context);
 
     ConversionTarget target(*context);
     target.addLegalDialect<
