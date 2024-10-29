@@ -674,6 +674,18 @@ class PastTranslator {
         getVarSymbol(op.getSource()), getVarSymbol(op.getResult()),
         src_offsets, dst_offsets, sizes));
 
+    // only copy back if the subview was written to to avoid
+    // false conflicts
+    bool written = false;
+    for (auto o : op.getResult().getUsers()) {
+      if (isa<memref::StoreOp>(o) ||
+          (isa<memref::CopyOp>(o) && dyn_cast<memref::CopyOp>(o).getTarget() == op.getResult())) {
+        written = true;
+        break;
+      }
+    }
+    if (!written) return nodeChain(stmts);
+
     nodeListClone(src_offsets);
     nodeListClone(dst_offsets);
     nodeListClone(sizes);
