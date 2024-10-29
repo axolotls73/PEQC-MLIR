@@ -14,6 +14,7 @@
 #include <iterator>
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include "past/past.h"
 #include "past/pprint.h"
 
@@ -44,7 +45,8 @@ class PastTranslator {
 
   //options
   bool declare_variables = true;
-  bool all_arrays_global = true;
+  bool all_arrays_global = false;
+  bool allow_unsupported_ops = true;
 
   symbol_table_t* symbolTable = symbol_table_malloc();
   std::unordered_map<Value, std::string> valueNames;
@@ -813,6 +815,36 @@ class PastTranslator {
     return nodeChain(stmts);
   }
 
+  s_past_node_t* translate_unsupported(Operation* op) {
+    assert(op);
+
+    // print op: use generic form to make it easy to find region
+    std::string s;
+    llvm::raw_string_ostream stream(s);
+    op->print(stream, OpPrintingFlags().printGenericOpForm());
+
+    // remove op's region, which will be translated separately
+    std::regex region(R"(\(\{(.|\n)*\}\))", std::regex::multiline);
+    s = std::regex_replace(s, region, "");
+    std::regex quote(R"(")");
+    s = std::regex_replace(s, quote, "");
+
+    ///TODO: figure out how strings work...
+    s = "\"" + s + "\"";
+    char* str = (char*)malloc(s.size() * sizeof(char));
+    strcpy(str, s.c_str());
+
+    std::vector<s_past_node_t*> nodes;
+    nodes.push_back(past_node_statement_create(
+      past_node_varref_create(getSymbol(str))));
+
+    for (auto &r : op->getRegions()) {
+      nodes.push_back(past_node_block_create(
+        translate(r)));
+    }
+    return nodeChain(nodes);
+  }
+
   public:
 
   s_past_node_t* translate(Operation* op) {
@@ -842,8 +874,12 @@ class PastTranslator {
     else if (auto o = dyn_cast<async::YieldOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<UnrealizedConversionCastOp>(op)) res = translate(o);
     else {
-      op->emitError("verif-translate: unknown operation");
-      exit(1);
+      if (!allow_unsupported_ops) {
+        op->emitError("verif-translate: unknown operation");
+        exit(1);
+      }
+
+      res = translate_unsupported(op);
     }
     return res;
   }
