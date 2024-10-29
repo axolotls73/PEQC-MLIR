@@ -36,13 +36,26 @@ void _past_array_copy_1d
   }
 }
 
+// void _past_array_copy_2d
+//                         (int** src, int sof1, int sof2, int sstr1, int sstr2,
+//                         int** dst, int dof1, int dof2, int dstr1, int dstr2,
+//                         int N1, int N2) {
+//   for (int i = 0; i < N1; i++) {
+//     for (int j = 0; j < N2; j++) {
+//       dst[i * dstr1 + dof1][j * dstr2 + dof2] = src[i * sstr1 + sof1][j * sstr2 + sof2];
+//     }
+//   }
+// }
+
 void _past_array_copy_2d
-                        (int** src, int sof1, int sof2, int sstr1, int sstr2,
-                        int** dst, int dof1, int dof2, int dstr1, int dstr2,
-                        int N1, int N2) {
-  for (int i = 0; i < N1; i++) {
-    for (int j = 0; j < N2; j++) {
-      dst[i * dstr1 + dof1][j * dstr2 + dof2] = src[i * sstr1 + sof1][j * sstr2 + sof2];
+                        (int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2,
+                        int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2,
+                        int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2) {
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i++) {
+    for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j++) {
+      // _past_ai_api_print(dsti, __past_ai_global_nocheck_i);
+      // _past_ai_api_print(dstj, __past_ai_global_nocheck_j);
+      __past_ai_global_nocheck_dst[__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1 + __past_ai_global_nocheck_dof1][__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2 + __past_ai_global_nocheck_dof2] = __past_ai_global_nocheck_src[__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1 + __past_ai_global_nocheck_sof1][__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2 + __past_ai_global_nocheck_sof2];
     }
   }
 }
