@@ -280,6 +280,7 @@ class PastTranslator {
 
   s_past_node_t* getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
         std::vector<s_past_node_t*> src_offsets, std::vector<s_past_node_t*> dst_offsets,
+        std::vector<s_past_node_t*> src_strides, std::vector<s_past_node_t*> dst_strides,
         std::vector<s_past_node_t*> sizes) {
     assert(src_offsets.size() == dst_offsets.size() &&
            src_offsets.size() == sizes.size() &&
@@ -291,17 +292,15 @@ class PastTranslator {
     for (auto offs : src_offsets) {
       args.push_back(offs);
     }
-    // strides: all 1
-    for (int i = 0; i < src_offsets.size(); i++) {
-      args.push_back(past_node_value_create_from_int(1));
+    for (auto str : src_strides) {
+      args.push_back(str);
     }
     args.push_back(past_node_varref_create(dst));
     for (auto offs : dst_offsets) {
       args.push_back(offs);
     }
-    // strides: all 1
-    for (int i = 0; i < dst_offsets.size(); i++) {
-      args.push_back(past_node_value_create_from_int(1));
+    for (auto str : dst_strides) {
+      args.push_back(str);
     }
     for (auto size : sizes) {
       args.push_back(size);
@@ -311,6 +310,17 @@ class PastTranslator {
       past_node_funcall_create(
         past_node_varref_create(getSymbol("_past_array_copy_" + std::to_string(numdims) + "d")),
         nodeChain(args)));
+  }
+
+  s_past_node_t* getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
+      std::vector<s_past_node_t*> src_offsets, std::vector<s_past_node_t*> dst_offsets,
+      std::vector<s_past_node_t*> sizes) {
+    std::vector<s_past_node_t*> src_strides, dst_strides;
+    for (int i = 0; i < src_offsets.size(); i++) {
+      src_strides.push_back(past_node_value_create_from_int(1));
+      dst_strides.push_back(past_node_value_create_from_int(1));
+    }
+    return getArrayCopy(src, dst, src_offsets, dst_offsets, src_strides, dst_strides, sizes);
   }
 
   // macro call: COPY_[N]D(src, 0, [size of dim 1], ... 0, [size of dim N], dst, 0, [size of dim 1], ... 0, [size of dim N])
@@ -643,15 +653,6 @@ class PastTranslator {
       }
     };
 
-    for (auto stride : op.getMixedStrides()) {
-      if (!stride.is<Attribute>() ||
-          !cast_or_null<IntegerAttr>(stride.get<Attribute>()) ||
-          cast<IntegerAttr>(stride.get<Attribute>()).getInt() != 1) {
-        op.emitError("memref.subview: only stride 1 supported");
-        exit(1);
-      }
-    }
-
     // declare new var for subview
     stmts.push_back(
       past_node_statement_create(
@@ -665,6 +666,12 @@ class PastTranslator {
       dst_offsets.push_back(past_node_value_create_from_int(0));
     }
 
+    std::vector<s_past_node_t*> src_strides, dst_strides;
+    for (auto str : op.getMixedStrides()) {
+      src_strides.push_back(getFoldResultNode(str));
+      dst_strides.push_back(past_node_value_create_from_int(1));
+    }
+
     std::vector<s_past_node_t*> sizes;
     for (auto size : op.getMixedSizes()) {
       sizes.push_back(getFoldResultNode(size));
@@ -672,7 +679,7 @@ class PastTranslator {
 
     stmts.push_back(getArrayCopy(
         getVarSymbol(op.getSource()), getVarSymbol(op.getResult()),
-        src_offsets, dst_offsets, sizes));
+        src_offsets, dst_offsets, src_strides, dst_strides, sizes));
 
     // only copy back if the subview was written to to avoid
     // false conflicts
