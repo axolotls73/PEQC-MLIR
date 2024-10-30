@@ -282,6 +282,7 @@ class PastTranslator {
         std::vector<s_past_node_t*> src_offsets, std::vector<s_past_node_t*> dst_offsets,
         std::vector<s_past_node_t*> src_strides, std::vector<s_past_node_t*> dst_strides,
         std::vector<s_past_node_t*> sizes) {
+    llvm::errs() << src_offsets.size() << " " << src_strides.size() << " " << sizes.size() << "\n";
     assert(src_offsets.size() == dst_offsets.size() &&
            src_offsets.size() == sizes.size() &&
            src_offsets.size() > 0);
@@ -695,12 +696,14 @@ class PastTranslator {
 
     nodeListClone(src_offsets);
     nodeListClone(dst_offsets);
+    nodeListClone(src_strides);
+    nodeListClone(dst_strides);
     nodeListClone(sizes);
 
     // add to end of block: copy back from subview
     auto copyback = getArrayCopy(
         getVarSymbol(op.getResult()), getVarSymbol(op.getSource()),
-        dst_offsets, src_offsets, sizes);
+        dst_offsets, src_offsets, dst_strides, src_strides, sizes);
     blockAddAtEnd[op.getResult()] = copyback;
 
     return nodeChain(stmts);
@@ -784,6 +787,9 @@ class PastTranslator {
 
 ///TODO: workaround!!
   s_past_node_t* translate(UnrealizedConversionCastOp op) {
+    LLVM_DEBUG(
+      llvm::errs() << "unrealized cc: " << op << "\n";
+    );
     getAndMapSymbol(op.getOperand(0), op.getResult(0));
     return nullptr;
   }
@@ -841,26 +847,44 @@ class PastTranslator {
     std::string s;
     llvm::raw_string_ostream stream(s);
     op->print(stream, OpPrintingFlags().printGenericOpForm());
+    LLVM_DEBUG (
+      llvm::errs() << "unsupported op: " << s << "\n";
+    );
 
     // remove op's region, which will be translated separately
-    std::regex region(R"(\(\{(.|\n)*\}\))", std::regex::multiline);
-    s = std::regex_replace(s, region, "");
+    auto first = s.find("({");
+    if (first != std::string::npos) {
+      auto last = s.rfind("})");
+      assert(last != std::string::npos);
+      s.erase(first, last);
+    }
+    // overflows, thank you c++
+    // std::regex region(R"(\(\{(.|\n)*\}\))", std::regex::multiline);
+    // s = std::regex_replace(s, region, "");
     std::regex quote(R"(")");
     s = std::regex_replace(s, quote, "");
 
     ///TODO: figure out how strings work...
     s = "\"" + s + "\"";
-    char* str = (char*)malloc(s.size() * sizeof(char));
+    char* str = (char*)malloc((s.size() + 1) * sizeof(char));
     strcpy(str, s.c_str());
 
     std::vector<s_past_node_t*> nodes;
+    // declare results of operation so future uses are ok
+    for (auto res : op->getResults()) {
+      nodes.push_back(past_node_statement_create(
+        past_node_varref_create(getVarSymbol(res))));
+    }
+
     nodes.push_back(past_node_statement_create(
       past_node_varref_create(getSymbol(str))));
-
     for (auto &r : op->getRegions()) {
       nodes.push_back(past_node_block_create(
         translate(r)));
     }
+    LLVM_DEBUG (
+      llvm::errs() << "unsupported op done\n";
+    );
     return nodeChain(nodes);
   }
 
