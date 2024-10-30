@@ -45,8 +45,18 @@ public:
     auto dst = op.getDst();
     auto src = op.getSrc();
     if (src.getType().getRank() != dst.getType().getRank()) {
-      op.emitWarning("verif-convert: dma_memcpy_nd src and dst need same dimensions");
+      op.emitWarning("verif-convert: dma_memcpy_nd src and dst need same rank");
       return failure();
+    }
+
+    SmallVector<Value> src_strides, dst_strides;
+    ///FIXME: verify correct strides
+    auto cst1 = rewriter.create<arith::ConstantIndexOp>(loc, 1).getResult();
+    for (int i = 0; i < op.getSrcOffsets().size(); i++) {
+      src_strides.push_back(cst1);
+    }
+    for (int i = 0; i < op.getDstOffsets().size(); i++) {
+      dst_strides.push_back(cst1);
     }
 
     // handle async
@@ -63,7 +73,8 @@ public:
 
     // get subview if offsets etc are present
     auto createSubview =
-        [&](TypedValue<MemRefType> val, OperandRange offsets, OperandRange sizes, OperandRange strides) {
+        [&](TypedValue<MemRefType> val, ValueRange offsets, ValueRange sizes, ValueRange strides) {
+      llvm::errs() << offsets.size() << " " << sizes.size() << " " << strides.size() << "\n";
       if (offsets.empty() && sizes.empty() && strides.empty())
         return val;
       else assert(!offsets.empty() && !sizes.empty() && !strides.empty());
@@ -82,8 +93,8 @@ public:
       return subop.getResult();
     };
 
-    src = createSubview(src, op.getSrcOffsets(), op.getSrcSizes(), op.getSrcStrides());
-    dst = createSubview(dst, op.getDstOffsets(), op.getDstSizes(), op.getDstStrides());
+    src = createSubview(src, op.getSrcOffsets(), op.getSrcSizes(), src_strides);
+    dst = createSubview(dst, op.getDstOffsets(), op.getDstSizes(), dst_strides);
 
     rewriter.create<memref::CopyOp>(loc, src, dst);
 

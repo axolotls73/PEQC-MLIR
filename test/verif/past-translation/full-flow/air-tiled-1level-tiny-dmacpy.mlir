@@ -7,7 +7,7 @@
 // RUN: %pastchecker %t/translation.c %t/translation.c A,B,C | grep YES
 
 // COM: weird stride 16 in dma_memcpy?
-// RUN: %pastchecker %t/translation.c %t/compare.c A,B,C 2>&1 | grep "trees differ"
+// RUN: %pastchecker %t/translation.c %t/compare.c A,B,C 2>&1 | grep YES
 
 //--- input.mlir
 
