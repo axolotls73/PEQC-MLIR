@@ -66,9 +66,19 @@ public:
         [&](TypedValue<MemRefType> val, OperandRange offsets, OperandRange sizes, OperandRange strides) {
       if (offsets.empty() && sizes.empty() && strides.empty())
         return val;
+      else assert(!offsets.empty() && !sizes.empty() && !strides.empty());
+
+      auto getFoldRange = []
+            (ValueRange range) {
+        SmallVector<OpFoldResult> newrange;
+        for (Value val : range) {
+          newrange.push_back(getAsOpFoldResult(val));
+        }
+        return newrange;
+      };
 
       auto subop = rewriter.create<memref::SubViewOp>(loc,
-          val, offsets, sizes, strides);
+          val, getFoldRange(offsets), getFoldRange(sizes), getFoldRange(strides));
       return subop.getResult();
     };
 

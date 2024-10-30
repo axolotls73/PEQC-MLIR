@@ -21,10 +21,10 @@ module {
             %8 = builtin.unrealized_conversion_cast %alloc_1 : memref<4x8xi32, 1> to memref<4x8xi32>
             %alloc_2 = memref.alloc() : memref<8x4xi32, 1>
             %9 = builtin.unrealized_conversion_cast %alloc_2 : memref<8x4xi32, 1> to memref<8x4xi32>
-            %subview_3 = memref.subview %arg0[%5, %arg7] [%c4, %c8] [%c16, %c1] : memref<16x16xi32> to memref<?x?xi32, strided<[?, ?], offset: ?>>
-            memref.copy %subview_3, %alloc_1 : memref<?x?xi32, strided<[?, ?], offset: ?>> to memref<4x8xi32, 1>
-            %subview_4 = memref.subview %arg1[%arg7, %6] [%c8, %c4] [%c16, %c1] : memref<16x16xi32> to memref<?x?xi32, strided<[?, ?], offset: ?>>
-            memref.copy %subview_4, %alloc_2 : memref<?x?xi32, strided<[?, ?], offset: ?>> to memref<8x4xi32, 1>
+            %subview_3 = memref.subview %arg0[%5, %arg7] [4, 8] [16, 1] : memref<16x16xi32> to memref<4x8xi32, strided<[256, 1], offset: ?>>
+            memref.copy %subview_3, %alloc_1 : memref<4x8xi32, strided<[256, 1], offset: ?>> to memref<4x8xi32, 1>
+            %subview_4 = memref.subview %arg1[%arg7, %6] [8, 4] [16, 1] : memref<16x16xi32> to memref<8x4xi32, strided<[256, 1], offset: ?>>
+            memref.copy %subview_4, %alloc_2 : memref<8x4xi32, strided<[256, 1], offset: ?>> to memref<8x4xi32, 1>
             %10 = async.create_group %c4 : !async.group
             %11 = scf.for %arg8 = %c0 to %c2 step %c1 iter_args(%arg9 = %c0) -> (index) {
               %12 = scf.for %arg10 = %c0 to %c2 step %c1 iter_args(%arg11 = %arg9) -> (index) {
@@ -43,10 +43,10 @@ module {
                     %18 = builtin.unrealized_conversion_cast %alloc_8 : memref<2x2xi32, 2> to memref<2x2xi32>
                     %alloc_9 = memref.alloc() : memref<2x2xi32, 2>
                     %19 = builtin.unrealized_conversion_cast %alloc_9 : memref<2x2xi32, 2> to memref<2x2xi32>
-                    %subview_10 = memref.subview %alloc_1[%15, %arg12] [%c2, %c2] [%c8, %c1] : memref<4x8xi32, 1> to memref<?x?xi32, strided<[?, ?], offset: ?>, 1>
-                    memref.copy %subview_10, %alloc_8 : memref<?x?xi32, strided<[?, ?], offset: ?>, 1> to memref<2x2xi32, 2>
-                    %subview_11 = memref.subview %alloc_2[%arg12, %16] [%c2, %c2] [%c4, %c1] : memref<8x4xi32, 1> to memref<?x?xi32, strided<[?, ?], offset: ?>, 1>
-                    memref.copy %subview_11, %alloc_9 : memref<?x?xi32, strided<[?, ?], offset: ?>, 1> to memref<2x2xi32, 2>
+                    %subview_10 = memref.subview %alloc_1[%15, %arg12] [2, 2] [8, 1] : memref<4x8xi32, 1> to memref<2x2xi32, strided<[64, 1], offset: ?>, 1>
+                    memref.copy %subview_10, %alloc_8 : memref<2x2xi32, strided<[64, 1], offset: ?>, 1> to memref<2x2xi32, 2>
+                    %subview_11 = memref.subview %alloc_2[%arg12, %16] [2, 2] [4, 1] : memref<8x4xi32, 1> to memref<2x2xi32, strided<[16, 1], offset: ?>, 1>
+                    memref.copy %subview_11, %alloc_9 : memref<2x2xi32, strided<[16, 1], offset: ?>, 1> to memref<2x2xi32, 2>
                     scf.for %arg13 = %c0 to %c2 step %c1 {
                       scf.for %arg14 = %c0 to %c2 step %c1 {
                         scf.for %arg15 = %c0 to %c2 step %c1 {
@@ -62,8 +62,8 @@ module {
                     memref.dealloc %alloc_8 : memref<2x2xi32, 2>
                     memref.dealloc %alloc_9 : memref<2x2xi32, 2>
                   }
-                  %subview_7 = memref.subview %alloc_0[%15, %16] [%c2, %c2] [%c4, %c1] : memref<4x4xi32, 1> to memref<?x?xi32, strided<[?, ?], offset: ?>, 1>
-                  memref.copy %alloc_6, %subview_7 : memref<2x2xi32, 2> to memref<?x?xi32, strided<[?, ?], offset: ?>, 1>
+                  %subview_7 = memref.subview %alloc_0[%15, %16] [2, 2] [4, 1] : memref<4x4xi32, 1> to memref<2x2xi32, strided<[16, 1], offset: ?>, 1>
+                  memref.copy %alloc_6, %subview_7 : memref<2x2xi32, 2> to memref<2x2xi32, strided<[16, 1], offset: ?>, 1>
                   memref.dealloc %alloc_6 : memref<2x2xi32, 2>
                   async.yield
                 }
@@ -77,8 +77,8 @@ module {
             memref.dealloc %alloc_1 : memref<4x8xi32, 1>
             memref.dealloc %alloc_2 : memref<8x4xi32, 1>
           }
-          %subview = memref.subview %alloc[%5, %6] [%c4, %c4] [%c16, %c1] : memref<16x16xi32> to memref<?x?xi32, strided<[?, ?], offset: ?>>
-          memref.copy %alloc_0, %subview : memref<4x4xi32, 1> to memref<?x?xi32, strided<[?, ?], offset: ?>>
+          %subview = memref.subview %alloc[%5, %6] [4, 4] [16, 1] : memref<16x16xi32> to memref<4x4xi32, strided<[256, 1], offset: ?>>
+          memref.copy %alloc_0, %subview : memref<4x4xi32, 1> to memref<4x4xi32, strided<[256, 1], offset: ?>>
           memref.dealloc %alloc_0 : memref<4x4xi32, 1>
           async.yield
         }
