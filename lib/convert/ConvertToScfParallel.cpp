@@ -24,7 +24,7 @@ namespace mlir::verif {
 namespace {
 
 static void createScfPar(Operation& op, ConversionPatternRewriter& rewriter, IRMapping& mapper,
-      OperandRange sizes, Region::BlockArgListType bodyargs, OperandRange asyncdeps,
+      ValueRange sizes, Region::BlockArgListType bodyargs, ValueRange asyncdeps,
       llvm::iterator_range<mlir::Region::OpIterator> opops) {
   auto loc = op.getLoc();
 
@@ -108,7 +108,7 @@ public:
     }
 
     createScfPar(*op.getOperation(), rewriter, mapper,
-        op.getSizes(), op.getBodyRegion().getArguments(), op.getAsyncDependencies(), op.getOps());
+        op.getSizes(), op.getBodyRegion().getArguments(), adaptor.getAsyncDependencies(), op.getOps());
     return success();
   }
 };
@@ -137,7 +137,7 @@ public:
     }
 
     createScfPar(*op.getOperation(), rewriter, mapper,
-        op.getSizes(), op.getBodyRegion().getArguments(), op.getAsyncDependencies(), op.getOps());
+        op.getSizes(), op.getBodyRegion().getArguments(), adaptor.getAsyncDependencies(), op.getOps());
     return success();
   }
 };
@@ -166,7 +166,7 @@ public:
     }
 
     createScfPar(*op.getOperation(), rewriter, mapper,
-        op.getSizes(), op.getBodyRegion().getArguments(), op.getAsyncDependencies(), op.getOps());
+        op.getSizes(), op.getBodyRegion().getArguments(), adaptor.getAsyncDependencies(), op.getOps());
     return success();
   }
 };
