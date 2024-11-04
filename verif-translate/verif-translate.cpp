@@ -538,6 +538,12 @@ class PastTranslator {
   s_past_node_t* translate(arith::DivFOp& op) {
     return translateArithBinop("arith_divf", past_div, op.getResult(), op.getLhs(), op.getRhs());
   }
+  s_past_node_t* translate(arith::MaxSIOp& op) {
+    return translateArithBinop("arith_maxsi", past_max, op.getResult(), op.getLhs(), op.getRhs());
+  }
+  s_past_node_t* translate(arith::MinSIOp& op) {
+    return translateArithBinop("arith_minsi", past_min, op.getResult(), op.getLhs(), op.getRhs());
+  }
 
   // scf
 
@@ -902,6 +908,8 @@ class PastTranslator {
     else if (auto o = dyn_cast<arith::MulIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MulFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::MaxSIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::MinSIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
