@@ -638,7 +638,7 @@ class PastTranslator {
 
     return past_node_statement_create(
       past_node_binary_create(past_assign,
-        past_node_varref_create(getVarSymbol(op.getResult())),
+        declareVar(op.getResult(), "arith_cmpi"),
         past_node_ternary_cond_create(
           cond,
           past_node_value_create_from_int(1),
