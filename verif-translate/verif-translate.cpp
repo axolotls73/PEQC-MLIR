@@ -699,22 +699,47 @@ class PastTranslator {
       return nodeChain(stmts);
   }
 
-  // set loop-carried vars equal to yield operands
+  s_past_node_t* translate(scf::IfOp op) {
+    assert(op.getResults().empty());
+    std::vector<s_past_node_t*> nodes;
+    for (Value res : op.getResults()) {
+      nodes.push_back(past_node_statement_create(
+        declareVar(res, "scf_if")));
+    }
+
+    nodes.push_back(past_node_if_create(
+      past_node_varref_create(getVarSymbol(op.getCondition())),
+      translate(op.getThenRegion()),
+      translate(op.getElseRegion())));
+    return nodeChain(nodes);
+  }
+
   s_past_node_t* translate(scf::YieldOp op) {
     if (op.getOperands().size() == 0)
       return nullptr;
 
     std::vector<s_past_node_t*> stmts;
-    auto loop = dyn_cast<scf::ForOp>(op.getOperation()->getParentOp());
-    assert(loop && (loop.getRegionIterArgs().size() == op.getResults().size()));
-    auto resIter = op.getResults().begin();
-    for (auto iv : loop.getRegionIterArgs()) {
-      Value res = *resIter++;
-      stmts.push_back(
-        past_node_statement_create(
-          past_node_binary_create(past_assign,
-            past_node_varref_create(getVarSymbol(iv)),
-            past_node_varref_create(getVarSymbol(res)))));
+
+    // handle scf.for:
+    // set loop-carried vars equal to yield operands
+    if (auto loop = dyn_cast<scf::ForOp>(op.getOperation()->getParentOp())) {
+      assert(loop && (loop.getRegionIterArgs().size() == op.getResults().size()));
+      auto resIter = op.getResults().begin();
+      for (auto iv : loop.getRegionIterArgs()) {
+        Value res = *resIter++;
+        stmts.push_back(
+          past_node_statement_create(
+            past_node_binary_create(past_assign,
+              past_node_varref_create(getVarSymbol(iv)),
+              past_node_varref_create(getVarSymbol(res)))));
+      }
+    }
+
+    // handle scf.if:
+    // if there are results, set result vars
+    else if (auto ifop = dyn_cast<scf::IfOp>(op.getOperation()->getParentOp())) {
+      if (op.getResults().empty()) return nullptr;
+      assert(0);
     }
     return nodeChain(stmts);
   }
@@ -1028,6 +1053,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::SelectOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<scf::IfOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::DeallocOp>(op)) res = translate(o);
