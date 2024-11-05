@@ -577,6 +577,46 @@ class PastTranslator {
     return translateArithBinop("arith_minsi", past_min, op.getResult(), op.getLhs(), op.getRhs());
   }
 
+  s_past_node_t* translate(arith::CmpIOp& op) {
+    arith::CmpIPredicate pred = op.getPredicate();
+    cs_past_node_type_t* cmptype = nullptr;
+    switch (pred) {
+      case arith::CmpIPredicate::eq:
+        cmptype = past_equal;
+        break;
+      case arith::CmpIPredicate::ne:
+        cmptype = past_notequal;
+        break;
+
+      case arith::CmpIPredicate::slt:
+      case arith::CmpIPredicate::ult:
+        cmptype = past_lt;
+        break;
+      case arith::CmpIPredicate::sle:
+      case arith::CmpIPredicate::ule:
+        cmptype = past_leq;
+        break;
+
+      case arith::CmpIPredicate::sgt:
+      case arith::CmpIPredicate::ugt:
+        cmptype = past_gt;
+        break;
+      case arith::CmpIPredicate::sge:
+      case arith::CmpIPredicate::uge:
+        cmptype = past_geq;
+        break;
+    }
+
+    s_past_node_t* cond = past_node_binary_create(cmptype,
+        past_node_varref_create(getVarSymbol(op.getLhs())),
+        past_node_varref_create(getVarSymbol(op.getRhs())));
+
+    return past_node_ternary_cond_create(
+      cond,
+      past_node_value_create_from_int(1),
+      past_node_value_create_from_int(0));
+  }
+
   // scf
 
   s_past_node_t* translate(scf::ForOp op) {
@@ -943,6 +983,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MaxSIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MinSIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);

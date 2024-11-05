@@ -15,4 +15,17 @@ module {
     %5 = arith.constant 5.000000e+00 : f64
 // CHECK: float {{.*}} = 5.0
     %6 = arith.constant 5.000000e+00 : f32
+// CHECK: [[A]] < [[B]] ? 1 : 0
+    %7 = arith.cmpi slt, %a, %b : i32
+// CHECK: [[A]] <= [[B]] ? 1 : 0
+    %8 = arith.cmpi sle, %a, %b : i32
+// CHECK: [[A]] > [[B]] ? 1 : 0
+    %9 = arith.cmpi sgt, %a, %b : i32
+// CHECK: [[A]] >= [[B]] ? 1 : 0
+    %10 = arith.cmpi sge, %a, %b : i32
+// CHECK: [[A]] != [[B]] ? 1 : 0
+    %11 = arith.cmpi ne, %a, %b : i32
+// CHECK: [[A]] == [[B]] ? 1 : 0
+    %12 = arith.cmpi eq, %a, %b : i32
+
 }
