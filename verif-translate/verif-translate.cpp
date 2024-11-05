@@ -648,7 +648,7 @@ class PastTranslator {
   s_past_node_t* translate(arith::SelectOp op) {
     return past_node_statement_create(
       past_node_binary_create(past_assign,
-        past_node_varref_create(getVarSymbol(op.getResult())),
+        declareVar(op.getResult(), "arith_select"),
         past_node_ternary_cond_create(
           // cond is already bool-like here, so don't need if == 1/== 0
           past_node_varref_create(getVarSymbol(op.getCondition())),
