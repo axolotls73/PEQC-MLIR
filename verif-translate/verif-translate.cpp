@@ -46,7 +46,7 @@ class PastTranslator {
   //options
   bool declare_variables = true;
   bool all_arrays_global = false;
-  bool allow_unsupported_ops = true;
+  bool allow_unsupported_ops = false;
 
   symbol_table_t* symbolTable = symbol_table_malloc();
   std::unordered_map<Value, std::string> valueNames;
@@ -169,16 +169,19 @@ class PastTranslator {
       std::string ret = "";
       switch (it.getWidth()) {
         case 32:
+          ret += "float";
+          break;
+        case 64:
+          ret += "double";
           break;
       }
-      ret += "float";
       return ret;
     }
 
     ///TODO: change to use node type
     else if (auto tm = dyn_cast<MemRefType>(t)) {
       std::string ret = getTypeName(tm.getElementType());
-      assert(tm.getNumDynamicDims() == 0);
+      // assert(tm.getNumDynamicDims() == 0);
       // for (int i = 0; i < tm.getRank(); i++) {
       //   ret += "*";
       // }
@@ -201,13 +204,28 @@ class PastTranslator {
     // llvm::errs() << "  " << t.getIntOrFloatBitWidth() << "\n";
     if (t.isIndex()) return e_past_value_int;
 
-    if (t.isInteger() && t.getIntOrFloatBitWidth() == 32) {
-      // llvm::errs() << "  " << dyn_cast<IntegerType>(t).getSignedness() << "\n";
-      if (dyn_cast<IntegerType>(t).getSignedness() ==
-            IntegerType::SignednessSemantics::Signed)
-        return e_past_value_longint;
-      else
-        return e_past_value_ulongint;
+    else if (t.isInteger()) {
+      auto it = dyn_cast<IntegerType>(t);
+
+      switch (it.getWidth()) {
+        case 32:
+          return e_past_value_longint;
+        case 64:
+          return e_past_value_longlongint;
+        default: assert(0);
+      }
+    }
+
+    else if (t.isIntOrFloat()) {
+      auto it = dyn_cast<FloatType>(t);
+      assert(it); //ints caught above
+
+      switch (it.getWidth()) {
+        case 32:
+          return e_past_value_float;
+        case 64:
+          return e_past_value_double;
+      }
     }
     assert(0);
   }
@@ -508,6 +526,20 @@ class PastTranslator {
 
   s_past_node_t* translate(arith::ConstantIndexOp& op) {
     u_past_value_data_t val = { .intval = op.value() };
+    return translateConstant(op, op.getResult().getType(), val);
+  }
+
+  s_past_node_t* translate(arith::ConstantFloatOp& op) {
+    u_past_value_data_t val;
+    switch (getTypePast(op.getResult().getType())) {
+      case e_past_value_float:
+        val.floatval = op.value().convertToFloat();
+        break;
+      case e_past_value_double:
+        val.doubleval = op.value().convertToDouble();
+        break;
+      default: assert(0);
+    }
     return translateConstant(op, op.getResult().getType(), val);
   }
 
@@ -903,6 +935,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<func::ReturnOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::ConstantIntOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::ConstantIndexOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::ConstantFloatOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::AddIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::AddFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MulIOp>(op)) res = translate(o);
