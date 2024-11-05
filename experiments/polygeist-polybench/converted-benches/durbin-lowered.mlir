@@ -14,14 +14,14 @@ module {
     %c0_6 = arith.constant 0 : index
     memref.store %1, %arg2[%c0_6] : memref<?xf64>
     %2 = llvm.mlir.undef : f64
-    memref.store %2, %alloca_3[] : memref<f64>
+    memref.store %2, %alloca_4[] : memref<f64>
     %c0_7 = arith.constant 0 : index
     %3 = memref.load %arg1[%c0_7] : memref<?xf64>
     %4 = arith.negf %3 : f64
-    memref.store %4, %alloca_3[] : memref<f64>
+    memref.store %4, %alloca_4[] : memref<f64>
     %5 = llvm.mlir.undef : f64
-    memref.store %5, %alloca_4[] : memref<f64>
-    memref.store %cst_0, %alloca_4[] : memref<f64>
+    memref.store %5, %alloca_3[] : memref<f64>
+    memref.store %cst_0, %alloca_3[] : memref<f64>
     %6 = llvm.mlir.undef : f64
     memref.store %6, %alloca_1[] : memref<f64>
     %c1 = arith.constant 1 : index
@@ -38,13 +38,13 @@ module {
       %11 = arith.mulf %9, %10 : f64
       %12 = arith.addf %7, %11 : f64
       memref.store %12, %alloca_1[] : memref<f64>
-      %13 = memref.load %alloca_4[] : memref<f64>
-      %14 = memref.load %alloca_3[] : memref<f64>
+      %13 = memref.load %alloca_3[] : memref<f64>
+      %14 = memref.load %alloca_4[] : memref<f64>
       %15 = arith.mulf %14, %14 : f64
       %16 = arith.subf %13, %15 : f64
-      %17 = memref.load %alloca_4[] : memref<f64>
+      %17 = memref.load %alloca_3[] : memref<f64>
       %18 = arith.mulf %16, %17 : f64
-      memref.store %18, %alloca_4[] : memref<f64>
+      memref.store %18, %alloca_3[] : memref<f64>
       %c1_10 = arith.constant 1 : index
       %c1_11 = arith.constant 1 : index
       scf.for %arg4 = %c1_10 to %arg3 step %c1_11 {
@@ -70,7 +70,7 @@ module {
         %30 = memref.load %alloca_1[] : memref<f64>
         %31 = arith.addf %29, %30 : f64
         %32 = arith.negf %31 : f64
-        %33 = memref.load %alloca_4[] : memref<f64>
+        %33 = memref.load %alloca_3[] : memref<f64>
         %34 = arith.divf %32, %33 : f64
         %c0_21 = arith.constant 0 : index
         memref.store %34, %alloca[%c0_21] : memref<1xf64>
@@ -92,7 +92,7 @@ module {
         %41 = memref.load %alloca[%c0_28] : memref<1xf64>
         %c0_29 = arith.constant 0 : index
         memref.store %41, %alloca_5[%c0_29] : memref<1xf64>
-        memref.store %41, %alloca_3[] : memref<f64>
+        memref.store %41, %alloca_4[] : memref<f64>
         %c0_30 = arith.constant 0 : index
         %42 = memref.load %alloca_5[%c0_30] : memref<1xf64>
         %c1_31 = arith.constant 1 : index
@@ -107,7 +107,7 @@ module {
         %30 = memref.load %alloca_1[] : memref<f64>
         %31 = arith.addf %29, %30 : f64
         %32 = arith.negf %31 : f64
-        %33 = memref.load %alloca_4[] : memref<f64>
+        %33 = memref.load %alloca_3[] : memref<f64>
         %34 = arith.divf %32, %33 : f64
         %c0_20 = arith.constant 0 : index
         memref.store %34, %alloca[%c0_20] : memref<1xf64>
@@ -126,7 +126,7 @@ module {
         %41 = memref.load %alloca[%c0_25] : memref<1xf64>
         %c0_26 = arith.constant 0 : index
         memref.store %41, %alloca_5[%c0_26] : memref<1xf64>
-        memref.store %41, %alloca_3[] : memref<f64>
+        memref.store %41, %alloca_4[] : memref<f64>
         %c0_27 = arith.constant 0 : index
         %42 = memref.load %alloca_5[%c0_27] : memref<1xf64>
         memref.store %42, %arg2[%arg3] : memref<?xf64>
