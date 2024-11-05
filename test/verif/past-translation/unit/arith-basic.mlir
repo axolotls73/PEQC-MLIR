@@ -7,6 +7,14 @@ module {
     %b = arith.constant 2 : i32
 // CHECK: = ([[A]] + [[B]])
     %2 = arith.addi %a, %b : i32
+// CHECK: = ([[A]] - [[B]])
+    %13 = arith.subi %a, %b : i32
+// CHECK: = ([[A]] * [[B]])
+    %14 = arith.muli %a, %b : i32
+// CHECK: = ([[A]] / [[B]])
+    %15 = arith.divsi %a, %b : i32
+// CHECK: = ([[A]] / [[B]])
+    %16 = arith.divui %a, %b : i32
 // CHECK: = max([[A]], [[B]])
     %3 = arith.maxsi %a, %b : i32
 // CHECK: = min([[A]], [[B]])

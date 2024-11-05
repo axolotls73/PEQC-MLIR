@@ -555,26 +555,32 @@ class PastTranslator {
   s_past_node_t* translate(arith::AddIOp& op) {
     return translateArithBinop("arith_addi", past_add, op.getResult(), op.getLhs(), op.getRhs());
   }
-  s_past_node_t* translate(arith::AddFOp& op) {
-    return translateArithBinop("arith_addf", past_add, op.getResult(), op.getLhs(), op.getRhs());
+  s_past_node_t* translate(arith::SubIOp& op) {
+    return translateArithBinop("arith_subi", past_sub, op.getResult(), op.getLhs(), op.getRhs());
   }
   s_past_node_t* translate(arith::MulIOp& op) {
     return translateArithBinop("arith_muli", past_mul, op.getResult(), op.getLhs(), op.getRhs());
   }
-  s_past_node_t* translate(arith::MulFOp& op) {
-    return translateArithBinop("arith_mulf", past_mul, op.getResult(), op.getLhs(), op.getRhs());
+  s_past_node_t* translate(arith::DivSIOp& op) {
+    return translateArithBinop("arith_divi", past_div, op.getResult(), op.getLhs(), op.getRhs());
   }
-  // s_past_node_t* translate(arith::Div& op) {
-  //   return translateArithBinop("arith_divi", past_div, op.getResult(), op.getLhs(), op.getRhs());
-  // }
-  s_past_node_t* translate(arith::DivFOp& op) {
-    return translateArithBinop("arith_divf", past_div, op.getResult(), op.getLhs(), op.getRhs());
+  s_past_node_t* translate(arith::DivUIOp& op) {
+    return translateArithBinop("arith_divi", past_div, op.getResult(), op.getLhs(), op.getRhs());
   }
   s_past_node_t* translate(arith::MaxSIOp& op) {
     return translateArithBinop("arith_maxsi", past_max, op.getResult(), op.getLhs(), op.getRhs());
   }
   s_past_node_t* translate(arith::MinSIOp& op) {
     return translateArithBinop("arith_minsi", past_min, op.getResult(), op.getLhs(), op.getRhs());
+  }
+  s_past_node_t* translate(arith::AddFOp& op) {
+    return translateArithBinop("arith_addf", past_add, op.getResult(), op.getLhs(), op.getRhs());
+  }
+  s_past_node_t* translate(arith::MulFOp& op) {
+    return translateArithBinop("arith_mulf", past_mul, op.getResult(), op.getLhs(), op.getRhs());
+  }
+  s_past_node_t* translate(arith::DivFOp& op) {
+    return translateArithBinop("arith_divf", past_div, op.getResult(), op.getLhs(), op.getRhs());
   }
 
   s_past_node_t* translate(arith::CmpIOp& op) {
@@ -977,12 +983,15 @@ class PastTranslator {
     else if (auto o = dyn_cast<arith::ConstantIndexOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::ConstantFloatOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::AddIOp>(op)) res = translate(o);
-    else if (auto o = dyn_cast<arith::AddFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::SubIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MulIOp>(op)) res = translate(o);
-    else if (auto o = dyn_cast<arith::MulFOp>(op)) res = translate(o);
-    else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::DivSIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::DivUIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MaxSIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MinSIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::AddFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::MulFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
