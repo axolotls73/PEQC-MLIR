@@ -153,6 +153,7 @@ class PastTranslator {
       }
 
       switch (it.getWidth()) {
+        case 1:
         case 32:
           // ret += "long ";
           break;
@@ -200,18 +201,22 @@ class PastTranslator {
   }
 
   e_past_value_type_t getTypePast(const Type& t) {
-    // llvm::errs() << "getTypePast: " << t << "\n";
-    // llvm::errs() << "  " << t.getIntOrFloatBitWidth() << "\n";
+    LLVM_DEBUG(
+      llvm::errs() << "getTypePast: " << t << "  " << t.getIntOrFloatBitWidth() << "\n";
+    );
     if (t.isIndex()) return e_past_value_int;
 
     else if (t.isInteger()) {
       auto it = dyn_cast<IntegerType>(t);
 
       switch (it.getWidth()) {
+        case 1:
+          // return e_past_value_bool;
         case 32:
-          return e_past_value_longint;
+          // return e_past_value_longint;
         case 64:
-          return e_past_value_longlongint;
+          // return e_past_value_longlongint;
+          return e_past_value_int;
         default: assert(0);
       }
     }
@@ -520,7 +525,21 @@ class PastTranslator {
   }
 
   s_past_node_t* translate(arith::ConstantIntOp& op) {
-    u_past_value_data_t val = { .intval = op.value() };
+    u_past_value_data_t val = {.intval = op.value()};
+    ///FIXME: low prio, make this consistent with types
+    // u_past_value_data_t val;
+    // switch (getTypePast(op.getResult().getType())) {
+    //   case e_past_value_bool:
+    //     val.boolval = op.value();
+    //     break;
+    //   case e_past_value_longint:
+    //     val.intval = op.value();
+    //     break;
+    //   case e_past_value_longlongint:
+    //     val.longlongintval = op.value();
+    //     break;
+    //   default: assert(0);
+    // }
     return translateConstant(op, op.getResult().getType(), val);
   }
 
@@ -617,10 +636,24 @@ class PastTranslator {
         past_node_varref_create(getVarSymbol(op.getLhs())),
         past_node_varref_create(getVarSymbol(op.getRhs())));
 
-    return past_node_ternary_cond_create(
-      cond,
-      past_node_value_create_from_int(1),
-      past_node_value_create_from_int(0));
+    return past_node_statement_create(
+      past_node_binary_create(past_assign,
+        past_node_varref_create(getVarSymbol(op.getResult())),
+        past_node_ternary_cond_create(
+          cond,
+          past_node_value_create_from_int(1),
+          past_node_value_create_from_int(0))));
+  }
+
+  s_past_node_t* translate(arith::SelectOp op) {
+    return past_node_statement_create(
+      past_node_binary_create(past_assign,
+        past_node_varref_create(getVarSymbol(op.getResult())),
+        past_node_ternary_cond_create(
+          // cond is already bool-like here, so don't need if == 1/== 0
+          past_node_varref_create(getVarSymbol(op.getCondition())),
+          past_node_varref_create(getVarSymbol(op.getTrueValue())),
+          past_node_varref_create(getVarSymbol(op.getFalseValue())))));
   }
 
   // scf
@@ -993,6 +1026,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<arith::MulFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::SelectOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
