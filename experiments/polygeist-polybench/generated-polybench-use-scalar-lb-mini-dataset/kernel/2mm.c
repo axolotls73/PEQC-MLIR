@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_2mm(int ni, int nj, int nk, int nl,
   double alpha,
   double beta,

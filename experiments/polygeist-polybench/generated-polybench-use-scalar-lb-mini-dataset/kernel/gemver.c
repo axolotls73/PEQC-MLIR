@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_gemver(int n,
      double alpha,
      double beta,

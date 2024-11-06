@@ -43,6 +43,10 @@ for cfile in glob(f'{PB_DIR}/*.preproc.c'):
     decls += f'  {typename}{"*" if "[" in var else ""} {varname};\n'
   signature = ', '.join([re.sub('\[.*\]', '', ''.join(s.split()[1:])) for s in signature.split(',')])
 
+  includes = '''
+#include <math.h>
+'''
+
   epilogue = f'''
 {{
 {decls}
@@ -51,6 +55,7 @@ for cfile in glob(f'{PB_DIR}/*.preproc.c'):
 '''
 
   with open(f'{newdir}/kernel/{name}.c', 'w') as f:
+    f.write(includes)
     f.write(kernel)
 
   with open(f'{newdir}/epilogue/{name}-epilogue.c', 'w') as f:

@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_gemm(int ni, int nj, int nk,
    double alpha,
    double beta,

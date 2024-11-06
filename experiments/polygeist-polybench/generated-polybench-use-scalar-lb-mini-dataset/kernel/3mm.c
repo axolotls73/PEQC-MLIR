@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
   double E[ 16 + 0][18 + 0],
   double A[ 16 + 0][20 + 0],

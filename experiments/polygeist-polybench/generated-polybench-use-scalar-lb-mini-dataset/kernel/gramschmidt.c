@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_gramschmidt(int m, int n,
    double A[ 20 + 0][30 + 0],
    double R[ 30 + 0][30 + 0],

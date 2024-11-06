@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_heat_3d(int tsteps,
         int n,
         double A[ 10 + 0][10 + 0][10 + 0],

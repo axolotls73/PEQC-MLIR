@@ -1,0 +1,231 @@
+config file: config/max-1-nesting.json
+  {
+  "cgeist_args": "-raise-scf-to-affine",
+  "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+  "mliropt_args": "--affine-parallelize=\"max-nested=1\"",
+  
+  "inline": true,
+  
+  "output_dir": "converted-benches-max-nested-1",
+  "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+  }
+converting trisolv
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trisolv.c -S -function=kernel_trisolv -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/trisolv.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/trisolv-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/trisolv-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/trisolv-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/trisolv-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/trisolv-converted.mlir
+    failed
+converting doitgen
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/doitgen.c -S -function=kernel_doitgen -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/doitgen.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/doitgen-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/doitgen-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/doitgen-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/doitgen-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/doitgen-converted.mlir
+converting correlation
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/correlation.c -S -function=kernel_correlation -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/correlation.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/correlation-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/correlation-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/correlation-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/correlation-lowered.mlir
+    failed
+converting seidel-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/seidel-2d.c -S -function=kernel_seidel_2d -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/seidel-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/seidel-2d-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/seidel-2d-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/seidel-2d-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/seidel-2d-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/seidel-2d-converted.mlir
+converting lu
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/lu.c -S -function=kernel_lu -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/lu.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/lu-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/lu-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/lu-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/lu-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/lu-converted.mlir
+    failed
+converting 3mm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/3mm.c -S -function=kernel_3mm -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/3mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/3mm-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/3mm-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/3mm-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/3mm-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/3mm-converted.mlir
+converting covariance
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/covariance.c -S -function=kernel_covariance -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/covariance.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/covariance-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/covariance-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/covariance-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/covariance-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/covariance-converted.mlir
+    failed
+converting syrk
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syrk.c -S -function=kernel_syrk -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/syrk.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/syrk-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/syrk-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/syrk-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/syrk-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/syrk-converted.mlir
+converting trmm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trmm.c -S -function=kernel_trmm -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/trmm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/trmm-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/trmm-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/trmm-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/trmm-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/trmm-converted.mlir
+converting bicg
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/bicg.c -S -function=kernel_bicg -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/bicg.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/bicg-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/bicg-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/bicg-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/bicg-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/bicg-converted.mlir
+converting floyd-warshall
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/floyd-warshall.c -S -function=kernel_floyd_warshall -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/floyd-warshall.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/floyd-warshall-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/floyd-warshall-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/floyd-warshall-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/floyd-warshall-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/floyd-warshall-converted.mlir
+converting cholesky
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/cholesky.c -S -function=kernel_cholesky -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/cholesky.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/cholesky-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/cholesky-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/cholesky-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/cholesky-lowered.mlir
+    failed
+converting jacobi-1d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-1d.c -S -function=kernel_jacobi_1d -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/jacobi-1d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/jacobi-1d-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/jacobi-1d-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/jacobi-1d-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/jacobi-1d-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/jacobi-1d-converted.mlir
+converting gesummv
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gesummv.c -S -function=kernel_gesummv -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/gesummv.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/gesummv-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/gesummv-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/gesummv-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/gesummv-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/gesummv-converted.mlir
+converting atax
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/atax.c -S -function=kernel_atax -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/atax.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/atax-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/atax-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/atax-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/atax-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/atax-converted.mlir
+converting mvt
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/mvt.c -S -function=kernel_mvt -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/mvt.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/mvt-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/mvt-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/mvt-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/mvt-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/mvt-converted.mlir
+converting 2mm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/2mm.c -S -function=kernel_2mm -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/2mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/2mm-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/2mm-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/2mm-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/2mm-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/2mm-converted.mlir
+converting durbin
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/durbin.c -S -function=kernel_durbin -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/durbin.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/durbin-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/durbin-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/durbin-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/durbin-lowered.mlir
+    failed
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/deriche.c
+converting fdtd-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/fdtd-2d.c -S -function=kernel_fdtd_2d -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/fdtd-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/fdtd-2d-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/fdtd-2d-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/fdtd-2d-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/fdtd-2d-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/fdtd-2d-converted.mlir
+    failed
+converting gramschmidt
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gramschmidt.c -S -function=kernel_gramschmidt -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/gramschmidt.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/gramschmidt-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/gramschmidt-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/gramschmidt-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/gramschmidt-lowered.mlir
+    failed
+converting heat-3d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/heat-3d.c -S -function=kernel_heat_3d -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/heat-3d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/heat-3d-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/heat-3d-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/heat-3d-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/heat-3d-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/heat-3d-converted.mlir
+    failed
+converting nussinov
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+    failed
+converting jacobi-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-2d.c -S -function=kernel_jacobi_2d -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/jacobi-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/jacobi-2d-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/jacobi-2d-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/jacobi-2d-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/jacobi-2d-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/jacobi-2d-converted.mlir
+converting gemm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemm.c -S -function=kernel_gemm -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/gemm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/gemm-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/gemm-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/gemm-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/gemm-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/gemm-converted.mlir
+converting symm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/symm.c -S -function=kernel_symm -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/symm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/symm-pluto.mlir
+    failed
+converting ludcmp
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/ludcmp.c -S -function=kernel_ludcmp -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/ludcmp.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/ludcmp-pluto.mlir
+    failed
+converting gemver
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemver.c -S -function=kernel_gemver -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/gemver.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/gemver-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/gemver-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/gemver-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/gemver-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/gemver-converted.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/adi.c
+converting syr2k
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syr2k.c -S -function=kernel_syr2k -raise-scf-to-affine
+    polymer-opt converted-benches-max-nested-1/syr2k.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches-max-nested-1/syr2k-pluto.mlir
+    mlir-opt converted-benches-max-nested-1/syr2k-pluto-inline.mlir --affine-parallelize="max-nested=1"
+    mlir-opt --lower-affine converted-benches-max-nested-1/syr2k-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches-max-nested-1/syr2k-lowered.mlir
+    verif-translate --translate-to-past converted-benches-max-nested-1/syr2k-converted.mlir

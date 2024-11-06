@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_atax(int m, int n,
    double A[ 38 + 0][42 + 0],
    double x[ 42 + 0],

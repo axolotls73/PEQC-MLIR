@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_symm(int m, int n,
    double alpha,
    double beta,

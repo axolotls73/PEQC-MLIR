@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_doitgen(int nr, int nq, int np,
       double A[ 10 + 0][8 + 0][12 + 0],
       double C4[ 12 + 0][12 + 0],

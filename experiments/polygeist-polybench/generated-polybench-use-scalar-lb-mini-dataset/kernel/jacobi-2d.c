@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_jacobi_2d(int tsteps,
        int n,
        double A[ 30 + 0][30 + 0],

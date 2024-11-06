@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_covariance(int m, int n,
          double float_n,
          double data[ 32 + 0][28 + 0],

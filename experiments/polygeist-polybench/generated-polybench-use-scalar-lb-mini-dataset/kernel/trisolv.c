@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_trisolv(int n,
       double L[ 40 + 0][40 + 0],
       double x[ 40 + 0],

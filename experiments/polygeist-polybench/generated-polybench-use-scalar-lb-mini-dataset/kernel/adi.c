@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_adi(int tsteps, int n,
   double u[ 20 + 0][20 + 0],
   double v[ 20 + 0][20 + 0],

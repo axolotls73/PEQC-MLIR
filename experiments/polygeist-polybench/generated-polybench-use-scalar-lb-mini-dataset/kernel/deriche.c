@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_deriche(int w, int h, float alpha,
        float imgIn[ 64 + 0][64 + 0],
        float imgOut[ 64 + 0][64 + 0],

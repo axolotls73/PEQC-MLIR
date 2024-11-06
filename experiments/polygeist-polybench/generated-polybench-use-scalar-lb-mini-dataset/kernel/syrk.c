@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_syrk(int n, int m,
    double alpha,
    double beta,

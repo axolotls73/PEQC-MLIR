@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_durbin(int n,
      double r[ 40 + 0],
      double y[ 40 + 0])

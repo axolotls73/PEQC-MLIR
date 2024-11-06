@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_trmm(int m, int n,
    double alpha,
    double A[ 20 + 0][20 + 0],

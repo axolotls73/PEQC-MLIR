@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_fdtd_2d(int tmax,
       int nx,
       int ny,

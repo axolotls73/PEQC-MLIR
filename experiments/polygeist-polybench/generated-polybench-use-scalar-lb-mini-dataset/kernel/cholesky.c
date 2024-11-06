@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_cholesky(int n,
        double A[ 40 + 0][40 + 0])
 {

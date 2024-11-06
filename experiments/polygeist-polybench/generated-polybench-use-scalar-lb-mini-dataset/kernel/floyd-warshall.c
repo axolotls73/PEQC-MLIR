@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_floyd_warshall(int n,
       int path[ 60 + 0][60 + 0])
 {

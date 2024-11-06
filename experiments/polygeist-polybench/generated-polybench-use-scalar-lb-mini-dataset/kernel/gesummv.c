@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_gesummv(int n,
       double alpha,
       double beta,

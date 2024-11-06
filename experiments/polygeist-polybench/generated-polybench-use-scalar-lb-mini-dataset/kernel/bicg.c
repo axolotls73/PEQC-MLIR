@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_bicg(int m, int n,
    double A[ 42 + 0][38 + 0],
    double s[ 38 + 0],

@@ -1,3 +1,5 @@
+
+#include <math.h>
 void kernel_nussinov(int n, base seq[ 60 + 0],
       int table[ 60 + 0][60 + 0])
 {

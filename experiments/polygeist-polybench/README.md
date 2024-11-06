@@ -16,7 +16,7 @@ Tools you need in your PATH:
 
 `script/convert_polybenches.py`: run benches through cgeist, polymer, verif conversion and translation. -h for options.
 
-`script/run.py`: run translated files in interpreter. -h for options (only --self implemented currently...).
+`script/run.py`: run translated files in interpreter. -h for options.
 
 ## Generating and running polybench translations
 

@@ -1,0 +1,10 @@
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-parallelize=\"max-nested=1\"",
+
+    "inline": true,
+
+    "output_dir": "converted-benches-max-nested-1",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+}

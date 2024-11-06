@@ -12,7 +12,7 @@ import itertools
 PASTCOMMAND = 'pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees'
 
 argparser = argparse.ArgumentParser()
-rungroup = argparser.add_mutually_exclusive_group()
+rungroup = argparser.add_mutually_exclusive_group(required=True)
 rungroup.add_argument('--self', action='store_true',
     help='only compare all benches with themselves')
 rungroup.add_argument('--compare-against', metavar='compare-dir', type=str,
@@ -31,7 +31,8 @@ def getbenchname(file):
   return None
 
 benches = []
-for benchdir in args.polybench_directory:
+compareagainstbenches = []
+for benchdir in args.polybench_directory + ([] if not args.compare_against else [args.compare_against]):
   for file in glob(f'{benchdir}/*'):
     name = getbenchname(os.path.basename(file))
     if name in args.skip: continue
@@ -39,7 +40,8 @@ for benchdir in args.polybench_directory:
       print(f'{CLR_YLW}unrecognized bench: "{name}" in "{file}"')
       continue
 
-    benches += [(file, name)]
+    if benchdir == args.compare_against: compareagainstbenches += [(file, name)]
+    else: benches += [(file, name)]
 
 pairs = []
 
@@ -47,7 +49,10 @@ if args.self:
   pairs += [(file, file, name, benchtoliveout[name]) for file, name in benches]
 
 elif args.compare_against:
-  pass
+  for cbfile, cbname in compareagainstbenches:
+    otherfiles = [(file, name) for file, name in benches if name == cbname]
+    if not len(otherfiles): continue
+    pairs += [(cbfile, file, cbname, benchtoliveout[cbname]) for file, _ in otherfiles]
 
 # default: cartesian product of all files in all dirs
 else:
@@ -64,7 +69,7 @@ for file1, file2, name, liveout in pairs:
   if 'YES' in stdout:
     print(f'pass: {file1} {file2}')
   else:
-    print(f'{CLR_RED}FAIL: {file1} {file2} {CLR_GRAY}(command line: {command}){CLR_NONE}')
+    print(f'{CLR_RED}FAIL{"(conflict)" if "conflict" in stdout else ""}: {file1} {file2} {CLR_GRAY}(command line: {command}){CLR_NONE}')
     failedruns += [command]
 
 print(f'{CLR_RED}\nFAILED RUNS:')

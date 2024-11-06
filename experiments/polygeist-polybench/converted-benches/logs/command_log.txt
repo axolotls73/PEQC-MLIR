@@ -1,0 +1,231 @@
+config file: /data-host-share/verif-dialect/experiments/polygeist-polybench/config/default-config.json
+  {
+  "cgeist_args": "-raise-scf-to-affine",
+  "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+  "mliropt_args": "--affine-parallelize",
+  
+  "inline": true,
+  
+  "output_dir": "converted-benches",
+  "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+  }
+converting trisolv
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trisolv.c -S -function=kernel_trisolv -raise-scf-to-affine
+    polymer-opt converted-benches/trisolv.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/trisolv-pluto.mlir
+    mlir-opt converted-benches/trisolv-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/trisolv-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/trisolv-lowered.mlir
+    verif-translate --translate-to-past converted-benches/trisolv-converted.mlir
+    failed
+converting doitgen
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/doitgen.c -S -function=kernel_doitgen -raise-scf-to-affine
+    polymer-opt converted-benches/doitgen.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/doitgen-pluto.mlir
+    mlir-opt converted-benches/doitgen-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/doitgen-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/doitgen-lowered.mlir
+    verif-translate --translate-to-past converted-benches/doitgen-converted.mlir
+converting correlation
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/correlation.c -S -function=kernel_correlation -raise-scf-to-affine
+    polymer-opt converted-benches/correlation.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/correlation-pluto.mlir
+    mlir-opt converted-benches/correlation-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/correlation-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/correlation-lowered.mlir
+    failed
+converting seidel-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/seidel-2d.c -S -function=kernel_seidel_2d -raise-scf-to-affine
+    polymer-opt converted-benches/seidel-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/seidel-2d-pluto.mlir
+    mlir-opt converted-benches/seidel-2d-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/seidel-2d-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/seidel-2d-lowered.mlir
+    verif-translate --translate-to-past converted-benches/seidel-2d-converted.mlir
+converting lu
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/lu.c -S -function=kernel_lu -raise-scf-to-affine
+    polymer-opt converted-benches/lu.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/lu-pluto.mlir
+    mlir-opt converted-benches/lu-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/lu-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/lu-lowered.mlir
+    verif-translate --translate-to-past converted-benches/lu-converted.mlir
+    failed
+converting 3mm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/3mm.c -S -function=kernel_3mm -raise-scf-to-affine
+    polymer-opt converted-benches/3mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/3mm-pluto.mlir
+    mlir-opt converted-benches/3mm-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/3mm-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/3mm-lowered.mlir
+    verif-translate --translate-to-past converted-benches/3mm-converted.mlir
+converting covariance
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/covariance.c -S -function=kernel_covariance -raise-scf-to-affine
+    polymer-opt converted-benches/covariance.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/covariance-pluto.mlir
+    mlir-opt converted-benches/covariance-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/covariance-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/covariance-lowered.mlir
+    verif-translate --translate-to-past converted-benches/covariance-converted.mlir
+    failed
+converting syrk
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syrk.c -S -function=kernel_syrk -raise-scf-to-affine
+    polymer-opt converted-benches/syrk.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/syrk-pluto.mlir
+    mlir-opt converted-benches/syrk-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/syrk-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/syrk-lowered.mlir
+    verif-translate --translate-to-past converted-benches/syrk-converted.mlir
+converting trmm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trmm.c -S -function=kernel_trmm -raise-scf-to-affine
+    polymer-opt converted-benches/trmm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/trmm-pluto.mlir
+    mlir-opt converted-benches/trmm-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/trmm-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/trmm-lowered.mlir
+    verif-translate --translate-to-past converted-benches/trmm-converted.mlir
+converting bicg
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/bicg.c -S -function=kernel_bicg -raise-scf-to-affine
+    polymer-opt converted-benches/bicg.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/bicg-pluto.mlir
+    mlir-opt converted-benches/bicg-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/bicg-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/bicg-lowered.mlir
+    verif-translate --translate-to-past converted-benches/bicg-converted.mlir
+converting floyd-warshall
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/floyd-warshall.c -S -function=kernel_floyd_warshall -raise-scf-to-affine
+    polymer-opt converted-benches/floyd-warshall.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/floyd-warshall-pluto.mlir
+    mlir-opt converted-benches/floyd-warshall-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/floyd-warshall-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/floyd-warshall-lowered.mlir
+    verif-translate --translate-to-past converted-benches/floyd-warshall-converted.mlir
+converting cholesky
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/cholesky.c -S -function=kernel_cholesky -raise-scf-to-affine
+    polymer-opt converted-benches/cholesky.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/cholesky-pluto.mlir
+    mlir-opt converted-benches/cholesky-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/cholesky-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/cholesky-lowered.mlir
+    failed
+converting jacobi-1d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-1d.c -S -function=kernel_jacobi_1d -raise-scf-to-affine
+    polymer-opt converted-benches/jacobi-1d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/jacobi-1d-pluto.mlir
+    mlir-opt converted-benches/jacobi-1d-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/jacobi-1d-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/jacobi-1d-lowered.mlir
+    verif-translate --translate-to-past converted-benches/jacobi-1d-converted.mlir
+converting gesummv
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gesummv.c -S -function=kernel_gesummv -raise-scf-to-affine
+    polymer-opt converted-benches/gesummv.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/gesummv-pluto.mlir
+    mlir-opt converted-benches/gesummv-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/gesummv-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/gesummv-lowered.mlir
+    verif-translate --translate-to-past converted-benches/gesummv-converted.mlir
+converting atax
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/atax.c -S -function=kernel_atax -raise-scf-to-affine
+    polymer-opt converted-benches/atax.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/atax-pluto.mlir
+    mlir-opt converted-benches/atax-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/atax-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/atax-lowered.mlir
+    verif-translate --translate-to-past converted-benches/atax-converted.mlir
+converting mvt
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/mvt.c -S -function=kernel_mvt -raise-scf-to-affine
+    polymer-opt converted-benches/mvt.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/mvt-pluto.mlir
+    mlir-opt converted-benches/mvt-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/mvt-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/mvt-lowered.mlir
+    verif-translate --translate-to-past converted-benches/mvt-converted.mlir
+converting 2mm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/2mm.c -S -function=kernel_2mm -raise-scf-to-affine
+    polymer-opt converted-benches/2mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/2mm-pluto.mlir
+    mlir-opt converted-benches/2mm-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/2mm-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/2mm-lowered.mlir
+    verif-translate --translate-to-past converted-benches/2mm-converted.mlir
+converting durbin
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/durbin.c -S -function=kernel_durbin -raise-scf-to-affine
+    polymer-opt converted-benches/durbin.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/durbin-pluto.mlir
+    mlir-opt converted-benches/durbin-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/durbin-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/durbin-lowered.mlir
+    failed
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/deriche.c
+converting fdtd-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/fdtd-2d.c -S -function=kernel_fdtd_2d -raise-scf-to-affine
+    polymer-opt converted-benches/fdtd-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/fdtd-2d-pluto.mlir
+    mlir-opt converted-benches/fdtd-2d-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/fdtd-2d-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/fdtd-2d-lowered.mlir
+    verif-translate --translate-to-past converted-benches/fdtd-2d-converted.mlir
+    failed
+converting gramschmidt
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gramschmidt.c -S -function=kernel_gramschmidt -raise-scf-to-affine
+    polymer-opt converted-benches/gramschmidt.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/gramschmidt-pluto.mlir
+    mlir-opt converted-benches/gramschmidt-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/gramschmidt-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/gramschmidt-lowered.mlir
+    failed
+converting heat-3d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/heat-3d.c -S -function=kernel_heat_3d -raise-scf-to-affine
+    polymer-opt converted-benches/heat-3d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/heat-3d-pluto.mlir
+    mlir-opt converted-benches/heat-3d-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/heat-3d-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/heat-3d-lowered.mlir
+    verif-translate --translate-to-past converted-benches/heat-3d-converted.mlir
+    failed
+converting nussinov
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+    failed
+converting jacobi-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-2d.c -S -function=kernel_jacobi_2d -raise-scf-to-affine
+    polymer-opt converted-benches/jacobi-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/jacobi-2d-pluto.mlir
+    mlir-opt converted-benches/jacobi-2d-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/jacobi-2d-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/jacobi-2d-lowered.mlir
+    verif-translate --translate-to-past converted-benches/jacobi-2d-converted.mlir
+converting gemm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemm.c -S -function=kernel_gemm -raise-scf-to-affine
+    polymer-opt converted-benches/gemm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/gemm-pluto.mlir
+    mlir-opt converted-benches/gemm-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/gemm-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/gemm-lowered.mlir
+    verif-translate --translate-to-past converted-benches/gemm-converted.mlir
+converting symm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/symm.c -S -function=kernel_symm -raise-scf-to-affine
+    polymer-opt converted-benches/symm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/symm-pluto.mlir
+    failed
+converting ludcmp
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/ludcmp.c -S -function=kernel_ludcmp -raise-scf-to-affine
+    polymer-opt converted-benches/ludcmp.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/ludcmp-pluto.mlir
+    failed
+converting gemver
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemver.c -S -function=kernel_gemver -raise-scf-to-affine
+    polymer-opt converted-benches/gemver.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/gemver-pluto.mlir
+    mlir-opt converted-benches/gemver-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/gemver-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/gemver-lowered.mlir
+    verif-translate --translate-to-past converted-benches/gemver-converted.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/adi.c
+converting syr2k
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syr2k.c -S -function=kernel_syr2k -raise-scf-to-affine
+    polymer-opt converted-benches/syr2k.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-benches/syr2k-pluto.mlir
+    mlir-opt converted-benches/syr2k-pluto-inline.mlir --affine-parallelize
+    mlir-opt --lower-affine converted-benches/syr2k-parallelized.mlir
+    verif-opt --verif-scf-parallel-to-async converted-benches/syr2k-lowered.mlir
+    verif-translate --translate-to-past converted-benches/syr2k-converted.mlir
