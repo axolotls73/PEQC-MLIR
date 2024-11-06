@@ -9,5 +9,8 @@
   double* x;
   double* y;
 
+#pragma peqc async_execute
+{
   kernel_gesummv(n, alpha, beta, A, B, tmp, x, y);
+}
 }

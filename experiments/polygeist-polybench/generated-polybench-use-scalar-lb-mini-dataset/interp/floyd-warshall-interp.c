@@ -22,6 +22,9 @@ void kernel_floyd_warshall(int n,
   int n;
   int* path;
 
+#pragma peqc async_execute
+{
   kernel_floyd_warshall(n, path);
+}
 }
 #pragma pocc-region-end

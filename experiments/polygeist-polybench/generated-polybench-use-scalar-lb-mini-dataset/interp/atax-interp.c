@@ -32,6 +32,9 @@ void kernel_atax(int m, int n,
   double* y;
   double* tmp;
 
+#pragma peqc async_execute
+{
   kernel_atax(m, n, A, x, y, tmp);
+}
 }
 #pragma pocc-region-end

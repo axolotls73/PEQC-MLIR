@@ -100,6 +100,9 @@ void kernel_deriche(int w, int h, float alpha,
   float* y1;
   float* y2;
 
+#pragma peqc async_execute
+{
   kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2);
+}
 }
 #pragma pocc-region-end

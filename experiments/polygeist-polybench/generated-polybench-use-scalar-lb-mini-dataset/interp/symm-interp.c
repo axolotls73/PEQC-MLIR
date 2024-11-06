@@ -35,6 +35,9 @@ void kernel_symm(int m, int n,
   double* A;
   double* B;
 
+#pragma peqc async_execute
+{
   kernel_symm(m, n, alpha, beta, C, A, B);
+}
 }
 #pragma pocc-region-end

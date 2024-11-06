@@ -70,6 +70,9 @@ void kernel_correlation(int m, int n,
   double* mean;
   double* stddev;
 
+#pragma peqc async_execute
+{
   kernel_correlation(m, n, float_n, data, corr, mean, stddev);
+}
 }
 #pragma pocc-region-end

@@ -26,6 +26,9 @@ void kernel_trisolv(int n,
   double* x;
   double* b;
 
+#pragma peqc async_execute
+{
   kernel_trisolv(n, L, x, b);
+}
 }
 #pragma pocc-region-end

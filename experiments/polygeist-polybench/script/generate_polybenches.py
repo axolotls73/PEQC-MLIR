@@ -47,10 +47,12 @@ for cfile in glob(f'{PB_DIR}/*.preproc.c'):
 #include <math.h>
 '''
 
-  epilogue = f'''
+  epilogue = lambda asyncpragma : f'''
 {{
 {decls}
+{f"#pragma peqc async_execute{NL}{{" if asyncpragma else ""}
   kernel_{name.replace("-", "_")}({signature});
+{"}" if asyncpragma else ""}
 }}
 '''
 
@@ -59,12 +61,19 @@ for cfile in glob(f'{PB_DIR}/*.preproc.c'):
     f.write(kernel)
 
   with open(f'{newdir}/epilogue/{name}-epilogue.c', 'w') as f:
-    f.write(epilogue)
+    f.write(epilogue(True))
+  with open(f'{newdir}/epilogue/{name}-epilogue-noasync.c', 'w') as f:
+    f.write(epilogue(False))
 
   with open(f'{newdir}/interp/{name}-interp.c', 'w') as f:
     f.write("#pragma pocc-region-start\n")
     f.write(kernel)
-    f.write(epilogue)
+    f.write(epilogue(True))
+    f.write("#pragma pocc-region-end\n")
+  with open(f'{newdir}/interp/{name}-interp-noasync.c', 'w') as f:
+    f.write("#pragma pocc-region-start\n")
+    f.write(kernel)
+    f.write(epilogue(False))
     f.write("#pragma pocc-region-end\n")
 
 runsh(f'rm {PB_DIR}/*.preproc.c')

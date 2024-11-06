@@ -53,6 +53,9 @@ void kernel_ludcmp(int n,
   double* x;
   double* y;
 
+#pragma peqc async_execute
+{
   kernel_ludcmp(n, A, b, x, y);
+}
 }
 #pragma pocc-region-end

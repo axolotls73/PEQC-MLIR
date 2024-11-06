@@ -37,6 +37,9 @@ void kernel_nussinov(int n, base seq[ 60 + 0],
   base* seq;
   int* table;
 
+#pragma peqc async_execute
+{
   kernel_nussinov(n, seq, table);
+}
 }
 #pragma pocc-region-end

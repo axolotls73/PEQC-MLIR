@@ -29,6 +29,9 @@ void kernel_mvt(int n,
   double* y_2;
   double* A;
 
+#pragma peqc async_execute
+{
   kernel_mvt(n, x1, x2, y_1, y_2, A);
+}
 }
 #pragma pocc-region-end

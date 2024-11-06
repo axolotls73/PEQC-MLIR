@@ -39,6 +39,9 @@ void kernel_gramschmidt(int m, int n,
   double* R;
   double* Q;
 
+#pragma peqc async_execute
+{
   kernel_gramschmidt(m, n, A, R, Q);
+}
 }
 #pragma pocc-region-end

@@ -41,6 +41,9 @@ void kernel_heat_3d(int tsteps,
   double* A;
   double* B;
 
+#pragma peqc async_execute
+{
   kernel_heat_3d(tsteps, n, A, B);
+}
 }
 #pragma pocc-region-end

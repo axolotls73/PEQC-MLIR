@@ -6,5 +6,8 @@
   double* x;
   double* y;
 
+#pragma peqc async_execute
+{
   kernel_ludcmp(n, A, b, x, y);
+}
 }

@@ -43,6 +43,9 @@ void kernel_covariance(int m, int n,
   double* cov;
   double* mean;
 
+#pragma peqc async_execute
+{
   kernel_covariance(m, n, float_n, data, cov, mean);
+}
 }
 #pragma pocc-region-end

@@ -27,6 +27,9 @@ void kernel_lu(int n,
   int n;
   double* A;
 
+#pragma peqc async_execute
+{
   kernel_lu(n, A);
+}
 }
 #pragma pocc-region-end

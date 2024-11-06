@@ -30,6 +30,9 @@ void kernel_cholesky(int n,
   int n;
   double* A;
 
+#pragma peqc async_execute
+{
   kernel_cholesky(n, A);
+}
 }
 #pragma pocc-region-end

@@ -45,6 +45,9 @@ void kernel_2mm(int ni, int nj, int nk, int nl,
   double* C;
   double* D;
 
+#pragma peqc async_execute
+{
   kernel_2mm(ni, nj, nk, nl, alpha, beta, tmp, A, B, C, D);
+}
 }
 #pragma pocc-region-end

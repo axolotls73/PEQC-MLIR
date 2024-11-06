@@ -72,6 +72,9 @@ void kernel_adi(int tsteps, int n,
   double* p;
   double* q;
 
+#pragma peqc async_execute
+{
   kernel_adi(tsteps, n, u, v, p, q);
+}
 }
 #pragma pocc-region-end

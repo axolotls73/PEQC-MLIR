@@ -28,6 +28,9 @@ void kernel_jacobi_2d(int tsteps,
   double* A;
   double* B;
 
+#pragma peqc async_execute
+{
   kernel_jacobi_2d(tsteps, n, A, B);
+}
 }
 #pragma pocc-region-end

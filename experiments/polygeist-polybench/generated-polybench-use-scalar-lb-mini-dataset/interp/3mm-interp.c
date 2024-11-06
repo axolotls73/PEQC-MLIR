@@ -55,6 +55,9 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
   double* D;
   double* G;
 
+#pragma peqc async_execute
+{
   kernel_3mm(ni, nj, nk, nl, nm, E, A, B, F, C, D, G);
+}
 }
 #pragma pocc-region-end
