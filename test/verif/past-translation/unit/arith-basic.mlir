@@ -7,6 +7,10 @@ module {
     %b = arith.constant 2 : i32
 // CHECK: int [[C:.*]] = 4
     %c = arith.constant 4 : i32
+// CHECK: float [[F:.*]] = 0.0
+    %f = arith.constant 0.0 : f32
+// CHECK: float [[G:.*]] = 2.0
+    %g = arith.constant 2.0 : f32
 // COM: this is weird, but technically still works with C
 // COM: semantics as long as you only use logical operations?
 // CHECK: int [[cond:.*]] = -1
@@ -43,4 +47,18 @@ module {
     %12 = arith.cmpi eq, %a, %b : i32
 // CHECK: = ([[cond]] ? [[A]] : [[B]])
     %17 = arith.select %cond, %a, %b : i32
+// CHECK: float {{.*}} = ([[F]] + [[G]])
+    %18 = arith.addf %f, %g : f32
+// CHECK: float {{.*}} = ([[F]] - [[G]])
+    %19 = arith.subf %f, %g : f32
+// CHECK: float {{.*}} = ([[F]] * [[G]])
+    %20 = arith.mulf %f, %g : f32
+// CHECK: float {{.*}} = ([[F]] / [[G]])
+    %21 = arith.divf %f, %g : f32
+// CHECK: float {{.*}} = sqrt([[F]])
+    %22 = math.sqrt %f : f32
+// CHECK: = ([[A]] & [[B]])
+    %23 = arith.andi %a, %b : i32
+// CHECK: = ([[A]] | [[B]])
+    %24 = arith.ori %a, %b : i32
 }

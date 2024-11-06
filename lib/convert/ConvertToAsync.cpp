@@ -385,6 +385,7 @@ public:
     target.addLegalDialect<
         func::FuncDialect,
         arith::ArithDialect,
+        math::MathDialect,
         scf::SCFDialect,
         memref::MemRefDialect,
         async::AsyncDialect,

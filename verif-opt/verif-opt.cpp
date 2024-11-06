@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
   registry.insert<
       mlir::verif::VerifDialect,
       mlir::arith::ArithDialect,
+      mlir::math::MathDialect,
       mlir::scf::SCFDialect,
       mlir::func::FuncDialect,
       mlir::memref::MemRefDialect,

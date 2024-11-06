@@ -20,6 +20,7 @@
 
 #include "mlir/IR/BuiltinDialect.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
+#include "mlir/Dialect/Math/IR/Math.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
@@ -586,6 +587,12 @@ class PastTranslator {
   s_past_node_t* translate(arith::DivUIOp& op) {
     return translateArithBinop("arith_divi", past_div, op.getResult(), op.getLhs(), op.getRhs());
   }
+  s_past_node_t* translate(arith::AndIOp& op) {
+    return translateArithBinop("arith_andi", past_band, op.getResult(), op.getLhs(), op.getRhs());
+  }
+  s_past_node_t* translate(arith::OrIOp& op) {
+    return translateArithBinop("arith_ori", past_bor, op.getResult(), op.getLhs(), op.getRhs());
+  }
   s_past_node_t* translate(arith::MaxSIOp& op) {
     return translateArithBinop("arith_maxsi", past_max, op.getResult(), op.getLhs(), op.getRhs());
   }
@@ -595,11 +602,27 @@ class PastTranslator {
   s_past_node_t* translate(arith::AddFOp& op) {
     return translateArithBinop("arith_addf", past_add, op.getResult(), op.getLhs(), op.getRhs());
   }
+  s_past_node_t* translate(arith::SubFOp& op) {
+    return translateArithBinop("arith_subf", past_sub, op.getResult(), op.getLhs(), op.getRhs());
+  }
   s_past_node_t* translate(arith::MulFOp& op) {
     return translateArithBinop("arith_mulf", past_mul, op.getResult(), op.getLhs(), op.getRhs());
   }
   s_past_node_t* translate(arith::DivFOp& op) {
     return translateArithBinop("arith_divf", past_div, op.getResult(), op.getLhs(), op.getRhs());
+  }
+
+  s_past_node_t* translateArithUnaryOp
+            (const char* resultName, const cs_past_node_type_t* pastType,
+             Value res, Value expr) {
+    //
+    return getDeclareAndAssign(res.getType(), resultName, res,
+        past_node_unary_create(pastType,
+          past_node_varref_create(getVarSymbol(expr))));
+  }
+
+  s_past_node_t* translate(math::SqrtOp op) {
+    return translateArithUnaryOp("math_sqrt", past_sqrt, op.getResult(), op.getOperand());
   }
 
   s_past_node_t* translate(arith::CmpIOp& op) {
@@ -749,6 +772,10 @@ class PastTranslator {
 
   s_past_node_t* translate(memref::AllocOp op) {
     return past_node_statement_create(declareVar(op.getResult(), "memref_alloc"));
+  }
+
+  s_past_node_t* translate(memref::AllocaOp op) {
+    return past_node_statement_create(declareVar(op.getResult(), "memref_alloca"));
   }
 
   ///TODO: check for use-after-free bugs?
@@ -1045,17 +1072,22 @@ class PastTranslator {
     else if (auto o = dyn_cast<arith::MulIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivSIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivUIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::AndIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::OrIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MaxSIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MinSIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::AddFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::SubFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MulFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<math::SqrtOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::SelectOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::IfOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<memref::AllocaOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::DeallocOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::LoadOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
@@ -1117,6 +1149,7 @@ int main(int argc, char **argv) {
           registry.insert<
             mlir::verif::VerifDialect,
             mlir::arith::ArithDialect,
+            mlir::math::MathDialect,
             mlir::scf::SCFDialect,
             mlir::func::FuncDialect,
             mlir::memref::MemRefDialect,
