@@ -40,6 +40,8 @@ public:
     Value cst_0 = rewriter.create<arith::ConstantIndexOp>(loc, 0).getResult();
     Value cst_1 = rewriter.create<arith::ConstantIndexOp>(loc, 1).getResult();
 
+    bool dynamictripcount = false;
+
     // create nested for loops
     uint64_t totalTripCount = 1;
     SmallVector<scf::ForOp> loops;
@@ -58,13 +60,26 @@ public:
 
       auto loop = rewriter.create<scf::ForOp>(loc, lbv, ubv, sv, indexArg);
 
+      mapper.map(lbv, loop.getLowerBound());
+      mapper.map(ubv, loop.getUpperBound());
+      mapper.map(sv, loop.getStep());
+      mapper.map(iv, loop.getInductionVar());
+
+      rewriter.setInsertionPointToStart(loop.getBody());
+      loops.push_back(loop);
+
+      if (dynamictripcount) continue;
       // get loop trip count -- taken from SCF/Utils
       std::optional<int64_t> lbCstOp = getConstantIntValue(lbv);
       std::optional<int64_t> ubCstOp = getConstantIntValue(ubv);
       std::optional<int64_t> stepCstOp = getConstantIntValue(sv);
       if (!(lbCstOp.has_value() && ubCstOp.has_value() && stepCstOp.has_value())) {
-        op.emitWarning("scf.parallel expected to have constant loop bounds");
-        return failure();
+        // op.emitWarning("scf.parallel expected to have constant loop bounds");
+        // return failure();
+        dynamictripcount = true;
+        ///FIXME: calculate actual trip count at runtime at some point
+        totalTripCount = 42;
+        continue;
       }
       int64_t lbCst = lbCstOp.value();
       int64_t ubCst = ubCstOp.value();
@@ -74,14 +89,6 @@ public:
         return failure();
       }
       totalTripCount *= llvm::divideCeil((uint64_t)ubCst - (uint64_t)lbCst, (uint64_t)stepCst);
-
-      mapper.map(lbv, loop.getLowerBound());
-      mapper.map(ubv, loop.getUpperBound());
-      mapper.map(sv, loop.getStep());
-      mapper.map(iv, loop.getInductionVar());
-
-      rewriter.setInsertionPointToStart(loop.getBody());
-      loops.push_back(loop);
     }
 
     auto outerLoop = loops[0];
@@ -116,7 +123,7 @@ public:
       // make a buffer to store values to reduce
       rewriter.setInsertionPoint(outerLoop);
       auto buffer = rewriter.create<memref::AllocOp>
-          (loc, MemRefType::Builder({(int64_t)totalTripCount}, res.getType())).getResult();
+          (loc, (MemRefType)MemRefType::Builder({ShapedType::kDynamic}, res.getType()), SmallVector<Value>{cst_tc}).getResult();
 
       // store value
       rewriter.setInsertionPointToEnd(asyncExec.getBody());
