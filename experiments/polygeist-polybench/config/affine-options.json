@@ -36,7 +36,7 @@
 {
     "cgeist_args": "-raise-scf-to-affine",
     "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
-    "mliropt_args": "--affine-loop-tile",
+    "mliropt_args": "--affine-loop-tile=\"tile-size=32\"",
 
     "inline": true,
 
@@ -63,6 +63,28 @@
     "inline": true,
 
     "output_dir": "affine-unroll-jam",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-normalize --canonicalize --affine-loop-tile=\"tile-size=32\" --affine-loop-unroll-jam=\"unroll-jam-factor=4\" --affine-loop-tile=\"tile-size=32\"",
+
+    "inline": true,
+
+    "output_dir": "affine-no-polymer-tile-and-unroll-jam",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-normalize --canonicalize --affine-loop-fusion --affine-loop-tile=\"tile-size=32\"",
+
+    "inline": true,
+
+    "output_dir": "affine-no-polymer-fuse-and-tile",
     "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
 },
 
