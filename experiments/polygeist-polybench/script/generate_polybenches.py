@@ -65,11 +65,11 @@ for cfile in glob(f'{PB_DIR}/*.preproc.c'):
   with open(f'{newdir}/epilogue/{name}-epilogue-noasync.c', 'w') as f:
     f.write(epilogue(False))
 
-  with open(f'{newdir}/interp/{name}-interp.c', 'w') as f:
-    f.write("#pragma pocc-region-start\n")
-    f.write(kernel)
-    f.write(epilogue(True))
-    f.write("#pragma pocc-region-end\n")
+  # with open(f'{newdir}/interp/{name}-interp.c', 'w') as f:
+  #   f.write("#pragma pocc-region-start\n")
+  #   f.write(kernel)
+  #   f.write(epilogue(True))
+  #   f.write("#pragma pocc-region-end\n")
   with open(f'{newdir}/interp/{name}-interp-noasync.c', 'w') as f:
     f.write("#pragma pocc-region-start\n")
     f.write(kernel)
