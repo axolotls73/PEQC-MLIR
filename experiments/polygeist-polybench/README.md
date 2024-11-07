@@ -24,7 +24,13 @@ Tools you need in your PATH:
 $> ./script/generate_polybenches.py -DPOLYBENCH_USE_SCALAR_LB -DMINI_DATASET
 
 # adi hangs somewhere in polygeist, skip for now
-$> ./script/convert_polybenches.py generated-polybench-use-scalar-lb-mini-dataset/ converted-benches --skip adi
+$> ./script/convert_polybenches.py config/default-config.json --skip adi
 
 $> ./script/run.py --self converted-benches/translated
+```
+
+Affine transfos tests:
+```sh
+./script/convert_polybenches.py config/affine-options-no-polymer.json --topdir converted-affine-options-no-polymer --skip adi,deriche,durbin,gramschmidt,symm,ludcmp
+./script/convert_polybenches.py config/affine-options.json --topdir converted-affine-options --skip adi,deriche,durbin,gramschmidt,symm,ludcmp
 ```

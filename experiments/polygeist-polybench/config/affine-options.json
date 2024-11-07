@@ -1,0 +1,102 @@
+[
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-loop-fusion",
+
+    "inline": true,
+
+    "output_dir": "affine-loop-fusion",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-loop-invariant-code-motion",
+
+    "inline": true,
+
+    "output_dir": "affine-loop-inv-code-motion",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-loop-normalize",
+
+    "inline": true,
+
+    "output_dir": "affine-normalize",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-loop-tile",
+
+    "inline": true,
+
+    "output_dir": "affine-tile",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-loop-unroll",
+
+    "inline": true,
+
+    "output_dir": "affine-unroll",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-loop-unroll-jam",
+
+    "inline": true,
+
+    "output_dir": "affine-unroll-jam",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-parallelize=\"max-nested=1\"",
+
+    "inline": true,
+
+    "output_dir": "affine-parallelize",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize",
+
+    "inline": true,
+
+    "output_dir": "affine-all",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize",
+
+    "inline": true,
+
+    "output_dir": "affine-all-except-parallelize",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+}
+
+]
