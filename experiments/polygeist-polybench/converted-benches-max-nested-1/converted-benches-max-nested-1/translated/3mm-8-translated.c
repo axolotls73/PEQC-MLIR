@@ -189,7 +189,10 @@ void kernel_3mm(int func_arg_0, int func_arg_1, int func_arg_2, int func_arg_3, 
   double* D;
   double* G;
 
+#pragma peqc async_execute
+{
   kernel_3mm(ni, nj, nk, nl, nm, E, A, B, F, C, D, G);
+}
 }
 
 #pragma pocc-region-end

@@ -123,7 +123,10 @@ void kernel_doitgen(int func_arg_0, int func_arg_1, int func_arg_2, double* func
   double* C4;
   double* sum;
 
+#pragma peqc async_execute
+{
   kernel_doitgen(nr, nq, np, A, C4, sum);
+}
 }
 
 #pragma pocc-region-end

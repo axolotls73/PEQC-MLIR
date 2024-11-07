@@ -138,7 +138,10 @@ void kernel_bicg(int func_arg_0, int func_arg_1, double* func_arg_2, double* fun
   double* p;
   double* r;
 
+#pragma peqc async_execute
+{
   kernel_bicg(m, n, A, s, q, p, r);
+}
 }
 
 #pragma pocc-region-end

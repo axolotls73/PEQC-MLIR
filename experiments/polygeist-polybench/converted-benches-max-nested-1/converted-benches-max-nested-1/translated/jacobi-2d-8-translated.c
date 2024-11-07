@@ -425,7 +425,10 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
   double* A;
   double* B;
 
+#pragma peqc async_execute
+{
   kernel_jacobi_2d(tsteps, n, A, B);
+}
 }
 
 #pragma pocc-region-end

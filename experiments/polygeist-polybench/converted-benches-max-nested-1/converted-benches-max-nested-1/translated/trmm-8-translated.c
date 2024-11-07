@@ -66,7 +66,10 @@ void kernel_trmm(int func_arg_0, int func_arg_1, double func_arg_2, double* func
   double* A;
   double* B;
 
+#pragma peqc async_execute
+{
   kernel_trmm(m, n, alpha, A, B);
+}
 }
 
 #pragma pocc-region-end

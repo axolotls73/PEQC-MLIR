@@ -68,7 +68,10 @@ void kernel_syrk(int func_arg_0, int func_arg_1, double func_arg_2, double func_
   double* C;
   double* A;
 
+#pragma peqc async_execute
+{
   kernel_syrk(n, m, alpha, beta, C, A);
+}
 }
 
 #pragma pocc-region-end

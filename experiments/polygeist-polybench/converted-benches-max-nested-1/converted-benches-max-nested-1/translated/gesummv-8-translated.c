@@ -121,7 +121,10 @@ void kernel_gesummv(int func_arg_0, double func_arg_1, double func_arg_2, double
   double* x;
   double* y;
 
+#pragma peqc async_execute
+{
   kernel_gesummv(n, alpha, beta, A, B, tmp, x, y);
+}
 }
 
 #pragma pocc-region-end

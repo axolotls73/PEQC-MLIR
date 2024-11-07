@@ -137,7 +137,10 @@ void kernel_atax(int func_arg_0, int func_arg_1, double* func_arg_2, double* fun
   double* y;
   double* tmp;
 
+#pragma peqc async_execute
+{
   kernel_atax(m, n, A, x, y, tmp);
+}
 }
 
 #pragma pocc-region-end

@@ -42,7 +42,9 @@ void kernel_floyd_warshall(int func_arg_0, int* func_arg_1)
   int n;
   int* path;
 
+
   kernel_floyd_warshall(n, path);
+
 }
 
 #pragma pocc-region-end

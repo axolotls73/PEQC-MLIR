@@ -134,7 +134,10 @@ void kernel_gemver(int func_arg_0, double func_arg_1, double func_arg_2, double*
   double* y;
   double* z;
 
+#pragma peqc async_execute
+{
   kernel_gemver(n, alpha, beta, A, u1, v1, u2, v2, w, x, y, z);
+}
 }
 
 #pragma pocc-region-end

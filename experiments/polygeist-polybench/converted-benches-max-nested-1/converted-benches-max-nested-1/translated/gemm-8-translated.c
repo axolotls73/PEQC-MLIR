@@ -69,7 +69,10 @@ void kernel_gemm(int func_arg_0, int func_arg_1, int func_arg_2, double func_arg
   double* A;
   double* B;
 
+#pragma peqc async_execute
+{
   kernel_gemm(ni, nj, nk, alpha, beta, C, A, B);
+}
 }
 
 #pragma pocc-region-end

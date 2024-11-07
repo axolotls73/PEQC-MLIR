@@ -134,7 +134,9 @@ void kernel_jacobi_1d(int func_arg_0, int func_arg_1, double* func_arg_2, double
   double* A;
   double* B;
 
+
   kernel_jacobi_1d(tsteps, n, A, B);
+
 }
 
 #pragma pocc-region-end
