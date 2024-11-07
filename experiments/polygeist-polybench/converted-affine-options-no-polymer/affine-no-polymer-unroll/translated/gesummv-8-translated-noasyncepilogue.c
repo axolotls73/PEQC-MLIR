@@ -1,5 +1,5 @@
 #pragma pocc-region-start
-#include "/data-host-share/verif-dialect/verif-translate/interp_macros.h"
+#include "/data-host-share/verif-dialect/verif-translate/interp_macros_seq.h"
 void kernel_gesummv(int func_arg_0, double func_arg_1, double func_arg_2, double* func_arg_3, double* func_arg_4, double* func_arg_5, double* func_arg_6, double* func_arg_7)
 {
   int arith_const_8 = 3; 

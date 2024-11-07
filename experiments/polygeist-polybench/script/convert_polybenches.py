@@ -14,7 +14,8 @@ import functools as ft
 
 BASEDIR = os.path.abspath(f'{os.path.dirname(__file__)}/..')
 VERIFREPO = os.path.abspath(f'{BASEDIR}/../..')
-EPILOGUE_SCRIPT = f'{VERIFREPO}/test/add_epilogue.sh'
+EPILOGUE_SCRIPT = f'{BASEDIR}/script/add_epilogue.sh'
+EPILOGUE_SCRIPT_ASYNC = f'{BASEDIR}/script/add_epilogue_async.sh'
 
 debugopts = ['mlir', 'translate', 'convert']
 
@@ -196,7 +197,7 @@ def convertbenches(config):
     with open(f'{outdir}/{name}-7-translated-no-includes.c', 'w') as f:
       f.write(stdout)
     if 'async' in stdout:
-      _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {outdir}/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue.c {outdir}/translated/{name}-8-translated.c {VERIFREPO}')
+      _, _, rc = runsh(f'{EPILOGUE_SCRIPT_ASYNC} {outdir}/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue.c {outdir}/translated/{name}-8-translated.c {VERIFREPO}')
       assert not rc
     else:
       _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {outdir}/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue-noasync.c {outdir}/translated/{name}-8-translated-noasyncepilogue.c {VERIFREPO}')

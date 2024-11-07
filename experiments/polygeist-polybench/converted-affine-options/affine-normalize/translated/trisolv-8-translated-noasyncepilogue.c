@@ -1,5 +1,5 @@
 #pragma pocc-region-start
-#include "/data-host-share/verif-dialect/verif-translate/interp_macros.h"
+#include "/data-host-share/verif-dialect/verif-translate/interp_macros_seq.h"
 void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, double* func_arg_3)
 {
   int arith_const_4 = 39; 
