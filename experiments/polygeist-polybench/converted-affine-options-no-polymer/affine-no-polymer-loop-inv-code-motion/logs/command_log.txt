@@ -1,0 +1,218 @@
+config file: config/affine-options-no-polymer.json, output dir converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion
+{'cgeist_args': '-raise-scf-to-affine', 'polymer_args': '', 'mliropt_args': '--affine-loop-invariant-code-motion', 'inline': True, 'output_dir': 'affine-no-polymer-loop-inv-code-motion', 'polybench_dir': 'generated-polybench-use-scalar-lb-mini-dataset'}
+converting trisolv
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trisolv.c -S -function=kernel_trisolv -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trisolv.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trisolv-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trisolv-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trisolv-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trisolv-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trisolv-converted.mlir
+converting doitgen
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/doitgen.c -S -function=kernel_doitgen -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/doitgen.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/doitgen-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/doitgen-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/doitgen-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/doitgen-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/doitgen-converted.mlir
+converting correlation
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/correlation.c -S -function=kernel_correlation -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/correlation.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/correlation-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/correlation-pluto-inline.mlir --affine-loop-invariant-code-motion
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/correlation-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/correlation-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/correlation-converted.mlir
+    failed
+converting seidel-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/seidel-2d.c -S -function=kernel_seidel_2d -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/seidel-2d.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/seidel-2d-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/seidel-2d-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/seidel-2d-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/seidel-2d-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/seidel-2d-converted.mlir
+converting lu
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/lu.c -S -function=kernel_lu -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/lu.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/lu-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/lu-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/lu-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/lu-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/lu-converted.mlir
+converting 3mm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/3mm.c -S -function=kernel_3mm -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/3mm.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/3mm-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/3mm-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/3mm-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/3mm-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/3mm-converted.mlir
+converting covariance
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/covariance.c -S -function=kernel_covariance -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/covariance.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/covariance-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/covariance-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/covariance-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/covariance-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/covariance-converted.mlir
+converting syrk
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syrk.c -S -function=kernel_syrk -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syrk.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syrk-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syrk-pluto-inline.mlir --affine-loop-invariant-code-motion
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syrk-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syrk-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syrk-converted.mlir
+converting trmm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trmm.c -S -function=kernel_trmm -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trmm.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trmm-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trmm-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trmm-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trmm-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/trmm-converted.mlir
+converting bicg
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/bicg.c -S -function=kernel_bicg -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/bicg.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/bicg-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/bicg-pluto-inline.mlir --affine-loop-invariant-code-motion
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/bicg-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/bicg-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/bicg-converted.mlir
+converting floyd-warshall
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/floyd-warshall.c -S -function=kernel_floyd_warshall -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/floyd-warshall.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/floyd-warshall-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/floyd-warshall-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/floyd-warshall-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/floyd-warshall-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/floyd-warshall-converted.mlir
+converting cholesky
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/cholesky.c -S -function=kernel_cholesky -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/cholesky.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/cholesky-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/cholesky-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/cholesky-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/cholesky-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/cholesky-converted.mlir
+converting jacobi-1d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-1d.c -S -function=kernel_jacobi_1d -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-1d.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-1d-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-1d-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-1d-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-1d-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-1d-converted.mlir
+converting gesummv
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gesummv.c -S -function=kernel_gesummv -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gesummv.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gesummv-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gesummv-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gesummv-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gesummv-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gesummv-converted.mlir
+converting atax
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/atax.c -S -function=kernel_atax -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/atax.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/atax-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/atax-pluto-inline.mlir --affine-loop-invariant-code-motion
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/atax-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/atax-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/atax-converted.mlir
+converting mvt
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/mvt.c -S -function=kernel_mvt -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/mvt.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/mvt-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/mvt-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/mvt-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/mvt-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/mvt-converted.mlir
+converting 2mm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/2mm.c -S -function=kernel_2mm -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/2mm.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/2mm-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/2mm-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/2mm-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/2mm-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/2mm-converted.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/durbin.c
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/deriche.c
+converting fdtd-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/fdtd-2d.c -S -function=kernel_fdtd_2d -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/fdtd-2d.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/fdtd-2d-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/fdtd-2d-pluto-inline.mlir --affine-loop-invariant-code-motion
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/fdtd-2d-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/fdtd-2d-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/fdtd-2d-converted.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/gramschmidt.c
+converting heat-3d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/heat-3d.c -S -function=kernel_heat_3d -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/heat-3d.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/heat-3d-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/heat-3d-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/heat-3d-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/heat-3d-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/heat-3d-converted.mlir
+converting nussinov
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+    failed
+converting jacobi-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-2d.c -S -function=kernel_jacobi_2d -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-2d.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-2d-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-2d-pluto-inline.mlir --affine-loop-invariant-code-motion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-2d-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-2d-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/jacobi-2d-converted.mlir
+converting gemm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemm.c -S -function=kernel_gemm -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemm.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemm-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemm-pluto-inline.mlir --affine-loop-invariant-code-motion
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemm-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemm-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemm-converted.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/symm.c
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/ludcmp.c
+converting gemver
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemver.c -S -function=kernel_gemver -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemver.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemver-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemver-pluto-inline.mlir --affine-loop-invariant-code-motion
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemver-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemver-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/gemver-converted.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/adi.c
+converting syr2k
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syr2k.c -S -function=kernel_syr2k -raise-scf-to-affine
+    polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syr2k.mlir 
+    mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syr2k-pluto.mlir
+    mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syr2k-pluto-inline.mlir --affine-loop-invariant-code-motion
+    mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syr2k-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syr2k-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/syr2k-converted.mlir
+
+
+fail before conversion:
+    nussinov: cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+fail during conversion:
+fail during translation:
+    correlation: verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-inv-code-motion/correlation-converted.mlir
