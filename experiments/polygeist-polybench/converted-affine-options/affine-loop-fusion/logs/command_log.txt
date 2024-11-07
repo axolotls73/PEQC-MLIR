@@ -1,0 +1,217 @@
+config file: config/affine-options.json, output dir converted-affine-options/affine-loop-fusion
+{'cgeist_args': '-raise-scf-to-affine', 'polymer_args': '-reg2mem -extract-scop-stmt -pluto-opt', 'mliropt_args': '--affine-loop-fusion', 'inline': True, 'output_dir': 'affine-loop-fusion', 'polybench_dir': 'generated-polybench-use-scalar-lb-mini-dataset'}
+converting trisolv
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trisolv.c -S -function=kernel_trisolv -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/trisolv.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/trisolv-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/trisolv-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/trisolv-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/trisolv-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/trisolv-converted.mlir
+converting doitgen
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/doitgen.c -S -function=kernel_doitgen -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/doitgen.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/doitgen-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/doitgen-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/doitgen-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/doitgen-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/doitgen-converted.mlir
+converting correlation
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/correlation.c -S -function=kernel_correlation -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/correlation.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/correlation-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/correlation-pluto-inline.mlir --affine-loop-fusion
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/correlation-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/correlation-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/correlation-converted.mlir
+    failed
+converting seidel-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/seidel-2d.c -S -function=kernel_seidel_2d -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/seidel-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/seidel-2d-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/seidel-2d-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/seidel-2d-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/seidel-2d-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/seidel-2d-converted.mlir
+converting lu
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/lu.c -S -function=kernel_lu -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/lu.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/lu-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/lu-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/lu-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/lu-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/lu-converted.mlir
+converting 3mm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/3mm.c -S -function=kernel_3mm -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/3mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/3mm-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/3mm-pluto-inline.mlir --affine-loop-fusion
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/3mm-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/3mm-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/3mm-converted.mlir
+converting covariance
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/covariance.c -S -function=kernel_covariance -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/covariance.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/covariance-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/covariance-pluto-inline.mlir --affine-loop-fusion
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/covariance-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/covariance-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/covariance-converted.mlir
+converting syrk
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syrk.c -S -function=kernel_syrk -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/syrk.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/syrk-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/syrk-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/syrk-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/syrk-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/syrk-converted.mlir
+converting trmm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trmm.c -S -function=kernel_trmm -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/trmm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/trmm-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/trmm-pluto-inline.mlir --affine-loop-fusion
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/trmm-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/trmm-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/trmm-converted.mlir
+converting bicg
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/bicg.c -S -function=kernel_bicg -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/bicg.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/bicg-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/bicg-pluto-inline.mlir --affine-loop-fusion
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/bicg-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/bicg-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/bicg-converted.mlir
+converting floyd-warshall
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/floyd-warshall.c -S -function=kernel_floyd_warshall -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/floyd-warshall.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/floyd-warshall-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/floyd-warshall-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/floyd-warshall-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/floyd-warshall-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/floyd-warshall-converted.mlir
+converting cholesky
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/cholesky.c -S -function=kernel_cholesky -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/cholesky.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/cholesky-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/cholesky-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/cholesky-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/cholesky-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/cholesky-converted.mlir
+converting jacobi-1d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-1d.c -S -function=kernel_jacobi_1d -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/jacobi-1d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/jacobi-1d-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/jacobi-1d-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/jacobi-1d-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/jacobi-1d-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/jacobi-1d-converted.mlir
+converting gesummv
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gesummv.c -S -function=kernel_gesummv -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/gesummv.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/gesummv-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/gesummv-pluto-inline.mlir --affine-loop-fusion
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/gesummv-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/gesummv-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/gesummv-converted.mlir
+converting atax
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/atax.c -S -function=kernel_atax -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/atax.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/atax-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/atax-pluto-inline.mlir --affine-loop-fusion
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/atax-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/atax-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/atax-converted.mlir
+converting mvt
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/mvt.c -S -function=kernel_mvt -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/mvt.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/mvt-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/mvt-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/mvt-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/mvt-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/mvt-converted.mlir
+converting 2mm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/2mm.c -S -function=kernel_2mm -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/2mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/2mm-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/2mm-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/2mm-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/2mm-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/2mm-converted.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/durbin.c
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/deriche.c
+converting fdtd-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/fdtd-2d.c -S -function=kernel_fdtd_2d -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/fdtd-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/fdtd-2d-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/fdtd-2d-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/fdtd-2d-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/fdtd-2d-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/fdtd-2d-converted.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/gramschmidt.c
+converting heat-3d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/heat-3d.c -S -function=kernel_heat_3d -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/heat-3d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/heat-3d-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/heat-3d-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/heat-3d-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/heat-3d-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/heat-3d-converted.mlir
+converting nussinov
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+    failed
+converting jacobi-2d
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-2d.c -S -function=kernel_jacobi_2d -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/jacobi-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/jacobi-2d-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/jacobi-2d-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/jacobi-2d-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/jacobi-2d-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/jacobi-2d-converted.mlir
+converting gemm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemm.c -S -function=kernel_gemm -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/gemm.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/gemm-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/gemm-pluto-inline.mlir --affine-loop-fusion
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/gemm-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/gemm-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/gemm-converted.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/symm.c
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/ludcmp.c
+converting gemver
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemver.c -S -function=kernel_gemver -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/gemver.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/gemver-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/gemver-pluto-inline.mlir --affine-loop-fusion
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/gemver-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/gemver-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/gemver-converted.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/adi.c
+converting syr2k
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syr2k.c -S -function=kernel_syr2k -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/syr2k.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/syr2k-pluto.mlir
+    mlir-opt converted-affine-options/affine-loop-fusion/syr2k-pluto-inline.mlir --affine-loop-fusion
+    pass output same as input
+    mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/syr2k-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/syr2k-lowered.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/syr2k-converted.mlir
+
+
+fail before conversion:
+    nussinov: cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+fail during conversion:
+fail during translation:
+    correlation: verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/correlation-converted.mlir
