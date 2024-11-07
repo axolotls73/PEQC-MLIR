@@ -1,4 +1,5 @@
-from subprocess import run as subprocess_run
+from subprocess import run as subprocess_run, Popen, PIPE, TimeoutExpired
+from signal import SIGINT
 import os
 from glob import glob
 
@@ -14,9 +15,20 @@ def run(*args, timeout=None):
   out = subprocess_run(args, capture_output=True, timeout=timeout)
   return out.stdout.decode(), out.stderr.decode(), out.returncode
 
-def runsh(args, timeout=None):
-  out = subprocess_run(args, capture_output=True, shell=True, timeout=timeout)
-  return out.stdout.decode(), out.stderr.decode(), out.returncode
+def runsh(command, timeout=None):
+  #https://stackoverflow.com/a/36955420
+  with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, start_new_session=True) as process:
+    try:
+        output = process.communicate(timeout=timeout)
+        returncode = process.returncode
+    except TimeoutExpired:
+        os.killpg(process.pid, SIGINT) # send signal to the process group
+        output = process.communicate()
+        returncode = None
+  stdout, stderr = output
+
+  # out = subprocess_run(args, capture_output=True, shell=True, timeout=timeout)
+  return stdout.decode() if stdout else None, stderr.decode() if stderr else None, returncode
 
 CLR_RED = '\033[31m'
 CLR_GRN = '\033[32m'

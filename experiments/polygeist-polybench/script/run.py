@@ -12,12 +12,14 @@ import itertools
 PASTCOMMAND = 'pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees'
 
 argparser = argparse.ArgumentParser()
+argparser.add_argument('polybench_directory', nargs='+')
+argparser.add_argument('--timeout', type=int, default=None,
+    help='timeout in seconds, default none')
 rungroup = argparser.add_mutually_exclusive_group(required=True)
 rungroup.add_argument('--self', action='store_true',
     help='only compare all benches with themselves')
 rungroup.add_argument('--compare-against', metavar='compare-dir', type=str,
     help='only compare against corresponding benches in compare-dir (instead of cartesian product of all)')
-argparser.add_argument('polybench_directory', nargs='+')
 argparser.add_argument('--skip', type=lambda t: [s.strip() for s in t.split(',')], default=[],
     help='comma-separated list of bench names to skip')
 args = argparser.parse_args()
@@ -64,12 +66,15 @@ for file1, file2, name, liveout in pairs:
   if liveout is None:
     print(f'{CLR_YLW}skipping run "{file1} {file2}"{CLR_NONE}')
     continue
-  command = f'{PASTCOMMAND} {file1} {file2} {liveout}'
-  stdout, stderr, rc = runsh(command)
-  if 'YES' in stdout:
-    print(f'pass: {file1} {file2}')
+  command = f'{PASTCOMMAND} {file1} {file2} "{liveout}"'
+  stdout, stderr, rc = runsh(command, timeout=args.timeout)
+  timeout = True if rc is None else False
+  if stdout and 'YES' in stdout:
+    print(f'pass: {name}: {file1} {file2}')
   else:
-    print(f'{CLR_RED}FAIL{"(conflict)" if "conflict" in stdout else ""}: {file1} {file2} {CLR_GRAY}(command line: {command}){CLR_NONE}')
+    conflictstr = "(conflict)" if "conflict" in stdout else ""
+    timeoutstr = "(timeout)" if timeout else ""
+    print(f'{CLR_RED}FAIL{conflictstr}{timeoutstr}: {name}: {file1} {file2} {CLR_GRAY}(command line: {command}){CLR_NONE}')
     failedruns += [command]
 
 print(f'{CLR_RED}\nFAILED RUNS:')

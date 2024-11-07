@@ -22,6 +22,8 @@ argparser.add_argument('config_file', type=str, default=f'{BASEDIR}/config/defau
     help='json file with options, default config/default-config.json')
 argparser.add_argument('--topdir', type=str,
     help='put all runs in this directory')
+argparser.add_argument('--timeout', type=int, default=60,
+    help='timeout for conversion, default 60')
 argparser.add_argument('--skip', type=lambda t: [s.strip() for s in t.split(',')], default=[],
     help='comma-separated list of bench names to skip')
 argparser.add_argument('--debug', choices=debugopts, default=[],
@@ -34,13 +36,15 @@ args = argparser.parse_args()
 def runorrecord(command, listtoadd, stage, name=None, log=None):
   global args
   log += [f'    {command}']
-  stdout, stderr, rc = runsh(command)
+  stdout, stderr, rc = runsh(command, timeout=args.timeout)
   emptymodule = '''module {
 }'''
-  if rc or emptymodule in stdout:
+  if (rc or rc is None) or emptymodule in stdout:
     listtoadd += [(name, command)]
-    print(f'{CLR_RED}  failed{"(empty)" if emptymodule in stdout else ""}: {command}{CLR_NONE}')
-    log += [f'    failed{"(empty)" if emptymodule in stdout else ""}']
+    empty = "(empty)" if stdout and emptymodule in stdout else ""
+    timeoutstr = "(timeout)" if rc is None else ""
+    print(f'{CLR_RED}  failed{empty}{timeoutstr}: {command}{CLR_NONE}')
+    log += [f'    failed{empty}{timeoutstr}']
     if args.debug == stage:
       print(stderr, file=sys.stderr)
     if args.die == stage:
