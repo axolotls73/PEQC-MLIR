@@ -2,224 +2,224 @@ config file: config/affine-options.json, output dir converted-affine-options/aff
 {'cgeist_args': '-raise-scf-to-affine', 'polymer_args': '-reg2mem -extract-scop-stmt -pluto-opt', 'mliropt_args': '--affine-loop-unroll-jam', 'inline': True, 'output_dir': 'affine-unroll-jam', 'polybench_dir': 'generated-polybench-use-scalar-lb-mini-dataset'}
 converting trisolv
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trisolv.c -S -function=kernel_trisolv -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/trisolv.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/trisolv-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/trisolv-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/trisolv-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/trisolv-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/trisolv-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/trisolv-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/trisolv-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/trisolv-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/trisolv-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/trisolv-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/trisolv-6-after-conversion.mlir
 converting doitgen
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/doitgen.c -S -function=kernel_doitgen -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/doitgen.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/doitgen-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/doitgen-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/doitgen-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/doitgen-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/doitgen-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/doitgen-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/doitgen-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/doitgen-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/doitgen-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/doitgen-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/doitgen-6-after-conversion.mlir
 converting correlation
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/correlation.c -S -function=kernel_correlation -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/correlation.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/correlation-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/correlation-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/correlation-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/correlation-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/correlation-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/correlation-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/correlation-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/correlation-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/correlation-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/correlation-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/correlation-6-after-conversion.mlir
     failed
 converting seidel-2d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/seidel-2d.c -S -function=kernel_seidel_2d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/seidel-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/seidel-2d-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/seidel-2d-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/seidel-2d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/seidel-2d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/seidel-2d-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/seidel-2d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/seidel-2d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/seidel-2d-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/seidel-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/seidel-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/seidel-2d-6-after-conversion.mlir
 converting lu
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/lu.c -S -function=kernel_lu -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/lu.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/lu-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/lu-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/lu-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/lu-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/lu-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/lu-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/lu-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/lu-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/lu-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/lu-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/lu-6-after-conversion.mlir
 converting 3mm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/3mm.c -S -function=kernel_3mm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/3mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/3mm-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/3mm-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/3mm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/3mm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/3mm-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/3mm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/3mm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/3mm-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/3mm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/3mm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/3mm-6-after-conversion.mlir
 converting covariance
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/covariance.c -S -function=kernel_covariance -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/covariance.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/covariance-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/covariance-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/covariance-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/covariance-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/covariance-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/covariance-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/covariance-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/covariance-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/covariance-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/covariance-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/covariance-6-after-conversion.mlir
 converting syrk
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syrk.c -S -function=kernel_syrk -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/syrk.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/syrk-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/syrk-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/syrk-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/syrk-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/syrk-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/syrk-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/syrk-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/syrk-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/syrk-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/syrk-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/syrk-6-after-conversion.mlir
 converting trmm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trmm.c -S -function=kernel_trmm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/trmm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/trmm-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/trmm-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/trmm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/trmm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/trmm-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/trmm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/trmm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/trmm-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/trmm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/trmm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/trmm-6-after-conversion.mlir
 converting bicg
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/bicg.c -S -function=kernel_bicg -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/bicg.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/bicg-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/bicg-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/bicg-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/bicg-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/bicg-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/bicg-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/bicg-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/bicg-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/bicg-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/bicg-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/bicg-6-after-conversion.mlir
 converting floyd-warshall
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/floyd-warshall.c -S -function=kernel_floyd_warshall -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/floyd-warshall.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/floyd-warshall-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/floyd-warshall-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/floyd-warshall-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/floyd-warshall-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/floyd-warshall-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/floyd-warshall-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/floyd-warshall-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/floyd-warshall-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/floyd-warshall-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/floyd-warshall-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/floyd-warshall-6-after-conversion.mlir
 converting cholesky
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/cholesky.c -S -function=kernel_cholesky -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/cholesky.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/cholesky-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/cholesky-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/cholesky-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/cholesky-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/cholesky-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/cholesky-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/cholesky-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/cholesky-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/cholesky-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/cholesky-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/cholesky-6-after-conversion.mlir
 converting jacobi-1d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-1d.c -S -function=kernel_jacobi_1d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/jacobi-1d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/jacobi-1d-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/jacobi-1d-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/jacobi-1d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/jacobi-1d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/jacobi-1d-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/jacobi-1d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/jacobi-1d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/jacobi-1d-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/jacobi-1d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/jacobi-1d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/jacobi-1d-6-after-conversion.mlir
 converting gesummv
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gesummv.c -S -function=kernel_gesummv -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/gesummv.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/gesummv-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/gesummv-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/gesummv-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/gesummv-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/gesummv-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/gesummv-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/gesummv-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/gesummv-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/gesummv-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/gesummv-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/gesummv-6-after-conversion.mlir
 converting atax
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/atax.c -S -function=kernel_atax -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/atax.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/atax-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/atax-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/atax-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/atax-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/atax-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/atax-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/atax-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/atax-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/atax-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/atax-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/atax-6-after-conversion.mlir
 converting mvt
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/mvt.c -S -function=kernel_mvt -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/mvt.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/mvt-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/mvt-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/mvt-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/mvt-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/mvt-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/mvt-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/mvt-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/mvt-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/mvt-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/mvt-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/mvt-6-after-conversion.mlir
 converting 2mm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/2mm.c -S -function=kernel_2mm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/2mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/2mm-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/2mm-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/2mm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/2mm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/2mm-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/2mm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/2mm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/2mm-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/2mm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/2mm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/2mm-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/durbin.c
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/deriche.c
 converting fdtd-2d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/fdtd-2d.c -S -function=kernel_fdtd_2d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/fdtd-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/fdtd-2d-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/fdtd-2d-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/fdtd-2d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/fdtd-2d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/fdtd-2d-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/fdtd-2d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/fdtd-2d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/fdtd-2d-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/fdtd-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/fdtd-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/fdtd-2d-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/gramschmidt.c
 converting heat-3d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/heat-3d.c -S -function=kernel_heat_3d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/heat-3d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/heat-3d-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/heat-3d-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/heat-3d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/heat-3d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/heat-3d-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/heat-3d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/heat-3d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/heat-3d-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/heat-3d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/heat-3d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/heat-3d-6-after-conversion.mlir
 converting nussinov
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
     failed
 converting jacobi-2d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-2d.c -S -function=kernel_jacobi_2d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/jacobi-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/jacobi-2d-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/jacobi-2d-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/jacobi-2d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/jacobi-2d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/jacobi-2d-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/jacobi-2d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/jacobi-2d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/jacobi-2d-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/jacobi-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/jacobi-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/jacobi-2d-6-after-conversion.mlir
 converting gemm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemm.c -S -function=kernel_gemm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/gemm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/gemm-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/gemm-pluto-inline.mlir --affine-loop-unroll-jam
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/gemm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/gemm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/gemm-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/gemm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/gemm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/gemm-3-after-inline.mlir --affine-loop-unroll-jam
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/gemm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/gemm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/gemm-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/symm.c
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/ludcmp.c
 converting gemver
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemver.c -S -function=kernel_gemver -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/gemver.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/gemver-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/gemver-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/gemver-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/gemver-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/gemver-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/gemver-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/gemver-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/gemver-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/gemver-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/gemver-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/gemver-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/adi.c
 converting syr2k
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syr2k.c -S -function=kernel_syr2k -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-unroll-jam/syr2k.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-unroll-jam/syr2k-pluto.mlir
-    mlir-opt converted-affine-options/affine-unroll-jam/syr2k-pluto-inline.mlir --affine-loop-unroll-jam
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/syr2k-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/syr2k-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/syr2k-converted.mlir
+    polymer-opt converted-affine-options/affine-unroll-jam/syr2k-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-unroll-jam/syr2k-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-unroll-jam/syr2k-3-after-inline.mlir --affine-loop-unroll-jam
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-unroll-jam/syr2k-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-unroll-jam/syr2k-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/syr2k-6-after-conversion.mlir
 
 
 fail before conversion:
     nussinov: cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
 fail during conversion:
 fail during translation:
-    correlation: verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/correlation-converted.mlir
+    correlation: verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/correlation-6-after-conversion.mlir

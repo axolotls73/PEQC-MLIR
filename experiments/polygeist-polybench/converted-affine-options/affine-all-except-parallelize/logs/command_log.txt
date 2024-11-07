@@ -2,205 +2,205 @@ config file: config/affine-options.json, output dir converted-affine-options/aff
 {'cgeist_args': '-raise-scf-to-affine', 'polymer_args': '-reg2mem -extract-scop-stmt -pluto-opt', 'mliropt_args': '--affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize', 'inline': True, 'output_dir': 'affine-all-except-parallelize', 'polybench_dir': 'generated-polybench-use-scalar-lb-mini-dataset'}
 converting trisolv
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trisolv.c -S -function=kernel_trisolv -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/trisolv.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/trisolv-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/trisolv-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/trisolv-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/trisolv-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/trisolv-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/trisolv-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/trisolv-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/trisolv-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/trisolv-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/trisolv-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/trisolv-6-after-conversion.mlir
 converting doitgen
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/doitgen.c -S -function=kernel_doitgen -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/doitgen.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/doitgen-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/doitgen-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/doitgen-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/doitgen-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/doitgen-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/doitgen-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/doitgen-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/doitgen-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/doitgen-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/doitgen-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/doitgen-6-after-conversion.mlir
 converting correlation
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/correlation.c -S -function=kernel_correlation -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/correlation.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/correlation-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/correlation-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/correlation-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/correlation-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/correlation-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/correlation-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/correlation-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/correlation-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/correlation-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/correlation-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/correlation-6-after-conversion.mlir
     failed
 converting seidel-2d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/seidel-2d.c -S -function=kernel_seidel_2d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/seidel-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/seidel-2d-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/seidel-2d-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/seidel-2d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/seidel-2d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/seidel-2d-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/seidel-2d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/seidel-2d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/seidel-2d-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/seidel-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/seidel-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/seidel-2d-6-after-conversion.mlir
 converting lu
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/lu.c -S -function=kernel_lu -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/lu.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/lu-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/lu-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    polymer-opt converted-affine-options/affine-all-except-parallelize/lu-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/lu-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/lu-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
     failed(timeout)
 converting 3mm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/3mm.c -S -function=kernel_3mm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/3mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/3mm-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/3mm-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/3mm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/3mm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/3mm-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/3mm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/3mm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/3mm-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/3mm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/3mm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/3mm-6-after-conversion.mlir
 converting covariance
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/covariance.c -S -function=kernel_covariance -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/covariance.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/covariance-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/covariance-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/covariance-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/covariance-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/covariance-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/covariance-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/covariance-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/covariance-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/covariance-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/covariance-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/covariance-6-after-conversion.mlir
     failed
 converting syrk
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syrk.c -S -function=kernel_syrk -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/syrk.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/syrk-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/syrk-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/syrk-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/syrk-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/syrk-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/syrk-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/syrk-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/syrk-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/syrk-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/syrk-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/syrk-6-after-conversion.mlir
 converting trmm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trmm.c -S -function=kernel_trmm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/trmm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/trmm-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/trmm-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/trmm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/trmm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/trmm-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/trmm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/trmm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/trmm-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/trmm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/trmm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/trmm-6-after-conversion.mlir
 converting bicg
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/bicg.c -S -function=kernel_bicg -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/bicg.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/bicg-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/bicg-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/bicg-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/bicg-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/bicg-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/bicg-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/bicg-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/bicg-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/bicg-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/bicg-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/bicg-6-after-conversion.mlir
 converting floyd-warshall
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/floyd-warshall.c -S -function=kernel_floyd_warshall -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/floyd-warshall.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/floyd-warshall-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/floyd-warshall-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/floyd-warshall-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/floyd-warshall-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/floyd-warshall-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/floyd-warshall-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/floyd-warshall-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/floyd-warshall-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/floyd-warshall-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/floyd-warshall-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/floyd-warshall-6-after-conversion.mlir
 converting cholesky
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/cholesky.c -S -function=kernel_cholesky -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/cholesky.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/cholesky-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/cholesky-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/cholesky-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/cholesky-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/cholesky-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/cholesky-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/cholesky-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/cholesky-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/cholesky-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/cholesky-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/cholesky-6-after-conversion.mlir
     failed
 converting jacobi-1d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-1d.c -S -function=kernel_jacobi_1d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/jacobi-1d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/jacobi-1d-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/jacobi-1d-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/jacobi-1d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/jacobi-1d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/jacobi-1d-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/jacobi-1d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/jacobi-1d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/jacobi-1d-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/jacobi-1d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/jacobi-1d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/jacobi-1d-6-after-conversion.mlir
 converting gesummv
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gesummv.c -S -function=kernel_gesummv -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/gesummv.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/gesummv-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/gesummv-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/gesummv-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/gesummv-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/gesummv-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/gesummv-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/gesummv-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/gesummv-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/gesummv-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/gesummv-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/gesummv-6-after-conversion.mlir
 converting atax
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/atax.c -S -function=kernel_atax -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/atax.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/atax-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/atax-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/atax-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/atax-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/atax-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/atax-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/atax-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/atax-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/atax-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/atax-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/atax-6-after-conversion.mlir
 converting mvt
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/mvt.c -S -function=kernel_mvt -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/mvt.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/mvt-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/mvt-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/mvt-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/mvt-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/mvt-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/mvt-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/mvt-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/mvt-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/mvt-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/mvt-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/mvt-6-after-conversion.mlir
 converting 2mm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/2mm.c -S -function=kernel_2mm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/2mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/2mm-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/2mm-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/2mm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/2mm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/2mm-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/2mm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/2mm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/2mm-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/2mm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/2mm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/2mm-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/durbin.c
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/deriche.c
 converting fdtd-2d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/fdtd-2d.c -S -function=kernel_fdtd_2d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/fdtd-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/fdtd-2d-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/fdtd-2d-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/fdtd-2d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/fdtd-2d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/fdtd-2d-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/fdtd-2d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/fdtd-2d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/fdtd-2d-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/fdtd-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/fdtd-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/fdtd-2d-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/gramschmidt.c
 converting heat-3d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/heat-3d.c -S -function=kernel_heat_3d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/heat-3d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/heat-3d-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/heat-3d-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/heat-3d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/heat-3d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/heat-3d-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/heat-3d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/heat-3d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/heat-3d-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/heat-3d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/heat-3d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/heat-3d-6-after-conversion.mlir
 converting nussinov
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
-    failed(timeout)
+    failed
 converting jacobi-2d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-2d.c -S -function=kernel_jacobi_2d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/jacobi-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/jacobi-2d-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/jacobi-2d-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/jacobi-2d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/jacobi-2d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/jacobi-2d-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/jacobi-2d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/jacobi-2d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/jacobi-2d-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/jacobi-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/jacobi-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/jacobi-2d-6-after-conversion.mlir
 converting gemm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemm.c -S -function=kernel_gemm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/gemm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/gemm-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/gemm-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/gemm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/gemm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/gemm-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/gemm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/gemm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/gemm-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/gemm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/gemm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/gemm-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/symm.c
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/ludcmp.c
 converting gemver
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemver.c -S -function=kernel_gemver -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/gemver.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/gemver-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/gemver-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/gemver-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/gemver-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/gemver-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/gemver-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/gemver-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/gemver-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/gemver-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/gemver-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/gemver-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/adi.c
 converting syr2k
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syr2k.c -S -function=kernel_syr2k -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-all-except-parallelize/syr2k.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/syr2k-pluto.mlir
-    mlir-opt converted-affine-options/affine-all-except-parallelize/syr2k-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
-    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/syr2k-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/syr2k-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/syr2k-converted.mlir
+    polymer-opt converted-affine-options/affine-all-except-parallelize/syr2k-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-all-except-parallelize/syr2k-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-all-except-parallelize/syr2k-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    mlir-opt --lower-affine converted-affine-options/affine-all-except-parallelize/syr2k-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-all-except-parallelize/syr2k-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/syr2k-6-after-conversion.mlir
 
 
 fail before conversion:
-    lu: mlir-opt converted-affine-options/affine-all-except-parallelize/lu-pluto-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+    lu: mlir-opt converted-affine-options/affine-all-except-parallelize/lu-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
     nussinov: cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
 fail during conversion:
 fail during translation:
-    correlation: verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/correlation-converted.mlir
-    covariance: verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/covariance-converted.mlir
-    cholesky: verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/cholesky-converted.mlir
+    correlation: verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/correlation-6-after-conversion.mlir
+    covariance: verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/covariance-6-after-conversion.mlir
+    cholesky: verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/cholesky-6-after-conversion.mlir

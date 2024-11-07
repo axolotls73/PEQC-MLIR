@@ -1,214 +1,214 @@
 config file: config/affine-options.json, output dir converted-affine-options/affine-tile
-{'cgeist_args': '-raise-scf-to-affine', 'polymer_args': '-reg2mem -extract-scop-stmt -pluto-opt', 'mliropt_args': '--affine-loop-tile', 'inline': True, 'output_dir': 'affine-tile', 'polybench_dir': 'generated-polybench-use-scalar-lb-mini-dataset'}
+{'cgeist_args': '-raise-scf-to-affine', 'polymer_args': '-reg2mem -extract-scop-stmt -pluto-opt', 'mliropt_args': '--affine-loop-tile="tile-size=32"', 'inline': True, 'output_dir': 'affine-tile', 'polybench_dir': 'generated-polybench-use-scalar-lb-mini-dataset'}
 converting trisolv
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trisolv.c -S -function=kernel_trisolv -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/trisolv.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/trisolv-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/trisolv-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/trisolv-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/trisolv-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/trisolv-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/trisolv-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/trisolv-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/trisolv-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/trisolv-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/trisolv-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/trisolv-6-after-conversion.mlir
 converting doitgen
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/doitgen.c -S -function=kernel_doitgen -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/doitgen.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/doitgen-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/doitgen-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/doitgen-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/doitgen-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/doitgen-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/doitgen-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/doitgen-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/doitgen-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/doitgen-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/doitgen-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/doitgen-6-after-conversion.mlir
 converting correlation
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/correlation.c -S -function=kernel_correlation -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/correlation.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/correlation-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/correlation-pluto-inline.mlir --affine-loop-tile
-    mlir-opt --lower-affine converted-affine-options/affine-tile/correlation-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/correlation-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/correlation-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/correlation-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/correlation-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/correlation-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    mlir-opt --lower-affine converted-affine-options/affine-tile/correlation-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/correlation-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/correlation-6-after-conversion.mlir
     failed
 converting seidel-2d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/seidel-2d.c -S -function=kernel_seidel_2d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/seidel-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/seidel-2d-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/seidel-2d-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/seidel-2d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/seidel-2d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/seidel-2d-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/seidel-2d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/seidel-2d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/seidel-2d-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/seidel-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/seidel-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/seidel-2d-6-after-conversion.mlir
 converting lu
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/lu.c -S -function=kernel_lu -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/lu.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/lu-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/lu-pluto-inline.mlir --affine-loop-tile
+    polymer-opt converted-affine-options/affine-tile/lu-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/lu-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/lu-3-after-inline.mlir --affine-loop-tile="tile-size=32"
     failed(timeout)
 converting 3mm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/3mm.c -S -function=kernel_3mm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/3mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/3mm-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/3mm-pluto-inline.mlir --affine-loop-tile
-    mlir-opt --lower-affine converted-affine-options/affine-tile/3mm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/3mm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/3mm-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/3mm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/3mm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/3mm-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    mlir-opt --lower-affine converted-affine-options/affine-tile/3mm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/3mm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/3mm-6-after-conversion.mlir
 converting covariance
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/covariance.c -S -function=kernel_covariance -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/covariance.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/covariance-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/covariance-pluto-inline.mlir --affine-loop-tile
-    mlir-opt --lower-affine converted-affine-options/affine-tile/covariance-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/covariance-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/covariance-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/covariance-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/covariance-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/covariance-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    mlir-opt --lower-affine converted-affine-options/affine-tile/covariance-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/covariance-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/covariance-6-after-conversion.mlir
 converting syrk
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syrk.c -S -function=kernel_syrk -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/syrk.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/syrk-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/syrk-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/syrk-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/syrk-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/syrk-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/syrk-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/syrk-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/syrk-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/syrk-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/syrk-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/syrk-6-after-conversion.mlir
 converting trmm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/trmm.c -S -function=kernel_trmm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/trmm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/trmm-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/trmm-pluto-inline.mlir --affine-loop-tile
-    mlir-opt --lower-affine converted-affine-options/affine-tile/trmm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/trmm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/trmm-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/trmm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/trmm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/trmm-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    mlir-opt --lower-affine converted-affine-options/affine-tile/trmm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/trmm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/trmm-6-after-conversion.mlir
 converting bicg
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/bicg.c -S -function=kernel_bicg -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/bicg.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/bicg-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/bicg-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/bicg-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/bicg-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/bicg-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/bicg-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/bicg-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/bicg-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/bicg-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/bicg-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/bicg-6-after-conversion.mlir
 converting floyd-warshall
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/floyd-warshall.c -S -function=kernel_floyd_warshall -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/floyd-warshall.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/floyd-warshall-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/floyd-warshall-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/floyd-warshall-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/floyd-warshall-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/floyd-warshall-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/floyd-warshall-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/floyd-warshall-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/floyd-warshall-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/floyd-warshall-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/floyd-warshall-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/floyd-warshall-6-after-conversion.mlir
 converting cholesky
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/cholesky.c -S -function=kernel_cholesky -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/cholesky.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/cholesky-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/cholesky-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/cholesky-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/cholesky-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/cholesky-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/cholesky-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/cholesky-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/cholesky-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/cholesky-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/cholesky-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/cholesky-6-after-conversion.mlir
 converting jacobi-1d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-1d.c -S -function=kernel_jacobi_1d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/jacobi-1d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/jacobi-1d-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/jacobi-1d-pluto-inline.mlir --affine-loop-tile
-    mlir-opt --lower-affine converted-affine-options/affine-tile/jacobi-1d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/jacobi-1d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/jacobi-1d-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/jacobi-1d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/jacobi-1d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/jacobi-1d-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    mlir-opt --lower-affine converted-affine-options/affine-tile/jacobi-1d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/jacobi-1d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/jacobi-1d-6-after-conversion.mlir
 converting gesummv
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gesummv.c -S -function=kernel_gesummv -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/gesummv.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/gesummv-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/gesummv-pluto-inline.mlir --affine-loop-tile
-    mlir-opt --lower-affine converted-affine-options/affine-tile/gesummv-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/gesummv-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/gesummv-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/gesummv-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/gesummv-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/gesummv-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    mlir-opt --lower-affine converted-affine-options/affine-tile/gesummv-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/gesummv-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/gesummv-6-after-conversion.mlir
 converting atax
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/atax.c -S -function=kernel_atax -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/atax.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/atax-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/atax-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/atax-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/atax-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/atax-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/atax-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/atax-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/atax-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/atax-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/atax-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/atax-6-after-conversion.mlir
 converting mvt
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/mvt.c -S -function=kernel_mvt -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/mvt.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/mvt-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/mvt-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/mvt-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/mvt-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/mvt-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/mvt-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/mvt-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/mvt-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/mvt-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/mvt-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/mvt-6-after-conversion.mlir
 converting 2mm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/2mm.c -S -function=kernel_2mm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/2mm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/2mm-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/2mm-pluto-inline.mlir --affine-loop-tile
-    mlir-opt --lower-affine converted-affine-options/affine-tile/2mm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/2mm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/2mm-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/2mm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/2mm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/2mm-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    mlir-opt --lower-affine converted-affine-options/affine-tile/2mm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/2mm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/2mm-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/durbin.c
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/deriche.c
 converting fdtd-2d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/fdtd-2d.c -S -function=kernel_fdtd_2d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/fdtd-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/fdtd-2d-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/fdtd-2d-pluto-inline.mlir --affine-loop-tile
-    mlir-opt --lower-affine converted-affine-options/affine-tile/fdtd-2d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/fdtd-2d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/fdtd-2d-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/fdtd-2d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/fdtd-2d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/fdtd-2d-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    mlir-opt --lower-affine converted-affine-options/affine-tile/fdtd-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/fdtd-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/fdtd-2d-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/gramschmidt.c
 converting heat-3d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/heat-3d.c -S -function=kernel_heat_3d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/heat-3d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/heat-3d-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/heat-3d-pluto-inline.mlir --affine-loop-tile
-    mlir-opt --lower-affine converted-affine-options/affine-tile/heat-3d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/heat-3d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/heat-3d-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/heat-3d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/heat-3d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/heat-3d-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    mlir-opt --lower-affine converted-affine-options/affine-tile/heat-3d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/heat-3d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/heat-3d-6-after-conversion.mlir
 converting nussinov
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
-    failed(timeout)
+    failed
 converting jacobi-2d
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/jacobi-2d.c -S -function=kernel_jacobi_2d -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/jacobi-2d.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/jacobi-2d-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/jacobi-2d-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/jacobi-2d-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/jacobi-2d-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/jacobi-2d-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/jacobi-2d-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/jacobi-2d-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/jacobi-2d-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/jacobi-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/jacobi-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/jacobi-2d-6-after-conversion.mlir
 converting gemm
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemm.c -S -function=kernel_gemm -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/gemm.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/gemm-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/gemm-pluto-inline.mlir --affine-loop-tile
-    mlir-opt --lower-affine converted-affine-options/affine-tile/gemm-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/gemm-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/gemm-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/gemm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/gemm-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/gemm-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    mlir-opt --lower-affine converted-affine-options/affine-tile/gemm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/gemm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/gemm-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/symm.c
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/ludcmp.c
 converting gemver
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemver.c -S -function=kernel_gemver -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/gemver.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/gemver-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/gemver-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/gemver-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/gemver-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/gemver-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/gemver-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/gemver-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/gemver-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/gemver-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/gemver-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/gemver-6-after-conversion.mlir
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/adi.c
 converting syr2k
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syr2k.c -S -function=kernel_syr2k -raise-scf-to-affine
-    polymer-opt converted-affine-options/affine-tile/syr2k.mlir -reg2mem -extract-scop-stmt -pluto-opt
-    mlir-opt --inline converted-affine-options/affine-tile/syr2k-pluto.mlir
-    mlir-opt converted-affine-options/affine-tile/syr2k-pluto-inline.mlir --affine-loop-tile
-    pass output same as input
-    mlir-opt --lower-affine converted-affine-options/affine-tile/syr2k-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/syr2k-lowered.mlir
-    verif-translate --translate-to-past converted-affine-options/affine-tile/syr2k-converted.mlir
+    polymer-opt converted-affine-options/affine-tile/syr2k-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-tile/syr2k-2-after-polymer.mlir
+    mlir-opt converted-affine-options/affine-tile/syr2k-3-after-inline.mlir --affine-loop-tile="tile-size=32"
+    **pass output same as input**
+    mlir-opt --lower-affine converted-affine-options/affine-tile/syr2k-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-tile/syr2k-5-after-loweraffine.mlir
+    verif-translate --translate-to-past converted-affine-options/affine-tile/syr2k-6-after-conversion.mlir
 
 
 fail before conversion:
-    lu: mlir-opt converted-affine-options/affine-tile/lu-pluto-inline.mlir --affine-loop-tile
+    lu: mlir-opt converted-affine-options/affine-tile/lu-3-after-inline.mlir --affine-loop-tile="tile-size=32"
     nussinov: cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
 fail during conversion:
 fail during translation:
-    correlation: verif-translate --translate-to-past converted-affine-options/affine-tile/correlation-converted.mlir
+    correlation: verif-translate --translate-to-past converted-affine-options/affine-tile/correlation-6-after-conversion.mlir
