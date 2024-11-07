@@ -8,6 +8,7 @@ import re
 import os
 import argparse
 import json
+import csv
 import itertools as it
 import functools as ft
 
@@ -32,9 +33,26 @@ argparser.add_argument('--die', choices=debugopts, default=[],
     help='stop after first error from this stage')
 args = argparser.parse_args()
 
+configs = json.load(open(args.config_file))
+if not(type(configs) is list): configs = [configs]
+configdirs = [config['output_dir'] for config in configs]
+assert len(configdirs) == len(set(configdirs)), 'configs must have different output directories!'
+
+if not args.topdir:
+  assert len(configs) == 1
+  args.topdir = configs[0]['output_dir']
+
+if args.topdir:
+  runsh(f'mkdir -p {args.topdir}')
+
+csvfile = f'{args.topdir}/stats.csv'
+cw = csv.writer(open(csvfile, 'w'))
+cw.writerow(['name' 'output_dir', 'all_pass', 'fail_command', 'flag_did_nothing'])
+
 # returns stdout if successful
-def runorrecord(command, listtoadd, stage, name=None, log=None):
+def runorrecord(command, listtoadd, stage, name=None, log=None, outdir=None):
   global args
+  global cw
   log += [f'    {command}']
   stdout, stderr, rc = runsh(command, timeout=args.timeout)
   emptymodule = '''module {
@@ -45,6 +63,7 @@ def runorrecord(command, listtoadd, stage, name=None, log=None):
     timeoutstr = "(timeout)" if rc is None else ""
     print(f'{CLR_RED}  failed{empty}{timeoutstr}: {command}{CLR_NONE}')
     log += [f'    failed{empty}{timeoutstr}']
+    cw.writerow([name, outdir, 'no', command])
     if args.debug == stage:
       print(stderr, file=sys.stderr)
     if args.die == stage:
@@ -52,11 +71,13 @@ def runorrecord(command, listtoadd, stage, name=None, log=None):
     return None
   return stdout
 
+# returns true if files are different
 def checkdiff(f1, f2, command, log):
   _, _, rc = runsh(f'diff {f1} {f2}')
-  if rc: return
+  if rc: return True
   print(f'  {CLR_YLW}pass output same as input: {command}{CLR_NONE}')
-  log += ['    pass output same as input']
+  log += ['    **pass output same as input**']
+  return False
 
 
 def convertbenches(config):
@@ -65,9 +86,12 @@ def convertbenches(config):
   global conversionfailed
   global translationfailed
   global args
+  global cw
   runmlirfailed = []
   runconvfailed = []
   runtranfailed = []
+
+  uselesspass = False
 
   outdir = args.topdir + '/' + config['output_dir'] if args.topdir else config['output_dir']
   pbdir = config['polybench_dir']
@@ -102,68 +126,83 @@ def convertbenches(config):
     print('converting ' + name)
     log += ['converting ' + name]
 
-    nrunorrecord = ft.partial(runorrecord, name=name, log=log)
+    nrunorrecord = ft.partial(runorrecord, name=name, log=log, outdir=outdir)
 
+    file_original_mlir = f'{outdir}/{name}-1-original.mlir'
     stdout = nrunorrecord(f'cgeist {file} -S -function=kernel_{name.replace("-", "_")} {cgeist_args}',
                         runmlirfailed, 'mlir')
     if not stdout: continue
     # remove module and function attributes
     stdout = re.sub(r'module attributes {.*}', 'module', stdout)
     stdout = re.sub(r'func.func (.+) attributes {.*}', r'func.func \1', stdout)
-    with open(f'{outdir}/{name}.mlir', 'w') as f:
+    with open(file_original_mlir, 'w') as f:
       f.write(stdout)
 
 
-    command = f'polymer-opt {outdir}/{name}.mlir {polymer_args}'
+    file_after_polymer = f'{outdir}/{name}-2-after-polymer.mlir'
+    command = f'polymer-opt {file_original_mlir} {polymer_args}'
     stdout = nrunorrecord(command, runmlirfailed, 'mlir')
     if not stdout: continue
     # get rid of symbol()
     stdout = re.sub(r'symbol\((.*?)\)', r'\1', stdout)
-    with open(f'{outdir}/{name}-pluto.mlir', 'w') as f:
+    with open(file_after_polymer, 'w') as f:
       f.write(stdout)
-    if len(polymer_args): checkdiff(f'{outdir}/{name}.mlir', f'{outdir}/{name}-pluto.mlir', command, log)
+    if len(polymer_args):
+      diff = checkdiff(file_original_mlir, file_after_polymer, command, log)
+      if not diff: uselesspass = True
 
+    file_after_inline = f'{outdir}/{name}-3-after-inline.mlir'
     if inline:
-      stdout = nrunorrecord(f'mlir-opt --inline {outdir}/{name}-pluto.mlir',
+      stdout = nrunorrecord(f'mlir-opt --inline {file_after_polymer}',
                           runmlirfailed, 'mlir')
       if not stdout: continue
       # get rid of symbol()
       stdout = re.sub(r'symbol\((.*?)\)', r'\1', stdout)
-      with open(f'{outdir}/{name}-pluto-inline.mlir', 'w') as f:
+      with open(file_after_inline, 'w') as f:
         f.write(stdout)
 
-    mliropt_input = f'{outdir}/{name}-pluto.mlir' if not inline else f'{outdir}/{name}-pluto-inline.mlir'
+    mliropt_input = file_after_polymer if not inline else file_after_inline
 
 
+    file_after_mliropt = f'{outdir}/{name}-4-after-mliropt.mlir'
     command = f'mlir-opt {mliropt_input} {mliropt_args}'
     stdout = nrunorrecord(command, runmlirfailed, 'mlir')
     if not stdout: continue
-    with open(f'{outdir}/{name}-mliropt.mlir', 'w') as f:
+    with open(file_after_mliropt, 'w') as f:
       f.write(stdout)
-    if len(mliropt_args): checkdiff(mliropt_input, f'{outdir}/{name}-mliropt.mlir', command, log)
+    if len(mliropt_args):
+      diff = checkdiff(mliropt_input, file_after_mliropt, command, log)
+      if not diff: uselesspass = True
 
 
-    stdout = nrunorrecord(f'mlir-opt --lower-affine {outdir}/{name}-mliropt.mlir',
+    file_after_loweraffine = f'{outdir}/{name}-5-after-loweraffine.mlir'
+    stdout = nrunorrecord(f'mlir-opt --lower-affine {file_after_mliropt}',
                         runmlirfailed, 'mlir')
     if not stdout: continue
-    with open(f'{outdir}/{name}-lowered.mlir', 'w') as f:
+    with open(file_after_loweraffine, 'w') as f:
       f.write(stdout)
 
 
-    stdout = nrunorrecord(f'verif-opt --verif-scf-parallel-to-async {outdir}/{name}-lowered.mlir',
+    stdout = nrunorrecord(f'verif-opt --verif-scf-parallel-to-async {file_after_loweraffine}',
                         runconvfailed, 'convert')
     if not stdout: continue
-    with open(f'{outdir}/{name}-converted.mlir', 'w') as f:
+    with open(f'{outdir}/{name}-6-after-conversion.mlir', 'w') as f:
       f.write(stdout)
 
 
-    stdout = nrunorrecord(f'verif-translate --translate-to-past {outdir}/{name}-converted.mlir',
+    stdout = nrunorrecord(f'verif-translate --translate-to-past {outdir}/{name}-6-after-conversion.mlir',
                         runtranfailed, 'translate')
     if not stdout: continue
-    with open(f'{outdir}/{name}-translated-no-includes.c', 'w') as f:
+    with open(f'{outdir}/{name}-7-translated-no-includes.c', 'w') as f:
       f.write(stdout)
-    _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {outdir}/{name}-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue.c {outdir}/translated/{name}-translated.c {VERIFREPO}')
-    assert not rc
+    if 'async' in stdout:
+      _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {outdir}/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue.c {outdir}/translated/{name}-8-translated.c {VERIFREPO}')
+      assert not rc
+    else:
+      _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {outdir}/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue-noasync.c {outdir}/translated/{name}-8-translated-noasyncepilogue.c {VERIFREPO}')
+      assert not rc
+
+    cw.writerow([name, outdir, 'yes', 'N/A', 'yes' if uselesspass else 'no'])
 
   log += ['\n\nfail before conversion:']
   for name, command in runmlirfailed:
@@ -187,14 +226,6 @@ def convertbenches(config):
 mlirstepsfailed = []
 conversionfailed = []
 translationfailed = []
-
-if args.topdir:
-  runsh(f'mkdir -p {args.topdir}')
-
-configs = json.load(open(args.config_file))
-if not(type(configs) is list): configs = [configs]
-configdirs = [config['output_dir'] for config in configs]
-assert len(configdirs) == len(set(configdirs)), 'configs must have different output directories!'
 
 for config in configs:
   convertbenches(config)
