@@ -1,0 +1,30 @@
+nameoutput_dir,all_pass,fail_command,flag_did_nothing
+trisolv,converted-benches/converted-benches,yes,N/A,no
+doitgen,converted-benches/converted-benches,yes,N/A,no
+correlation,converted-benches/converted-benches,no,verif-translate --translate-to-past converted-benches/converted-benches/correlation-6-after-conversion.mlir
+seidel-2d,converted-benches/converted-benches,yes,N/A,yes
+lu,converted-benches/converted-benches,yes,N/A,yes
+3mm,converted-benches/converted-benches,yes,N/A,yes
+covariance,converted-benches/converted-benches,yes,N/A,yes
+syrk,converted-benches/converted-benches,yes,N/A,yes
+trmm,converted-benches/converted-benches,yes,N/A,yes
+bicg,converted-benches/converted-benches,yes,N/A,yes
+floyd-warshall,converted-benches/converted-benches,yes,N/A,yes
+cholesky,converted-benches/converted-benches,yes,N/A,yes
+jacobi-1d,converted-benches/converted-benches,yes,N/A,yes
+gesummv,converted-benches/converted-benches,yes,N/A,yes
+atax,converted-benches/converted-benches,yes,N/A,yes
+mvt,converted-benches/converted-benches,yes,N/A,yes
+2mm,converted-benches/converted-benches,yes,N/A,yes
+durbin,converted-benches/converted-benches,no,verif-opt --verif-scf-parallel-to-async converted-benches/converted-benches/durbin-5-after-loweraffine.mlir
+deriche,converted-benches/converted-benches,no,verif-opt --verif-scf-parallel-to-async converted-benches/converted-benches/deriche-5-after-loweraffine.mlir
+fdtd-2d,converted-benches/converted-benches,yes,N/A,yes
+gramschmidt,converted-benches/converted-benches,no,verif-opt --verif-scf-parallel-to-async converted-benches/converted-benches/gramschmidt-5-after-loweraffine.mlir
+heat-3d,converted-benches/converted-benches,yes,N/A,yes
+nussinov,converted-benches/converted-benches,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+jacobi-2d,converted-benches/converted-benches,yes,N/A,yes
+gemm,converted-benches/converted-benches,yes,N/A,yes
+symm,converted-benches/converted-benches,no,mlir-opt --inline converted-benches/converted-benches/symm-2-after-polymer.mlir
+ludcmp,converted-benches/converted-benches,no,mlir-opt --inline converted-benches/converted-benches/ludcmp-2-after-polymer.mlir
+gemver,converted-benches/converted-benches,yes,N/A,yes
+syr2k,converted-benches/converted-benches,yes,N/A,yes
