@@ -28,6 +28,8 @@ argparser.add_argument('--timeout', type=int, default=60,
     help='timeout for conversion, default 60')
 argparser.add_argument('--skip', type=lambda t: [s.strip() for s in t.split(',')], default=[],
     help='comma-separated list of bench names to skip')
+argparser.add_argument('--only', type=lambda t: [s.strip() for s in t.split(',')], default=[],
+    help='only convert this comma-separated list of bench names')
 argparser.add_argument('--debug', choices=debugopts, default=[],
     help='print stderr from this stage')
 argparser.add_argument('--die', choices=debugopts, default=[],
@@ -43,12 +45,9 @@ if not args.topdir:
   assert len(configs) == 1
   args.topdir = configs[0]['output_dir']
 
-if args.topdir:
-  runsh(f'mkdir -p {args.topdir}')
-
 csvfile = f'{args.topdir}/stats.csv'
 cw = csv.writer(open(csvfile, 'w'))
-cw.writerow(['name' 'output_dir', 'all_pass', 'fail_command', 'flag_did_nothing'])
+cw.writerow(['name', 'output_dir', 'all_pass', 'fail_command', 'flag_did_nothing'])
 
 # returns stdout if successful
 def runorrecord(command, listtoadd, stage, name=None, log=None, outdir=None):
@@ -74,7 +73,7 @@ def runorrecord(command, listtoadd, stage, name=None, log=None, outdir=None):
 
 # returns true if files are different
 def checkdiff(f1, f2, command, log):
-  _, _, rc = runsh(f'diff {f1} {f2}')
+  _, _, rc = runsh(f'diff -wbB {f1} {f2}')
   if rc: return True
   print(f'  {CLR_YLW}pass output same as input: {command}{CLR_NONE}')
   log += ['    **pass output same as input**']
@@ -120,7 +119,7 @@ def convertbenches(config):
 
   for file in glob(f'{pbdir}/kernel/*.c'):
     name = os.path.basename(file).replace('.c', '')
-    if name in args.skip:
+    if (args.only and name not in args.only) or (args.skip and name in args.skip):
       print(f'{CLR_YLW}skipping {file}{CLR_NONE}')
       log += [f'skipping {file}']
       continue
