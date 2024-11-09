@@ -662,10 +662,7 @@ class PastTranslator {
     return past_node_statement_create(
       past_node_binary_create(past_assign,
         declareVar(op.getResult(), "arith_cmpi"),
-        past_node_ternary_cond_create(
-          cond,
-          past_node_value_create_from_int(1),
-          past_node_value_create_from_int(0))));
+        cond));
   }
 
   s_past_node_t* translate(arith::SelectOp op) {

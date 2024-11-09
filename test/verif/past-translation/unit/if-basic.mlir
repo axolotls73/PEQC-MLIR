@@ -3,7 +3,7 @@
 module {
 // CHECK: int [[C1:.*]] = 1
 // CHECK: int [[C2:.*]] = 2
-// CHECK: int [[cond:.*]] = (([[C1]] != [[C2]]) ? 1 : 0)
+// CHECK: int [[cond:.*]] = ([[C1]] != [[C2]])
     %c1 = arith.constant 1 : index
     %c2 = arith.constant 2 : index
     %cond = arith.cmpi ne, %c1, %c2 : index
