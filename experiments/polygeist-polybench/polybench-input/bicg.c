@@ -72,7 +72,7 @@ void kernel_bicg(int m, int n,
 
 #pragma scop
   for (i = 0; i < _PB_M; i++)
-    s[i] = 0;
+    s[i] = 0.0;
   for (i = 0; i < _PB_N; i++)
     {
       q[i] = SCALAR_VAL(0.0);

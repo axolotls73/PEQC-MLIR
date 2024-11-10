@@ -63,7 +63,7 @@ void kernel_atax(int m, int n,
 
 #pragma scop
   for (i = 0; i < _PB_N; i++)
-    y[i] = 0;
+    y[i] = 0.0;
   for (i = 0; i < _PB_M; i++)
     {
       tmp[i] = SCALAR_VAL(0.0);
