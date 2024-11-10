@@ -11,7 +11,7 @@ void kernel_bicg(int m, int n,
 
 #pragma scop
   for (i = 0; i < 38; i++)
-    s[i] = 0;
+    s[i] = 0.0;
   for (i = 0; i < 42; i++)
     {
       q[i] = 0.0;

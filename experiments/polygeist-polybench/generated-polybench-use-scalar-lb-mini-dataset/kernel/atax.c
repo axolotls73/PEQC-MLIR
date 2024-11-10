@@ -10,7 +10,7 @@ void kernel_atax(int m, int n,
 
 #pragma scop
   for (i = 0; i < 42; i++)
-    y[i] = 0;
+    y[i] = 0.0;
   for (i = 0; i < 38; i++)
     {
       tmp[i] = 0.0;
