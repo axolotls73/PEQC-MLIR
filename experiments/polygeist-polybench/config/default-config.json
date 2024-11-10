@@ -1,10 +1,16 @@
 {
+    "topdir": "converted-benches-no-flags",
+    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset",
+
+    "optionsets": [
+{
     "cgeist_args": "-raise-scf-to-affine",
     "polymer_args": "",
     "mliropt_args": "",
 
     "inline": true,
 
-    "output_dir": "converted-benches-no-flags",
-    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset"
+    "output_dir": "converted-benches-no-flags"
+}
+]
 }

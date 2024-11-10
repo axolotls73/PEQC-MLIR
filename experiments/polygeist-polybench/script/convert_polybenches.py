@@ -22,8 +22,6 @@ debugopts = ['mlir', 'translate', 'convert']
 argparser = argparse.ArgumentParser()
 argparser.add_argument('config_file', type=str, default=f'{BASEDIR}/config/default-config.json', nargs='?',
     help='json file with options, default config/default-config.json')
-argparser.add_argument('--topdir', type=str,
-    help='put all runs in this directory')
 argparser.add_argument('--timeout', type=int, default=60,
     help='timeout for conversion, default 60')
 argparser.add_argument('--skip', type=lambda t: [s.strip() for s in t.split(',')], default=[],
@@ -36,16 +34,19 @@ argparser.add_argument('--die', choices=debugopts, default=[],
     help='stop after first error from this stage')
 args = argparser.parse_args()
 
-configs = json.load(open(args.config_file))
+configobj = json.load(open(args.config_file))
+print(configobj)
+configs = configobj['optionsets']
+pbdir = configobj['polybench_dir']
+
 if not(type(configs) is list): configs = [configs]
 configdirs = [config['output_dir'] for config in configs]
 assert len(configdirs) == len(set(configdirs)), 'configs must have different output directories!'
 
-if not args.topdir:
-  assert len(configs) == 1
-  args.topdir = configs[0]['output_dir']
+topdir = configobj['topdir']
+runsh(f'mkdir -p {topdir}')
 
-csvfile = f'{args.topdir}/stats.csv'
+csvfile = f'{topdir}/conversion_stats.csv'
 cw = csv.writer(open(csvfile, 'w'))
 cw.writerow(['name', 'output_dir', 'all_pass', 'fail_command', 'flag_did_nothing'])
 
@@ -82,6 +83,7 @@ def checkdiff(f1, f2, command, log):
 
 def convertbenches(config):
   print(f'PROCESSING DIR: {config["output_dir"]}')
+  global pbdir
   global mlirstepsfailed
   global conversionfailed
   global translationfailed
@@ -93,8 +95,7 @@ def convertbenches(config):
 
   uselesspass = False
 
-  outdir = args.topdir + '/' + config['output_dir'] if args.topdir else config['output_dir']
-  pbdir = config['polybench_dir']
+  outdir = topdir + '/' + config['output_dir']
   cgeist_args = config['cgeist_args']
   polymer_args = config['polymer_args']
   mliropt_args = config['mliropt_args']
@@ -111,6 +112,7 @@ def convertbenches(config):
   #   exit(1)
   runsh(f'mkdir -p {outdir}')
   runsh(f'mkdir -p {outdir}/translated')
+  runsh(f'mkdir -p {outdir}/conversion')
   runsh(f'mkdir -p {outdir}/logs')
 
   if not os.path.isdir(f'{pbdir}/kernel') or not os.path.isdir(f'{pbdir}/epilogue'):
@@ -128,7 +130,7 @@ def convertbenches(config):
 
     nrunorrecord = ft.partial(runorrecord, name=name, log=log, outdir=outdir)
 
-    file_original_mlir = f'{outdir}/{name}-1-original.mlir'
+    file_original_mlir = f'{outdir}/conversion/{name}-1-original.mlir'
     stdout = nrunorrecord(f'cgeist {file} -S -function=kernel_{name.replace("-", "_")} {cgeist_args}',
                         runmlirfailed, 'mlir')
     if not stdout: continue
@@ -139,7 +141,7 @@ def convertbenches(config):
       f.write(stdout)
 
 
-    file_after_polymer = f'{outdir}/{name}-2-after-polymer.mlir'
+    file_after_polymer = f'{outdir}/conversion/{name}-2-after-polymer.mlir'
     command = f'polymer-opt {file_original_mlir} {polymer_args}'
     stdout = nrunorrecord(command, runmlirfailed, 'mlir')
     if not stdout: continue
@@ -151,7 +153,7 @@ def convertbenches(config):
       diff = checkdiff(file_original_mlir, file_after_polymer, command, log)
       if not diff: uselesspass = True
 
-    file_after_inline = f'{outdir}/{name}-3-after-inline.mlir'
+    file_after_inline = f'{outdir}/conversion/{name}-3-after-inline.mlir'
     if inline:
       stdout = nrunorrecord(f'mlir-opt --inline {file_after_polymer}',
                           runmlirfailed, 'mlir')
@@ -164,7 +166,7 @@ def convertbenches(config):
     mliropt_input = file_after_polymer if not inline else file_after_inline
 
 
-    file_after_mliropt = f'{outdir}/{name}-4-after-mliropt.mlir'
+    file_after_mliropt = f'{outdir}/conversion/{name}-4-after-mliropt.mlir'
     command = f'mlir-opt {mliropt_input} {mliropt_args}'
     stdout = nrunorrecord(command, runmlirfailed, 'mlir')
     if not stdout: continue
@@ -175,7 +177,7 @@ def convertbenches(config):
       if not diff: uselesspass = True
 
 
-    file_after_loweraffine = f'{outdir}/{name}-5-after-loweraffine.mlir'
+    file_after_loweraffine = f'{outdir}/conversion/{name}-5-after-loweraffine.mlir'
     stdout = nrunorrecord(f'mlir-opt --lower-affine {file_after_mliropt}',
                         runmlirfailed, 'mlir')
     if not stdout: continue
@@ -186,23 +188,23 @@ def convertbenches(config):
     stdout = nrunorrecord(f'verif-opt --verif-scf-parallel-to-async {file_after_loweraffine}',
                         runconvfailed, 'convert')
     if not stdout: continue
-    with open(f'{outdir}/{name}-6-after-conversion.mlir', 'w') as f:
+    with open(f'{outdir}/conversion/{name}-6-after-conversion.mlir', 'w') as f:
       f.write(stdout)
 
 
-    stdout = nrunorrecord(f'verif-translate --translate-to-past {outdir}/{name}-6-after-conversion.mlir',
+    stdout = nrunorrecord(f'verif-translate --translate-to-past {outdir}/conversion/{name}-6-after-conversion.mlir',
                         runtranfailed, 'translate')
     if not stdout: continue
-    with open(f'{outdir}/{name}-7-translated-no-includes.c', 'w') as f:
+    with open(f'{outdir}/conversion/{name}-7-translated-no-includes.c', 'w') as f:
       f.write(stdout)
     if 'async' in stdout:
-      _, _, rc = runsh(f'{EPILOGUE_SCRIPT_ASYNC} {outdir}/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue.c {outdir}/translated/{name}-8-translated.c {VERIFREPO}')
+      _, _, rc = runsh(f'{EPILOGUE_SCRIPT_ASYNC} {outdir}/conversion/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue.c {outdir}/translated/{name}-8-translated.c {VERIFREPO}')
       assert not rc
     else:
-      _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {outdir}/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue-noasync.c {outdir}/translated/{name}-8-translated-noasyncepilogue.c {VERIFREPO}')
+      _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {outdir}/conversion/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue-noasync.c {outdir}/translated/{name}-8-translated-noasyncepilogue.c {VERIFREPO}')
       assert not rc
 
-    cw.writerow([name, outdir, 'yes', 'N/A', 'yes' if uselesspass else 'no'])
+    cw.writerow([name, config['output_dir'], 'yes', 'N/A', 'yes' if uselesspass else 'no'])
 
   log += ['\n\nfail before conversion:']
   for name, command in runmlirfailed:
