@@ -12,7 +12,7 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
   for (int for_iter_11 = arith_const_8; for_iter_11 < arith_const_9; for_iter_11 += arith_const_10) {
     double memref_load_12 = func_arg_3[for_iter_11]; 
     func_arg_2[for_iter_11] = memref_load_12; 
-    int arith_cmpi_13 = ((for_iter_11 < arith_const_8) ? 1 : 0); 
+    int arith_cmpi_13 = (for_iter_11 < arith_const_8); 
     int arith_subi_14 = (arith_const_6 - for_iter_11); 
     int arith_select_15 = (arith_cmpi_13 ? arith_subi_14 : for_iter_11); 
     int arith_divi_16 = (arith_select_15 / arith_const_7); 
@@ -48,7 +48,7 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
       double arith_subf_43 = (memref_load_42 - arith_mulf_41); 
       func_arg_2[for_iter_11] = arith_subf_43; 
     }
-    int arith_cmpi_44 = ((for_iter_11 < arith_const_8) ? 1 : 0); 
+    int arith_cmpi_44 = (for_iter_11 < arith_const_8); 
     int arith_subi_45 = (arith_const_6 - for_iter_11); 
     int arith_select_46 = (arith_cmpi_44 ? arith_subi_45 : for_iter_11); 
     int arith_divi_47 = (arith_select_46 / arith_const_7); 

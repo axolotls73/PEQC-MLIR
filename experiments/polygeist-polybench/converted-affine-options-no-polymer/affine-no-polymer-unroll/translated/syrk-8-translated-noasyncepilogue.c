@@ -12,7 +12,7 @@ void kernel_syrk(int func_arg_0, int func_arg_1, double func_arg_2, double func_
   int arith_const_13 = 1; 
   for (int for_iter_14 = arith_const_11; for_iter_14 < arith_const_12; for_iter_14 += arith_const_13) {
     int arith_addi_15 = (for_iter_14 + arith_const_13); 
-    int arith_cmpi_16 = ((arith_addi_15 < arith_const_11) ? 1 : 0); 
+    int arith_cmpi_16 = (arith_addi_15 < arith_const_11); 
     int arith_subi_17 = (arith_const_9 - arith_addi_15); 
     int arith_select_18 = (arith_cmpi_16 ? arith_subi_17 : arith_addi_15); 
     int arith_divi_19 = (arith_select_18 / arith_const_10); 
@@ -37,7 +37,7 @@ void kernel_syrk(int func_arg_0, int func_arg_1, double func_arg_2, double func_
       func_arg_4[for_iter_14][arith_addi_32] = arith_mulf_34; 
     }
     int arith_addi_35 = (for_iter_14 + arith_const_13); 
-    int arith_cmpi_36 = ((arith_addi_35 < arith_const_11) ? 1 : 0); 
+    int arith_cmpi_36 = (arith_addi_35 < arith_const_11); 
     int arith_subi_37 = (arith_const_9 - arith_addi_35); 
     int arith_select_38 = (arith_cmpi_36 ? arith_subi_37 : arith_addi_35); 
     int arith_divi_39 = (arith_select_38 / arith_const_10); 
@@ -52,7 +52,7 @@ void kernel_syrk(int func_arg_0, int func_arg_1, double func_arg_2, double func_
     }
     for (int for_iter_47 = arith_const_11; for_iter_47 < arith_const_6; for_iter_47 += arith_const_13) {
       int arith_addi_48 = (for_iter_14 + arith_const_13); 
-      int arith_cmpi_49 = ((arith_addi_48 < arith_const_11) ? 1 : 0); 
+      int arith_cmpi_49 = (arith_addi_48 < arith_const_11); 
       int arith_subi_50 = (arith_const_9 - arith_addi_48); 
       int arith_select_51 = (arith_cmpi_49 ? arith_subi_50 : arith_addi_48); 
       int arith_divi_52 = (arith_select_51 / arith_const_10); 
@@ -93,7 +93,7 @@ void kernel_syrk(int func_arg_0, int func_arg_1, double func_arg_2, double func_
         func_arg_4[for_iter_14][arith_addi_77] = arith_addf_83; 
       }
       int arith_addi_84 = (for_iter_14 + arith_const_13); 
-      int arith_cmpi_85 = ((arith_addi_84 < arith_const_11) ? 1 : 0); 
+      int arith_cmpi_85 = (arith_addi_84 < arith_const_11); 
       int arith_subi_86 = (arith_const_9 - arith_addi_84); 
       int arith_select_87 = (arith_cmpi_85 ? arith_subi_86 : arith_addi_84); 
       int arith_divi_88 = (arith_select_87 / arith_const_10); 

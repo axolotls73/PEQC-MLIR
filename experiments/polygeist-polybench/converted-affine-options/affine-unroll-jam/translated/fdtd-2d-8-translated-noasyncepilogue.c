@@ -15,13 +15,13 @@ void kernel_fdtd_2d(int func_arg_0, int func_arg_1, int func_arg_2, double* func
   int arith_const_17 = 1; 
   for (int for_iter_18 = arith_const_15; for_iter_18 < arith_const_16; for_iter_18 += arith_const_17) {
     for (int for_iter_19 = arith_const_15; for_iter_19 < arith_const_16; for_iter_19 += arith_const_17) {
-      int arith_cmpi_20 = ((for_iter_19 == arith_const_15) ? 1 : 0); 
+      int arith_cmpi_20 = (for_iter_19 == arith_const_15); 
       if (arith_cmpi_20) {
         int arith_muli_21 = (for_iter_18 * arith_const_12); 
         int arith_addi_22 = (arith_muli_21 + arith_const_11); 
         int arith_maxsi_23 = max(arith_addi_22, arith_const_15); 
         for (int for_iter_24 = arith_maxsi_23; for_iter_24 < arith_const_10; for_iter_24 += arith_const_17) {
-          int arith_cmpi_25 = ((for_iter_18 == arith_const_15) ? 1 : 0); 
+          int arith_cmpi_25 = (for_iter_18 == arith_const_15); 
           if (arith_cmpi_25) {
             double memref_load_26 = func_arg_6[for_iter_24]; 
             func_arg_4[arith_const_15][arith_const_15] = memref_load_26; 
@@ -59,7 +59,7 @@ void kernel_fdtd_2d(int func_arg_0, int func_arg_1, int func_arg_2, double* func
           int arith_addi_54 = (for_iter_24 + arith_const_10); 
           int arith_minsi_55 = min(arith_addi_54, arith_const_12); 
           for (int for_iter_56 = arith_addi_53; for_iter_56 < arith_minsi_55; for_iter_56 += arith_const_17) {
-            int arith_cmpi_57 = ((for_iter_18 == arith_const_15) ? 1 : 0); 
+            int arith_cmpi_57 = (for_iter_18 == arith_const_15); 
             if (arith_cmpi_57) {
               int arith_muli_58 = (for_iter_56 * arith_const_8); 
               int arith_addi_59 = (arith_muli_58 + for_iter_24); 
@@ -184,12 +184,12 @@ void kernel_fdtd_2d(int func_arg_0, int func_arg_1, int func_arg_2, double* func
         }
       }
       int arith_addi_171 = (for_iter_19 + arith_const_8); 
-      int arith_cmpi_172 = ((arith_addi_171 == arith_const_15) ? 1 : 0); 
+      int arith_cmpi_172 = (arith_addi_171 == arith_const_15); 
       if (arith_cmpi_172) {
         for (int for_iter_173 = arith_const_7; for_iter_173 < arith_const_10; for_iter_173 += arith_const_17) {
           int arith_addi_174 = (for_iter_173 + arith_const_10); 
           for (int for_iter_175 = arith_const_12; for_iter_175 < arith_addi_174; for_iter_175 += arith_const_17) {
-            int arith_cmpi_176 = ((for_iter_18 == arith_const_15) ? 1 : 0); 
+            int arith_cmpi_176 = (for_iter_18 == arith_const_15); 
             if (arith_cmpi_176) {
               int arith_muli_177 = (for_iter_175 * arith_const_8); 
               int arith_addi_178 = (arith_muli_177 + for_iter_173); 

@@ -18,7 +18,7 @@ void kernel_floyd_warshall(int func_arg_0, int* func_arg_1)
               int memref_load_15 = func_arg_1[for_iter_11][for_iter_9]; 
               int memref_load_16 = func_arg_1[for_iter_9][for_iter_13]; 
               int arith_addi_17 = (memref_load_15 + memref_load_16); 
-              int arith_cmpi_18 = ((memref_load_14 < arith_addi_17) ? 1 : 0); 
+              int arith_cmpi_18 = (memref_load_14 < arith_addi_17); 
               int arith_select_19 = (arith_cmpi_18 ? memref_load_14 : arith_addi_17); 
               func_arg_1[for_iter_11][for_iter_13] = arith_select_19; 
             }

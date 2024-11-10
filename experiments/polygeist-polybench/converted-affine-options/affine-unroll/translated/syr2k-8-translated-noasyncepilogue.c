@@ -12,7 +12,7 @@ void kernel_syr2k(int func_arg_0, int func_arg_1, double func_arg_2, double func
   int arith_const_14 = 1; 
   for (int for_iter_15 = arith_const_12; for_iter_15 < arith_const_13; for_iter_15 += arith_const_14) {
     int arith_addi_16 = (for_iter_15 + arith_const_14); 
-    int arith_cmpi_17 = ((arith_addi_16 < arith_const_12) ? 1 : 0); 
+    int arith_cmpi_17 = (arith_addi_16 < arith_const_12); 
     int arith_subi_18 = (arith_const_10 - arith_addi_16); 
     int arith_select_19 = (arith_cmpi_17 ? arith_subi_18 : arith_addi_16); 
     int arith_divi_20 = (arith_select_19 / arith_const_11); 
@@ -37,7 +37,7 @@ void kernel_syr2k(int func_arg_0, int func_arg_1, double func_arg_2, double func
       func_arg_4[for_iter_15][arith_addi_33] = arith_mulf_35; 
     }
     int arith_addi_36 = (for_iter_15 + arith_const_14); 
-    int arith_cmpi_37 = ((arith_addi_36 < arith_const_12) ? 1 : 0); 
+    int arith_cmpi_37 = (arith_addi_36 < arith_const_12); 
     int arith_subi_38 = (arith_const_10 - arith_addi_36); 
     int arith_select_39 = (arith_cmpi_37 ? arith_subi_38 : arith_addi_36); 
     int arith_divi_40 = (arith_select_39 / arith_const_11); 

@@ -42,7 +42,7 @@ void kernel_2mm(int func_arg_0, int func_arg_1, int func_arg_2, int func_arg_3, 
   }
   PAST_WAIT_SEMAPHORE_ALL(async_group_24, async_group_index_25, PAST_TASK_FINISHED); 
   for (int for_iter_36 = arith_const_21; for_iter_36 < arith_const_17; for_iter_36 += arith_const_23) {
-    int arith_cmpi_37 = ((for_iter_36 == arith_const_21) ? 1 : 0); 
+    int arith_cmpi_37 = (for_iter_36 == arith_const_21); 
     if (arith_cmpi_37) {
       int* async_group_38; 
       int async_group_index_39 = 0; 
@@ -83,7 +83,7 @@ void kernel_2mm(int func_arg_0, int func_arg_1, int func_arg_2, int func_arg_3, 
       PAST_WAIT_SEMAPHORE_ALL(async_group_38, async_group_index_39, PAST_TASK_FINISHED); 
     }
     int arith_addi_61 = (for_iter_36 + arith_const_12); 
-    int arith_cmpi_62 = ((arith_addi_61 == arith_const_21) ? 1 : 0); 
+    int arith_cmpi_62 = (arith_addi_61 == arith_const_21); 
     if (arith_cmpi_62) {
       int* async_group_63; 
       int async_group_index_64 = 0; 

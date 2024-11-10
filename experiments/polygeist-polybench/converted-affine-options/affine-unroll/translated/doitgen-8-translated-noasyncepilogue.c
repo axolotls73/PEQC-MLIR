@@ -19,7 +19,7 @@ void kernel_doitgen(int func_arg_0, int func_arg_1, int func_arg_2, double* func
   for (int for_iter_20 = arith_const_17; for_iter_20 < arith_const_18; for_iter_20 += arith_const_19) {
     int arith_muli_21 = (for_iter_20 * arith_const_15); 
     int arith_addi_22 = (arith_muli_21 + arith_const_14); 
-    int arith_cmpi_23 = ((arith_addi_22 <= arith_const_17) ? 1 : 0); 
+    int arith_cmpi_23 = (arith_addi_22 <= arith_const_17); 
     int arith_subi_24 = (arith_const_17 - arith_addi_22); 
     int arith_subi_25 = (arith_addi_22 - arith_const_19); 
     int arith_select_26 = (arith_cmpi_23 ? arith_subi_24 : arith_subi_25); 
@@ -30,7 +30,7 @@ void kernel_doitgen(int func_arg_0, int func_arg_1, int func_arg_2, double* func
     int arith_maxsi_31 = max(arith_select_30, arith_const_17); 
     int arith_muli_32 = (for_iter_20 * arith_const_15); 
     int arith_addi_33 = (arith_muli_32 + arith_const_11); 
-    int arith_cmpi_34 = ((arith_addi_33 < arith_const_17) ? 1 : 0); 
+    int arith_cmpi_34 = (arith_addi_33 < arith_const_17); 
     int arith_subi_35 = (arith_const_10 - arith_addi_33); 
     int arith_select_36 = (arith_cmpi_34 ? arith_subi_35 : arith_addi_33); 
     int arith_divi_37 = (arith_select_36 / arith_const_13); 

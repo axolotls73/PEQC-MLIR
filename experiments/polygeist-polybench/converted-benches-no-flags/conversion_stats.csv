@@ -1,0 +1,31 @@
+name,output_dir,all_pass,fail_command,flag_did_nothing
+trisolv,converted-benches-no-flags,yes,N/A,no
+doitgen,converted-benches-no-flags,yes,N/A,no
+correlation,converted-benches-no-flags/converted-benches-no-flags,no,verif-translate --translate-to-past converted-benches-no-flags/converted-benches-no-flags/conversion/correlation-6-after-conversion.mlir
+seidel-2d,converted-benches-no-flags,yes,N/A,no
+lu,converted-benches-no-flags,yes,N/A,no
+3mm,converted-benches-no-flags,yes,N/A,no
+covariance,converted-benches-no-flags,yes,N/A,no
+syrk,converted-benches-no-flags,yes,N/A,no
+trmm,converted-benches-no-flags,yes,N/A,no
+bicg,converted-benches-no-flags,yes,N/A,no
+floyd-warshall,converted-benches-no-flags,yes,N/A,no
+cholesky,converted-benches-no-flags,yes,N/A,no
+jacobi-1d,converted-benches-no-flags,yes,N/A,no
+gesummv,converted-benches-no-flags,yes,N/A,no
+atax,converted-benches-no-flags,yes,N/A,no
+mvt,converted-benches-no-flags,yes,N/A,no
+2mm,converted-benches-no-flags,yes,N/A,no
+durbin,converted-benches-no-flags/converted-benches-no-flags,no,verif-opt --verif-scf-parallel-to-async converted-benches-no-flags/converted-benches-no-flags/conversion/durbin-5-after-loweraffine.mlir
+deriche,converted-benches-no-flags/converted-benches-no-flags,no,verif-opt --verif-scf-parallel-to-async converted-benches-no-flags/converted-benches-no-flags/conversion/deriche-5-after-loweraffine.mlir
+fdtd-2d,converted-benches-no-flags,yes,N/A,no
+gramschmidt,converted-benches-no-flags/converted-benches-no-flags,no,verif-opt --verif-scf-parallel-to-async converted-benches-no-flags/converted-benches-no-flags/conversion/gramschmidt-5-after-loweraffine.mlir
+heat-3d,converted-benches-no-flags,yes,N/A,no
+nussinov,converted-benches-no-flags/converted-benches-no-flags,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+jacobi-2d,converted-benches-no-flags,yes,N/A,no
+gemm,converted-benches-no-flags,yes,N/A,no
+symm,converted-benches-no-flags/converted-benches-no-flags,no,verif-opt --verif-scf-parallel-to-async converted-benches-no-flags/converted-benches-no-flags/conversion/symm-5-after-loweraffine.mlir
+ludcmp,converted-benches-no-flags/converted-benches-no-flags,no,verif-opt --verif-scf-parallel-to-async converted-benches-no-flags/converted-benches-no-flags/conversion/ludcmp-5-after-loweraffine.mlir
+gemver,converted-benches-no-flags,yes,N/A,no
+adi,converted-benches-no-flags,yes,N/A,no
+syr2k,converted-benches-no-flags,yes,N/A,no

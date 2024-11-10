@@ -46,7 +46,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
         int arith_minsi_45 = min(arith_minsi_44, arith_addi_41); 
         int arith_minsi_46 = min(arith_minsi_45, arith_addi_43); 
         for (int for_iter_47 = arith_maxsi_37; for_iter_47 < arith_minsi_46; for_iter_47 += arith_const_25) {
-          int arith_cmpi_48 = ((for_iter_47 < arith_const_23) ? 1 : 0); 
+          int arith_cmpi_48 = (for_iter_47 < arith_const_23); 
           int arith_subi_49 = (arith_const_16 - for_iter_47); 
           int arith_select_50 = (arith_cmpi_48 ? arith_subi_49 : for_iter_47); 
           int arith_divi_51 = (arith_select_50 / arith_const_20); 
@@ -54,7 +54,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
           int arith_select_53 = (arith_cmpi_48 ? arith_subi_52 : arith_divi_51); 
           int arith_muli_54 = (for_iter_26 * arith_const_16); 
           int arith_addi_55 = (arith_select_53 + arith_muli_54); 
-          int arith_cmpi_56 = ((arith_addi_55 >= arith_const_23) ? 1 : 0); 
+          int arith_cmpi_56 = (arith_addi_55 >= arith_const_23); 
           if (arith_cmpi_56) {
             int arith_muli_57 = (for_iter_27 * arith_const_15); 
             int arith_muli_58 = (for_iter_47 * arith_const_24); 
@@ -146,7 +146,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
           int arith_addi_140 = (arith_muli_139 + arith_const_14); 
           int arith_minsi_141 = min(arith_addi_138, arith_addi_140); 
           for (int for_iter_142 = arith_maxsi_136; for_iter_142 < arith_minsi_141; for_iter_142 += arith_const_25) {
-            int arith_cmpi_143 = ((for_iter_47 < arith_const_23) ? 1 : 0); 
+            int arith_cmpi_143 = (for_iter_47 < arith_const_23); 
             int arith_subi_144 = (arith_const_16 - for_iter_47); 
             int arith_select_145 = (arith_cmpi_143 ? arith_subi_144 : for_iter_47); 
             int arith_divi_146 = (arith_select_145 / arith_const_20); 
@@ -154,7 +154,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
             int arith_select_148 = (arith_cmpi_143 ? arith_subi_147 : arith_divi_146); 
             int arith_muli_149 = (for_iter_27 * arith_const_16); 
             int arith_addi_150 = (arith_select_148 + arith_muli_149); 
-            int arith_cmpi_151 = ((arith_addi_150 >= arith_const_23) ? 1 : 0); 
+            int arith_cmpi_151 = (arith_addi_150 >= arith_const_23); 
             if (arith_cmpi_151) {
               int arith_muli_152 = (for_iter_28 * arith_const_15); 
               int arith_muli_153 = (for_iter_47 * arith_const_24); 
@@ -235,7 +235,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
             int arith_addi_225 = (arith_muli_224 + arith_const_14); 
             int arith_minsi_226 = min(arith_addi_223, arith_addi_225); 
             for (int for_iter_227 = arith_maxsi_221; for_iter_227 < arith_minsi_226; for_iter_227 += arith_const_25) {
-              int arith_cmpi_228 = ((for_iter_47 < arith_const_23) ? 1 : 0); 
+              int arith_cmpi_228 = (for_iter_47 < arith_const_23); 
               int arith_subi_229 = (arith_const_16 - for_iter_47); 
               int arith_select_230 = (arith_cmpi_228 ? arith_subi_229 : for_iter_47); 
               int arith_divi_231 = (arith_select_230 / arith_const_20); 
@@ -243,7 +243,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
               int arith_select_233 = (arith_cmpi_228 ? arith_subi_232 : arith_divi_231); 
               int arith_muli_234 = (for_iter_28 * arith_const_16); 
               int arith_addi_235 = (arith_select_233 + arith_muli_234); 
-              int arith_cmpi_236 = ((arith_addi_235 >= arith_const_23) ? 1 : 0); 
+              int arith_cmpi_236 = (arith_addi_235 >= arith_const_23); 
               if (arith_cmpi_236) {
                 int arith_muli_237 = (for_iter_47 * arith_const_13); 
                 int arith_addi_238 = (arith_muli_237 + for_iter_142); 
@@ -480,7 +480,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
                 func_arg_2[arith_addi_459][arith_addi_462][arith_addi_465] = arith_addf_456; 
               }
               int arith_addi_466 = (for_iter_47 + arith_const_12); 
-              int arith_cmpi_467 = ((arith_addi_466 <= arith_const_23) ? 1 : 0); 
+              int arith_cmpi_467 = (arith_addi_466 <= arith_const_23); 
               int arith_subi_468 = (arith_const_23 - arith_addi_466); 
               int arith_subi_469 = (arith_addi_466 - arith_const_25); 
               int arith_select_470 = (arith_cmpi_467 ? arith_subi_468 : arith_subi_469); 
@@ -490,7 +490,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
               int arith_select_474 = (arith_cmpi_467 ? arith_subi_472 : arith_addi_473); 
               int arith_muli_475 = (arith_select_474 * arith_const_16); 
               int arith_addi_476 = (for_iter_28 + arith_muli_475); 
-              int arith_cmpi_477 = ((arith_addi_476 >= arith_const_23) ? 1 : 0); 
+              int arith_cmpi_477 = (arith_addi_476 >= arith_const_23); 
               if (arith_cmpi_477) {
                 int arith_muli_478 = (for_iter_47 * arith_const_13); 
                 int arith_addi_479 = (arith_muli_478 + for_iter_142); 
@@ -562,7 +562,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
               }
             }
             int arith_addi_544 = (for_iter_47 + arith_const_12); 
-            int arith_cmpi_545 = ((arith_addi_544 <= arith_const_23) ? 1 : 0); 
+            int arith_cmpi_545 = (arith_addi_544 <= arith_const_23); 
             int arith_subi_546 = (arith_const_23 - arith_addi_544); 
             int arith_subi_547 = (arith_addi_544 - arith_const_25); 
             int arith_select_548 = (arith_cmpi_545 ? arith_subi_546 : arith_subi_547); 
@@ -572,7 +572,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
             int arith_select_552 = (arith_cmpi_545 ? arith_subi_550 : arith_addi_551); 
             int arith_muli_553 = (arith_select_552 * arith_const_16); 
             int arith_addi_554 = (for_iter_27 + arith_muli_553); 
-            int arith_cmpi_555 = ((arith_addi_554 >= arith_const_23) ? 1 : 0); 
+            int arith_cmpi_555 = (arith_addi_554 >= arith_const_23); 
             if (arith_cmpi_555) {
               int arith_muli_556 = (for_iter_28 * arith_const_15); 
               int arith_muli_557 = (for_iter_47 * arith_const_24); 
@@ -655,7 +655,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
             }
           }
           int arith_addi_632 = (for_iter_47 + arith_const_12); 
-          int arith_cmpi_633 = ((arith_addi_632 <= arith_const_23) ? 1 : 0); 
+          int arith_cmpi_633 = (arith_addi_632 <= arith_const_23); 
           int arith_subi_634 = (arith_const_23 - arith_addi_632); 
           int arith_subi_635 = (arith_addi_632 - arith_const_25); 
           int arith_select_636 = (arith_cmpi_633 ? arith_subi_634 : arith_subi_635); 
@@ -665,7 +665,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
           int arith_select_640 = (arith_cmpi_633 ? arith_subi_638 : arith_addi_639); 
           int arith_muli_641 = (arith_select_640 * arith_const_16); 
           int arith_addi_642 = (for_iter_26 + arith_muli_641); 
-          int arith_cmpi_643 = ((arith_addi_642 >= arith_const_23) ? 1 : 0); 
+          int arith_cmpi_643 = (arith_addi_642 >= arith_const_23); 
           if (arith_cmpi_643) {
             int arith_muli_644 = (for_iter_27 * arith_const_15); 
             int arith_muli_645 = (for_iter_47 * arith_const_24); 
@@ -764,7 +764,7 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
         int arith_muli_733 = (for_iter_26 * arith_const_16); 
         int arith_addi_734 = (arith_addi_732 + arith_muli_733); 
         int arith_addi_735 = (arith_addi_734 + arith_const_24); 
-        int arith_cmpi_736 = ((arith_addi_735 >= arith_const_23) ? 1 : 0); 
+        int arith_cmpi_736 = (arith_addi_735 >= arith_const_23); 
         if (arith_cmpi_736) {
           int arith_muli_737 = (for_iter_26 * arith_const_15); 
           int arith_maxsi_738 = max(arith_muli_737, arith_const_8); 

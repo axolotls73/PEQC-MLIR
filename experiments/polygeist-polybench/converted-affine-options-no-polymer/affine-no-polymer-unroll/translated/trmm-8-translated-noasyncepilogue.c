@@ -16,7 +16,7 @@ void kernel_trmm(int func_arg_0, int func_arg_1, double func_arg_2, double* func
       int arith_addi_16 = (for_iter_14 + arith_const_13); 
       int arith_muli_17 = (for_iter_14 * arith_const_9); 
       int arith_addi_18 = (arith_muli_17 + arith_const_8); 
-      int arith_cmpi_19 = ((arith_addi_18 < arith_const_11) ? 1 : 0); 
+      int arith_cmpi_19 = (arith_addi_18 < arith_const_11); 
       int arith_subi_20 = (arith_const_9 - arith_addi_18); 
       int arith_select_21 = (arith_cmpi_19 ? arith_subi_20 : arith_addi_18); 
       int arith_divi_22 = (arith_select_21 / arith_const_7); 
@@ -56,7 +56,7 @@ void kernel_trmm(int func_arg_0, int func_arg_1, double func_arg_2, double* func
       }
       int arith_muli_52 = (for_iter_14 * arith_const_9); 
       int arith_addi_53 = (arith_muli_52 + arith_const_8); 
-      int arith_cmpi_54 = ((arith_addi_53 < arith_const_11) ? 1 : 0); 
+      int arith_cmpi_54 = (arith_addi_53 < arith_const_11); 
       int arith_subi_55 = (arith_const_9 - arith_addi_53); 
       int arith_select_56 = (arith_cmpi_54 ? arith_subi_55 : arith_addi_53); 
       int arith_divi_57 = (arith_select_56 / arith_const_7); 

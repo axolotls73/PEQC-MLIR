@@ -19,11 +19,11 @@ void kernel_cholesky(int func_arg_0, double* func_arg_1)
       int arith_addi_16 = (for_iter_15 + arith_const_12); 
       for (int for_iter_17 = arith_const_10; for_iter_17 < arith_addi_16; for_iter_17 += arith_const_12) {
         int arith_addi_18 = (for_iter_13 + arith_const_9); 
-        int arith_cmpi_19 = ((arith_addi_18 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_19 = (arith_addi_18 == arith_const_10); 
         int arith_addi_20 = (for_iter_15 + arith_const_9); 
-        int arith_cmpi_21 = ((arith_addi_20 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_21 = (arith_addi_20 == arith_const_10); 
         int arith_andi_22 = (arith_cmpi_19 & arith_cmpi_21); 
-        int arith_cmpi_23 = ((for_iter_17 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_23 = (for_iter_17 == arith_const_10); 
         int arith_andi_24 = (arith_andi_22 & arith_cmpi_23); 
         if (arith_andi_24) {
           for (int for_iter_25 = arith_const_10; for_iter_25 < arith_const_8; for_iter_25 += arith_const_12) {
@@ -45,10 +45,10 @@ void kernel_cholesky(int func_arg_0, double* func_arg_1)
             }
           }
         }
-        int arith_cmpi_39 = ((for_iter_13 == arith_const_10) ? 1 : 0); 
-        int arith_cmpi_40 = ((for_iter_15 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_39 = (for_iter_13 == arith_const_10); 
+        int arith_cmpi_40 = (for_iter_15 == arith_const_10); 
         int arith_andi_41 = (arith_cmpi_39 & arith_cmpi_40); 
-        int arith_cmpi_42 = ((for_iter_17 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_42 = (for_iter_17 == arith_const_10); 
         int arith_andi_43 = (arith_andi_41 & arith_cmpi_42); 
         if (arith_andi_43) {
           double memref_load_44 = func_arg_1[arith_const_10][arith_const_10]; 
@@ -65,12 +65,12 @@ void kernel_cholesky(int func_arg_0, double* func_arg_1)
           func_arg_1[arith_const_12][arith_const_12] = arith_subf_52; 
         }
         int arith_addi_53 = (for_iter_13 + arith_const_9); 
-        int arith_cmpi_54 = ((arith_addi_53 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_54 = (arith_addi_53 == arith_const_10); 
         int arith_addi_55 = (for_iter_15 + arith_const_9); 
-        int arith_cmpi_56 = ((arith_addi_55 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_56 = (arith_addi_55 == arith_const_10); 
         int arith_andi_57 = (arith_cmpi_54 & arith_cmpi_56); 
         int arith_addi_58 = (for_iter_17 + arith_const_9); 
-        int arith_cmpi_59 = ((arith_addi_58 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_59 = (arith_addi_58 == arith_const_10); 
         int arith_andi_60 = (arith_andi_57 & arith_cmpi_59); 
         if (arith_andi_60) {
           double memref_load_61 = func_arg_1[arith_const_6][arith_const_6]; 
@@ -81,7 +81,7 @@ void kernel_cholesky(int func_arg_0, double* func_arg_1)
         }
         int arith_muli_65 = (for_iter_17 * arith_const_9); 
         int arith_addi_66 = (for_iter_15 + arith_muli_65); 
-        int arith_cmpi_67 = ((arith_addi_66 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_67 = (arith_addi_66 == arith_const_10); 
         if (arith_cmpi_67) {
           int arith_muli_68 = (for_iter_13 * arith_const_6); 
           int arith_muli_69 = (for_iter_15 * arith_const_6); 
@@ -95,7 +95,7 @@ void kernel_cholesky(int func_arg_0, double* func_arg_1)
           int arith_minsi_77 = min(arith_addi_74, arith_const_4); 
           int arith_minsi_78 = min(arith_minsi_77, arith_addi_76); 
           for (int for_iter_79 = arith_maxsi_72; for_iter_79 < arith_minsi_78; for_iter_79 += arith_const_12) {
-            int arith_cmpi_80 = ((for_iter_15 == arith_const_10) ? 1 : 0); 
+            int arith_cmpi_80 = (for_iter_15 == arith_const_10); 
             if (arith_cmpi_80) {
               double memref_load_81 = func_arg_1[for_iter_79][arith_const_10]; 
               double memref_load_82 = func_arg_1[arith_const_10][arith_const_10]; 
@@ -187,7 +187,7 @@ void kernel_cholesky(int func_arg_0, double* func_arg_1)
             func_arg_1[for_iter_79][arith_addi_154] = arith_divf_153; 
             int arith_muli_155 = (for_iter_15 * arith_const_9); 
             int arith_addi_156 = (for_iter_13 + arith_muli_155); 
-            int arith_cmpi_157 = ((arith_addi_156 == arith_const_10) ? 1 : 0); 
+            int arith_cmpi_157 = (arith_addi_156 == arith_const_10); 
             if (arith_cmpi_157) {
               double memref_load_158 = func_arg_1[for_iter_79][for_iter_79]; 
               int arith_addi_159 = (for_iter_79 + arith_const_9); 
@@ -199,10 +199,10 @@ void kernel_cholesky(int func_arg_0, double* func_arg_1)
           }
         }
         int arith_addi_163 = (for_iter_13 + arith_const_9); 
-        int arith_cmpi_164 = ((arith_addi_163 == arith_const_10) ? 1 : 0); 
-        int arith_cmpi_165 = ((for_iter_15 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_164 = (arith_addi_163 == arith_const_10); 
+        int arith_cmpi_165 = (for_iter_15 == arith_const_10); 
         int arith_andi_166 = (arith_cmpi_164 & arith_cmpi_165); 
-        int arith_cmpi_167 = ((for_iter_17 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_167 = (for_iter_17 == arith_const_10); 
         int arith_andi_168 = (arith_andi_166 & arith_cmpi_167); 
         if (arith_andi_168) {
           for (int for_iter_169 = arith_const_10; for_iter_169 < arith_const_8; for_iter_169 += arith_const_12) {
@@ -246,12 +246,12 @@ void kernel_cholesky(int func_arg_0, double* func_arg_1)
           }
         }
         int arith_addi_200 = (for_iter_13 + arith_const_9); 
-        int arith_cmpi_201 = ((arith_addi_200 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_201 = (arith_addi_200 == arith_const_10); 
         int arith_addi_202 = (for_iter_15 + arith_const_9); 
-        int arith_cmpi_203 = ((arith_addi_202 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_203 = (arith_addi_202 == arith_const_10); 
         int arith_andi_204 = (arith_cmpi_201 & arith_cmpi_203); 
         int arith_addi_205 = (for_iter_17 + arith_const_9); 
-        int arith_cmpi_206 = ((arith_addi_205 == arith_const_10) ? 1 : 0); 
+        int arith_cmpi_206 = (arith_addi_205 == arith_const_10); 
         int arith_andi_207 = (arith_andi_204 & arith_cmpi_206); 
         if (arith_andi_207) {
           double memref_load_208 = func_arg_1[arith_const_2][arith_const_2]; 

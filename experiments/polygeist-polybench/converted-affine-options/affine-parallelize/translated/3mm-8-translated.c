@@ -97,7 +97,7 @@ void kernel_3mm(int func_arg_0, int func_arg_1, int func_arg_2, int func_arg_3, 
   }
   PAST_WAIT_SEMAPHORE_ALL(async_group_53, async_group_index_54, PAST_TASK_FINISHED); 
   for (int for_iter_60 = arith_const_23; for_iter_60 < arith_const_18; for_iter_60 += arith_const_25) {
-    int arith_cmpi_61 = ((for_iter_60 == arith_const_23) ? 1 : 0); 
+    int arith_cmpi_61 = (for_iter_60 == arith_const_23); 
     if (arith_cmpi_61) {
       int* async_group_62; 
       int async_group_index_63 = 0; 
@@ -137,7 +137,7 @@ void kernel_3mm(int func_arg_0, int func_arg_1, int func_arg_2, int func_arg_3, 
       PAST_WAIT_SEMAPHORE_ALL(async_group_62, async_group_index_63, PAST_TASK_FINISHED); 
     }
     int arith_addi_84 = (for_iter_60 + arith_const_13); 
-    int arith_cmpi_85 = ((arith_addi_84 == arith_const_23) ? 1 : 0); 
+    int arith_cmpi_85 = (arith_addi_84 == arith_const_23); 
     if (arith_cmpi_85) {
       int* async_group_86; 
       int async_group_index_87 = 0; 

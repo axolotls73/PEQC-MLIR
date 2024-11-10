@@ -22,7 +22,7 @@ void kernel_floyd_warshall(int func_arg_0, int* func_arg_1)
               int memref_load_19 = func_arg_1[for_iter_14][for_iter_11]; 
               int memref_load_20 = func_arg_1[for_iter_11][for_iter_17]; 
               int arith_addi_21 = (memref_load_19 + memref_load_20); 
-              int arith_cmpi_22 = ((memref_load_18 < arith_addi_21) ? 1 : 0); 
+              int arith_cmpi_22 = (memref_load_18 < arith_addi_21); 
               int arith_select_23 = (arith_cmpi_22 ? memref_load_18 : arith_addi_21); 
               func_arg_1[for_iter_14][for_iter_17] = arith_select_23; 
             }

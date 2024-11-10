@@ -42,7 +42,7 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
       int arith_minsi_41 = min(arith_addi_38, arith_const_16); 
       int arith_minsi_42 = min(arith_minsi_41, arith_addi_40); 
       for (int for_iter_43 = arith_maxsi_36; for_iter_43 < arith_minsi_42; for_iter_43 += arith_const_24) {
-        int arith_cmpi_44 = ((for_iter_43 < arith_const_22) ? 1 : 0); 
+        int arith_cmpi_44 = (for_iter_43 < arith_const_22); 
         int arith_subi_45 = (arith_const_20 - for_iter_43); 
         int arith_select_46 = (arith_cmpi_44 ? arith_subi_45 : for_iter_43); 
         int arith_divi_47 = (arith_select_46 / arith_const_18); 
@@ -50,7 +50,7 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
         int arith_select_49 = (arith_cmpi_44 ? arith_subi_48 : arith_divi_47); 
         int arith_muli_50 = (for_iter_25 * arith_const_20); 
         int arith_addi_51 = (arith_select_49 + arith_muli_50); 
-        int arith_cmpi_52 = ((arith_addi_51 >= arith_const_22) ? 1 : 0); 
+        int arith_cmpi_52 = (arith_addi_51 >= arith_const_22); 
         if (arith_cmpi_52) {
           int arith_muli_53 = (for_iter_30 * arith_const_14); 
           int arith_muli_54 = (for_iter_43 * arith_const_19); 
@@ -99,7 +99,7 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
         int arith_addi_94 = (arith_muli_93 + arith_const_13); 
         int arith_minsi_95 = min(arith_addi_92, arith_addi_94); 
         for (int for_iter_96 = arith_maxsi_90; for_iter_96 < arith_minsi_95; for_iter_96 += arith_const_24) {
-          int arith_cmpi_97 = ((for_iter_43 < arith_const_22) ? 1 : 0); 
+          int arith_cmpi_97 = (for_iter_43 < arith_const_22); 
           int arith_subi_98 = (arith_const_20 - for_iter_43); 
           int arith_select_99 = (arith_cmpi_97 ? arith_subi_98 : for_iter_43); 
           int arith_divi_100 = (arith_select_99 / arith_const_18); 
@@ -107,7 +107,7 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
           int arith_select_102 = (arith_cmpi_97 ? arith_subi_101 : arith_divi_100); 
           int arith_muli_103 = (for_iter_30 * arith_const_20); 
           int arith_addi_104 = (arith_select_102 + arith_muli_103); 
-          int arith_cmpi_105 = ((arith_addi_104 >= arith_const_22) ? 1 : 0); 
+          int arith_cmpi_105 = (arith_addi_104 >= arith_const_22); 
           if (arith_cmpi_105) {
             int arith_muli_106 = (for_iter_96 * arith_const_12); 
             int arith_addi_107 = (arith_muli_106 + for_iter_43); 
@@ -231,7 +231,7 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
             func_arg_2[arith_addi_218][arith_addi_221] = arith_mulf_215; 
           }
           int arith_addi_222 = (for_iter_43 + arith_const_20); 
-          int arith_cmpi_223 = ((arith_addi_222 <= arith_const_22) ? 1 : 0); 
+          int arith_cmpi_223 = (arith_addi_222 <= arith_const_22); 
           int arith_subi_224 = (arith_const_22 - arith_addi_222); 
           int arith_subi_225 = (arith_addi_222 - arith_const_24); 
           int arith_select_226 = (arith_cmpi_223 ? arith_subi_224 : arith_subi_225); 
@@ -241,7 +241,7 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
           int arith_select_230 = (arith_cmpi_223 ? arith_subi_228 : arith_addi_229); 
           int arith_muli_231 = (arith_select_230 * arith_const_20); 
           int arith_addi_232 = (for_iter_30 + arith_muli_231); 
-          int arith_cmpi_233 = ((arith_addi_232 >= arith_const_22) ? 1 : 0); 
+          int arith_cmpi_233 = (arith_addi_232 >= arith_const_22); 
           if (arith_cmpi_233) {
             int arith_muli_234 = (for_iter_96 * arith_const_12); 
             int arith_addi_235 = (arith_muli_234 + for_iter_43); 
@@ -274,7 +274,7 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
           }
         }
         int arith_addi_261 = (for_iter_43 + arith_const_20); 
-        int arith_cmpi_262 = ((arith_addi_261 <= arith_const_22) ? 1 : 0); 
+        int arith_cmpi_262 = (arith_addi_261 <= arith_const_22); 
         int arith_subi_263 = (arith_const_22 - arith_addi_261); 
         int arith_subi_264 = (arith_addi_261 - arith_const_24); 
         int arith_select_265 = (arith_cmpi_262 ? arith_subi_263 : arith_subi_264); 
@@ -284,7 +284,7 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
         int arith_select_269 = (arith_cmpi_262 ? arith_subi_267 : arith_addi_268); 
         int arith_muli_270 = (arith_select_269 * arith_const_20); 
         int arith_addi_271 = (for_iter_25 + arith_muli_270); 
-        int arith_cmpi_272 = ((arith_addi_271 >= arith_const_22) ? 1 : 0); 
+        int arith_cmpi_272 = (arith_addi_271 >= arith_const_22); 
         if (arith_cmpi_272) {
           int arith_muli_273 = (for_iter_30 * arith_const_14); 
           int arith_muli_274 = (for_iter_43 * arith_const_19); 
@@ -331,7 +331,7 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
       int arith_muli_311 = (for_iter_25 * arith_const_20); 
       int arith_addi_312 = (arith_muli_310 + arith_muli_311); 
       int arith_addi_313 = (arith_addi_312 + arith_const_24); 
-      int arith_cmpi_314 = ((arith_addi_313 >= arith_const_22) ? 1 : 0); 
+      int arith_cmpi_314 = (arith_addi_313 >= arith_const_22); 
       if (arith_cmpi_314) {
         int arith_muli_315 = (for_iter_25 * arith_const_14); 
         int arith_maxsi_316 = max(arith_muli_315, arith_const_8); 

@@ -26,9 +26,9 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
     int arith_addi_22 = (for_iter_21 + arith_const_13); 
     for (int for_iter_23 = arith_const_11; for_iter_23 < arith_addi_22; for_iter_23 += arith_const_13) {
       int arith_addi_24 = (for_iter_21 + arith_const_8); 
-      int arith_cmpi_25 = ((arith_addi_24 == arith_const_11) ? 1 : 0); 
+      int arith_cmpi_25 = (arith_addi_24 == arith_const_11); 
       int arith_addi_26 = (for_iter_23 + arith_const_8); 
-      int arith_cmpi_27 = ((arith_addi_26 == arith_const_11) ? 1 : 0); 
+      int arith_cmpi_27 = (arith_addi_26 == arith_const_11); 
       int arith_andi_28 = (arith_cmpi_25 & arith_cmpi_27); 
       if (arith_andi_28) {
         double memref_load_29 = func_arg_2[arith_const_10]; 
@@ -62,11 +62,11 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
           double arith_subf_55 = (memref_load_49 - arith_mulf_54); 
           func_arg_2[for_iter_44] = arith_subf_55; 
         }
-        int arith_cmpi_56 = ((for_iter_21 == arith_const_11) ? 1 : 0); 
-        int arith_cmpi_57 = ((for_iter_23 == arith_const_11) ? 1 : 0); 
+        int arith_cmpi_56 = (for_iter_21 == arith_const_11); 
+        int arith_cmpi_57 = (for_iter_23 == arith_const_11); 
         int arith_andi_58 = (arith_cmpi_56 & arith_cmpi_57); 
         int arith_addi_59 = (for_iter_44 + arith_const_8); 
-        int arith_cmpi_60 = ((arith_addi_59 == arith_const_11) ? 1 : 0); 
+        int arith_cmpi_60 = (arith_addi_59 == arith_const_11); 
         int arith_andi_61 = (arith_andi_58 & arith_cmpi_60); 
         if (arith_andi_61) {
           double memref_load_62 = func_arg_2[arith_const_11]; 
@@ -75,7 +75,7 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
           func_arg_2[arith_const_11] = arith_divf_64; 
         }
         int arith_addi_65 = (for_iter_44 + arith_const_5); 
-        int arith_cmpi_66 = ((arith_addi_65 >= arith_const_11) ? 1 : 0); 
+        int arith_cmpi_66 = (arith_addi_65 >= arith_const_11); 
         if (arith_cmpi_66) {
           int arith_addi_67 = (for_iter_44 + arith_const_8); 
           double memref_load_68 = func_arg_2[arith_addi_67]; 
@@ -96,7 +96,7 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
         }
         int arith_muli_81 = (for_iter_23 * arith_const_8); 
         int arith_addi_82 = (for_iter_21 + arith_muli_81); 
-        int arith_cmpi_83 = ((arith_addi_82 == arith_const_11) ? 1 : 0); 
+        int arith_cmpi_83 = (arith_addi_82 == arith_const_11); 
         if (arith_cmpi_83) {
           double memref_load_84 = func_arg_2[for_iter_44]; 
           int arith_addi_85 = (for_iter_44 + arith_const_8); 
@@ -109,8 +109,8 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
         }
       }
       int arith_addi_91 = (for_iter_21 + arith_const_8); 
-      int arith_cmpi_92 = ((arith_addi_91 == arith_const_11) ? 1 : 0); 
-      int arith_cmpi_93 = ((for_iter_23 == arith_const_11) ? 1 : 0); 
+      int arith_cmpi_92 = (arith_addi_91 == arith_const_11); 
+      int arith_cmpi_93 = (for_iter_23 == arith_const_11); 
       int arith_andi_94 = (arith_cmpi_92 & arith_cmpi_93); 
       if (arith_andi_94) {
         for (int for_iter_95 = arith_const_6; for_iter_95 < arith_const_9; for_iter_95 += arith_const_13) {
@@ -127,9 +127,9 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
         }
       }
       int arith_addi_104 = (for_iter_21 + arith_const_8); 
-      int arith_cmpi_105 = ((arith_addi_104 == arith_const_11) ? 1 : 0); 
+      int arith_cmpi_105 = (arith_addi_104 == arith_const_11); 
       int arith_addi_106 = (for_iter_23 + arith_const_8); 
-      int arith_cmpi_107 = ((arith_addi_106 == arith_const_11) ? 1 : 0); 
+      int arith_cmpi_107 = (arith_addi_106 == arith_const_11); 
       int arith_andi_108 = (arith_cmpi_105 & arith_cmpi_107); 
       if (arith_andi_108) {
         double memref_load_109 = func_arg_2[arith_const_4]; 

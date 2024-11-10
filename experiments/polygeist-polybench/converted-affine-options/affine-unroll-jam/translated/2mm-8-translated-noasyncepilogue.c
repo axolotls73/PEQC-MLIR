@@ -29,7 +29,7 @@ void kernel_2mm(int func_arg_0, int func_arg_1, int func_arg_2, int func_arg_3, 
     }
   }
   for (int for_iter_31 = arith_const_21; for_iter_31 < arith_const_17; for_iter_31 += arith_const_23) {
-    int arith_cmpi_32 = ((for_iter_31 == arith_const_21) ? 1 : 0); 
+    int arith_cmpi_32 = (for_iter_31 == arith_const_21); 
     if (arith_cmpi_32) {
       for (int for_iter_33 = arith_const_21; for_iter_33 < arith_const_22; for_iter_33 += arith_const_23) {
         for (int for_iter_34 = arith_const_21; for_iter_34 < arith_const_19; for_iter_34 += arith_const_23) {
@@ -57,7 +57,7 @@ void kernel_2mm(int func_arg_0, int func_arg_1, int func_arg_2, int func_arg_3, 
       }
     }
     int arith_addi_51 = (for_iter_31 + arith_const_12); 
-    int arith_cmpi_52 = ((arith_addi_51 == arith_const_21) ? 1 : 0); 
+    int arith_cmpi_52 = (arith_addi_51 == arith_const_21); 
     if (arith_cmpi_52) {
       for (int for_iter_53 = arith_const_21; for_iter_53 < arith_const_22; for_iter_53 += arith_const_23) {
         for (int for_iter_54 = arith_const_21; for_iter_54 < arith_const_19; for_iter_54 += arith_const_23) {

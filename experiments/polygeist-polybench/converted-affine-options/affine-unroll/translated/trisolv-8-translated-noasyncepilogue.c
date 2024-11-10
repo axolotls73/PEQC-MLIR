@@ -38,9 +38,9 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
     int arith_addi_31 = (for_iter_30 + arith_const_16); 
     for (int for_iter_32 = arith_const_14; for_iter_32 < arith_addi_31; for_iter_32 += arith_const_16) {
       int arith_addi_33 = (for_iter_30 + arith_const_9); 
-      int arith_cmpi_34 = ((arith_addi_33 == arith_const_14) ? 1 : 0); 
+      int arith_cmpi_34 = (arith_addi_33 == arith_const_14); 
       int arith_addi_35 = (for_iter_32 + arith_const_9); 
-      int arith_cmpi_36 = ((arith_addi_35 == arith_const_14) ? 1 : 0); 
+      int arith_cmpi_36 = (arith_addi_35 == arith_const_14); 
       int arith_andi_37 = (arith_cmpi_34 & arith_cmpi_36); 
       if (arith_andi_37) {
         double memref_load_38 = func_arg_2[arith_const_13]; 
@@ -74,11 +74,11 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
           double arith_subf_64 = (memref_load_58 - arith_mulf_63); 
           func_arg_2[for_iter_53] = arith_subf_64; 
         }
-        int arith_cmpi_65 = ((for_iter_30 == arith_const_14) ? 1 : 0); 
-        int arith_cmpi_66 = ((for_iter_32 == arith_const_14) ? 1 : 0); 
+        int arith_cmpi_65 = (for_iter_30 == arith_const_14); 
+        int arith_cmpi_66 = (for_iter_32 == arith_const_14); 
         int arith_andi_67 = (arith_cmpi_65 & arith_cmpi_66); 
         int arith_addi_68 = (for_iter_53 + arith_const_9); 
-        int arith_cmpi_69 = ((arith_addi_68 == arith_const_14) ? 1 : 0); 
+        int arith_cmpi_69 = (arith_addi_68 == arith_const_14); 
         int arith_andi_70 = (arith_andi_67 & arith_cmpi_69); 
         if (arith_andi_70) {
           double memref_load_71 = func_arg_2[arith_const_14]; 
@@ -87,7 +87,7 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
           func_arg_2[arith_const_14] = arith_divf_73; 
         }
         int arith_addi_74 = (for_iter_53 + arith_const_6); 
-        int arith_cmpi_75 = ((arith_addi_74 >= arith_const_14) ? 1 : 0); 
+        int arith_cmpi_75 = (arith_addi_74 >= arith_const_14); 
         if (arith_cmpi_75) {
           int arith_addi_76 = (for_iter_53 + arith_const_9); 
           double memref_load_77 = func_arg_2[arith_addi_76]; 
@@ -108,7 +108,7 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
         }
         int arith_muli_90 = (for_iter_32 * arith_const_9); 
         int arith_addi_91 = (for_iter_30 + arith_muli_90); 
-        int arith_cmpi_92 = ((arith_addi_91 == arith_const_14) ? 1 : 0); 
+        int arith_cmpi_92 = (arith_addi_91 == arith_const_14); 
         if (arith_cmpi_92) {
           double memref_load_93 = func_arg_2[for_iter_53]; 
           int arith_addi_94 = (for_iter_53 + arith_const_9); 
@@ -121,8 +121,8 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
         }
       }
       int arith_addi_100 = (for_iter_30 + arith_const_9); 
-      int arith_cmpi_101 = ((arith_addi_100 == arith_const_14) ? 1 : 0); 
-      int arith_cmpi_102 = ((for_iter_32 == arith_const_14) ? 1 : 0); 
+      int arith_cmpi_101 = (arith_addi_100 == arith_const_14); 
+      int arith_cmpi_102 = (for_iter_32 == arith_const_14); 
       int arith_andi_103 = (arith_cmpi_101 & arith_cmpi_102); 
       if (arith_andi_103) {
         for (int for_iter_104 = arith_const_7; for_iter_104 < arith_const_12; for_iter_104 += arith_const_16) {
@@ -176,9 +176,9 @@ void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, doub
         }
       }
       int arith_addi_145 = (for_iter_30 + arith_const_9); 
-      int arith_cmpi_146 = ((arith_addi_145 == arith_const_14) ? 1 : 0); 
+      int arith_cmpi_146 = (arith_addi_145 == arith_const_14); 
       int arith_addi_147 = (for_iter_32 + arith_const_9); 
-      int arith_cmpi_148 = ((arith_addi_147 == arith_const_14) ? 1 : 0); 
+      int arith_cmpi_148 = (arith_addi_147 == arith_const_14); 
       int arith_andi_149 = (arith_cmpi_146 & arith_cmpi_148); 
       if (arith_andi_149) {
         double memref_load_150 = func_arg_2[arith_const_4]; 

@@ -25,7 +25,7 @@ void kernel_jacobi_1d(int func_arg_0, int func_arg_1, double* func_arg_2, double
     int arith_addi_24 = (arith_muli_23 + arith_const_11); 
     int arith_minsi_25 = min(arith_addi_24, arith_const_12); 
     for (int for_iter_26 = arith_maxsi_22; for_iter_26 < arith_minsi_25; for_iter_26 += arith_const_18) {
-      int arith_cmpi_27 = ((for_iter_26 < arith_const_16) ? 1 : 0); 
+      int arith_cmpi_27 = (for_iter_26 < arith_const_16); 
       int arith_subi_28 = (arith_const_10 - for_iter_26); 
       int arith_select_29 = (arith_cmpi_27 ? arith_subi_28 : for_iter_26); 
       int arith_divi_30 = (arith_select_29 / arith_const_14); 
@@ -33,7 +33,7 @@ void kernel_jacobi_1d(int func_arg_0, int func_arg_1, double* func_arg_2, double
       int arith_select_32 = (arith_cmpi_27 ? arith_subi_31 : arith_divi_30); 
       int arith_muli_33 = (for_iter_19 * arith_const_10); 
       int arith_addi_34 = (arith_select_32 + arith_muli_33); 
-      int arith_cmpi_35 = ((arith_addi_34 >= arith_const_16) ? 1 : 0); 
+      int arith_cmpi_35 = (arith_addi_34 >= arith_const_16); 
       if (arith_cmpi_35) {
         double memref_load_36 = func_arg_2[arith_const_16]; 
         double memref_load_37 = func_arg_2[arith_const_18]; 
@@ -90,7 +90,7 @@ void kernel_jacobi_1d(int func_arg_0, int func_arg_1, double* func_arg_2, double
         func_arg_2[arith_addi_84] = arith_mulf_81; 
       }
       int arith_addi_85 = (for_iter_26 + arith_const_10); 
-      int arith_cmpi_86 = ((arith_addi_85 <= arith_const_16) ? 1 : 0); 
+      int arith_cmpi_86 = (arith_addi_85 <= arith_const_16); 
       int arith_subi_87 = (arith_const_16 - arith_addi_85); 
       int arith_subi_88 = (arith_addi_85 - arith_const_18); 
       int arith_select_89 = (arith_cmpi_86 ? arith_subi_87 : arith_subi_88); 
@@ -100,7 +100,7 @@ void kernel_jacobi_1d(int func_arg_0, int func_arg_1, double* func_arg_2, double
       int arith_select_93 = (arith_cmpi_86 ? arith_subi_91 : arith_addi_92); 
       int arith_muli_94 = (arith_select_93 * arith_const_10); 
       int arith_addi_95 = (for_iter_19 + arith_muli_94); 
-      int arith_cmpi_96 = ((arith_addi_95 >= arith_const_16) ? 1 : 0); 
+      int arith_cmpi_96 = (arith_addi_95 >= arith_const_16); 
       if (arith_cmpi_96) {
         double memref_load_97 = func_arg_3[arith_const_5]; 
         double memref_load_98 = func_arg_3[arith_const_4]; 
@@ -111,7 +111,7 @@ void kernel_jacobi_1d(int func_arg_0, int func_arg_1, double* func_arg_2, double
         func_arg_2[arith_const_4] = arith_mulf_102; 
       }
     }
-    int arith_cmpi_103 = ((for_iter_19 == arith_const_16) ? 1 : 0); 
+    int arith_cmpi_103 = (for_iter_19 == arith_const_16); 
     if (arith_cmpi_103) {
       double memref_load_104 = func_arg_2[arith_const_16]; 
       double memref_load_105 = func_arg_2[arith_const_18]; 

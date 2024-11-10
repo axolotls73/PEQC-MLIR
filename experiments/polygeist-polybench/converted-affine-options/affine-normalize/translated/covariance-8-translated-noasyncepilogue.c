@@ -71,7 +71,7 @@ void kernel_covariance(int func_arg_0, int func_arg_1, double func_arg_2, double
   for (int for_iter_54 = arith_const_18; for_iter_54 < arith_const_13; for_iter_54 += arith_const_16) {
     int arith_muli_55 = (for_iter_54 * arith_const_12); 
     int arith_addi_56 = (arith_muli_55 + arith_const_11); 
-    int arith_cmpi_57 = ((arith_addi_56 <= arith_const_18) ? 1 : 0); 
+    int arith_cmpi_57 = (arith_addi_56 <= arith_const_18); 
     int arith_subi_58 = (arith_const_18 - arith_addi_56); 
     int arith_subi_59 = (arith_addi_56 - arith_const_16); 
     int arith_select_60 = (arith_cmpi_57 ? arith_subi_58 : arith_subi_59); 
@@ -82,7 +82,7 @@ void kernel_covariance(int func_arg_0, int func_arg_1, double func_arg_2, double
     int arith_maxsi_65 = max(arith_select_64, arith_const_18); 
     int arith_muli_66 = (for_iter_54 * arith_const_14); 
     int arith_addi_67 = (arith_muli_66 + arith_const_9); 
-    int arith_cmpi_68 = ((arith_addi_67 < arith_const_18) ? 1 : 0); 
+    int arith_cmpi_68 = (arith_addi_67 < arith_const_18); 
     int arith_subi_69 = (arith_const_15 - arith_addi_67); 
     int arith_select_70 = (arith_cmpi_68 ? arith_subi_69 : arith_addi_67); 
     int arith_divi_71 = (arith_select_70 / arith_const_8); 
