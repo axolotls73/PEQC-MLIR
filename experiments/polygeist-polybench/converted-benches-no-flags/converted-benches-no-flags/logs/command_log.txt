@@ -220,14 +220,7 @@ converting gemver
     mlir-opt --lower-affine converted-benches-no-flags/converted-benches-no-flags/conversion/gemver-4-after-mliropt.mlir
     verif-opt --verif-scf-parallel-to-async converted-benches-no-flags/converted-benches-no-flags/conversion/gemver-5-after-loweraffine.mlir
     verif-translate --translate-to-past converted-benches-no-flags/converted-benches-no-flags/conversion/gemver-6-after-conversion.mlir
-converting adi
-    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/adi.c -S -function=kernel_adi -raise-scf-to-affine
-    polymer-opt converted-benches-no-flags/converted-benches-no-flags/conversion/adi-1-original.mlir 
-    mlir-opt --inline converted-benches-no-flags/converted-benches-no-flags/conversion/adi-2-after-polymer.mlir
-    mlir-opt converted-benches-no-flags/converted-benches-no-flags/conversion/adi-3-after-inline.mlir 
-    mlir-opt --lower-affine converted-benches-no-flags/converted-benches-no-flags/conversion/adi-4-after-mliropt.mlir
-    verif-opt --verif-scf-parallel-to-async converted-benches-no-flags/converted-benches-no-flags/conversion/adi-5-after-loweraffine.mlir
-    verif-translate --translate-to-past converted-benches-no-flags/converted-benches-no-flags/conversion/adi-6-after-conversion.mlir
+skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/adi.c
 converting syr2k
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/syr2k.c -S -function=kernel_syr2k -raise-scf-to-affine
     polymer-opt converted-benches-no-flags/converted-benches-no-flags/conversion/syr2k-1-original.mlir 
