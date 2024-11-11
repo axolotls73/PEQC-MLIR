@@ -64,7 +64,7 @@ def runorrecord(command, listtoadd, stage, name=None, log=None, outdir=None):
     timeoutstr = "(timeout)" if rc is None else ""
     print(f'{CLR_RED}  failed{empty}{timeoutstr}: {command}{CLR_NONE}')
     log += [f'    failed{empty}{timeoutstr}']
-    cw.writerow([name, outdir, 'no', command])
+    cw.writerow([name, re.sub(r'.*/', '', outdir), 'no', command, 'N/A'])
     if args.debug == stage:
       print(stderr, file=sys.stderr)
     if args.die == stage:
