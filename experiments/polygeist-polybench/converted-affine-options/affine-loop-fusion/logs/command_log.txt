@@ -188,7 +188,11 @@ converting gemm
     mlir-opt --lower-affine converted-affine-options/affine-loop-fusion/conversion/gemm-4-after-mliropt.mlir
     verif-opt --verif-scf-parallel-to-async converted-affine-options/affine-loop-fusion/conversion/gemm-5-after-loweraffine.mlir
     verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/conversion/gemm-6-after-conversion.mlir
-skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/symm.c
+converting symm
+    cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/symm.c -S -function=kernel_symm -raise-scf-to-affine
+    polymer-opt converted-affine-options/affine-loop-fusion/conversion/symm-1-original.mlir -reg2mem -extract-scop-stmt -pluto-opt
+    mlir-opt --inline converted-affine-options/affine-loop-fusion/conversion/symm-2-after-polymer.mlir
+    failed
 skipping generated-polybench-use-scalar-lb-mini-dataset/kernel/ludcmp.c
 converting gemver
     cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/gemver.c -S -function=kernel_gemver -raise-scf-to-affine
@@ -212,6 +216,7 @@ converting syr2k
 
 fail before conversion:
     nussinov: cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+    symm: mlir-opt --inline converted-affine-options/affine-loop-fusion/conversion/symm-2-after-polymer.mlir
 fail during conversion:
 fail during translation:
     correlation: verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/conversion/correlation-6-after-conversion.mlir
