@@ -275,19 +275,19 @@ class PastTranslator {
           assignval));
   }
 
-  s_past_node_t* getArrayAccess(s_symbol_t* arr, std::vector<s_symbol_t*> ops) {
+  s_past_node_t* getArrayAccess(s_symbol_t* arr, std::vector<s_past_node_t*> ops) {
     s_past_node_t* ret = nullptr;
     for (auto op : ops) {
       if (!ret) {
         ret = past_node_binary_create(past_arrayref,
           past_node_varref_create(arr),
-          past_node_varref_create(op)
+          op
         );
       }
       else {
         ret = past_node_binary_create(past_arrayref,
           ret,
-          past_node_varref_create(op)
+          op
         );
       }
     }
@@ -295,9 +295,13 @@ class PastTranslator {
   }
 
   s_past_node_t* getArrayAccess(Value arr, OperandRange ops) {
-    std::vector<s_symbol_t*> vops;
+    std::vector<s_past_node_t*> vops;
     for (auto o : ops) {
-      vops.push_back(getVarSymbol(o));
+      vops.push_back(past_node_varref_create(getVarSymbol(o)));
+    }
+    // memref[] == memref[0]
+    if (ops.empty()) {
+      vops.push_back(past_node_value_create_from_int(0));
     }
     return getArrayAccess(getVarSymbol(arr), vops);
   }
@@ -902,7 +906,7 @@ class PastTranslator {
         past_node_binary_create(past_assign,
           getArrayAccess(
             getVarSymbol(op.getGroup()),
-            std::vector{groupIndex}),
+            std::vector{past_node_varref_create(groupIndex)}),
           past_node_varref_create(getVarSymbol(op.getOperand())))));
     // increment group index
     stmts.push_back(
