@@ -19,6 +19,7 @@
 #include "past/pprint.h"
 
 #include "mlir/IR/BuiltinDialect.h"
+#include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Math/IR/Math.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
@@ -591,6 +592,9 @@ class PastTranslator {
   s_past_node_t* translate(arith::DivUIOp& op) {
     return translateArithBinop("arith_divi", past_div, op.getResult(), op.getLhs(), op.getRhs());
   }
+  s_past_node_t* translate(arith::RemSIOp& op) {
+    return translateArithBinop("arith_remsi", past_mod, op.getResult(), op.getLhs(), op.getRhs());
+  }
   s_past_node_t* translate(arith::AndIOp& op) {
     return translateArithBinop("arith_andi", past_band, op.getResult(), op.getLhs(), op.getRhs());
   }
@@ -627,6 +631,9 @@ class PastTranslator {
 
   s_past_node_t* translate(math::SqrtOp op) {
     return translateArithUnaryOp("math_sqrt", past_sqrt, op.getResult(), op.getOperand());
+  }
+  s_past_node_t* translate(arith::NegFOp op) {
+    return translateArithUnaryOp("math_negf", past_unaminus, op.getResult(), op.getOperand());
   }
 
   s_past_node_t* translate(arith::CmpIOp& op) {
@@ -964,6 +971,11 @@ class PastTranslator {
     return nullptr;
   }
 
+  s_past_node_t* translate(LLVM::UndefOp op) {
+    return past_node_statement_create(
+      declareVar(op.getResult(), ""));
+  }
+
   // returns a linked list of the translation of the contained blocks'
   // operations, chained
   s_past_node_t* translate(Region& region) {
@@ -1073,6 +1085,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<arith::MulIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivSIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivUIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::RemSIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::AndIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::OrIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MaxSIOp>(op)) res = translate(o);
@@ -1082,6 +1095,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<arith::MulFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<math::SqrtOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::NegFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::SelectOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
@@ -1100,6 +1114,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<async::ExecuteOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::YieldOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<UnrealizedConversionCastOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<LLVM::UndefOp>(op)) res = translate(o);
     else {
       if (!allow_unsupported_ops) {
         op->emitError("verif-translate: unknown operation");
@@ -1155,7 +1170,8 @@ int main(int argc, char **argv) {
             mlir::func::FuncDialect,
             mlir::memref::MemRefDialect,
             mlir::async::AsyncDialect,
-            xilinx::air::airDialect
+            xilinx::air::airDialect,
+            mlir::LLVM::LLVMDialect
           >();
       });
 

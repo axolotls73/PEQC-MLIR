@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
     >();
 
   registry.insert<xilinx::air::airDialect>();
+  registry.insert<mlir::LLVM::LLVMDialect>();
 
   // Add the following to include *all* MLIR Core dialects, or selectively
   // include what you need like above. You only need to register dialects that

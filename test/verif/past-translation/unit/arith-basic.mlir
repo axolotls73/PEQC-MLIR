@@ -61,4 +61,8 @@ module {
     %23 = arith.andi %a, %b : i32
 // CHECK: = ([[A]] | [[B]])
     %24 = arith.ori %a, %b : i32
+// CHECK: = -([[F]])
+    %25 = arith.negf %f : f32
+// CHECK: = ([[A]] % [[B]])
+    %26 = arith.remsi %a, %b : i32
 }
