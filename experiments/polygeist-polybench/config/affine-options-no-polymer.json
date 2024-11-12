@@ -32,7 +32,7 @@
 {
     "cgeist_args": "-raise-scf-to-affine",
     "polymer_args": "",
-    "mliropt_args": "--affine-loop-tile",
+    "mliropt_args": "--affine-loop-tile=\"tile-size=32\"",
 
     "output_dir": "affine-no-polymer-tile"
 },
@@ -80,7 +80,7 @@
 {
     "cgeist_args": "-raise-scf-to-affine",
     "polymer_args": "",
-    "mliropt_args": "--affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize\"max-nested=1\" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize",
+    "mliropt_args": "--affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize=\"max-nested=1\" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize",
 
     "output_dir": "affine-no-polymer-all"
 },
