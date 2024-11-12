@@ -1,11 +1,12 @@
 module {
   func.func @kernel_gesummv(%arg0: i32, %arg1: f64, %arg2: f64, %arg3: memref<?x30xf64>, %arg4: memref<?x30xf64>, %arg5: memref<?xf64>, %arg6: memref<?xf64>, %arg7: memref<?xf64>) {
+    %c1 = arith.constant 1 : index
     %cst = arith.constant 0.000000e+00 : f64
     %c0 = arith.constant 0 : index
     %c30 = arith.constant 30 : index
-    %c1 = arith.constant 1 : index
-    scf.for %arg8 = %c0 to %c30 step %c1 {
-      %0 = arith.addi %arg8, %c1 : index
+    %c32 = arith.constant 32 : index
+    scf.for %arg8 = %c0 to %c30 step %c32 {
+      %0 = arith.addi %arg8, %c30 : index
       scf.for %arg9 = %arg8 to %0 step %c1 {
         memref.store %cst, %arg5[%arg9] : memref<?xf64>
         memref.store %cst, %arg7[%arg9] : memref<?xf64>

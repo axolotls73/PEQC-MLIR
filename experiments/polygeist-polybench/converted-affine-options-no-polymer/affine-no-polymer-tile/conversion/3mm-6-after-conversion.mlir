@@ -3,16 +3,17 @@ module {
     %c24 = arith.constant 24 : index
     %c22 = arith.constant 22 : index
     %c20 = arith.constant 20 : index
+    %c1 = arith.constant 1 : index
     %c18 = arith.constant 18 : index
     %cst = arith.constant 0.000000e+00 : f64
     %c0 = arith.constant 0 : index
     %c16 = arith.constant 16 : index
-    %c1 = arith.constant 1 : index
-    scf.for %arg12 = %c0 to %c16 step %c1 {
-      scf.for %arg13 = %c0 to %c18 step %c1 {
-        %0 = arith.addi %arg12, %c1 : index
+    %c32 = arith.constant 32 : index
+    scf.for %arg12 = %c0 to %c16 step %c32 {
+      scf.for %arg13 = %c0 to %c18 step %c32 {
+        %0 = arith.addi %arg12, %c16 : index
         scf.for %arg14 = %arg12 to %0 step %c1 {
-          %1 = arith.addi %arg13, %c1 : index
+          %1 = arith.addi %arg13, %c18 : index
           scf.for %arg15 = %arg13 to %1 step %c1 {
             memref.store %cst, %arg5[%arg14, %arg15] : memref<?x18xf64>
             scf.for %arg16 = %c0 to %c20 step %c1 {
@@ -27,11 +28,11 @@ module {
         }
       }
     }
-    scf.for %arg12 = %c0 to %c18 step %c1 {
-      scf.for %arg13 = %c0 to %c22 step %c1 {
-        %0 = arith.addi %arg12, %c1 : index
+    scf.for %arg12 = %c0 to %c18 step %c32 {
+      scf.for %arg13 = %c0 to %c22 step %c32 {
+        %0 = arith.addi %arg12, %c18 : index
         scf.for %arg14 = %arg12 to %0 step %c1 {
-          %1 = arith.addi %arg13, %c1 : index
+          %1 = arith.addi %arg13, %c22 : index
           scf.for %arg15 = %arg13 to %1 step %c1 {
             memref.store %cst, %arg8[%arg14, %arg15] : memref<?x22xf64>
             scf.for %arg16 = %c0 to %c24 step %c1 {
@@ -46,11 +47,11 @@ module {
         }
       }
     }
-    scf.for %arg12 = %c0 to %c16 step %c1 {
-      scf.for %arg13 = %c0 to %c22 step %c1 {
-        %0 = arith.addi %arg12, %c1 : index
+    scf.for %arg12 = %c0 to %c16 step %c32 {
+      scf.for %arg13 = %c0 to %c22 step %c32 {
+        %0 = arith.addi %arg12, %c16 : index
         scf.for %arg14 = %arg12 to %0 step %c1 {
-          %1 = arith.addi %arg13, %c1 : index
+          %1 = arith.addi %arg13, %c22 : index
           scf.for %arg15 = %arg13 to %1 step %c1 {
             memref.store %cst, %arg11[%arg14, %arg15] : memref<?x22xf64>
             scf.for %arg16 = %c0 to %c18 step %c1 {

@@ -1,10 +1,10 @@
 #map = affine_map<(d0) -> (d0)>
-#map1 = affine_map<(d0) -> (d0 + 1)>
+#map1 = affine_map<(d0) -> (d0 + 20)>
 module {
   func.func @kernel_heat_3d(%arg0: i32, %arg1: i32, %arg2: memref<?x10x10xf64>, %arg3: memref<?x10x10xf64>) {
     %cst = arith.constant 1.250000e-01 : f64
     %cst_0 = arith.constant 2.000000e+00 : f64
-    affine.for %arg4 = 1 to 21 {
+    affine.for %arg4 = 1 to 21 step 32 {
       affine.for %arg5 = #map(%arg4) to #map1(%arg4) {
         affine.for %arg6 = 1 to 9 {
           affine.for %arg7 = 1 to 9 {

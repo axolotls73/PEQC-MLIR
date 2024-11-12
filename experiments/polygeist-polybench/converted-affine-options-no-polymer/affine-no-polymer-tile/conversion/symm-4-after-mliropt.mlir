@@ -1,14 +1,15 @@
 #map = affine_map<(d0) -> (d0)>
-#map1 = affine_map<(d0) -> (d0 + 1)>
+#map1 = affine_map<(d0) -> (d0 + 20)>
+#map2 = affine_map<(d0) -> (d0 + 30)>
 module {
   func.func @kernel_symm(%arg0: i32, %arg1: i32, %arg2: f64, %arg3: f64, %arg4: memref<?x30xf64>, %arg5: memref<?x20xf64>, %arg6: memref<?x30xf64>) {
     %cst = arith.constant 0.000000e+00 : f64
     %alloca = memref.alloca() : memref<f64>
     affine.store %cst, %alloca[] : memref<f64>
-    affine.for %arg7 = 0 to 20 {
-      affine.for %arg8 = 0 to 30 {
+    affine.for %arg7 = 0 to 20 step 32 {
+      affine.for %arg8 = 0 to 30 step 32 {
         affine.for %arg9 = #map(%arg7) to #map1(%arg7) {
-          affine.for %arg10 = #map(%arg8) to #map1(%arg8) {
+          affine.for %arg10 = #map(%arg8) to #map2(%arg8) {
             affine.store %cst, %alloca[] : memref<f64>
             affine.for %arg11 = 0 to #map(%arg9) {
               %10 = affine.load %arg6[%arg9, %arg10] : memref<?x30xf64>

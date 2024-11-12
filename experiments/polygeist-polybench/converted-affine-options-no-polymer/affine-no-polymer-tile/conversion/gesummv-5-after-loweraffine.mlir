@@ -3,18 +3,18 @@ module {
     %cst = arith.constant 0.000000e+00 : f64
     %c0 = arith.constant 0 : index
     %c30 = arith.constant 30 : index
-    %c1 = arith.constant 1 : index
-    scf.for %arg8 = %c0 to %c30 step %c1 {
-      %c1_0 = arith.constant 1 : index
-      %0 = arith.addi %arg8, %c1_0 : index
-      %c1_1 = arith.constant 1 : index
-      scf.for %arg9 = %arg8 to %0 step %c1_1 {
+    %c32 = arith.constant 32 : index
+    scf.for %arg8 = %c0 to %c30 step %c32 {
+      %c30_0 = arith.constant 30 : index
+      %0 = arith.addi %arg8, %c30_0 : index
+      %c1 = arith.constant 1 : index
+      scf.for %arg9 = %arg8 to %0 step %c1 {
         memref.store %cst, %arg5[%arg9] : memref<?xf64>
         memref.store %cst, %arg7[%arg9] : memref<?xf64>
-        %c0_2 = arith.constant 0 : index
-        %c30_3 = arith.constant 30 : index
-        %c1_4 = arith.constant 1 : index
-        scf.for %arg10 = %c0_2 to %c30_3 step %c1_4 {
+        %c0_1 = arith.constant 0 : index
+        %c30_2 = arith.constant 30 : index
+        %c1_3 = arith.constant 1 : index
+        scf.for %arg10 = %c0_1 to %c30_2 step %c1_3 {
           %6 = memref.load %arg3[%arg9, %arg10] : memref<?x30xf64>
           %7 = memref.load %arg6[%arg10] : memref<?xf64>
           %8 = arith.mulf %6, %7 : f64

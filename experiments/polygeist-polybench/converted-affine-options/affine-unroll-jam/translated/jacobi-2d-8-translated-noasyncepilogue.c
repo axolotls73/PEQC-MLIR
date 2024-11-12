@@ -1,5 +1,5 @@
 #pragma pocc-region-start
-#include "/data-host-share/verif-dialect/verif-translate/interp_macros_seq.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/interp_macros_seq.h"
 void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double* func_arg_3)
 {
   int arith_const_4 = -29; 
@@ -379,7 +379,7 @@ void kernel_jacobi_2d(int func_arg_0, int func_arg_1, double* func_arg_2, double
 
 
 {
-#include "/data-host-share/verif-dialect/verif-translate/prologue.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/prologue.h"
   int tsteps;
   int n;
   double* A;

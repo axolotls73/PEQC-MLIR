@@ -1,10 +1,11 @@
 #map = affine_map<(d0) -> (d0)>
-#map1 = affine_map<(d0) -> (d0 + 1)>
+#map1 = affine_map<(d0) -> (d0 + 28)>
+#map2 = affine_map<(d0) -> (d0 + 32)>
 module {
   func.func @kernel_covariance(%arg0: i32, %arg1: i32, %arg2: f64, %arg3: memref<?x28xf64>, %arg4: memref<?x28xf64>, %arg5: memref<?xf64>) {
     %cst = arith.constant 1.000000e+00 : f64
     %cst_0 = arith.constant 0.000000e+00 : f64
-    affine.for %arg6 = 0 to 28 {
+    affine.for %arg6 = 0 to 28 step 32 {
       affine.for %arg7 = #map(%arg6) to #map1(%arg6) {
         affine.store %cst_0, %arg5[%arg7] : memref<?xf64>
         affine.for %arg8 = 0 to 32 {
@@ -18,9 +19,9 @@ module {
         affine.store %2, %arg5[%arg7] : memref<?xf64>
       }
     }
-    affine.for %arg6 = 0 to 32 {
-      affine.for %arg7 = 0 to 28 {
-        affine.for %arg8 = #map(%arg6) to #map1(%arg6) {
+    affine.for %arg6 = 0 to 32 step 32 {
+      affine.for %arg7 = 0 to 28 step 32 {
+        affine.for %arg8 = #map(%arg6) to #map2(%arg6) {
           affine.for %arg9 = #map(%arg7) to #map1(%arg7) {
             %1 = affine.load %arg5[%arg9] : memref<?xf64>
             %2 = affine.load %arg3[%arg8, %arg9] : memref<?x28xf64>

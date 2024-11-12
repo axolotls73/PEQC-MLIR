@@ -1,5 +1,5 @@
 #pragma pocc-region-start
-#include "/data-host-share/verif-dialect/verif-translate/interp_macros_seq.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/interp_macros_seq.h"
 void kernel_3mm(int func_arg_0, int func_arg_1, int func_arg_2, int func_arg_3, int func_arg_4, double* func_arg_5, double* func_arg_6, double* func_arg_7, double* func_arg_8, double* func_arg_9, double* func_arg_10, double* func_arg_11)
 {
   int arith_const_12 = 41; 
@@ -97,7 +97,7 @@ void kernel_3mm(int func_arg_0, int func_arg_1, int func_arg_2, int func_arg_3, 
 
 
 {
-#include "/data-host-share/verif-dialect/verif-translate/prologue.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/prologue.h"
   int ni;
   int nj;
   int nk;

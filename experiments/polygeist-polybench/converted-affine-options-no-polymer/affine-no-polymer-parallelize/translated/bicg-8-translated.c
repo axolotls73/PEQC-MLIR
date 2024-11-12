@@ -1,5 +1,5 @@
 #pragma pocc-region-start
-#include "/data-host-share/verif-dialect/verif-translate/interp_macros.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/interp_macros.h"
 void kernel_bicg(int func_arg_0, int func_arg_1, double* func_arg_2, double* func_arg_3, double* func_arg_4, double* func_arg_5, double* func_arg_6)
 {
   int arith_const_7 = 42; 
@@ -46,7 +46,7 @@ void kernel_bicg(int func_arg_0, int func_arg_1, double* func_arg_2, double* fun
 
 
 {
-#include "/data-host-share/verif-dialect/verif-translate/prologue.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/prologue.h"
   int m;
   int n;
   double* A;

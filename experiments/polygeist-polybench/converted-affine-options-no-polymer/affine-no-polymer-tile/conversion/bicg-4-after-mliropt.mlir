@@ -1,15 +1,16 @@
 #map = affine_map<(d0) -> (d0)>
-#map1 = affine_map<(d0) -> (d0 + 1)>
+#map1 = affine_map<(d0) -> (d0 + 32, 38)>
+#map2 = affine_map<(d0) -> (d0 + 32, 42)>
 module {
   func.func @kernel_bicg(%arg0: i32, %arg1: i32, %arg2: memref<?x38xf64>, %arg3: memref<?xf64>, %arg4: memref<?xf64>, %arg5: memref<?xf64>, %arg6: memref<?xf64>) {
     %cst = arith.constant 0.000000e+00 : f64
-    affine.for %arg7 = 0 to 38 {
-      affine.for %arg8 = #map(%arg7) to #map1(%arg7) {
+    affine.for %arg7 = 0 to 38 step 32 {
+      affine.for %arg8 = #map(%arg7) to min #map1(%arg7) {
         affine.store %cst, %arg3[%arg8] : memref<?xf64>
       }
     }
-    affine.for %arg7 = 0 to 42 {
-      affine.for %arg8 = #map(%arg7) to #map1(%arg7) {
+    affine.for %arg7 = 0 to 42 step 32 {
+      affine.for %arg8 = #map(%arg7) to min #map2(%arg7) {
         affine.store %cst, %arg4[%arg8] : memref<?xf64>
         affine.for %arg9 = 0 to 38 {
           %0 = affine.load %arg3[%arg9] : memref<?xf64>

@@ -1,14 +1,15 @@
 #map = affine_map<(d0) -> (d0)>
-#map1 = affine_map<(d0) -> (d0 + 1)>
+#map1 = affine_map<(d0) -> (d0 + 20)>
+#map2 = affine_map<(d0) -> (d0 + 32, 39)>
 module {
   func.func @kernel_seidel_2d(%arg0: i32, %arg1: i32, %arg2: memref<?x40xf64>) {
     %cst = arith.constant 9.000000e+00 : f64
-    affine.for %arg3 = 0 to 20 {
-      affine.for %arg4 = 1 to 39 {
-        affine.for %arg5 = 1 to 39 {
+    affine.for %arg3 = 0 to 20 step 32 {
+      affine.for %arg4 = 1 to 39 step 32 {
+        affine.for %arg5 = 1 to 39 step 32 {
           affine.for %arg6 = #map(%arg3) to #map1(%arg3) {
-            affine.for %arg7 = #map(%arg4) to #map1(%arg4) {
-              affine.for %arg8 = #map(%arg5) to #map1(%arg5) {
+            affine.for %arg7 = #map(%arg4) to min #map2(%arg4) {
+              affine.for %arg8 = #map(%arg5) to min #map2(%arg5) {
                 %0 = affine.load %arg2[%arg7 - 1, %arg8 - 1] : memref<?x40xf64>
                 %1 = affine.load %arg2[%arg7 - 1, %arg8] : memref<?x40xf64>
                 %2 = arith.addf %0, %1 : f64

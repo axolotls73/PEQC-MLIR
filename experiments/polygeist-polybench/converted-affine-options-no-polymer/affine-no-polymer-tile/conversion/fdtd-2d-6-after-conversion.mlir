@@ -4,13 +4,14 @@ module {
     %c19 = arith.constant 19 : index
     %c-1 = arith.constant -1 : index
     %c30 = arith.constant 30 : index
+    %c1 = arith.constant 1 : index
     %cst = arith.constant 0.69999999999999996 : f64
     %cst_0 = arith.constant 5.000000e-01 : f64
     %c0 = arith.constant 0 : index
     %c20 = arith.constant 20 : index
-    %c1 = arith.constant 1 : index
-    scf.for %arg7 = %c0 to %c20 step %c1 {
-      %0 = arith.addi %arg7, %c1 : index
+    %c32 = arith.constant 32 : index
+    scf.for %arg7 = %c0 to %c20 step %c32 {
+      %0 = arith.addi %arg7, %c20 : index
       scf.for %arg8 = %arg7 to %0 step %c1 {
         scf.for %arg9 = %c0 to %c30 step %c1 {
           %1 = memref.load %arg6[%arg8] : memref<?xf64>

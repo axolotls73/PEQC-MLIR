@@ -1,5 +1,5 @@
 #pragma pocc-region-start
-#include "/data-host-share/verif-dialect/verif-translate/interp_macros.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/interp_macros.h"
 void kernel_seidel_2d(int func_arg_0, int func_arg_1, double* func_arg_2)
 {
   int arith_const_3 = 37; 
@@ -207,7 +207,7 @@ void kernel_seidel_2d(int func_arg_0, int func_arg_1, double* func_arg_2)
 
 
 {
-#include "/data-host-share/verif-dialect/verif-translate/prologue.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/prologue.h"
   int tsteps;
   int n;
   double* A;

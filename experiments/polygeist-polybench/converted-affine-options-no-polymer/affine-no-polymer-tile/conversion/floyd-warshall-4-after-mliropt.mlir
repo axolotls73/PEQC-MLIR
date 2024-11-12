@@ -1,13 +1,13 @@
 #map = affine_map<(d0) -> (d0)>
-#map1 = affine_map<(d0) -> (d0 + 1)>
+#map1 = affine_map<(d0) -> (d0 + 32, 60)>
 module {
   func.func @kernel_floyd_warshall(%arg0: i32, %arg1: memref<?x60xi32>) {
-    affine.for %arg2 = 0 to 60 {
-      affine.for %arg3 = 0 to 60 {
-        affine.for %arg4 = 0 to 60 {
-          affine.for %arg5 = #map(%arg2) to #map1(%arg2) {
-            affine.for %arg6 = #map(%arg3) to #map1(%arg3) {
-              affine.for %arg7 = #map(%arg4) to #map1(%arg4) {
+    affine.for %arg2 = 0 to 60 step 32 {
+      affine.for %arg3 = 0 to 60 step 32 {
+        affine.for %arg4 = 0 to 60 step 32 {
+          affine.for %arg5 = #map(%arg2) to min #map1(%arg2) {
+            affine.for %arg6 = #map(%arg3) to min #map1(%arg3) {
+              affine.for %arg7 = #map(%arg4) to min #map1(%arg4) {
                 %0 = affine.load %arg1[%arg6, %arg7] : memref<?x60xi32>
                 %1 = affine.load %arg1[%arg6, %arg5] : memref<?x60xi32>
                 %2 = affine.load %arg1[%arg5, %arg7] : memref<?x60xi32>

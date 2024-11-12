@@ -1,5 +1,5 @@
 #pragma pocc-region-start
-#include "/data-host-share/verif-dialect/verif-translate/interp_macros_seq.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/interp_macros_seq.h"
 void kernel_lu(int func_arg_0, double* func_arg_1)
 {
   int arith_const_2 = -1; 
@@ -41,7 +41,7 @@ void kernel_lu(int func_arg_0, double* func_arg_1)
 
 
 {
-#include "/data-host-share/verif-dialect/verif-translate/prologue.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/prologue.h"
   int n;
   double* A;
 

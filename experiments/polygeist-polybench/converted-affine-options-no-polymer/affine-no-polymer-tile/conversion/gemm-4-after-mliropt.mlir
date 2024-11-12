@@ -1,8 +1,8 @@
 #map = affine_map<(d0) -> (d0)>
-#map1 = affine_map<(d0) -> (d0 + 1)>
+#map1 = affine_map<(d0) -> (d0 + 20)>
 module {
   func.func @kernel_gemm(%arg0: i32, %arg1: i32, %arg2: i32, %arg3: f64, %arg4: f64, %arg5: memref<?x25xf64>, %arg6: memref<?x30xf64>, %arg7: memref<?x25xf64>) {
-    affine.for %arg8 = 0 to 20 {
+    affine.for %arg8 = 0 to 20 step 32 {
       affine.for %arg9 = #map(%arg8) to #map1(%arg8) {
         affine.for %arg10 = 0 to 25 {
           %0 = affine.load %arg5[%arg9, %arg10] : memref<?x25xf64>

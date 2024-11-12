@@ -1,10 +1,10 @@
 #map = affine_map<(d0) -> (d0)>
-#map1 = affine_map<(d0) -> (d0 + 1)>
+#map1 = affine_map<(d0) -> (d0 + 20)>
 module {
   func.func @kernel_fdtd_2d(%arg0: i32, %arg1: i32, %arg2: i32, %arg3: memref<?x30xf64>, %arg4: memref<?x30xf64>, %arg5: memref<?x30xf64>, %arg6: memref<?xf64>) {
     %cst = arith.constant 0.69999999999999996 : f64
     %cst_0 = arith.constant 5.000000e-01 : f64
-    affine.for %arg7 = 0 to 20 {
+    affine.for %arg7 = 0 to 20 step 32 {
       affine.for %arg8 = #map(%arg7) to #map1(%arg7) {
         affine.for %arg9 = 0 to 30 {
           %0 = affine.load %arg6[%arg8] : memref<?xf64>

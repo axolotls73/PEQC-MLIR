@@ -1,30 +1,31 @@
 #pragma pocc-region-start
-#include "/data-host-share/verif-dialect/verif-translate/interp_macros_seq.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/interp_macros_seq.h"
 void kernel_syrk(int func_arg_0, int func_arg_1, double func_arg_2, double func_arg_3, double* func_arg_4, double* func_arg_5)
 {
   int arith_const_6 = 20; 
-  int arith_const_7 = 0; 
-  int arith_const_8 = 30; 
-  int arith_const_9 = 1; 
-  for (int for_iter_10 = arith_const_7; for_iter_10 < arith_const_8; for_iter_10 += arith_const_9) {
-    int arith_addi_11 = (for_iter_10 + arith_const_9); 
-    for (int for_iter_12 = for_iter_10; for_iter_12 < arith_addi_11; for_iter_12 += arith_const_9) {
-      int arith_addi_13 = (for_iter_12 + arith_const_9); 
-      for (int for_iter_14 = arith_const_7; for_iter_14 < arith_addi_13; for_iter_14 += arith_const_9) {
-        double memref_load_15 = func_arg_4[for_iter_12][for_iter_14]; 
-        double arith_mulf_16 = (memref_load_15 * func_arg_3); 
-        func_arg_4[for_iter_12][for_iter_14] = arith_mulf_16; 
+  int arith_const_7 = 1; 
+  int arith_const_8 = 0; 
+  int arith_const_9 = 30; 
+  int arith_const_10 = 32; 
+  for (int for_iter_11 = arith_const_8; for_iter_11 < arith_const_9; for_iter_11 += arith_const_10) {
+    int arith_addi_12 = (for_iter_11 + arith_const_9); 
+    for (int for_iter_13 = for_iter_11; for_iter_13 < arith_addi_12; for_iter_13 += arith_const_7) {
+      int arith_addi_14 = (for_iter_13 + arith_const_7); 
+      for (int for_iter_15 = arith_const_8; for_iter_15 < arith_addi_14; for_iter_15 += arith_const_7) {
+        double memref_load_16 = func_arg_4[for_iter_13][for_iter_15]; 
+        double arith_mulf_17 = (memref_load_16 * func_arg_3); 
+        func_arg_4[for_iter_13][for_iter_15] = arith_mulf_17; 
       }
-      for (int for_iter_17 = arith_const_7; for_iter_17 < arith_const_6; for_iter_17 += arith_const_9) {
-        int arith_addi_18 = (for_iter_12 + arith_const_9); 
-        for (int for_iter_19 = arith_const_7; for_iter_19 < arith_addi_18; for_iter_19 += arith_const_9) {
-          double memref_load_20 = func_arg_5[for_iter_12][for_iter_17]; 
-          double arith_mulf_21 = (func_arg_2 * memref_load_20); 
-          double memref_load_22 = func_arg_5[for_iter_19][for_iter_17]; 
-          double arith_mulf_23 = (arith_mulf_21 * memref_load_22); 
-          double memref_load_24 = func_arg_4[for_iter_12][for_iter_19]; 
-          double arith_addf_25 = (memref_load_24 + arith_mulf_23); 
-          func_arg_4[for_iter_12][for_iter_19] = arith_addf_25; 
+      for (int for_iter_18 = arith_const_8; for_iter_18 < arith_const_6; for_iter_18 += arith_const_7) {
+        int arith_addi_19 = (for_iter_13 + arith_const_7); 
+        for (int for_iter_20 = arith_const_8; for_iter_20 < arith_addi_19; for_iter_20 += arith_const_7) {
+          double memref_load_21 = func_arg_5[for_iter_13][for_iter_18]; 
+          double arith_mulf_22 = (func_arg_2 * memref_load_21); 
+          double memref_load_23 = func_arg_5[for_iter_20][for_iter_18]; 
+          double arith_mulf_24 = (arith_mulf_22 * memref_load_23); 
+          double memref_load_25 = func_arg_4[for_iter_13][for_iter_20]; 
+          double arith_addf_26 = (memref_load_25 + arith_mulf_24); 
+          func_arg_4[for_iter_13][for_iter_20] = arith_addf_26; 
         }
       }
     }
@@ -35,7 +36,7 @@ void kernel_syrk(int func_arg_0, int func_arg_1, double func_arg_2, double func_
 
 
 {
-#include "/data-host-share/verif-dialect/verif-translate/prologue.h"
+#include "/data-host-share/verif-dialect/experiments/polygeist-polybench/script/prologue.h"
   int n;
   int m;
   double alpha;

@@ -3,76 +3,78 @@ void kernel_heat_3d(int func_arg_0, int func_arg_1, double* func_arg_2, double* 
 {
   int arith_const_4 = -1; 
   int arith_const_5 = 9; 
-  double arith_const_6 = 0.125000; 
-  double arith_const_7 = 2.000000; 
-  int arith_const_8 = 1; 
-  int arith_const_9 = 21; 
-  for (int for_iter_10 = arith_const_8; for_iter_10 < arith_const_9; for_iter_10 += arith_const_8) {
-    int arith_addi_11 = (for_iter_10 + arith_const_8); 
-    for (int for_iter_12 = for_iter_10; for_iter_12 < arith_addi_11; for_iter_12 += arith_const_8) {
-      for (int for_iter_13 = arith_const_8; for_iter_13 < arith_const_5; for_iter_13 += arith_const_8) {
-        for (int for_iter_14 = arith_const_8; for_iter_14 < arith_const_5; for_iter_14 += arith_const_8) {
-          for (int for_iter_15 = arith_const_8; for_iter_15 < arith_const_5; for_iter_15 += arith_const_8) {
-            int arith_addi_16 = (for_iter_13 + arith_const_8); 
-            double memref_load_17 = func_arg_2[arith_addi_16][for_iter_14][for_iter_15]; 
-            double memref_load_18 = func_arg_2[for_iter_13][for_iter_14][for_iter_15]; 
-            double arith_mulf_19 = (memref_load_18 * arith_const_7); 
-            double arith_subf_20 = (memref_load_17 - arith_mulf_19); 
-            int arith_addi_21 = (for_iter_13 + arith_const_4); 
-            double memref_load_22 = func_arg_2[arith_addi_21][for_iter_14][for_iter_15]; 
-            double arith_addf_23 = (arith_subf_20 + memref_load_22); 
-            double arith_mulf_24 = (arith_addf_23 * arith_const_6); 
-            int arith_addi_25 = (for_iter_14 + arith_const_8); 
-            double memref_load_26 = func_arg_2[for_iter_13][arith_addi_25][for_iter_15]; 
-            double arith_subf_27 = (memref_load_26 - arith_mulf_19); 
-            int arith_addi_28 = (for_iter_14 + arith_const_4); 
-            double memref_load_29 = func_arg_2[for_iter_13][arith_addi_28][for_iter_15]; 
-            double arith_addf_30 = (arith_subf_27 + memref_load_29); 
-            double arith_mulf_31 = (arith_addf_30 * arith_const_6); 
-            double arith_addf_32 = (arith_mulf_24 + arith_mulf_31); 
-            int arith_addi_33 = (for_iter_15 + arith_const_8); 
-            double memref_load_34 = func_arg_2[for_iter_13][for_iter_14][arith_addi_33]; 
-            double arith_subf_35 = (memref_load_34 - arith_mulf_19); 
-            int arith_addi_36 = (for_iter_15 + arith_const_4); 
-            double memref_load_37 = func_arg_2[for_iter_13][for_iter_14][arith_addi_36]; 
-            double arith_addf_38 = (arith_subf_35 + memref_load_37); 
-            double arith_mulf_39 = (arith_addf_38 * arith_const_6); 
-            double arith_addf_40 = (arith_addf_32 + arith_mulf_39); 
-            double arith_addf_41 = (arith_addf_40 + memref_load_18); 
-            func_arg_3[for_iter_13][for_iter_14][for_iter_15] = arith_addf_41; 
+  int arith_const_6 = 20; 
+  double arith_const_7 = 0.125000; 
+  double arith_const_8 = 2.000000; 
+  int arith_const_9 = 1; 
+  int arith_const_10 = 21; 
+  int arith_const_11 = 32; 
+  for (int for_iter_12 = arith_const_9; for_iter_12 < arith_const_10; for_iter_12 += arith_const_11) {
+    int arith_addi_13 = (for_iter_12 + arith_const_6); 
+    for (int for_iter_14 = for_iter_12; for_iter_14 < arith_addi_13; for_iter_14 += arith_const_9) {
+      for (int for_iter_15 = arith_const_9; for_iter_15 < arith_const_5; for_iter_15 += arith_const_9) {
+        for (int for_iter_16 = arith_const_9; for_iter_16 < arith_const_5; for_iter_16 += arith_const_9) {
+          for (int for_iter_17 = arith_const_9; for_iter_17 < arith_const_5; for_iter_17 += arith_const_9) {
+            int arith_addi_18 = (for_iter_15 + arith_const_9); 
+            double memref_load_19 = func_arg_2[arith_addi_18][for_iter_16][for_iter_17]; 
+            double memref_load_20 = func_arg_2[for_iter_15][for_iter_16][for_iter_17]; 
+            double arith_mulf_21 = (memref_load_20 * arith_const_8); 
+            double arith_subf_22 = (memref_load_19 - arith_mulf_21); 
+            int arith_addi_23 = (for_iter_15 + arith_const_4); 
+            double memref_load_24 = func_arg_2[arith_addi_23][for_iter_16][for_iter_17]; 
+            double arith_addf_25 = (arith_subf_22 + memref_load_24); 
+            double arith_mulf_26 = (arith_addf_25 * arith_const_7); 
+            int arith_addi_27 = (for_iter_16 + arith_const_9); 
+            double memref_load_28 = func_arg_2[for_iter_15][arith_addi_27][for_iter_17]; 
+            double arith_subf_29 = (memref_load_28 - arith_mulf_21); 
+            int arith_addi_30 = (for_iter_16 + arith_const_4); 
+            double memref_load_31 = func_arg_2[for_iter_15][arith_addi_30][for_iter_17]; 
+            double arith_addf_32 = (arith_subf_29 + memref_load_31); 
+            double arith_mulf_33 = (arith_addf_32 * arith_const_7); 
+            double arith_addf_34 = (arith_mulf_26 + arith_mulf_33); 
+            int arith_addi_35 = (for_iter_17 + arith_const_9); 
+            double memref_load_36 = func_arg_2[for_iter_15][for_iter_16][arith_addi_35]; 
+            double arith_subf_37 = (memref_load_36 - arith_mulf_21); 
+            int arith_addi_38 = (for_iter_17 + arith_const_4); 
+            double memref_load_39 = func_arg_2[for_iter_15][for_iter_16][arith_addi_38]; 
+            double arith_addf_40 = (arith_subf_37 + memref_load_39); 
+            double arith_mulf_41 = (arith_addf_40 * arith_const_7); 
+            double arith_addf_42 = (arith_addf_34 + arith_mulf_41); 
+            double arith_addf_43 = (arith_addf_42 + memref_load_20); 
+            func_arg_3[for_iter_15][for_iter_16][for_iter_17] = arith_addf_43; 
           }
         }
       }
-      for (int for_iter_42 = arith_const_8; for_iter_42 < arith_const_5; for_iter_42 += arith_const_8) {
-        for (int for_iter_43 = arith_const_8; for_iter_43 < arith_const_5; for_iter_43 += arith_const_8) {
-          for (int for_iter_44 = arith_const_8; for_iter_44 < arith_const_5; for_iter_44 += arith_const_8) {
-            int arith_addi_45 = (for_iter_42 + arith_const_8); 
-            double memref_load_46 = func_arg_3[arith_addi_45][for_iter_43][for_iter_44]; 
-            double memref_load_47 = func_arg_3[for_iter_42][for_iter_43][for_iter_44]; 
-            double arith_mulf_48 = (memref_load_47 * arith_const_7); 
-            double arith_subf_49 = (memref_load_46 - arith_mulf_48); 
-            int arith_addi_50 = (for_iter_42 + arith_const_4); 
-            double memref_load_51 = func_arg_3[arith_addi_50][for_iter_43][for_iter_44]; 
-            double arith_addf_52 = (arith_subf_49 + memref_load_51); 
-            double arith_mulf_53 = (arith_addf_52 * arith_const_6); 
-            int arith_addi_54 = (for_iter_43 + arith_const_8); 
-            double memref_load_55 = func_arg_3[for_iter_42][arith_addi_54][for_iter_44]; 
-            double arith_subf_56 = (memref_load_55 - arith_mulf_48); 
-            int arith_addi_57 = (for_iter_43 + arith_const_4); 
-            double memref_load_58 = func_arg_3[for_iter_42][arith_addi_57][for_iter_44]; 
-            double arith_addf_59 = (arith_subf_56 + memref_load_58); 
-            double arith_mulf_60 = (arith_addf_59 * arith_const_6); 
-            double arith_addf_61 = (arith_mulf_53 + arith_mulf_60); 
-            int arith_addi_62 = (for_iter_44 + arith_const_8); 
-            double memref_load_63 = func_arg_3[for_iter_42][for_iter_43][arith_addi_62]; 
-            double arith_subf_64 = (memref_load_63 - arith_mulf_48); 
-            int arith_addi_65 = (for_iter_44 + arith_const_4); 
-            double memref_load_66 = func_arg_3[for_iter_42][for_iter_43][arith_addi_65]; 
-            double arith_addf_67 = (arith_subf_64 + memref_load_66); 
-            double arith_mulf_68 = (arith_addf_67 * arith_const_6); 
-            double arith_addf_69 = (arith_addf_61 + arith_mulf_68); 
-            double arith_addf_70 = (arith_addf_69 + memref_load_47); 
-            func_arg_2[for_iter_42][for_iter_43][for_iter_44] = arith_addf_70; 
+      for (int for_iter_44 = arith_const_9; for_iter_44 < arith_const_5; for_iter_44 += arith_const_9) {
+        for (int for_iter_45 = arith_const_9; for_iter_45 < arith_const_5; for_iter_45 += arith_const_9) {
+          for (int for_iter_46 = arith_const_9; for_iter_46 < arith_const_5; for_iter_46 += arith_const_9) {
+            int arith_addi_47 = (for_iter_44 + arith_const_9); 
+            double memref_load_48 = func_arg_3[arith_addi_47][for_iter_45][for_iter_46]; 
+            double memref_load_49 = func_arg_3[for_iter_44][for_iter_45][for_iter_46]; 
+            double arith_mulf_50 = (memref_load_49 * arith_const_8); 
+            double arith_subf_51 = (memref_load_48 - arith_mulf_50); 
+            int arith_addi_52 = (for_iter_44 + arith_const_4); 
+            double memref_load_53 = func_arg_3[arith_addi_52][for_iter_45][for_iter_46]; 
+            double arith_addf_54 = (arith_subf_51 + memref_load_53); 
+            double arith_mulf_55 = (arith_addf_54 * arith_const_7); 
+            int arith_addi_56 = (for_iter_45 + arith_const_9); 
+            double memref_load_57 = func_arg_3[for_iter_44][arith_addi_56][for_iter_46]; 
+            double arith_subf_58 = (memref_load_57 - arith_mulf_50); 
+            int arith_addi_59 = (for_iter_45 + arith_const_4); 
+            double memref_load_60 = func_arg_3[for_iter_44][arith_addi_59][for_iter_46]; 
+            double arith_addf_61 = (arith_subf_58 + memref_load_60); 
+            double arith_mulf_62 = (arith_addf_61 * arith_const_7); 
+            double arith_addf_63 = (arith_mulf_55 + arith_mulf_62); 
+            int arith_addi_64 = (for_iter_46 + arith_const_9); 
+            double memref_load_65 = func_arg_3[for_iter_44][for_iter_45][arith_addi_64]; 
+            double arith_subf_66 = (memref_load_65 - arith_mulf_50); 
+            int arith_addi_67 = (for_iter_46 + arith_const_4); 
+            double memref_load_68 = func_arg_3[for_iter_44][for_iter_45][arith_addi_67]; 
+            double arith_addf_69 = (arith_subf_66 + memref_load_68); 
+            double arith_mulf_70 = (arith_addf_69 * arith_const_7); 
+            double arith_addf_71 = (arith_addf_63 + arith_mulf_70); 
+            double arith_addf_72 = (arith_addf_71 + memref_load_49); 
+            func_arg_2[for_iter_44][for_iter_45][for_iter_46] = arith_addf_72; 
           }
         }
       }

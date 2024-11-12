@@ -1,11 +1,12 @@
 module {
   func.func @kernel_syrk(%arg0: i32, %arg1: i32, %arg2: f64, %arg3: f64, %arg4: memref<?x30xf64>, %arg5: memref<?x20xf64>) {
     %c20 = arith.constant 20 : index
+    %c1 = arith.constant 1 : index
     %c0 = arith.constant 0 : index
     %c30 = arith.constant 30 : index
-    %c1 = arith.constant 1 : index
-    scf.for %arg6 = %c0 to %c30 step %c1 {
-      %0 = arith.addi %arg6, %c1 : index
+    %c32 = arith.constant 32 : index
+    scf.for %arg6 = %c0 to %c30 step %c32 {
+      %0 = arith.addi %arg6, %c30 : index
       scf.for %arg7 = %arg6 to %0 step %c1 {
         %1 = arith.addi %arg7, %c1 : index
         scf.for %arg8 = %c0 to %1 step %c1 {

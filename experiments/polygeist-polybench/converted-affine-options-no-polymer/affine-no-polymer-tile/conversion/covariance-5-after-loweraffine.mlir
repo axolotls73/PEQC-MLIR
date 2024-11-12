@@ -4,10 +4,10 @@ module {
     %cst_0 = arith.constant 0.000000e+00 : f64
     %c0 = arith.constant 0 : index
     %c28 = arith.constant 28 : index
-    %c1 = arith.constant 1 : index
-    scf.for %arg6 = %c0 to %c28 step %c1 {
-      %c1_6 = arith.constant 1 : index
-      %1 = arith.addi %arg6, %c1_6 : index
+    %c32 = arith.constant 32 : index
+    scf.for %arg6 = %c0 to %c28 step %c32 {
+      %c28_6 = arith.constant 28 : index
+      %1 = arith.addi %arg6, %c28_6 : index
       %c1_7 = arith.constant 1 : index
       scf.for %arg7 = %arg6 to %1 step %c1_7 {
         memref.store %cst_0, %arg5[%arg7] : memref<?xf64>
@@ -26,19 +26,19 @@ module {
       }
     }
     %c0_1 = arith.constant 0 : index
-    %c32 = arith.constant 32 : index
-    %c1_2 = arith.constant 1 : index
-    scf.for %arg6 = %c0_1 to %c32 step %c1_2 {
+    %c32_2 = arith.constant 32 : index
+    %c32_3 = arith.constant 32 : index
+    scf.for %arg6 = %c0_1 to %c32_2 step %c32_3 {
       %c0_6 = arith.constant 0 : index
       %c28_7 = arith.constant 28 : index
-      %c1_8 = arith.constant 1 : index
-      scf.for %arg7 = %c0_6 to %c28_7 step %c1_8 {
-        %c1_9 = arith.constant 1 : index
-        %1 = arith.addi %arg6, %c1_9 : index
+      %c32_8 = arith.constant 32 : index
+      scf.for %arg7 = %c0_6 to %c28_7 step %c32_8 {
+        %c32_9 = arith.constant 32 : index
+        %1 = arith.addi %arg6, %c32_9 : index
         %c1_10 = arith.constant 1 : index
         scf.for %arg8 = %arg6 to %1 step %c1_10 {
-          %c1_11 = arith.constant 1 : index
-          %2 = arith.addi %arg7, %c1_11 : index
+          %c28_11 = arith.constant 28 : index
+          %2 = arith.addi %arg7, %c28_11 : index
           %c1_12 = arith.constant 1 : index
           scf.for %arg9 = %arg7 to %2 step %c1_12 {
             %3 = memref.load %arg5[%arg9] : memref<?xf64>
@@ -50,10 +50,10 @@ module {
       }
     }
     %0 = arith.subf %arg2, %cst : f64
-    %c0_3 = arith.constant 0 : index
-    %c28_4 = arith.constant 28 : index
-    %c1_5 = arith.constant 1 : index
-    scf.for %arg6 = %c0_3 to %c28_4 step %c1_5 {
+    %c0_4 = arith.constant 0 : index
+    %c28_5 = arith.constant 28 : index
+    %c1 = arith.constant 1 : index
+    scf.for %arg6 = %c0_4 to %c28_5 step %c1 {
       %c28_6 = arith.constant 28 : index
       %c1_7 = arith.constant 1 : index
       scf.for %arg7 = %arg6 to %c28_6 step %c1_7 {
