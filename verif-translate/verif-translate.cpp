@@ -619,6 +619,9 @@ class PastTranslator {
   s_past_node_t* translate(arith::DivFOp& op) {
     return translateArithBinop("arith_divf", past_div, op.getResult(), op.getLhs(), op.getRhs());
   }
+  s_past_node_t* translate(math::PowFOp& op) {
+    return translateArithBinop("math_powf", past_pow, op.getResult(), op.getLhs(), op.getRhs());
+  }
 
   s_past_node_t* translateArithUnaryOp
             (const char* resultName, const cs_past_node_type_t* pastType,
@@ -633,7 +636,10 @@ class PastTranslator {
     return translateArithUnaryOp("math_sqrt", past_sqrt, op.getResult(), op.getOperand());
   }
   s_past_node_t* translate(arith::NegFOp op) {
-    return translateArithUnaryOp("math_negf", past_unaminus, op.getResult(), op.getOperand());
+    return translateArithUnaryOp("arith_negf", past_unaminus, op.getResult(), op.getOperand());
+  }
+  s_past_node_t* translate(math::ExpOp op) {
+    return translateArithUnaryOp("math_exp", past_exp, op.getResult(), op.getOperand());
   }
 
   s_past_node_t* translate(arith::CmpIOp& op) {
@@ -664,6 +670,53 @@ class PastTranslator {
       case arith::CmpIPredicate::uge:
         cmptype = past_geq;
         break;
+    }
+
+    s_past_node_t* cond = past_node_binary_create(cmptype,
+        past_node_varref_create(getVarSymbol(op.getLhs())),
+        past_node_varref_create(getVarSymbol(op.getRhs())));
+
+    return past_node_statement_create(
+      past_node_binary_create(past_assign,
+        declareVar(op.getResult(), "arith_cmpi"),
+        cond));
+  }
+
+  s_past_node_t* translate(arith::CmpFOp& op) {
+    arith::CmpFPredicate pred = op.getPredicate();
+    cs_past_node_type_t* cmptype = nullptr;
+    switch (pred) {
+      case arith::CmpFPredicate::OEQ:
+      case arith::CmpFPredicate::UEQ:
+        cmptype = past_equal;
+        break;
+      case arith::CmpFPredicate::ONE:
+      case arith::CmpFPredicate::UNE:
+        cmptype = past_notequal;
+        break;
+
+      case arith::CmpFPredicate::OLT:
+      case arith::CmpFPredicate::ULT:
+        cmptype = past_lt;
+        break;
+      case arith::CmpFPredicate::OLE:
+      case arith::CmpFPredicate::ULE:
+        cmptype = past_leq;
+        break;
+
+      case arith::CmpFPredicate::OGT:
+      case arith::CmpFPredicate::UGT:
+        cmptype = past_gt;
+        break;
+      case arith::CmpFPredicate::OGE:
+      case arith::CmpFPredicate::UGE:
+        cmptype = past_geq;
+        break;
+      case arith::CmpFPredicate::ORD:
+      case arith::CmpFPredicate::UNO:
+      case arith::CmpFPredicate::AlwaysFalse:
+      case arith::CmpFPredicate::AlwaysTrue:
+        assert(0);
     }
 
     s_past_node_t* cond = past_node_binary_create(cmptype,
@@ -1077,6 +1130,7 @@ class PastTranslator {
     if (auto o = dyn_cast<ModuleOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<func::FuncOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<func::ReturnOp>(op)) res = translate(o);
+
     else if (auto o = dyn_cast<arith::ConstantIntOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::ConstantIndexOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::ConstantFloatOp>(op)) res = translate(o);
@@ -1094,13 +1148,18 @@ class PastTranslator {
     else if (auto o = dyn_cast<arith::SubFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::MulFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::DivFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<math::PowFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<math::SqrtOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::NegFOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<math::ExpOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::CmpFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::SelectOp>(op)) res = translate(o);
+
     else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::IfOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
+
     else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::AllocaOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::DeallocOp>(op)) res = translate(o);
@@ -1108,11 +1167,13 @@ class PastTranslator {
     else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::CopyOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<memref::SubViewOp>(op)) res = translate(o);
+
     else if (auto o = dyn_cast<async::CreateGroupOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::AddToGroupOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::AwaitAllOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::ExecuteOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<async::YieldOp>(op)) res = translate(o);
+
     else if (auto o = dyn_cast<UnrealizedConversionCastOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<LLVM::UndefOp>(op)) res = translate(o);
     else {

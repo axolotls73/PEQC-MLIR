@@ -45,6 +45,30 @@ module {
     %11 = arith.cmpi ne, %a, %b : i32
 // CHECK: = ([[A]] == [[B]])
     %12 = arith.cmpi eq, %a, %b : i32
+// CHECK: = ([[F]] < [[G]])
+    %27 = arith.cmpf olt, %f, %g : f32
+// CHECK: = ([[F]] < [[G]])
+    %28 = arith.cmpf ult, %f, %g : f32
+// CHECK: = ([[F]] <= [[G]])
+    %29 = arith.cmpf ole, %f, %g : f32
+// CHECK: = ([[F]] <= [[G]])
+    %30 = arith.cmpf ule, %f, %g : f32
+// CHECK: = ([[F]] > [[G]])
+    %31 = arith.cmpf ogt, %f, %g : f32
+// CHECK: = ([[F]] > [[G]])
+    %32 = arith.cmpf ugt, %f, %g : f32
+// CHECK: = ([[F]] >= [[G]])
+    %33 = arith.cmpf oge, %f, %g : f32
+// CHECK: = ([[F]] >= [[G]])
+    %34 = arith.cmpf uge, %f, %g : f32
+// CHECK: = ([[F]] != [[G]])
+    %35 = arith.cmpf one, %f, %g : f32
+// CHECK: = ([[F]] != [[G]])
+    %36 = arith.cmpf une, %f, %g : f32
+// CHECK: = ([[F]] == [[G]])
+    %37 = arith.cmpf oeq, %f, %g : f32
+// CHECK: = ([[F]] == [[G]])
+    %38 = arith.cmpf ueq, %f, %g : f32
 // CHECK: = ([[cond]] ? [[A]] : [[B]])
     %17 = arith.select %cond, %a, %b : i32
 // CHECK: float {{.*}} = ([[F]] + [[G]])
@@ -65,4 +89,8 @@ module {
     %25 = arith.negf %f : f32
 // CHECK: = ([[A]] % [[B]])
     %26 = arith.remsi %a, %b : i32
+// CHECK: = exp([[F]])
+    %39 = math.exp %f : f32
+// CHECK: = pow([[F]], [[G]])
+    %40 = math.powf %f, %g : f32
 }
