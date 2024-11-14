@@ -14,20 +14,21 @@
 /* RNA bases represented as chars, range is [0,3] */
 typedef char base;
 
-#define match(b1, b2) (((b1)+(b2)) == 3 ? 1 : 0)
+// #define match(b1, b2) (((b1)+(b2)) == 3 ? 1 : 0)
+#define match(b1, b2) (((b1)+(b2)) == 3)
 #define max_score(s1, s2) ((s1 >= s2) ? s1 : s2)
 
 /* Array initialization. */
 static
 void init_array (int n,
-                 base POLYBENCH_1D(seq,N,n),
+                 char POLYBENCH_1D(seq,N,n),
 		 DATA_TYPE POLYBENCH_2D(table,N,N,n,n))
 {
   int i, j;
 
   //base is AGCT/0..3
   for (i=0; i <n; i++) {
-     seq[i] = (base)((i+1)%4);
+     seq[i] = (char)((i+1)%4);
   }
 
   for (i=0; i <n; i++)
@@ -68,7 +69,7 @@ void print_array(int n,
   based on algorithm by Nussinov, described in Allison Lake's senior thesis.
 */
 static
-void kernel_nussinov(int n, base POLYBENCH_1D(seq,N,n),
+void kernel_nussinov(int n, DATA_TYPE POLYBENCH_1D(seq,N,n),
 			   DATA_TYPE POLYBENCH_2D(table,N,N,n,n))
 {
   int i, j, k;
