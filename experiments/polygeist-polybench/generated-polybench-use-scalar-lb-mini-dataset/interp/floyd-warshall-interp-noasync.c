@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_floyd_warshall(int n,
       int path[ 60 + 0][60 + 0])

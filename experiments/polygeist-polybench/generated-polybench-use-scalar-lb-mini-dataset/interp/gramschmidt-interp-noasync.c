@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_gramschmidt(int m, int n,
    double A[ 20 + 0][30 + 0],

@@ -8,13 +8,13 @@ void kernel_symm(int m, int n,
    double B[ 20 + 0][30 + 0])
 {
   int i, j, k;
-  double temp2;
+  double temp2 = 0.0;
 
 #pragma scop
    for (i = 0; i < 20; i++)
       for (j = 0; j < 30; j++ )
       {
-        temp2 = 0;
+        temp2 = 0.0;
         for (k = 0; k < i; k++) {
            C[k][j] += alpha*B[i][j] * A[i][k];
            temp2 += B[k][j] * A[i][k];

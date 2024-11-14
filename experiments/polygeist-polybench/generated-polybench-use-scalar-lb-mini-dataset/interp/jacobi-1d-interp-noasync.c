@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_jacobi_1d(int tsteps,
        int n,

@@ -1,6 +1,6 @@
 
 #include <math.h>
-void kernel_nussinov(int n, base seq[ 500 + 0],
+void kernel_nussinov(int n, int seq[ 500 + 0],
       int table[ 500 + 0][500 + 0])
 {
   int i, j, k;
@@ -17,7 +17,7 @@ void kernel_nussinov(int n, base seq[ 500 + 0],
    if (j-1>=0 && i+1<500) {
 
      if (i<j-1)
-        table[i][j] = ((table[i][j] >= table[i+1][j-1]+(((seq[i])+(seq[j])) == 3 ? 1 : 0)) ? table[i][j] : table[i+1][j-1]+(((seq[i])+(seq[j])) == 3 ? 1 : 0));
+        table[i][j] = ((table[i][j] >= table[i+1][j-1]+(((seq[i])+(seq[j])) == 3)) ? table[i][j] : table[i+1][j-1]+(((seq[i])+(seq[j])) == 3));
      else
         table[i][j] = ((table[i][j] >= table[i+1][j-1]) ? table[i][j] : table[i+1][j-1]);
    }

@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
   double E[ 16 + 0][18 + 0],

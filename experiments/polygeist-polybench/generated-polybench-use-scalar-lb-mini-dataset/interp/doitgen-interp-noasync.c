@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_doitgen(int nr, int nq, int np,
       double A[ 10 + 0][8 + 0][12 + 0],

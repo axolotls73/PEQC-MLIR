@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_symm(int m, int n,
    double alpha,
@@ -7,13 +11,13 @@ void kernel_symm(int m, int n,
    double B[ 200 + 0][240 + 0])
 {
   int i, j, k;
-  double temp2;
+  double temp2 = 0.0;
 
 #pragma scop
    for (i = 0; i < 200; i++)
       for (j = 0; j < 240; j++ )
       {
-        temp2 = 0;
+        temp2 = 0.0;
         for (k = 0; k < i; k++) {
            C[k][j] += alpha*B[i][j] * A[i][k];
            temp2 += B[k][j] * A[i][k];

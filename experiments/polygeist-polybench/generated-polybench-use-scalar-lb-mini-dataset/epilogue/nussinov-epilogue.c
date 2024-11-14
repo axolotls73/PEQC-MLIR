@@ -1,7 +1,7 @@
 
 {
   int n;
-  base* seq;
+  int* seq;
   int* table;
 
 #pragma peqc async_execute

@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_trisolv(int n,
       double L[ 40 + 0][40 + 0],

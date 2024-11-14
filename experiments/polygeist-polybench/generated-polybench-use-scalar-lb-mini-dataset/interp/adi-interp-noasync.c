@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_adi(int tsteps, int n,
   double u[ 20 + 0][20 + 0],
@@ -13,9 +17,9 @@ void kernel_adi(int tsteps, int n,
 
 #pragma scop
 
-  DX = 1.0/(double)20;
-  DY = 1.0/(double)20;
-  DT = 1.0/(double)20;
+  DX = 1.0/20.0;
+  DY = 1.0/20.0;
+  DT = 1.0/20.0;
   B1 = 2.0;
   B2 = 1.0;
   mul1 = B1 * DT / (DX * DX);

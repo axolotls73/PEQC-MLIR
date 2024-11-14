@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_bicg(int m, int n,
    double A[ 410 + 0][390 + 0],
@@ -10,7 +14,7 @@ void kernel_bicg(int m, int n,
 
 #pragma scop
   for (i = 0; i < 390; i++)
-    s[i] = 0;
+    s[i] = 0.0;
   for (i = 0; i < 410; i++)
     {
       q[i] = 0.0;

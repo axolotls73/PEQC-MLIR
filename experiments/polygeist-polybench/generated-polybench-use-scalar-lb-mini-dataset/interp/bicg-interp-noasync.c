@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_bicg(int m, int n,
    double A[ 42 + 0][38 + 0],

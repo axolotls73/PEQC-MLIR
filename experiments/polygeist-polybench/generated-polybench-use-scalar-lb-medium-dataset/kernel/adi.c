@@ -14,9 +14,9 @@ void kernel_adi(int tsteps, int n,
 
 #pragma scop
 
-  DX = 1.0/(double)200;
-  DY = 1.0/(double)200;
-  DT = 1.0/(double)100;
+  DX = 1.0/200.0;
+  DY = 1.0/200.0;
+  DT = 1.0/100.0;
   B1 = 2.0;
   B2 = 1.0;
   mul1 = B1 * DT / (DX * DX);

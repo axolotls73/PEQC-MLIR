@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_ludcmp(int n,
      double A[ 400 + 0][400 + 0],

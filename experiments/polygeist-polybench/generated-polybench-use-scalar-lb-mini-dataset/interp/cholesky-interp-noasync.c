@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_cholesky(int n,
        double A[ 40 + 0][40 + 0])

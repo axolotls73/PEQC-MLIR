@@ -1,3 +1,7 @@
+
+#define expf exp
+#define powf pow
+
 #pragma pocc-region-start
 void kernel_2mm(int ni, int nj, int nk, int nl,
   double alpha,

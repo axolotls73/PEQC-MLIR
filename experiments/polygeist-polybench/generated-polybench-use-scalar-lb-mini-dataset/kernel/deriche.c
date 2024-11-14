@@ -16,13 +16,17 @@ void kernel_deriche(int w, int h, float alpha,
     float b1, b2, c1, c2;
 
 #pragma scop
-   k = (1.0f -expf(-alpha))*(1.0f -expf(-alpha))/(1.0f +2.0f*alpha*expf(-alpha)-expf(2.0f*alpha));
+
+   k = (1.0f - expf(-alpha)) * (1.0f - expf(-alpha)) /
+        (((alpha * expf(-alpha) * 2.0f) + 1.0f) - expf(alpha * 2.0f));
    a1 = a5 = k;
    a2 = a6 = k*expf(-alpha)*(alpha-1.0f);
    a3 = a7 = k*expf(-alpha)*(alpha+1.0f);
-   a4 = a8 = -k*expf(-2.0f*alpha);
+
+   a4 = a8 = -k*expf(alpha * -2.0f);
    b1 = powf(2.0f,-alpha);
-   b2 = -expf(-2.0f*alpha);
+
+   b2 = -expf(alpha * -2.0f);
    c1 = c2 = 1;
 
    for (i=0; i<64; i++) {
