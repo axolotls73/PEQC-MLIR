@@ -102,8 +102,8 @@ module {
   func.func @kernel_durbin(%arg0: i32, %arg1: memref<?xf64>, %arg2: memref<?xf64>) {
     %c1 = arith.constant 1 : index
     %c0 = arith.constant 0 : index
-    %alloca = memref.alloca() {scop.scratchpad} : memref<1xf64>
-    %alloca_0 = memref.alloca() : memref<f64>
+    %alloca = memref.alloca() : memref<f64>
+    %alloca_0 = memref.alloca() {scop.scratchpad} : memref<1xf64>
     %alloca_1 = memref.alloca() : memref<40xf64>
     %alloca_2 = memref.alloca() : memref<f64>
     %alloca_3 = memref.alloca() : memref<f64>
@@ -113,34 +113,34 @@ module {
     call @S5(%alloca_3, %arg1) : (memref<f64>, memref<?xf64>) -> ()
     call @S1(%alloca_2) : (memref<f64>) -> ()
     call @S4(%alloca_2) : (memref<f64>) -> ()
-    call @S0(%alloca_0) : (memref<f64>) -> ()
+    call @S0(%alloca) : (memref<f64>) -> ()
     affine.for %arg3 = 1 to 40 {
-      func.call @S7(%alloca_0) : (memref<f64>) -> ()
-      func.call @S8(%alloca_0, %arg2, %c0, %arg1, %arg3) : (memref<f64>, memref<?xf64>, index, memref<?xf64>, index) -> ()
+      func.call @S7(%alloca) : (memref<f64>) -> ()
+      func.call @S8(%alloca, %arg2, %c0, %arg1, %arg3) : (memref<f64>, memref<?xf64>, index, memref<?xf64>, index) -> ()
       func.call @S6(%alloca_2, %alloca_3) : (memref<f64>, memref<f64>) -> ()
       affine.for %arg4 = 1 to #map(%arg3) {
-        func.call @S8(%alloca_0, %arg2, %arg4, %arg1, %arg3) : (memref<f64>, memref<?xf64>, index, memref<?xf64>, index) -> ()
+        func.call @S8(%alloca, %arg2, %arg4, %arg1, %arg3) : (memref<f64>, memref<?xf64>, index, memref<?xf64>, index) -> ()
       }
       affine.if #set(%arg3) {
-        func.call @S9(%alloca, %alloca_2, %alloca_0, %arg1, %c1) : (memref<1xf64>, memref<f64>, memref<f64>, memref<?xf64>, index) -> ()
-        func.call @S11(%c0, %alloca_1, %arg2, %c1, %alloca) : (index, memref<40xf64>, memref<?xf64>, index, memref<1xf64>) -> ()
+        func.call @S9(%alloca_0, %alloca_2, %alloca, %arg1, %c1) : (memref<1xf64>, memref<f64>, memref<f64>, memref<?xf64>, index) -> ()
+        func.call @S11(%c0, %alloca_1, %arg2, %c1, %alloca_0) : (index, memref<40xf64>, memref<?xf64>, index, memref<1xf64>) -> ()
         func.call @S12(%arg2, %c0, %alloca_1) : (memref<?xf64>, index, memref<40xf64>) -> ()
-        func.call @S10(%alloca_3, %alloca, %alloca_4) : (memref<f64>, memref<1xf64>, memref<1xf64>) -> ()
+        func.call @S10(%alloca_3, %alloca_0, %alloca_4) : (memref<f64>, memref<1xf64>, memref<1xf64>) -> ()
         func.call @S13(%arg2, %c1, %alloca_4) : (memref<?xf64>, index, memref<1xf64>) -> ()
       }
       affine.if #set1(%arg3) {
-        func.call @S9(%alloca, %alloca_2, %alloca_0, %arg1, %arg3) : (memref<1xf64>, memref<f64>, memref<f64>, memref<?xf64>, index) -> ()
-        func.call @S11(%c0, %alloca_1, %arg2, %arg3, %alloca) : (index, memref<40xf64>, memref<?xf64>, index, memref<1xf64>) -> ()
-        func.call @S10(%alloca_3, %alloca, %alloca_4) : (memref<f64>, memref<1xf64>, memref<1xf64>) -> ()
+        func.call @S9(%alloca_0, %alloca_2, %alloca, %arg1, %arg3) : (memref<1xf64>, memref<f64>, memref<f64>, memref<?xf64>, index) -> ()
+        func.call @S11(%c0, %alloca_1, %arg2, %arg3, %alloca_0) : (index, memref<40xf64>, memref<?xf64>, index, memref<1xf64>) -> ()
+        func.call @S10(%alloca_3, %alloca_0, %alloca_4) : (memref<f64>, memref<1xf64>, memref<1xf64>) -> ()
         func.call @S13(%arg2, %arg3, %alloca_4) : (memref<?xf64>, index, memref<1xf64>) -> ()
       }
       affine.for %arg4 = 39 to #map1(%arg3) {
         %0 = affine.apply #map2(%arg4)
-        func.call @S11(%0, %alloca_1, %arg2, %arg3, %alloca) : (index, memref<40xf64>, memref<?xf64>, index, memref<1xf64>) -> ()
+        func.call @S11(%0, %alloca_1, %arg2, %arg3, %alloca_0) : (index, memref<40xf64>, memref<?xf64>, index, memref<1xf64>) -> ()
       }
       affine.if #set1(%arg3) {
         %0 = affine.apply #map3(%arg3)
-        func.call @S11(%0, %alloca_1, %arg2, %arg3, %alloca) : (index, memref<40xf64>, memref<?xf64>, index, memref<1xf64>) -> ()
+        func.call @S11(%0, %alloca_1, %arg2, %arg3, %alloca_0) : (index, memref<40xf64>, memref<?xf64>, index, memref<1xf64>) -> ()
         func.call @S12(%arg2, %c0, %alloca_1) : (memref<?xf64>, index, memref<40xf64>) -> ()
       }
       affine.for %arg4 = #map4(%arg3) to #map5(%arg3) {

@@ -6,65 +6,70 @@ module {
     %c2 = arith.constant 2 : index
     %c-1 = arith.constant -1 : index
     %c4 = arith.constant 4 : index
-    %c0 = arith.constant 0 : index
     %c30 = arith.constant 30 : index
+    %c32 = arith.constant 32 : index
+    %c0 = arith.constant 0 : index
     %c1 = arith.constant 1 : index
-    %0 = async.create_group %c30 : !async.group
-    %1 = scf.for %arg6 = %c0 to %c30 step %c1 iter_args(%arg7 = %c0) -> (index) {
+    %0 = async.create_group %c1 : !async.group
+    %1 = scf.for %arg6 = %c0 to %c1 step %c1 iter_args(%arg7 = %c0) -> (index) {
       %token = async.execute {
-        scf.for %arg8 = %c0 to %c1 step %c1 {
-          %6 = arith.addi %arg6, %arg8 : index
-          %7 = arith.addi %arg6, %arg8 : index
-          %8 = arith.addi %7, %c1 : index
-          %9 = arith.cmpi slt, %8, %c0 : index
-          %10 = arith.subi %c-1, %8 : index
-          %11 = arith.select %9, %10, %8 : index
-          %12 = arith.divsi %11, %c4 : index
-          %13 = arith.subi %c-1, %12 : index
-          %14 = arith.select %9, %13, %12 : index
-          scf.for %arg9 = %c0 to %14 step %c1 {
-            %27 = arith.muli %arg9, %c4 : index
-            %28 = memref.load %arg4[%6, %27] : memref<?x30xf64>
-            %29 = arith.mulf %28, %arg3 : f64
-            memref.store %29, %arg4[%6, %27] : memref<?x30xf64>
-            %30 = arith.addi %27, %c1 : index
-            %31 = memref.load %arg4[%6, %30] : memref<?x30xf64>
-            %32 = arith.mulf %31, %arg3 : f64
-            memref.store %32, %arg4[%6, %30] : memref<?x30xf64>
-            %33 = arith.addi %27, %c2 : index
-            %34 = memref.load %arg4[%6, %33] : memref<?x30xf64>
-            %35 = arith.mulf %34, %arg3 : f64
-            memref.store %35, %arg4[%6, %33] : memref<?x30xf64>
-            %36 = arith.addi %27, %c3 : index
-            %37 = memref.load %arg4[%6, %36] : memref<?x30xf64>
-            %38 = arith.mulf %37, %arg3 : f64
-            memref.store %38, %arg4[%6, %36] : memref<?x30xf64>
+        %6 = arith.muli %arg6, %c32 : index
+        scf.for %arg8 = %c0 to %c30 step %c1 {
+          %7 = arith.addi %6, %arg8 : index
+          %8 = arith.muli %arg6, %c32 : index
+          %9 = arith.addi %arg8, %8 : index
+          %10 = arith.addi %9, %c1 : index
+          %11 = arith.cmpi slt, %10, %c0 : index
+          %12 = arith.subi %c-1, %10 : index
+          %13 = arith.select %11, %12, %10 : index
+          %14 = arith.divsi %13, %c4 : index
+          %15 = arith.subi %c-1, %14 : index
+          %16 = arith.select %11, %15, %14 : index
+          scf.for %arg9 = %c0 to %16 step %c1 {
+            %31 = arith.muli %arg9, %c4 : index
+            %32 = memref.load %arg4[%7, %31] : memref<?x30xf64>
+            %33 = arith.mulf %32, %arg3 : f64
+            memref.store %33, %arg4[%7, %31] : memref<?x30xf64>
+            %34 = arith.addi %31, %c1 : index
+            %35 = memref.load %arg4[%7, %34] : memref<?x30xf64>
+            %36 = arith.mulf %35, %arg3 : f64
+            memref.store %36, %arg4[%7, %34] : memref<?x30xf64>
+            %37 = arith.addi %31, %c2 : index
+            %38 = memref.load %arg4[%7, %37] : memref<?x30xf64>
+            %39 = arith.mulf %38, %arg3 : f64
+            memref.store %39, %arg4[%7, %37] : memref<?x30xf64>
+            %40 = arith.addi %31, %c3 : index
+            %41 = memref.load %arg4[%7, %40] : memref<?x30xf64>
+            %42 = arith.mulf %41, %arg3 : f64
+            memref.store %42, %arg4[%7, %40] : memref<?x30xf64>
           }
-          %15 = arith.addi %arg6, %arg8 : index
-          %16 = arith.addi %arg6, %arg8 : index
-          %17 = arith.addi %16, %c1 : index
-          %18 = arith.cmpi slt, %17, %c0 : index
-          %19 = arith.subi %c-1, %17 : index
-          %20 = arith.select %18, %19, %17 : index
-          %21 = arith.divsi %20, %c4 : index
-          %22 = arith.subi %c-1, %21 : index
-          %23 = arith.select %18, %22, %21 : index
-          %24 = arith.muli %23, %c-4 : index
-          %25 = arith.addi %15, %24 : index
-          %26 = arith.addi %25, %c1 : index
-          scf.for %arg9 = %c0 to %26 step %c1 {
-            %27 = arith.addi %6, %c1 : index
-            %28 = arith.cmpi slt, %27, %c0 : index
-            %29 = arith.subi %c-1, %27 : index
-            %30 = arith.select %28, %29, %27 : index
-            %31 = arith.divsi %30, %c4 : index
-            %32 = arith.subi %c-1, %31 : index
-            %33 = arith.select %28, %32, %31 : index
-            %34 = arith.muli %33, %c4 : index
-            %35 = arith.addi %arg9, %34 : index
-            %36 = memref.load %arg4[%6, %35] : memref<?x30xf64>
-            %37 = arith.mulf %36, %arg3 : f64
-            memref.store %37, %arg4[%6, %35] : memref<?x30xf64>
+          %17 = arith.muli %arg6, %c32 : index
+          %18 = arith.addi %arg8, %17 : index
+          %19 = arith.muli %arg6, %c32 : index
+          %20 = arith.addi %arg8, %19 : index
+          %21 = arith.addi %20, %c1 : index
+          %22 = arith.cmpi slt, %21, %c0 : index
+          %23 = arith.subi %c-1, %21 : index
+          %24 = arith.select %22, %23, %21 : index
+          %25 = arith.divsi %24, %c4 : index
+          %26 = arith.subi %c-1, %25 : index
+          %27 = arith.select %22, %26, %25 : index
+          %28 = arith.muli %27, %c-4 : index
+          %29 = arith.addi %18, %28 : index
+          %30 = arith.addi %29, %c1 : index
+          scf.for %arg9 = %c0 to %30 step %c1 {
+            %31 = arith.addi %7, %c1 : index
+            %32 = arith.cmpi slt, %31, %c0 : index
+            %33 = arith.subi %c-1, %31 : index
+            %34 = arith.select %32, %33, %31 : index
+            %35 = arith.divsi %34, %c4 : index
+            %36 = arith.subi %c-1, %35 : index
+            %37 = arith.select %32, %36, %35 : index
+            %38 = arith.muli %37, %c4 : index
+            %39 = arith.addi %arg9, %38 : index
+            %40 = memref.load %arg4[%7, %39] : memref<?x30xf64>
+            %41 = arith.mulf %40, %arg3 : f64
+            memref.store %41, %arg4[%7, %39] : memref<?x30xf64>
           }
         }
         async.yield

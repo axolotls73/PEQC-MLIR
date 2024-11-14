@@ -248,7 +248,6 @@ converting adi
     polymer-opt converted-affine-options-no-polymer/affine-no-polymer-loop-fusion/conversion/adi-1-original.mlir 
     mlir-opt --inline converted-affine-options-no-polymer/affine-no-polymer-loop-fusion/conversion/adi-2-after-polymer.mlir
     mlir-opt converted-affine-options-no-polymer/affine-no-polymer-loop-fusion/conversion/adi-3-after-inline.mlir --affine-loop-fusion
-    **pass output same as input**
     mlir-opt --lower-affine converted-affine-options-no-polymer/affine-no-polymer-loop-fusion/conversion/adi-4-after-mliropt.mlir
     verif-opt --verif-scf-parallel-to-async converted-affine-options-no-polymer/affine-no-polymer-loop-fusion/conversion/adi-5-after-loweraffine.mlir
     verif-translate --translate-to-past converted-affine-options-no-polymer/affine-no-polymer-loop-fusion/conversion/adi-6-after-conversion.mlir

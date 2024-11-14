@@ -6,14 +6,14 @@ module {
     %c4 = arith.constant 4 : index
     %c7 = arith.constant 7 : index
     %c28 = arith.constant 28 : index
+    %c20 = arith.constant 20 : index
     %cst = arith.constant 2.000000e-01 : f64
     %c0 = arith.constant 0 : index
-    %c20 = arith.constant 20 : index
     %c1 = arith.constant 1 : index
-    scf.for %arg4 = %c0 to %c20 step %c1 {
-      %0 = async.create_group %c1 : !async.group
-      %1 = scf.for %arg5 = %c0 to %c1 step %c1 iter_args(%arg6 = %c0) -> (index) {
-        %token = async.execute {
+    %0 = async.create_group %c1 : !async.group
+    %1 = scf.for %arg4 = %c0 to %c1 step %c1 iter_args(%arg5 = %c0) -> (index) {
+      %token = async.execute {
+        scf.for %arg6 = %c0 to %c20 step %c1 {
           scf.for %arg7 = %c0 to %c28 step %c1 {
             %4 = arith.addi %arg7, %c1 : index
             scf.for %arg8 = %c0 to %c7 step %c1 {
@@ -154,14 +154,14 @@ module {
               memref.store %65, %arg2[%4, %51] : memref<?x30xf64>
             }
           }
-          async.yield
         }
-        %2 = async.add_to_group %token, %0 : !async.token
-        %3 = arith.addi %arg6, %c1 : index
-        scf.yield %3 : index
+        async.yield
       }
-      async.await_all %0
+      %2 = async.add_to_group %token, %0 : !async.token
+      %3 = arith.addi %arg5, %c1 : index
+      scf.yield %3 : index
     }
+    async.await_all %0
     return
   }
 }

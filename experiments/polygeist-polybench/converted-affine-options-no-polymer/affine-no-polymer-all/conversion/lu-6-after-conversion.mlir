@@ -1,155 +1,160 @@
 module {
   func.func @kernel_lu(%arg0: i32, %arg1: memref<?x40xf64>) {
     %c42 = arith.constant 42 : index
-    %c40 = arith.constant 40 : index
-    %c-4 = arith.constant -4 : index
+    %c8 = arith.constant 8 : index
     %c3 = arith.constant 3 : index
-    %c2 = arith.constant 2 : index
     %c-1 = arith.constant -1 : index
     %c4 = arith.constant 4 : index
+    %c40 = arith.constant 40 : index
+    %c-32 = arith.constant -32 : index
+    %c32 = arith.constant 32 : index
     %c0 = arith.constant 0 : index
-    %c10 = arith.constant 10 : index
+    %c2 = arith.constant 2 : index
     %c1 = arith.constant 1 : index
-    scf.for %arg2 = %c0 to %c10 step %c1 {
-      %0 = arith.muli %arg2, %c4 : index
-      scf.for %arg3 = %c0 to %c4 step %c1 {
-        %1 = arith.addi %0, %arg3 : index
-        %2 = arith.muli %arg2, %c4 : index
-        %3 = arith.addi %arg3, %2 : index
-        scf.for %arg4 = %c0 to %3 step %c1 {
-          %10 = arith.cmpi slt, %arg4, %c0 : index
-          %11 = arith.subi %c-1, %arg4 : index
-          %12 = arith.select %10, %11, %arg4 : index
-          %13 = arith.divsi %12, %c4 : index
-          %14 = arith.subi %c-1, %13 : index
-          %15 = arith.select %10, %14, %13 : index
-          scf.for %arg5 = %c0 to %15 step %c1 {
-            %23 = arith.muli %arg5, %c4 : index
-            %24 = memref.load %arg1[%1, %23] : memref<?x40xf64>
-            %25 = memref.load %arg1[%23, %arg4] : memref<?x40xf64>
-            %26 = arith.mulf %24, %25 : f64
-            %27 = memref.load %arg1[%1, %arg4] : memref<?x40xf64>
-            %28 = arith.subf %27, %26 : f64
-            memref.store %28, %arg1[%1, %arg4] : memref<?x40xf64>
-            %29 = arith.addi %23, %c1 : index
-            %30 = memref.load %arg1[%1, %29] : memref<?x40xf64>
-            %31 = memref.load %arg1[%29, %arg4] : memref<?x40xf64>
-            %32 = arith.mulf %30, %31 : f64
-            %33 = memref.load %arg1[%1, %arg4] : memref<?x40xf64>
-            %34 = arith.subf %33, %32 : f64
-            memref.store %34, %arg1[%1, %arg4] : memref<?x40xf64>
-            %35 = arith.addi %23, %c2 : index
-            %36 = memref.load %arg1[%1, %35] : memref<?x40xf64>
-            %37 = memref.load %arg1[%35, %arg4] : memref<?x40xf64>
-            %38 = arith.mulf %36, %37 : f64
-            %39 = memref.load %arg1[%1, %arg4] : memref<?x40xf64>
-            %40 = arith.subf %39, %38 : f64
-            memref.store %40, %arg1[%1, %arg4] : memref<?x40xf64>
-            %41 = arith.addi %23, %c3 : index
-            %42 = memref.load %arg1[%1, %41] : memref<?x40xf64>
-            %43 = memref.load %arg1[%41, %arg4] : memref<?x40xf64>
-            %44 = arith.mulf %42, %43 : f64
-            %45 = memref.load %arg1[%1, %arg4] : memref<?x40xf64>
-            %46 = arith.subf %45, %44 : f64
-            memref.store %46, %arg1[%1, %arg4] : memref<?x40xf64>
+    scf.for %arg2 = %c0 to %c2 step %c1 {
+      %0 = arith.muli %arg2, %c32 : index
+      %1 = arith.muli %arg2, %c-32 : index
+      %2 = arith.addi %1, %c40 : index
+      %3 = arith.minsi %2, %c32 : index
+      scf.for %arg3 = %c0 to %3 step %c1 {
+        %4 = arith.addi %0, %arg3 : index
+        %5 = arith.muli %arg2, %c32 : index
+        %6 = arith.addi %arg3, %5 : index
+        scf.for %arg4 = %c0 to %6 step %c1 {
+          %13 = arith.cmpi slt, %arg4, %c0 : index
+          %14 = arith.subi %c-1, %arg4 : index
+          %15 = arith.select %13, %14, %arg4 : index
+          %16 = arith.divsi %15, %c4 : index
+          %17 = arith.subi %c-1, %16 : index
+          %18 = arith.select %13, %17, %16 : index
+          scf.for %arg5 = %c0 to %18 step %c1 {
+            %26 = arith.muli %arg5, %c4 : index
+            %27 = memref.load %arg1[%4, %26] : memref<?x40xf64>
+            %28 = memref.load %arg1[%26, %arg4] : memref<?x40xf64>
+            %29 = arith.mulf %27, %28 : f64
+            %30 = memref.load %arg1[%4, %arg4] : memref<?x40xf64>
+            %31 = arith.subf %30, %29 : f64
+            memref.store %31, %arg1[%4, %arg4] : memref<?x40xf64>
+            %32 = arith.addi %26, %c1 : index
+            %33 = memref.load %arg1[%4, %32] : memref<?x40xf64>
+            %34 = memref.load %arg1[%32, %arg4] : memref<?x40xf64>
+            %35 = arith.mulf %33, %34 : f64
+            %36 = memref.load %arg1[%4, %arg4] : memref<?x40xf64>
+            %37 = arith.subf %36, %35 : f64
+            memref.store %37, %arg1[%4, %arg4] : memref<?x40xf64>
+            %38 = arith.addi %26, %c2 : index
+            %39 = memref.load %arg1[%4, %38] : memref<?x40xf64>
+            %40 = memref.load %arg1[%38, %arg4] : memref<?x40xf64>
+            %41 = arith.mulf %39, %40 : f64
+            %42 = memref.load %arg1[%4, %arg4] : memref<?x40xf64>
+            %43 = arith.subf %42, %41 : f64
+            memref.store %43, %arg1[%4, %arg4] : memref<?x40xf64>
+            %44 = arith.addi %26, %c3 : index
+            %45 = memref.load %arg1[%4, %44] : memref<?x40xf64>
+            %46 = memref.load %arg1[%44, %arg4] : memref<?x40xf64>
+            %47 = arith.mulf %45, %46 : f64
+            %48 = memref.load %arg1[%4, %arg4] : memref<?x40xf64>
+            %49 = arith.subf %48, %47 : f64
+            memref.store %49, %arg1[%4, %arg4] : memref<?x40xf64>
           }
-          %16 = arith.remsi %arg4, %c4 : index
-          %17 = arith.cmpi slt, %16, %c0 : index
-          %18 = arith.addi %16, %c4 : index
-          %19 = arith.select %17, %18, %16 : index
-          scf.for %arg5 = %c0 to %19 step %c1 {
-            %23 = arith.cmpi slt, %arg4, %c0 : index
-            %24 = arith.subi %c-1, %arg4 : index
-            %25 = arith.select %23, %24, %arg4 : index
-            %26 = arith.divsi %25, %c4 : index
-            %27 = arith.subi %c-1, %26 : index
-            %28 = arith.select %23, %27, %26 : index
-            %29 = arith.muli %28, %c4 : index
-            %30 = arith.addi %arg5, %29 : index
-            %31 = memref.load %arg1[%1, %30] : memref<?x40xf64>
-            %32 = memref.load %arg1[%30, %arg4] : memref<?x40xf64>
-            %33 = arith.mulf %31, %32 : f64
-            %34 = memref.load %arg1[%1, %arg4] : memref<?x40xf64>
-            %35 = arith.subf %34, %33 : f64
-            memref.store %35, %arg1[%1, %arg4] : memref<?x40xf64>
+          %19 = arith.remsi %arg4, %c4 : index
+          %20 = arith.cmpi slt, %19, %c0 : index
+          %21 = arith.addi %19, %c4 : index
+          %22 = arith.select %20, %21, %19 : index
+          scf.for %arg5 = %c0 to %22 step %c1 {
+            %26 = arith.cmpi slt, %arg4, %c0 : index
+            %27 = arith.subi %c-1, %arg4 : index
+            %28 = arith.select %26, %27, %arg4 : index
+            %29 = arith.divsi %28, %c4 : index
+            %30 = arith.subi %c-1, %29 : index
+            %31 = arith.select %26, %30, %29 : index
+            %32 = arith.muli %31, %c4 : index
+            %33 = arith.addi %arg5, %32 : index
+            %34 = memref.load %arg1[%4, %33] : memref<?x40xf64>
+            %35 = memref.load %arg1[%33, %arg4] : memref<?x40xf64>
+            %36 = arith.mulf %34, %35 : f64
+            %37 = memref.load %arg1[%4, %arg4] : memref<?x40xf64>
+            %38 = arith.subf %37, %36 : f64
+            memref.store %38, %arg1[%4, %arg4] : memref<?x40xf64>
           }
-          %20 = memref.load %arg1[%arg4, %arg4] : memref<?x40xf64>
-          %21 = memref.load %arg1[%1, %arg4] : memref<?x40xf64>
-          %22 = arith.divf %21, %20 : f64
-          memref.store %22, %arg1[%1, %arg4] : memref<?x40xf64>
+          %23 = memref.load %arg1[%arg4, %arg4] : memref<?x40xf64>
+          %24 = memref.load %arg1[%4, %arg4] : memref<?x40xf64>
+          %25 = arith.divf %24, %23 : f64
+          memref.store %25, %arg1[%4, %arg4] : memref<?x40xf64>
         }
-        %4 = arith.muli %arg3, %c-1 : index
-        %5 = arith.muli %arg2, %c-4 : index
-        %6 = arith.addi %4, %5 : index
-        %7 = arith.addi %6, %c40 : index
-        %8 = async.create_group %c42 : !async.group
-        %9 = scf.for %arg4 = %c0 to %7 step %c1 iter_args(%arg5 = %c0) -> (index) {
+        %7 = arith.muli %arg3, %c-1 : index
+        %8 = arith.muli %arg2, %c-32 : index
+        %9 = arith.addi %7, %8 : index
+        %10 = arith.addi %9, %c40 : index
+        %11 = async.create_group %c42 : !async.group
+        %12 = scf.for %arg4 = %c0 to %10 step %c1 iter_args(%arg5 = %c0) -> (index) {
           %token = async.execute {
-            %12 = arith.addi %1, %arg4 : index
-            %13 = arith.cmpi slt, %arg3, %c0 : index
-            %14 = arith.subi %c-1, %arg3 : index
-            %15 = arith.select %13, %14, %arg3 : index
-            %16 = arith.divsi %15, %c4 : index
-            %17 = arith.subi %c-1, %16 : index
-            %18 = arith.select %13, %17, %16 : index
-            %19 = arith.addi %arg2, %18 : index
-            scf.for %arg6 = %c0 to %19 step %c1 {
-              %24 = arith.muli %arg6, %c4 : index
-              %25 = memref.load %arg1[%1, %24] : memref<?x40xf64>
-              %26 = memref.load %arg1[%24, %12] : memref<?x40xf64>
-              %27 = arith.mulf %25, %26 : f64
-              %28 = memref.load %arg1[%1, %12] : memref<?x40xf64>
-              %29 = arith.subf %28, %27 : f64
-              memref.store %29, %arg1[%1, %12] : memref<?x40xf64>
-              %30 = arith.addi %24, %c1 : index
-              %31 = memref.load %arg1[%1, %30] : memref<?x40xf64>
-              %32 = memref.load %arg1[%30, %12] : memref<?x40xf64>
-              %33 = arith.mulf %31, %32 : f64
-              %34 = memref.load %arg1[%1, %12] : memref<?x40xf64>
-              %35 = arith.subf %34, %33 : f64
-              memref.store %35, %arg1[%1, %12] : memref<?x40xf64>
-              %36 = arith.addi %24, %c2 : index
-              %37 = memref.load %arg1[%1, %36] : memref<?x40xf64>
-              %38 = memref.load %arg1[%36, %12] : memref<?x40xf64>
-              %39 = arith.mulf %37, %38 : f64
-              %40 = memref.load %arg1[%1, %12] : memref<?x40xf64>
-              %41 = arith.subf %40, %39 : f64
-              memref.store %41, %arg1[%1, %12] : memref<?x40xf64>
-              %42 = arith.addi %24, %c3 : index
-              %43 = memref.load %arg1[%1, %42] : memref<?x40xf64>
-              %44 = memref.load %arg1[%42, %12] : memref<?x40xf64>
-              %45 = arith.mulf %43, %44 : f64
-              %46 = memref.load %arg1[%1, %12] : memref<?x40xf64>
-              %47 = arith.subf %46, %45 : f64
-              memref.store %47, %arg1[%1, %12] : memref<?x40xf64>
-            }
-            %20 = arith.remsi %1, %c4 : index
-            %21 = arith.cmpi slt, %20, %c0 : index
-            %22 = arith.addi %20, %c4 : index
-            %23 = arith.select %21, %22, %20 : index
+            %15 = arith.addi %4, %arg4 : index
+            %16 = arith.muli %arg2, %c8 : index
+            %17 = arith.cmpi slt, %arg3, %c0 : index
+            %18 = arith.subi %c-1, %arg3 : index
+            %19 = arith.select %17, %18, %arg3 : index
+            %20 = arith.divsi %19, %c4 : index
+            %21 = arith.subi %c-1, %20 : index
+            %22 = arith.select %17, %21, %20 : index
+            %23 = arith.addi %16, %22 : index
             scf.for %arg6 = %c0 to %23 step %c1 {
-              %24 = arith.cmpi slt, %1, %c0 : index
-              %25 = arith.subi %c-1, %1 : index
-              %26 = arith.select %24, %25, %1 : index
-              %27 = arith.divsi %26, %c4 : index
-              %28 = arith.subi %c-1, %27 : index
-              %29 = arith.select %24, %28, %27 : index
-              %30 = arith.muli %29, %c4 : index
-              %31 = arith.addi %arg6, %30 : index
-              %32 = memref.load %arg1[%1, %31] : memref<?x40xf64>
-              %33 = memref.load %arg1[%31, %12] : memref<?x40xf64>
-              %34 = arith.mulf %32, %33 : f64
-              %35 = memref.load %arg1[%1, %12] : memref<?x40xf64>
-              %36 = arith.subf %35, %34 : f64
-              memref.store %36, %arg1[%1, %12] : memref<?x40xf64>
+              %28 = arith.muli %arg6, %c4 : index
+              %29 = memref.load %arg1[%4, %28] : memref<?x40xf64>
+              %30 = memref.load %arg1[%28, %15] : memref<?x40xf64>
+              %31 = arith.mulf %29, %30 : f64
+              %32 = memref.load %arg1[%4, %15] : memref<?x40xf64>
+              %33 = arith.subf %32, %31 : f64
+              memref.store %33, %arg1[%4, %15] : memref<?x40xf64>
+              %34 = arith.addi %28, %c1 : index
+              %35 = memref.load %arg1[%4, %34] : memref<?x40xf64>
+              %36 = memref.load %arg1[%34, %15] : memref<?x40xf64>
+              %37 = arith.mulf %35, %36 : f64
+              %38 = memref.load %arg1[%4, %15] : memref<?x40xf64>
+              %39 = arith.subf %38, %37 : f64
+              memref.store %39, %arg1[%4, %15] : memref<?x40xf64>
+              %40 = arith.addi %28, %c2 : index
+              %41 = memref.load %arg1[%4, %40] : memref<?x40xf64>
+              %42 = memref.load %arg1[%40, %15] : memref<?x40xf64>
+              %43 = arith.mulf %41, %42 : f64
+              %44 = memref.load %arg1[%4, %15] : memref<?x40xf64>
+              %45 = arith.subf %44, %43 : f64
+              memref.store %45, %arg1[%4, %15] : memref<?x40xf64>
+              %46 = arith.addi %28, %c3 : index
+              %47 = memref.load %arg1[%4, %46] : memref<?x40xf64>
+              %48 = memref.load %arg1[%46, %15] : memref<?x40xf64>
+              %49 = arith.mulf %47, %48 : f64
+              %50 = memref.load %arg1[%4, %15] : memref<?x40xf64>
+              %51 = arith.subf %50, %49 : f64
+              memref.store %51, %arg1[%4, %15] : memref<?x40xf64>
+            }
+            %24 = arith.remsi %4, %c4 : index
+            %25 = arith.cmpi slt, %24, %c0 : index
+            %26 = arith.addi %24, %c4 : index
+            %27 = arith.select %25, %26, %24 : index
+            scf.for %arg6 = %c0 to %27 step %c1 {
+              %28 = arith.cmpi slt, %4, %c0 : index
+              %29 = arith.subi %c-1, %4 : index
+              %30 = arith.select %28, %29, %4 : index
+              %31 = arith.divsi %30, %c4 : index
+              %32 = arith.subi %c-1, %31 : index
+              %33 = arith.select %28, %32, %31 : index
+              %34 = arith.muli %33, %c4 : index
+              %35 = arith.addi %arg6, %34 : index
+              %36 = memref.load %arg1[%4, %35] : memref<?x40xf64>
+              %37 = memref.load %arg1[%35, %15] : memref<?x40xf64>
+              %38 = arith.mulf %36, %37 : f64
+              %39 = memref.load %arg1[%4, %15] : memref<?x40xf64>
+              %40 = arith.subf %39, %38 : f64
+              memref.store %40, %arg1[%4, %15] : memref<?x40xf64>
             }
             async.yield
           }
-          %10 = async.add_to_group %token, %8 : !async.token
-          %11 = arith.addi %arg5, %c1 : index
-          scf.yield %11 : index
+          %13 = async.add_to_group %token, %11 : !async.token
+          %14 = arith.addi %arg5, %c1 : index
+          scf.yield %14 : index
         }
-        async.await_all %8
+        async.await_all %11
       }
     }
     return

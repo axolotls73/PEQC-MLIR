@@ -5,12 +5,12 @@ module {
     %c-1 = arith.constant -1 : index
     %c4 = arith.constant 4 : index
     %c7 = arith.constant 7 : index
+    %c20 = arith.constant 20 : index
     %cst = arith.constant 3.333300e-01 : f64
     %c0 = arith.constant 0 : index
-    %c20 = arith.constant 20 : index
     %c1 = arith.constant 1 : index
-    scf.for %arg4 = %c0 to %c20 step %c1 {
-      scf.for %arg5 = %c0 to %c1 step %c1 {
+    scf.for %arg4 = %c0 to %c1 step %c1 {
+      scf.for %arg5 = %c0 to %c20 step %c1 {
         scf.for %arg6 = %c0 to %c7 step %c1 {
           %0 = arith.muli %arg6, %c4 : index
           %1 = arith.addi %0, %c1 : index

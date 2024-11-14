@@ -1,7 +1,7 @@
 name,output_dir,all_pass,fail_command,flag_did_nothing
 trisolv,affine-loop-fusion,yes,N/A,yes
 doitgen,affine-loop-fusion,yes,N/A,yes
-correlation,converted-affine-options/affine-loop-fusion,no,verif-translate --translate-to-past converted-affine-options/affine-loop-fusion/conversion/correlation-6-after-conversion.mlir
+correlation,affine-loop-fusion,yes,N/A,yes
 seidel-2d,affine-loop-fusion,yes,N/A,yes
 lu,affine-loop-fusion,yes,N/A,yes
 3mm,affine-loop-fusion,yes,N/A,yes
@@ -16,16 +16,21 @@ gesummv,affine-loop-fusion,yes,N/A,yes
 atax,affine-loop-fusion,yes,N/A,yes
 mvt,affine-loop-fusion,yes,N/A,yes
 2mm,affine-loop-fusion,yes,N/A,yes
+durbin,affine-loop-fusion,yes,N/A,yes
+deriche,affine-loop-fusion,yes,N/A,yes
 fdtd-2d,affine-loop-fusion,yes,N/A,yes
+gramschmidt,affine-loop-fusion,yes,N/A,yes
 heat-3d,affine-loop-fusion,yes,N/A,yes
-nussinov,converted-affine-options/affine-loop-fusion,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+nussinov,affine-loop-fusion,no,mlir-opt --inline converted-affine-options/affine-loop-fusion/conversion/nussinov-2-after-polymer.mlir,N/A
 jacobi-2d,affine-loop-fusion,yes,N/A,yes
 gemm,affine-loop-fusion,yes,N/A,yes
+symm,affine-loop-fusion,no,mlir-opt --inline converted-affine-options/affine-loop-fusion/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-loop-fusion,no,mlir-opt --inline converted-affine-options/affine-loop-fusion/conversion/ludcmp-2-after-polymer.mlir,N/A
 gemver,affine-loop-fusion,yes,N/A,yes
 syr2k,affine-loop-fusion,yes,N/A,yes
 trisolv,affine-loop-inv-code-motion,yes,N/A,yes
 doitgen,affine-loop-inv-code-motion,yes,N/A,yes
-correlation,converted-affine-options/affine-loop-inv-code-motion,no,verif-translate --translate-to-past converted-affine-options/affine-loop-inv-code-motion/conversion/correlation-6-after-conversion.mlir
+correlation,affine-loop-inv-code-motion,yes,N/A,yes
 seidel-2d,affine-loop-inv-code-motion,yes,N/A,yes
 lu,affine-loop-inv-code-motion,yes,N/A,yes
 3mm,affine-loop-inv-code-motion,yes,N/A,yes
@@ -40,16 +45,21 @@ gesummv,affine-loop-inv-code-motion,yes,N/A,yes
 atax,affine-loop-inv-code-motion,yes,N/A,yes
 mvt,affine-loop-inv-code-motion,yes,N/A,yes
 2mm,affine-loop-inv-code-motion,yes,N/A,yes
+durbin,affine-loop-inv-code-motion,yes,N/A,yes
+deriche,affine-loop-inv-code-motion,yes,N/A,yes
 fdtd-2d,affine-loop-inv-code-motion,yes,N/A,yes
+gramschmidt,affine-loop-inv-code-motion,yes,N/A,yes
 heat-3d,affine-loop-inv-code-motion,yes,N/A,yes
-nussinov,converted-affine-options/affine-loop-inv-code-motion,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+nussinov,affine-loop-inv-code-motion,no,mlir-opt --inline converted-affine-options/affine-loop-inv-code-motion/conversion/nussinov-2-after-polymer.mlir,N/A
 jacobi-2d,affine-loop-inv-code-motion,yes,N/A,yes
 gemm,affine-loop-inv-code-motion,yes,N/A,yes
+symm,affine-loop-inv-code-motion,no,mlir-opt --inline converted-affine-options/affine-loop-inv-code-motion/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-loop-inv-code-motion,no,mlir-opt --inline converted-affine-options/affine-loop-inv-code-motion/conversion/ludcmp-2-after-polymer.mlir,N/A
 gemver,affine-loop-inv-code-motion,yes,N/A,yes
 syr2k,affine-loop-inv-code-motion,yes,N/A,yes
 trisolv,affine-normalize,yes,N/A,no
 doitgen,affine-normalize,yes,N/A,yes
-correlation,converted-affine-options/affine-normalize,no,verif-translate --translate-to-past converted-affine-options/affine-normalize/conversion/correlation-6-after-conversion.mlir
+correlation,affine-normalize,yes,N/A,yes
 seidel-2d,affine-normalize,yes,N/A,yes
 lu,affine-normalize,yes,N/A,yes
 3mm,affine-normalize,yes,N/A,yes
@@ -64,18 +74,23 @@ gesummv,affine-normalize,yes,N/A,yes
 atax,affine-normalize,yes,N/A,yes
 mvt,affine-normalize,yes,N/A,yes
 2mm,affine-normalize,yes,N/A,yes
+durbin,affine-normalize,yes,N/A,yes
+deriche,affine-normalize,yes,N/A,yes
 fdtd-2d,affine-normalize,yes,N/A,yes
+gramschmidt,affine-normalize,yes,N/A,yes
 heat-3d,affine-normalize,yes,N/A,yes
-nussinov,converted-affine-options/affine-normalize,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+nussinov,affine-normalize,no,mlir-opt --inline converted-affine-options/affine-normalize/conversion/nussinov-2-after-polymer.mlir,N/A
 jacobi-2d,affine-normalize,yes,N/A,yes
 gemm,affine-normalize,yes,N/A,yes
+symm,affine-normalize,no,mlir-opt --inline converted-affine-options/affine-normalize/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-normalize,no,mlir-opt --inline converted-affine-options/affine-normalize/conversion/ludcmp-2-after-polymer.mlir,N/A
 gemver,affine-normalize,yes,N/A,yes
 syr2k,affine-normalize,yes,N/A,yes
 trisolv,affine-tile,yes,N/A,yes
 doitgen,affine-tile,yes,N/A,yes
-correlation,converted-affine-options/affine-tile,no,verif-translate --translate-to-past converted-affine-options/affine-tile/conversion/correlation-6-after-conversion.mlir
+correlation,affine-tile,yes,N/A,yes
 seidel-2d,affine-tile,yes,N/A,yes
-lu,converted-affine-options/affine-tile,no,"mlir-opt converted-affine-options/affine-tile/conversion/lu-3-after-inline.mlir --affine-loop-tile=""tile-size=32"""
+lu,affine-tile,no,"mlir-opt converted-affine-options/affine-tile/conversion/lu-3-after-inline.mlir --affine-loop-tile=""tile-size=32""",N/A
 3mm,affine-tile,yes,N/A,yes
 covariance,affine-tile,yes,N/A,yes
 syrk,affine-tile,yes,N/A,yes
@@ -88,16 +103,21 @@ gesummv,affine-tile,yes,N/A,yes
 atax,affine-tile,yes,N/A,yes
 mvt,affine-tile,yes,N/A,yes
 2mm,affine-tile,yes,N/A,yes
+durbin,affine-tile,yes,N/A,yes
+deriche,affine-tile,yes,N/A,yes
 fdtd-2d,affine-tile,yes,N/A,yes
+gramschmidt,affine-tile,yes,N/A,yes
 heat-3d,affine-tile,yes,N/A,yes
-nussinov,converted-affine-options/affine-tile,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+nussinov,affine-tile,no,mlir-opt --inline converted-affine-options/affine-tile/conversion/nussinov-2-after-polymer.mlir,N/A
 jacobi-2d,affine-tile,yes,N/A,yes
 gemm,affine-tile,yes,N/A,yes
+symm,affine-tile,no,mlir-opt --inline converted-affine-options/affine-tile/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-tile,no,mlir-opt --inline converted-affine-options/affine-tile/conversion/ludcmp-2-after-polymer.mlir,N/A
 gemver,affine-tile,yes,N/A,yes
 syr2k,affine-tile,yes,N/A,yes
 trisolv,affine-unroll,yes,N/A,no
 doitgen,affine-unroll,yes,N/A,no
-correlation,converted-affine-options/affine-unroll,no,verif-translate --translate-to-past converted-affine-options/affine-unroll/conversion/correlation-6-after-conversion.mlir
+correlation,affine-unroll,yes,N/A,no
 seidel-2d,affine-unroll,yes,N/A,yes
 lu,affine-unroll,yes,N/A,yes
 3mm,affine-unroll,yes,N/A,yes
@@ -112,16 +132,21 @@ gesummv,affine-unroll,yes,N/A,yes
 atax,affine-unroll,yes,N/A,yes
 mvt,affine-unroll,yes,N/A,yes
 2mm,affine-unroll,yes,N/A,yes
+durbin,affine-unroll,yes,N/A,yes
+deriche,affine-unroll,yes,N/A,yes
 fdtd-2d,affine-unroll,yes,N/A,yes
+gramschmidt,affine-unroll,yes,N/A,yes
 heat-3d,affine-unroll,yes,N/A,yes
-nussinov,converted-affine-options/affine-unroll,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+nussinov,affine-unroll,no,mlir-opt --inline converted-affine-options/affine-unroll/conversion/nussinov-2-after-polymer.mlir,N/A
 jacobi-2d,affine-unroll,yes,N/A,yes
 gemm,affine-unroll,yes,N/A,yes
+symm,affine-unroll,no,mlir-opt --inline converted-affine-options/affine-unroll/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-unroll,no,mlir-opt --inline converted-affine-options/affine-unroll/conversion/ludcmp-2-after-polymer.mlir,N/A
 gemver,affine-unroll,yes,N/A,yes
 syr2k,affine-unroll,yes,N/A,yes
 trisolv,affine-unroll-jam,yes,N/A,yes
 doitgen,affine-unroll-jam,yes,N/A,yes
-correlation,converted-affine-options/affine-unroll-jam,no,verif-translate --translate-to-past converted-affine-options/affine-unroll-jam/conversion/correlation-6-after-conversion.mlir
+correlation,affine-unroll-jam,yes,N/A,yes
 seidel-2d,affine-unroll-jam,yes,N/A,yes
 lu,affine-unroll-jam,yes,N/A,yes
 3mm,affine-unroll-jam,yes,N/A,yes
@@ -136,16 +161,21 @@ gesummv,affine-unroll-jam,yes,N/A,yes
 atax,affine-unroll-jam,yes,N/A,yes
 mvt,affine-unroll-jam,yes,N/A,yes
 2mm,affine-unroll-jam,yes,N/A,yes
+durbin,affine-unroll-jam,yes,N/A,yes
+deriche,affine-unroll-jam,yes,N/A,yes
 fdtd-2d,affine-unroll-jam,yes,N/A,yes
+gramschmidt,affine-unroll-jam,yes,N/A,yes
 heat-3d,affine-unroll-jam,yes,N/A,yes
-nussinov,converted-affine-options/affine-unroll-jam,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+nussinov,affine-unroll-jam,no,mlir-opt --inline converted-affine-options/affine-unroll-jam/conversion/nussinov-2-after-polymer.mlir,N/A
 jacobi-2d,affine-unroll-jam,yes,N/A,yes
 gemm,affine-unroll-jam,yes,N/A,yes
+symm,affine-unroll-jam,no,mlir-opt --inline converted-affine-options/affine-unroll-jam/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-unroll-jam,no,mlir-opt --inline converted-affine-options/affine-unroll-jam/conversion/ludcmp-2-after-polymer.mlir,N/A
 gemver,affine-unroll-jam,yes,N/A,yes
 syr2k,affine-unroll-jam,yes,N/A,yes
 trisolv,affine-tile-and-unroll-jam,yes,N/A,no
 doitgen,affine-tile-and-unroll-jam,yes,N/A,yes
-correlation,converted-affine-options/affine-tile-and-unroll-jam,no,verif-translate --translate-to-past converted-affine-options/affine-tile-and-unroll-jam/conversion/correlation-6-after-conversion.mlir
+correlation,affine-tile-and-unroll-jam,yes,N/A,yes
 seidel-2d,affine-tile-and-unroll-jam,yes,N/A,yes
 lu,affine-tile-and-unroll-jam,yes,N/A,yes
 3mm,affine-tile-and-unroll-jam,yes,N/A,yes
@@ -160,16 +190,21 @@ gesummv,affine-tile-and-unroll-jam,yes,N/A,yes
 atax,affine-tile-and-unroll-jam,yes,N/A,yes
 mvt,affine-tile-and-unroll-jam,yes,N/A,yes
 2mm,affine-tile-and-unroll-jam,yes,N/A,yes
+durbin,affine-tile-and-unroll-jam,yes,N/A,yes
+deriche,affine-tile-and-unroll-jam,yes,N/A,yes
 fdtd-2d,affine-tile-and-unroll-jam,yes,N/A,yes
+gramschmidt,affine-tile-and-unroll-jam,yes,N/A,yes
 heat-3d,affine-tile-and-unroll-jam,yes,N/A,yes
-nussinov,converted-affine-options/affine-tile-and-unroll-jam,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+nussinov,affine-tile-and-unroll-jam,no,mlir-opt --inline converted-affine-options/affine-tile-and-unroll-jam/conversion/nussinov-2-after-polymer.mlir,N/A
 jacobi-2d,affine-tile-and-unroll-jam,yes,N/A,yes
 gemm,affine-tile-and-unroll-jam,yes,N/A,yes
+symm,affine-tile-and-unroll-jam,no,mlir-opt --inline converted-affine-options/affine-tile-and-unroll-jam/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-tile-and-unroll-jam,no,mlir-opt --inline converted-affine-options/affine-tile-and-unroll-jam/conversion/ludcmp-2-after-polymer.mlir,N/A
 gemver,affine-tile-and-unroll-jam,yes,N/A,yes
 syr2k,affine-tile-and-unroll-jam,yes,N/A,yes
 trisolv,affine-fuse-and-tile,yes,N/A,no
 doitgen,affine-fuse-and-tile,yes,N/A,yes
-correlation,converted-affine-options/affine-fuse-and-tile,no,verif-translate --translate-to-past converted-affine-options/affine-fuse-and-tile/conversion/correlation-6-after-conversion.mlir
+correlation,affine-fuse-and-tile,yes,N/A,yes
 seidel-2d,affine-fuse-and-tile,yes,N/A,yes
 lu,affine-fuse-and-tile,yes,N/A,yes
 3mm,affine-fuse-and-tile,yes,N/A,yes
@@ -184,16 +219,21 @@ gesummv,affine-fuse-and-tile,yes,N/A,yes
 atax,affine-fuse-and-tile,yes,N/A,yes
 mvt,affine-fuse-and-tile,yes,N/A,yes
 2mm,affine-fuse-and-tile,yes,N/A,yes
+durbin,affine-fuse-and-tile,yes,N/A,yes
+deriche,affine-fuse-and-tile,yes,N/A,yes
 fdtd-2d,affine-fuse-and-tile,yes,N/A,yes
+gramschmidt,affine-fuse-and-tile,yes,N/A,yes
 heat-3d,affine-fuse-and-tile,yes,N/A,yes
-nussinov,converted-affine-options/affine-fuse-and-tile,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+nussinov,affine-fuse-and-tile,no,mlir-opt --inline converted-affine-options/affine-fuse-and-tile/conversion/nussinov-2-after-polymer.mlir,N/A
 jacobi-2d,affine-fuse-and-tile,yes,N/A,yes
 gemm,affine-fuse-and-tile,yes,N/A,yes
+symm,affine-fuse-and-tile,no,mlir-opt --inline converted-affine-options/affine-fuse-and-tile/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-fuse-and-tile,no,mlir-opt --inline converted-affine-options/affine-fuse-and-tile/conversion/ludcmp-2-after-polymer.mlir,N/A
 gemver,affine-fuse-and-tile,yes,N/A,yes
 syr2k,affine-fuse-and-tile,yes,N/A,yes
 trisolv,affine-parallelize,yes,N/A,no
 doitgen,affine-parallelize,yes,N/A,no
-correlation,converted-affine-options/affine-parallelize,no,verif-translate --translate-to-past converted-affine-options/affine-parallelize/conversion/correlation-6-after-conversion.mlir
+correlation,affine-parallelize,yes,N/A,no
 seidel-2d,affine-parallelize,yes,N/A,yes
 lu,affine-parallelize,yes,N/A,yes
 3mm,affine-parallelize,yes,N/A,yes
@@ -208,58 +248,73 @@ gesummv,affine-parallelize,yes,N/A,yes
 atax,affine-parallelize,yes,N/A,yes
 mvt,affine-parallelize,yes,N/A,yes
 2mm,affine-parallelize,yes,N/A,yes
+durbin,affine-parallelize,yes,N/A,yes
+deriche,affine-parallelize,yes,N/A,yes
 fdtd-2d,affine-parallelize,yes,N/A,yes
+gramschmidt,affine-parallelize,yes,N/A,yes
 heat-3d,affine-parallelize,yes,N/A,yes
-nussinov,converted-affine-options/affine-parallelize,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+nussinov,affine-parallelize,no,mlir-opt --inline converted-affine-options/affine-parallelize/conversion/nussinov-2-after-polymer.mlir,N/A
 jacobi-2d,affine-parallelize,yes,N/A,yes
 gemm,affine-parallelize,yes,N/A,yes
+symm,affine-parallelize,no,mlir-opt --inline converted-affine-options/affine-parallelize/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-parallelize,no,mlir-opt --inline converted-affine-options/affine-parallelize/conversion/ludcmp-2-after-polymer.mlir,N/A
 gemver,affine-parallelize,yes,N/A,yes
 syr2k,affine-parallelize,yes,N/A,yes
-trisolv,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/trisolv-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-doitgen,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/doitgen-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-correlation,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/correlation-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-seidel-2d,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/seidel-2d-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-lu,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/lu-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-3mm,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/3mm-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-covariance,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/covariance-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-syrk,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/syrk-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-trmm,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/trmm-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-bicg,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/bicg-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-floyd-warshall,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/floyd-warshall-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-cholesky,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/cholesky-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-jacobi-1d,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/jacobi-1d-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-gesummv,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/gesummv-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-atax,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/atax-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-mvt,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/mvt-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-2mm,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/2mm-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-fdtd-2d,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/fdtd-2d-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-heat-3d,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/heat-3d-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-nussinov,converted-affine-options/affine-all,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
-jacobi-2d,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/jacobi-2d-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-gemm,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/gemm-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-gemver,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/gemver-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
-syr2k,converted-affine-options/affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/syr2k-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-parallelize""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize"
+trisolv,affine-all,yes,N/A,no
+doitgen,affine-all,yes,N/A,no
+correlation,affine-all,yes,N/A,no
+seidel-2d,affine-all,yes,N/A,no
+lu,affine-all,no,"mlir-opt converted-affine-options/affine-all/conversion/lu-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile=""tile-size=32"" --affine-parallelize=""max-nested=1"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize",N/A
+3mm,affine-all,yes,N/A,no
+covariance,affine-all,yes,N/A,no
+syrk,affine-all,yes,N/A,no
+trmm,affine-all,yes,N/A,no
+bicg,affine-all,yes,N/A,no
+floyd-warshall,affine-all,yes,N/A,no
+cholesky,affine-all,yes,N/A,no
+jacobi-1d,affine-all,yes,N/A,no
+gesummv,affine-all,yes,N/A,no
+atax,affine-all,yes,N/A,no
+mvt,affine-all,yes,N/A,no
+2mm,affine-all,yes,N/A,no
+durbin,affine-all,yes,N/A,no
+deriche,affine-all,yes,N/A,no
+fdtd-2d,affine-all,yes,N/A,no
+gramschmidt,affine-all,yes,N/A,no
+heat-3d,affine-all,yes,N/A,no
+nussinov,affine-all,no,mlir-opt --inline converted-affine-options/affine-all/conversion/nussinov-2-after-polymer.mlir,N/A
+jacobi-2d,affine-all,yes,N/A,no
+gemm,affine-all,yes,N/A,no
+symm,affine-all,no,mlir-opt --inline converted-affine-options/affine-all/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-all,no,mlir-opt --inline converted-affine-options/affine-all/conversion/ludcmp-2-after-polymer.mlir,N/A
+gemver,affine-all,yes,N/A,no
+syr2k,affine-all,yes,N/A,no
 trisolv,affine-all-except-parallelize,yes,N/A,no
 doitgen,affine-all-except-parallelize,yes,N/A,no
-correlation,converted-affine-options/affine-all-except-parallelize,no,verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/conversion/correlation-6-after-conversion.mlir
+correlation,affine-all-except-parallelize,yes,N/A,no
 seidel-2d,affine-all-except-parallelize,yes,N/A,no
-lu,converted-affine-options/affine-all-except-parallelize,no,mlir-opt converted-affine-options/affine-all-except-parallelize/conversion/lu-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize
+lu,affine-all-except-parallelize,no,"mlir-opt converted-affine-options/affine-all-except-parallelize/conversion/lu-3-after-inline.mlir --affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile=""tile-size=32"" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize",N/A
 3mm,affine-all-except-parallelize,yes,N/A,no
-covariance,converted-affine-options/affine-all-except-parallelize,no,verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/conversion/covariance-6-after-conversion.mlir
+covariance,affine-all-except-parallelize,yes,N/A,no
 syrk,affine-all-except-parallelize,yes,N/A,no
 trmm,affine-all-except-parallelize,yes,N/A,no
 bicg,affine-all-except-parallelize,yes,N/A,no
 floyd-warshall,affine-all-except-parallelize,yes,N/A,no
-cholesky,converted-affine-options/affine-all-except-parallelize,no,verif-translate --translate-to-past converted-affine-options/affine-all-except-parallelize/conversion/cholesky-6-after-conversion.mlir
+cholesky,affine-all-except-parallelize,yes,N/A,no
 jacobi-1d,affine-all-except-parallelize,yes,N/A,no
 gesummv,affine-all-except-parallelize,yes,N/A,no
 atax,affine-all-except-parallelize,yes,N/A,no
 mvt,affine-all-except-parallelize,yes,N/A,no
 2mm,affine-all-except-parallelize,yes,N/A,no
+durbin,affine-all-except-parallelize,yes,N/A,no
+deriche,affine-all-except-parallelize,yes,N/A,no
 fdtd-2d,affine-all-except-parallelize,yes,N/A,no
+gramschmidt,affine-all-except-parallelize,yes,N/A,no
 heat-3d,affine-all-except-parallelize,yes,N/A,no
-nussinov,converted-affine-options/affine-all-except-parallelize,no,cgeist generated-polybench-use-scalar-lb-mini-dataset/kernel/nussinov.c -S -function=kernel_nussinov -raise-scf-to-affine
+nussinov,affine-all-except-parallelize,no,mlir-opt --inline converted-affine-options/affine-all-except-parallelize/conversion/nussinov-2-after-polymer.mlir,N/A
 jacobi-2d,affine-all-except-parallelize,yes,N/A,yes
 gemm,affine-all-except-parallelize,yes,N/A,yes
+symm,affine-all-except-parallelize,no,mlir-opt --inline converted-affine-options/affine-all-except-parallelize/conversion/symm-2-after-polymer.mlir,N/A
+ludcmp,affine-all-except-parallelize,no,mlir-opt --inline converted-affine-options/affine-all-except-parallelize/conversion/ludcmp-2-after-polymer.mlir,N/A
 gemver,affine-all-except-parallelize,yes,N/A,yes
 syr2k,affine-all-except-parallelize,yes,N/A,yes

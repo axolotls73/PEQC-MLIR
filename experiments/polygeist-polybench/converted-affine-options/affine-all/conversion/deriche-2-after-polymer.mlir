@@ -351,19 +351,19 @@ module {
     return
   }
   func.func @kernel_deriche(%arg0: i32, %arg1: i32, %arg2: f32, %arg3: memref<?x64xf32>, %arg4: memref<?x64xf32>, %arg5: memref<?x64xf32>, %arg6: memref<?x64xf32>) {
-    %alloca = memref.alloca() : memref<1xf32>
+    %alloca = memref.alloca() : memref<f32>
     %alloca_0 = memref.alloca() : memref<f32>
     %alloca_1 = memref.alloca() : memref<f32>
-    %alloca_2 = memref.alloca() : memref<f32>
+    %alloca_2 = memref.alloca() : memref<1xf32>
     %alloca_3 = memref.alloca() {scop.scratchpad} : memref<1xf32>
     %alloca_4 = memref.alloca() : memref<1xf32>
     %alloca_5 = memref.alloca() : memref<1xf32>
-    %alloca_6 = memref.alloca() {scop.scratchpad} : memref<1xf32>
+    %alloca_6 = memref.alloca() : memref<1xf32>
     %alloca_7 = memref.alloca() : memref<f32>
-    %alloca_8 = memref.alloca() : memref<f32>
+    %alloca_8 = memref.alloca() {scop.scratchpad} : memref<1xf32>
     %alloca_9 = memref.alloca() {scop.scratchpad} : memref<1xf32>
-    %alloca_10 = memref.alloca() : memref<1xf32>
-    %alloca_11 = memref.alloca() {scop.scratchpad} : memref<1xf32>
+    %alloca_10 = memref.alloca() {scop.scratchpad} : memref<1xf32>
+    %alloca_11 = memref.alloca() : memref<f32>
     %alloca_12 = memref.alloca() {scop.scratchpad} : memref<1xf32>
     %alloca_13 = memref.alloca() : memref<1xf32>
     %alloca_14 = memref.alloca() : memref<1xf32>
@@ -377,42 +377,42 @@ module {
     %alloca_22 = memref.alloca() : memref<f32>
     call @S15(%alloca_3, %arg2) : (memref<1xf32>, f32) -> ()
     call @S14(%alloca_12, %arg2) : (memref<1xf32>, f32) -> ()
-    call @S10(%alloca_6, %arg2) : (memref<1xf32>, f32) -> ()
-    call @S11(%alloca_15, %arg2, %alloca_6, %alloca_4, %alloca) : (memref<1xf32>, f32, memref<1xf32>, memref<1xf32>, memref<1xf32>) -> ()
-    call @S13(%alloca_11, %arg2, %alloca) : (memref<1xf32>, f32, memref<1xf32>) -> ()
-    call @S12(%alloca_9, %arg2, %alloca_4) : (memref<1xf32>, f32, memref<1xf32>) -> ()
-    call @S9(%alloca_2) : (memref<f32>) -> ()
-    call @S8(%alloca_8) : (memref<f32>) -> ()
-    call @S7(%alloca_1) : (memref<f32>) -> ()
+    call @S10(%alloca_8, %arg2) : (memref<1xf32>, f32) -> ()
+    call @S11(%alloca_15, %arg2, %alloca_8, %alloca_5, %alloca_2) : (memref<1xf32>, f32, memref<1xf32>, memref<1xf32>, memref<1xf32>) -> ()
+    call @S13(%alloca_10, %arg2, %alloca_2) : (memref<1xf32>, f32, memref<1xf32>) -> ()
+    call @S12(%alloca_9, %arg2, %alloca_5) : (memref<1xf32>, f32, memref<1xf32>) -> ()
+    call @S9(%alloca_1) : (memref<f32>) -> ()
+    call @S8(%alloca_11) : (memref<f32>) -> ()
+    call @S7(%alloca_22) : (memref<f32>) -> ()
     call @S6(%alloca_21) : (memref<f32>) -> ()
     affine.for %arg7 = 0 to 64 {
-      func.call @S18(%alloca_2) : (memref<f32>) -> ()
+      func.call @S18(%alloca_1) : (memref<f32>) -> ()
       func.call @S17(%alloca_21) : (memref<f32>) -> ()
-      func.call @S16(%alloca_1) : (memref<f32>) -> ()
+      func.call @S16(%alloca_22) : (memref<f32>) -> ()
       affine.for %arg8 = 0 to 64 {
-        func.call @S19(%arg5, %arg7, %arg8, %alloca_21, %alloca_3, %alloca_1, %alloca_12, %alloca_2, %alloca_15, %arg3, %alloca_6, %alloca_5) : (memref<?x64xf32>, index, index, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<?x64xf32>, memref<1xf32>, memref<1xf32>) -> ()
-        func.call @S22(%alloca_1, %arg5, %arg7, %arg8) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
-        func.call @S21(%alloca_21, %alloca_5) : (memref<f32>, memref<1xf32>) -> ()
-        func.call @S20(%alloca_2, %arg3, %arg7, %arg8) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
+        func.call @S19(%arg5, %arg7, %arg8, %alloca_21, %alloca_3, %alloca_22, %alloca_12, %alloca_1, %alloca_15, %arg3, %alloca_8, %alloca_6) : (memref<?x64xf32>, index, index, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<?x64xf32>, memref<1xf32>, memref<1xf32>) -> ()
+        func.call @S22(%alloca_22, %arg5, %arg7, %arg8) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
+        func.call @S21(%alloca_21, %alloca_6) : (memref<f32>, memref<1xf32>) -> ()
+        func.call @S20(%alloca_1, %arg3, %arg7, %arg8) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
       }
     }
     call @S5(%alloca_0) : (memref<f32>) -> ()
     call @S4(%alloca_18) : (memref<f32>) -> ()
     call @S3(%alloca_7) : (memref<f32>) -> ()
-    call @S2(%alloca_20) : (memref<f32>) -> ()
-    call @S1(%alloca_19) : (memref<f32>) -> ()
-    call @S0(%alloca_22) : (memref<f32>) -> ()
+    call @S2(%alloca_19) : (memref<f32>) -> ()
+    call @S1(%alloca_20) : (memref<f32>) -> ()
+    call @S0(%alloca) : (memref<f32>) -> ()
     affine.for %arg7 = 0 to 64 {
       func.call @S26(%alloca_18) : (memref<f32>) -> ()
       func.call @S25(%alloca_0) : (memref<f32>) -> ()
-      func.call @S24(%alloca_22) : (memref<f32>) -> ()
-      func.call @S23(%alloca_19) : (memref<f32>) -> ()
+      func.call @S24(%alloca) : (memref<f32>) -> ()
+      func.call @S23(%alloca_20) : (memref<f32>) -> ()
       affine.for %arg8 = 0 to 64 {
-        func.call @S27(%arg6, %arg7, %arg8, %alloca_22, %alloca_3, %alloca_19, %alloca_12, %alloca_18, %alloca_11, %alloca_0, %alloca_9, %alloca_10, %alloca_13) : (memref<?x64xf32>, index, index, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<1xf32>, memref<1xf32>) -> ()
-        func.call @S31(%alloca_19, %arg6, %arg7, %arg8) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
-        func.call @S30(%alloca_22, %alloca_13) : (memref<f32>, memref<1xf32>) -> ()
+        func.call @S27(%arg6, %arg7, %arg8, %alloca, %alloca_3, %alloca_20, %alloca_12, %alloca_18, %alloca_10, %alloca_0, %alloca_9, %alloca_4, %alloca_14) : (memref<?x64xf32>, index, index, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<1xf32>, memref<1xf32>) -> ()
+        func.call @S31(%alloca_20, %arg6, %arg7, %arg8) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
+        func.call @S30(%alloca, %alloca_14) : (memref<f32>, memref<1xf32>) -> ()
         func.call @S29(%alloca_0, %arg3, %arg7, %arg8) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
-        func.call @S28(%alloca_18, %alloca_10) : (memref<f32>, memref<1xf32>) -> ()
+        func.call @S28(%alloca_18, %alloca_4) : (memref<f32>, memref<1xf32>) -> ()
       }
     }
     affine.for %arg7 = 0 to 2 {
@@ -426,26 +426,26 @@ module {
     }
     affine.for %arg7 = 0 to 64 {
       func.call @S35(%alloca_21) : (memref<f32>) -> ()
-      func.call @S34(%alloca_1) : (memref<f32>) -> ()
-      func.call @S33(%alloca_8) : (memref<f32>) -> ()
+      func.call @S34(%alloca_22) : (memref<f32>) -> ()
+      func.call @S33(%alloca_11) : (memref<f32>) -> ()
       affine.for %arg8 = 0 to 64 {
-        func.call @S36(%arg5, %arg8, %arg7, %alloca_21, %alloca_3, %alloca_1, %alloca_12, %alloca_8, %alloca_15, %arg4, %alloca_6, %alloca_16) : (memref<?x64xf32>, index, index, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<?x64xf32>, memref<1xf32>, memref<1xf32>) -> ()
-        func.call @S39(%alloca_1, %arg5, %arg8, %arg7) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
+        func.call @S36(%arg5, %arg8, %arg7, %alloca_21, %alloca_3, %alloca_22, %alloca_12, %alloca_11, %alloca_15, %arg4, %alloca_8, %alloca_16) : (memref<?x64xf32>, index, index, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<?x64xf32>, memref<1xf32>, memref<1xf32>) -> ()
+        func.call @S39(%alloca_22, %arg5, %arg8, %arg7) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
         func.call @S38(%alloca_21, %alloca_16) : (memref<f32>, memref<1xf32>) -> ()
-        func.call @S37(%alloca_8, %arg4, %arg8, %arg7) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
+        func.call @S37(%alloca_11, %arg4, %arg8, %arg7) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
       }
     }
     affine.for %arg7 = 0 to 64 {
-      func.call @S43(%alloca_22) : (memref<f32>) -> ()
-      func.call @S42(%alloca_19) : (memref<f32>) -> ()
-      func.call @S41(%alloca_20) : (memref<f32>) -> ()
+      func.call @S43(%alloca) : (memref<f32>) -> ()
+      func.call @S42(%alloca_20) : (memref<f32>) -> ()
+      func.call @S41(%alloca_19) : (memref<f32>) -> ()
       func.call @S40(%alloca_7) : (memref<f32>) -> ()
       affine.for %arg8 = 0 to 64 {
-        func.call @S44(%arg6, %arg8, %arg7, %alloca_22, %alloca_3, %alloca_19, %alloca_12, %alloca_20, %alloca_11, %alloca_7, %alloca_9, %alloca_14, %alloca_17) : (memref<?x64xf32>, index, index, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<1xf32>, memref<1xf32>) -> ()
-        func.call @S48(%alloca_19, %arg6, %arg8, %arg7) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
-        func.call @S47(%alloca_22, %alloca_17) : (memref<f32>, memref<1xf32>) -> ()
+        func.call @S44(%arg6, %arg8, %arg7, %alloca, %alloca_3, %alloca_20, %alloca_12, %alloca_19, %alloca_10, %alloca_7, %alloca_9, %alloca_13, %alloca_17) : (memref<?x64xf32>, index, index, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<f32>, memref<1xf32>, memref<1xf32>, memref<1xf32>) -> ()
+        func.call @S48(%alloca_20, %arg6, %arg8, %arg7) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
+        func.call @S47(%alloca, %alloca_17) : (memref<f32>, memref<1xf32>) -> ()
         func.call @S46(%alloca_7, %arg4, %arg8, %arg7) : (memref<f32>, memref<?x64xf32>, index, index) -> ()
-        func.call @S45(%alloca_20, %alloca_14) : (memref<f32>, memref<1xf32>) -> ()
+        func.call @S45(%alloca_19, %alloca_13) : (memref<f32>, memref<1xf32>) -> ()
       }
     }
     affine.for %arg7 = 0 to 2 {

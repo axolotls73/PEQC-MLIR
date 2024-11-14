@@ -1,22 +1,23 @@
-#map = affine_map<(d0) -> (d0 + 1)>
+#map = affine_map<(d0) -> (d0 * 32 + 1)>
 #map1 = affine_map<(d0, d1) -> (d0 + d1)>
-#map2 = affine_map<(d0) -> (d0 * 4 + 1)>
-#map3 = affine_map<(d0) -> (d0 + 2)>
-#map4 = affine_map<(d0) -> (d0 + 3)>
+#map2 = affine_map<(d0) -> (d0 + 1)>
+#map3 = affine_map<(d0) -> (d0 * 4 + 1)>
+#map4 = affine_map<(d0) -> (d0 + 2)>
+#map5 = affine_map<(d0) -> (d0 + 3)>
 module {
   func.func @kernel_heat_3d(%arg0: i32, %arg1: i32, %arg2: memref<?x10x10xf64>, %arg3: memref<?x10x10xf64>) {
     %cst = arith.constant 1.250000e-01 : f64
     %cst_0 = arith.constant 2.000000e+00 : f64
-    affine.for %arg4 = 0 to 20 {
+    affine.parallel (%arg4) = (0) to (1) {
       %0 = affine.apply #map(%arg4)
-      affine.parallel (%arg5) = (0) to (1) {
+      affine.for %arg5 = 0 to 20 {
         %1 = affine.apply #map1(%0, %arg5)
         affine.for %arg6 = 0 to 8 {
-          %2 = affine.apply #map(%arg6)
+          %2 = affine.apply #map2(%arg6)
           affine.for %arg7 = 0 to 2 {
-            %3 = affine.apply #map2(%arg7)
+            %3 = affine.apply #map3(%arg7)
             affine.for %arg8 = 0 to 8 {
-              %4 = affine.apply #map(%arg8)
+              %4 = affine.apply #map2(%arg8)
               %5 = affine.load %arg2[%4 + 1, %2, %3] : memref<?x10x10xf64>
               %6 = affine.load %arg2[%4, %2, %3] : memref<?x10x10xf64>
               %7 = arith.mulf %6, %cst_0 : f64
@@ -38,7 +39,7 @@ module {
               %23 = arith.addf %17, %22 : f64
               %24 = arith.addf %23, %6 : f64
               affine.store %24, %arg3[%4, %2, %3] : memref<?x10x10xf64>
-              %25 = affine.apply #map(%3)
+              %25 = affine.apply #map2(%3)
               %26 = affine.load %arg2[%4 + 1, %2, %25] : memref<?x10x10xf64>
               %27 = affine.load %arg2[%4, %2, %25] : memref<?x10x10xf64>
               %28 = arith.mulf %27, %cst_0 : f64
@@ -60,7 +61,7 @@ module {
               %44 = arith.addf %38, %43 : f64
               %45 = arith.addf %44, %27 : f64
               affine.store %45, %arg3[%4, %2, %25] : memref<?x10x10xf64>
-              %46 = affine.apply #map3(%3)
+              %46 = affine.apply #map4(%3)
               %47 = affine.load %arg2[%4 + 1, %2, %46] : memref<?x10x10xf64>
               %48 = affine.load %arg2[%4, %2, %46] : memref<?x10x10xf64>
               %49 = arith.mulf %48, %cst_0 : f64
@@ -82,7 +83,7 @@ module {
               %65 = arith.addf %59, %64 : f64
               %66 = arith.addf %65, %48 : f64
               affine.store %66, %arg3[%4, %2, %46] : memref<?x10x10xf64>
-              %67 = affine.apply #map4(%3)
+              %67 = affine.apply #map5(%3)
               %68 = affine.load %arg2[%4 + 1, %2, %67] : memref<?x10x10xf64>
               %69 = affine.load %arg2[%4, %2, %67] : memref<?x10x10xf64>
               %70 = arith.mulf %69, %cst_0 : f64
@@ -108,11 +109,11 @@ module {
           }
         }
         affine.for %arg6 = 0 to 8 {
-          %2 = affine.apply #map(%arg6)
+          %2 = affine.apply #map2(%arg6)
           affine.for %arg7 = 0 to 2 {
-            %3 = affine.apply #map2(%arg7)
+            %3 = affine.apply #map3(%arg7)
             affine.for %arg8 = 0 to 8 {
-              %4 = affine.apply #map(%arg8)
+              %4 = affine.apply #map2(%arg8)
               %5 = affine.load %arg3[%4 + 1, %2, %3] : memref<?x10x10xf64>
               %6 = affine.load %arg3[%4, %2, %3] : memref<?x10x10xf64>
               %7 = arith.mulf %6, %cst_0 : f64
@@ -134,7 +135,7 @@ module {
               %23 = arith.addf %17, %22 : f64
               %24 = arith.addf %23, %6 : f64
               affine.store %24, %arg2[%4, %2, %3] : memref<?x10x10xf64>
-              %25 = affine.apply #map(%3)
+              %25 = affine.apply #map2(%3)
               %26 = affine.load %arg3[%4 + 1, %2, %25] : memref<?x10x10xf64>
               %27 = affine.load %arg3[%4, %2, %25] : memref<?x10x10xf64>
               %28 = arith.mulf %27, %cst_0 : f64
@@ -156,7 +157,7 @@ module {
               %44 = arith.addf %38, %43 : f64
               %45 = arith.addf %44, %27 : f64
               affine.store %45, %arg2[%4, %2, %25] : memref<?x10x10xf64>
-              %46 = affine.apply #map3(%3)
+              %46 = affine.apply #map4(%3)
               %47 = affine.load %arg3[%4 + 1, %2, %46] : memref<?x10x10xf64>
               %48 = affine.load %arg3[%4, %2, %46] : memref<?x10x10xf64>
               %49 = arith.mulf %48, %cst_0 : f64
@@ -178,7 +179,7 @@ module {
               %65 = arith.addf %59, %64 : f64
               %66 = arith.addf %65, %48 : f64
               affine.store %66, %arg2[%4, %2, %46] : memref<?x10x10xf64>
-              %67 = affine.apply #map4(%3)
+              %67 = affine.apply #map5(%3)
               %68 = affine.load %arg3[%4 + 1, %2, %67] : memref<?x10x10xf64>
               %69 = affine.load %arg3[%4, %2, %67] : memref<?x10x10xf64>
               %70 = arith.mulf %69, %cst_0 : f64

@@ -1,149 +1,144 @@
 #pragma pocc-region-start
 void kernel_cholesky(int func_arg_0, double* func_arg_1)
 {
-  int arith_const_2 = 3; 
-  int arith_const_3 = 2; 
+  int arith_const_2 = 8; 
+  int arith_const_3 = 3; 
   int arith_const_4 = -1; 
   int arith_const_5 = 4; 
-  int arith_const_6 = 0; 
-  int arith_const_7 = 40; 
-  int arith_const_8 = 1; 
-  for (int for_iter_9 = arith_const_6; for_iter_9 < arith_const_7; for_iter_9 += arith_const_8) {
-    int* async_group_10; 
-    int async_group_index_11 = 0; 
-    int for_iter_arg_13 = arith_const_6; 
-    for (int for_iter_12 = arith_const_6; for_iter_12 < arith_const_8; for_iter_12 += arith_const_8) {
-      PAST_NEW_SEMAPHORE(execute_token_14); 
-      #pragma peqc async_execute
-      {
-        int arith_addi_15 = (for_iter_9 + for_iter_12); 
-        int arith_addi_16 = (for_iter_9 + for_iter_12); 
-        for (int for_iter_17 = arith_const_6; for_iter_17 < arith_addi_16; for_iter_17 += arith_const_8) {
-          int arith_cmpi_18 = (for_iter_17 < arith_const_6); 
-          int arith_subi_19 = (arith_const_4 - for_iter_17); 
-          int arith_select_20 = (arith_cmpi_18 ? arith_subi_19 : for_iter_17); 
-          int arith_divi_21 = (arith_select_20 / arith_const_5); 
-          int arith_subi_22 = (arith_const_4 - arith_divi_21); 
-          int arith_select_23 = (arith_cmpi_18 ? arith_subi_22 : arith_divi_21); 
-          for (int for_iter_24 = arith_const_6; for_iter_24 < arith_select_23; for_iter_24 += arith_const_8) {
-            int arith_muli_25 = (for_iter_24 * arith_const_5); 
-            double memref_load_26 = func_arg_1[arith_addi_15][arith_muli_25]; 
-            double memref_load_27 = func_arg_1[for_iter_17][arith_muli_25]; 
-            double arith_mulf_28 = (memref_load_26 * memref_load_27); 
-            double memref_load_29 = func_arg_1[arith_addi_15][for_iter_17]; 
-            double arith_subf_30 = (memref_load_29 - arith_mulf_28); 
-            func_arg_1[arith_addi_15][for_iter_17] = arith_subf_30; 
-            int arith_addi_31 = (arith_muli_25 + arith_const_8); 
-            double memref_load_32 = func_arg_1[arith_addi_15][arith_addi_31]; 
-            double memref_load_33 = func_arg_1[for_iter_17][arith_addi_31]; 
-            double arith_mulf_34 = (memref_load_32 * memref_load_33); 
-            double memref_load_35 = func_arg_1[arith_addi_15][for_iter_17]; 
-            double arith_subf_36 = (memref_load_35 - arith_mulf_34); 
-            func_arg_1[arith_addi_15][for_iter_17] = arith_subf_36; 
-            int arith_addi_37 = (arith_muli_25 + arith_const_3); 
-            double memref_load_38 = func_arg_1[arith_addi_15][arith_addi_37]; 
-            double memref_load_39 = func_arg_1[for_iter_17][arith_addi_37]; 
-            double arith_mulf_40 = (memref_load_38 * memref_load_39); 
-            double memref_load_41 = func_arg_1[arith_addi_15][for_iter_17]; 
-            double arith_subf_42 = (memref_load_41 - arith_mulf_40); 
-            func_arg_1[arith_addi_15][for_iter_17] = arith_subf_42; 
-            int arith_addi_43 = (arith_muli_25 + arith_const_2); 
-            double memref_load_44 = func_arg_1[arith_addi_15][arith_addi_43]; 
-            double memref_load_45 = func_arg_1[for_iter_17][arith_addi_43]; 
-            double arith_mulf_46 = (memref_load_44 * memref_load_45); 
-            double memref_load_47 = func_arg_1[arith_addi_15][for_iter_17]; 
-            double arith_subf_48 = (memref_load_47 - arith_mulf_46); 
-            func_arg_1[arith_addi_15][for_iter_17] = arith_subf_48; 
-          }
-          int arith_remsi_49 = (for_iter_17 % arith_const_5); 
-          int arith_cmpi_50 = (arith_remsi_49 < arith_const_6); 
-          int arith_addi_51 = (arith_remsi_49 + arith_const_5); 
-          int arith_select_52 = (arith_cmpi_50 ? arith_addi_51 : arith_remsi_49); 
-          for (int for_iter_53 = arith_const_6; for_iter_53 < arith_select_52; for_iter_53 += arith_const_8) {
-            int arith_cmpi_54 = (for_iter_17 < arith_const_6); 
-            int arith_subi_55 = (arith_const_4 - for_iter_17); 
-            int arith_select_56 = (arith_cmpi_54 ? arith_subi_55 : for_iter_17); 
-            int arith_divi_57 = (arith_select_56 / arith_const_5); 
-            int arith_subi_58 = (arith_const_4 - arith_divi_57); 
-            int arith_select_59 = (arith_cmpi_54 ? arith_subi_58 : arith_divi_57); 
-            int arith_muli_60 = (arith_select_59 * arith_const_5); 
-            int arith_addi_61 = (for_iter_53 + arith_muli_60); 
-            double memref_load_62 = func_arg_1[arith_addi_15][arith_addi_61]; 
-            double memref_load_63 = func_arg_1[for_iter_17][arith_addi_61]; 
-            double arith_mulf_64 = (memref_load_62 * memref_load_63); 
-            double memref_load_65 = func_arg_1[arith_addi_15][for_iter_17]; 
-            double arith_subf_66 = (memref_load_65 - arith_mulf_64); 
-            func_arg_1[arith_addi_15][for_iter_17] = arith_subf_66; 
-          }
-          double memref_load_67 = func_arg_1[for_iter_17][for_iter_17]; 
-          double memref_load_68 = func_arg_1[arith_addi_15][for_iter_17]; 
-          double arith_divf_69 = (memref_load_68 / memref_load_67); 
-          func_arg_1[arith_addi_15][for_iter_17] = arith_divf_69; 
+  int arith_const_6 = 40; 
+  int arith_const_7 = -32; 
+  int arith_const_8 = 32; 
+  int arith_const_9 = 0; 
+  int arith_const_10 = 2; 
+  int arith_const_11 = 1; 
+  for (int for_iter_12 = arith_const_9; for_iter_12 < arith_const_10; for_iter_12 += arith_const_11) {
+    int arith_muli_13 = (for_iter_12 * arith_const_8); 
+    int arith_muli_14 = (for_iter_12 * arith_const_7); 
+    int arith_addi_15 = (arith_muli_14 + arith_const_6); 
+    int arith_minsi_16 = min(arith_addi_15, arith_const_8); 
+    for (int for_iter_17 = arith_const_9; for_iter_17 < arith_minsi_16; for_iter_17 += arith_const_11) {
+      int arith_addi_18 = (arith_muli_13 + for_iter_17); 
+      int arith_muli_19 = (for_iter_12 * arith_const_8); 
+      int arith_addi_20 = (for_iter_17 + arith_muli_19); 
+      for (int for_iter_21 = arith_const_9; for_iter_21 < arith_addi_20; for_iter_21 += arith_const_11) {
+        int arith_cmpi_22 = (for_iter_21 < arith_const_9); 
+        int arith_subi_23 = (arith_const_4 - for_iter_21); 
+        int arith_select_24 = (arith_cmpi_22 ? arith_subi_23 : for_iter_21); 
+        int arith_divi_25 = (arith_select_24 / arith_const_5); 
+        int arith_subi_26 = (arith_const_4 - arith_divi_25); 
+        int arith_select_27 = (arith_cmpi_22 ? arith_subi_26 : arith_divi_25); 
+        for (int for_iter_28 = arith_const_9; for_iter_28 < arith_select_27; for_iter_28 += arith_const_11) {
+          int arith_muli_29 = (for_iter_28 * arith_const_5); 
+          double memref_load_30 = func_arg_1[arith_addi_18][arith_muli_29]; 
+          double memref_load_31 = func_arg_1[for_iter_21][arith_muli_29]; 
+          double arith_mulf_32 = (memref_load_30 * memref_load_31); 
+          double memref_load_33 = func_arg_1[arith_addi_18][for_iter_21]; 
+          double arith_subf_34 = (memref_load_33 - arith_mulf_32); 
+          func_arg_1[arith_addi_18][for_iter_21] = arith_subf_34; 
+          int arith_addi_35 = (arith_muli_29 + arith_const_11); 
+          double memref_load_36 = func_arg_1[arith_addi_18][arith_addi_35]; 
+          double memref_load_37 = func_arg_1[for_iter_21][arith_addi_35]; 
+          double arith_mulf_38 = (memref_load_36 * memref_load_37); 
+          double memref_load_39 = func_arg_1[arith_addi_18][for_iter_21]; 
+          double arith_subf_40 = (memref_load_39 - arith_mulf_38); 
+          func_arg_1[arith_addi_18][for_iter_21] = arith_subf_40; 
+          int arith_addi_41 = (arith_muli_29 + arith_const_10); 
+          double memref_load_42 = func_arg_1[arith_addi_18][arith_addi_41]; 
+          double memref_load_43 = func_arg_1[for_iter_21][arith_addi_41]; 
+          double arith_mulf_44 = (memref_load_42 * memref_load_43); 
+          double memref_load_45 = func_arg_1[arith_addi_18][for_iter_21]; 
+          double arith_subf_46 = (memref_load_45 - arith_mulf_44); 
+          func_arg_1[arith_addi_18][for_iter_21] = arith_subf_46; 
+          int arith_addi_47 = (arith_muli_29 + arith_const_3); 
+          double memref_load_48 = func_arg_1[arith_addi_18][arith_addi_47]; 
+          double memref_load_49 = func_arg_1[for_iter_21][arith_addi_47]; 
+          double arith_mulf_50 = (memref_load_48 * memref_load_49); 
+          double memref_load_51 = func_arg_1[arith_addi_18][for_iter_21]; 
+          double arith_subf_52 = (memref_load_51 - arith_mulf_50); 
+          func_arg_1[arith_addi_18][for_iter_21] = arith_subf_52; 
         }
-        int arith_addi_70 = (for_iter_9 + for_iter_12); 
-        int arith_cmpi_71 = (arith_addi_70 < arith_const_6); 
-        int arith_subi_72 = (arith_const_4 - arith_addi_70); 
-        int arith_select_73 = (arith_cmpi_71 ? arith_subi_72 : arith_addi_70); 
-        int arith_divi_74 = (arith_select_73 / arith_const_5); 
-        int arith_subi_75 = (arith_const_4 - arith_divi_74); 
-        int arith_select_76 = (arith_cmpi_71 ? arith_subi_75 : arith_divi_74); 
-        for (int for_iter_77 = arith_const_6; for_iter_77 < arith_select_76; for_iter_77 += arith_const_8) {
-          int arith_muli_78 = (for_iter_77 * arith_const_5); 
-          double memref_load_79 = func_arg_1[arith_addi_15][arith_muli_78]; 
-          double arith_mulf_80 = (memref_load_79 * memref_load_79); 
-          double memref_load_81 = func_arg_1[arith_addi_15][arith_addi_15]; 
-          double arith_subf_82 = (memref_load_81 - arith_mulf_80); 
-          func_arg_1[arith_addi_15][arith_addi_15] = arith_subf_82; 
-          int arith_addi_83 = (arith_muli_78 + arith_const_8); 
-          double memref_load_84 = func_arg_1[arith_addi_15][arith_addi_83]; 
-          double arith_mulf_85 = (memref_load_84 * memref_load_84); 
-          double memref_load_86 = func_arg_1[arith_addi_15][arith_addi_15]; 
-          double arith_subf_87 = (memref_load_86 - arith_mulf_85); 
-          func_arg_1[arith_addi_15][arith_addi_15] = arith_subf_87; 
-          int arith_addi_88 = (arith_muli_78 + arith_const_3); 
-          double memref_load_89 = func_arg_1[arith_addi_15][arith_addi_88]; 
-          double arith_mulf_90 = (memref_load_89 * memref_load_89); 
-          double memref_load_91 = func_arg_1[arith_addi_15][arith_addi_15]; 
-          double arith_subf_92 = (memref_load_91 - arith_mulf_90); 
-          func_arg_1[arith_addi_15][arith_addi_15] = arith_subf_92; 
-          int arith_addi_93 = (arith_muli_78 + arith_const_2); 
-          double memref_load_94 = func_arg_1[arith_addi_15][arith_addi_93]; 
-          double arith_mulf_95 = (memref_load_94 * memref_load_94); 
-          double memref_load_96 = func_arg_1[arith_addi_15][arith_addi_15]; 
-          double arith_subf_97 = (memref_load_96 - arith_mulf_95); 
-          func_arg_1[arith_addi_15][arith_addi_15] = arith_subf_97; 
+        int arith_remsi_53 = (for_iter_21 % arith_const_5); 
+        int arith_cmpi_54 = (arith_remsi_53 < arith_const_9); 
+        int arith_addi_55 = (arith_remsi_53 + arith_const_5); 
+        int arith_select_56 = (arith_cmpi_54 ? arith_addi_55 : arith_remsi_53); 
+        for (int for_iter_57 = arith_const_9; for_iter_57 < arith_select_56; for_iter_57 += arith_const_11) {
+          int arith_cmpi_58 = (for_iter_21 < arith_const_9); 
+          int arith_subi_59 = (arith_const_4 - for_iter_21); 
+          int arith_select_60 = (arith_cmpi_58 ? arith_subi_59 : for_iter_21); 
+          int arith_divi_61 = (arith_select_60 / arith_const_5); 
+          int arith_subi_62 = (arith_const_4 - arith_divi_61); 
+          int arith_select_63 = (arith_cmpi_58 ? arith_subi_62 : arith_divi_61); 
+          int arith_muli_64 = (arith_select_63 * arith_const_5); 
+          int arith_addi_65 = (for_iter_57 + arith_muli_64); 
+          double memref_load_66 = func_arg_1[arith_addi_18][arith_addi_65]; 
+          double memref_load_67 = func_arg_1[for_iter_21][arith_addi_65]; 
+          double arith_mulf_68 = (memref_load_66 * memref_load_67); 
+          double memref_load_69 = func_arg_1[arith_addi_18][for_iter_21]; 
+          double arith_subf_70 = (memref_load_69 - arith_mulf_68); 
+          func_arg_1[arith_addi_18][for_iter_21] = arith_subf_70; 
         }
-        int arith_addi_98 = (for_iter_9 + for_iter_12); 
-        int arith_remsi_99 = (arith_addi_98 % arith_const_5); 
-        int arith_cmpi_100 = (arith_remsi_99 < arith_const_6); 
-        int arith_addi_101 = (arith_remsi_99 + arith_const_5); 
-        int arith_select_102 = (arith_cmpi_100 ? arith_addi_101 : arith_remsi_99); 
-        for (int for_iter_103 = arith_const_6; for_iter_103 < arith_select_102; for_iter_103 += arith_const_8) {
-          int arith_cmpi_104 = (arith_addi_15 < arith_const_6); 
-          int arith_subi_105 = (arith_const_4 - arith_addi_15); 
-          int arith_select_106 = (arith_cmpi_104 ? arith_subi_105 : arith_addi_15); 
-          int arith_divi_107 = (arith_select_106 / arith_const_5); 
-          int arith_subi_108 = (arith_const_4 - arith_divi_107); 
-          int arith_select_109 = (arith_cmpi_104 ? arith_subi_108 : arith_divi_107); 
-          int arith_muli_110 = (arith_select_109 * arith_const_5); 
-          int arith_addi_111 = (for_iter_103 + arith_muli_110); 
-          double memref_load_112 = func_arg_1[arith_addi_15][arith_addi_111]; 
-          double arith_mulf_113 = (memref_load_112 * memref_load_112); 
-          double memref_load_114 = func_arg_1[arith_addi_15][arith_addi_15]; 
-          double arith_subf_115 = (memref_load_114 - arith_mulf_113); 
-          func_arg_1[arith_addi_15][arith_addi_15] = arith_subf_115; 
-        }
-        double memref_load_116 = func_arg_1[arith_addi_15][arith_addi_15]; 
-        double math_sqrt_117 = sqrt(memref_load_116); 
-        func_arg_1[arith_addi_15][arith_addi_15] = math_sqrt_117; 
-        PAST_SET_SEMAPHORE(execute_token_14, PAST_TASK_FINISHED); 
+        double memref_load_71 = func_arg_1[for_iter_21][for_iter_21]; 
+        double memref_load_72 = func_arg_1[arith_addi_18][for_iter_21]; 
+        double arith_divf_73 = (memref_load_72 / memref_load_71); 
+        func_arg_1[arith_addi_18][for_iter_21] = arith_divf_73; 
       }
-      async_group_10[async_group_index_11] = execute_token_14; 
-      async_group_index_11++; 
-      int arith_addi_118 = (for_iter_arg_13 + arith_const_8); 
-      for_iter_arg_13 = arith_addi_118; 
+      int arith_muli_74 = (for_iter_12 * arith_const_2); 
+      int arith_cmpi_75 = (for_iter_17 < arith_const_9); 
+      int arith_subi_76 = (arith_const_4 - for_iter_17); 
+      int arith_select_77 = (arith_cmpi_75 ? arith_subi_76 : for_iter_17); 
+      int arith_divi_78 = (arith_select_77 / arith_const_5); 
+      int arith_subi_79 = (arith_const_4 - arith_divi_78); 
+      int arith_select_80 = (arith_cmpi_75 ? arith_subi_79 : arith_divi_78); 
+      int arith_addi_81 = (arith_muli_74 + arith_select_80); 
+      for (int for_iter_82 = arith_const_9; for_iter_82 < arith_addi_81; for_iter_82 += arith_const_11) {
+        int arith_muli_83 = (for_iter_82 * arith_const_5); 
+        double memref_load_84 = func_arg_1[arith_addi_18][arith_muli_83]; 
+        double arith_mulf_85 = (memref_load_84 * memref_load_84); 
+        double memref_load_86 = func_arg_1[arith_addi_18][arith_addi_18]; 
+        double arith_subf_87 = (memref_load_86 - arith_mulf_85); 
+        func_arg_1[arith_addi_18][arith_addi_18] = arith_subf_87; 
+        int arith_addi_88 = (arith_muli_83 + arith_const_11); 
+        double memref_load_89 = func_arg_1[arith_addi_18][arith_addi_88]; 
+        double arith_mulf_90 = (memref_load_89 * memref_load_89); 
+        double memref_load_91 = func_arg_1[arith_addi_18][arith_addi_18]; 
+        double arith_subf_92 = (memref_load_91 - arith_mulf_90); 
+        func_arg_1[arith_addi_18][arith_addi_18] = arith_subf_92; 
+        int arith_addi_93 = (arith_muli_83 + arith_const_10); 
+        double memref_load_94 = func_arg_1[arith_addi_18][arith_addi_93]; 
+        double arith_mulf_95 = (memref_load_94 * memref_load_94); 
+        double memref_load_96 = func_arg_1[arith_addi_18][arith_addi_18]; 
+        double arith_subf_97 = (memref_load_96 - arith_mulf_95); 
+        func_arg_1[arith_addi_18][arith_addi_18] = arith_subf_97; 
+        int arith_addi_98 = (arith_muli_83 + arith_const_3); 
+        double memref_load_99 = func_arg_1[arith_addi_18][arith_addi_98]; 
+        double arith_mulf_100 = (memref_load_99 * memref_load_99); 
+        double memref_load_101 = func_arg_1[arith_addi_18][arith_addi_18]; 
+        double arith_subf_102 = (memref_load_101 - arith_mulf_100); 
+        func_arg_1[arith_addi_18][arith_addi_18] = arith_subf_102; 
+      }
+      int arith_remsi_103 = (arith_addi_18 % arith_const_5); 
+      int arith_cmpi_104 = (arith_remsi_103 < arith_const_9); 
+      int arith_addi_105 = (arith_remsi_103 + arith_const_5); 
+      int arith_select_106 = (arith_cmpi_104 ? arith_addi_105 : arith_remsi_103); 
+      for (int for_iter_107 = arith_const_9; for_iter_107 < arith_select_106; for_iter_107 += arith_const_11) {
+        int arith_cmpi_108 = (arith_addi_18 < arith_const_9); 
+        int arith_subi_109 = (arith_const_4 - arith_addi_18); 
+        int arith_select_110 = (arith_cmpi_108 ? arith_subi_109 : arith_addi_18); 
+        int arith_divi_111 = (arith_select_110 / arith_const_5); 
+        int arith_subi_112 = (arith_const_4 - arith_divi_111); 
+        int arith_select_113 = (arith_cmpi_108 ? arith_subi_112 : arith_divi_111); 
+        int arith_muli_114 = (arith_select_113 * arith_const_5); 
+        int arith_addi_115 = (for_iter_107 + arith_muli_114); 
+        double memref_load_116 = func_arg_1[arith_addi_18][arith_addi_115]; 
+        double arith_mulf_117 = (memref_load_116 * memref_load_116); 
+        double memref_load_118 = func_arg_1[arith_addi_18][arith_addi_18]; 
+        double arith_subf_119 = (memref_load_118 - arith_mulf_117); 
+        func_arg_1[arith_addi_18][arith_addi_18] = arith_subf_119; 
+      }
+      double memref_load_120 = func_arg_1[arith_addi_18][arith_addi_18]; 
+      double math_sqrt_121 = sqrt(memref_load_120); 
+      func_arg_1[arith_addi_18][arith_addi_18] = math_sqrt_121; 
     }
-    PAST_WAIT_SEMAPHORE_ALL(async_group_10, async_group_index_11, PAST_TASK_FINISHED); 
   }
   return; 
 

@@ -1,6 +1,7 @@
 module {
   func.func @kernel_trmm(%arg0: i32, %arg1: i32, %arg2: f64, %arg3: memref<?x20xf64>, %arg4: memref<?x30xf64>) {
     %c20 = arith.constant 20 : index
+    %c32 = arith.constant 32 : index
     %c28 = arith.constant 28 : index
     %c3 = arith.constant 3 : index
     %c2 = arith.constant 2 : index
@@ -73,34 +74,35 @@ module {
         async.await_all %8
       }
     }
-    %0 = async.create_group %c20 : !async.group
-    %1 = scf.for %arg5 = %c0 to %c20 step %c1 iter_args(%arg6 = %c0) -> (index) {
+    %0 = async.create_group %c1 : !async.group
+    %1 = scf.for %arg5 = %c0 to %c1 step %c1 iter_args(%arg6 = %c0) -> (index) {
       %token = async.execute {
-        scf.for %arg7 = %c0 to %c1 step %c1 {
-          %4 = arith.addi %arg5, %arg7 : index
+        %4 = arith.muli %arg5, %c32 : index
+        scf.for %arg7 = %c0 to %c20 step %c1 {
+          %5 = arith.addi %4, %arg7 : index
           scf.for %arg8 = %c0 to %c7 step %c1 {
-            %5 = arith.muli %arg8, %c4 : index
-            %6 = memref.load %arg4[%4, %5] : memref<?x30xf64>
-            %7 = arith.mulf %arg2, %6 : f64
-            memref.store %7, %arg4[%4, %5] : memref<?x30xf64>
-            %8 = arith.addi %5, %c1 : index
-            %9 = memref.load %arg4[%4, %8] : memref<?x30xf64>
-            %10 = arith.mulf %arg2, %9 : f64
-            memref.store %10, %arg4[%4, %8] : memref<?x30xf64>
-            %11 = arith.addi %5, %c2 : index
-            %12 = memref.load %arg4[%4, %11] : memref<?x30xf64>
-            %13 = arith.mulf %arg2, %12 : f64
-            memref.store %13, %arg4[%4, %11] : memref<?x30xf64>
-            %14 = arith.addi %5, %c3 : index
-            %15 = memref.load %arg4[%4, %14] : memref<?x30xf64>
-            %16 = arith.mulf %arg2, %15 : f64
-            memref.store %16, %arg4[%4, %14] : memref<?x30xf64>
+            %6 = arith.muli %arg8, %c4 : index
+            %7 = memref.load %arg4[%5, %6] : memref<?x30xf64>
+            %8 = arith.mulf %arg2, %7 : f64
+            memref.store %8, %arg4[%5, %6] : memref<?x30xf64>
+            %9 = arith.addi %6, %c1 : index
+            %10 = memref.load %arg4[%5, %9] : memref<?x30xf64>
+            %11 = arith.mulf %arg2, %10 : f64
+            memref.store %11, %arg4[%5, %9] : memref<?x30xf64>
+            %12 = arith.addi %6, %c2 : index
+            %13 = memref.load %arg4[%5, %12] : memref<?x30xf64>
+            %14 = arith.mulf %arg2, %13 : f64
+            memref.store %14, %arg4[%5, %12] : memref<?x30xf64>
+            %15 = arith.addi %6, %c3 : index
+            %16 = memref.load %arg4[%5, %15] : memref<?x30xf64>
+            %17 = arith.mulf %arg2, %16 : f64
+            memref.store %17, %arg4[%5, %15] : memref<?x30xf64>
           }
           scf.for %arg8 = %c0 to %c2 step %c1 {
-            %5 = arith.addi %arg8, %c28 : index
-            %6 = memref.load %arg4[%4, %5] : memref<?x30xf64>
-            %7 = arith.mulf %arg2, %6 : f64
-            memref.store %7, %arg4[%4, %5] : memref<?x30xf64>
+            %6 = arith.addi %arg8, %c28 : index
+            %7 = memref.load %arg4[%5, %6] : memref<?x30xf64>
+            %8 = arith.mulf %arg2, %7 : f64
+            memref.store %8, %arg4[%5, %6] : memref<?x30xf64>
           }
         }
         async.yield
