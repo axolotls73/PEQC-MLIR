@@ -12,6 +12,8 @@
 include "VerifTypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
+// include "mlir/IR/BuiltinAttributes.td"
+include "mlir/IR/CommonAttrConstraints.td"
 include "mlir/IR/OpBase.td"
 
 def Verif_FooOp : Verif_Op<"foo", [Pure,
@@ -42,84 +44,66 @@ def Verif_FooOp : Verif_Op<"foo", [Pure,
 }
 
 
-def Verif_TestAddOp : Verif_Op<"test_add", [
+// from llvm/mlir/include/mlir/Dialect/MemRef/IR/MemRefOps.td
+/// A TypeAttr for memref types.
+def MemRefTypeAttr
+    : TypeAttrBase<"::mlir::MemRefType", "memref type attribute"> {
+  let constBuilderCall = "::mlir::TypeAttr::get($0)";
+}
+
+// fifo ops!
+
+def Verif_FifoInitOp : Verif_Op<"fifo.init", [
         ]> {
     let summary = "";
     let description = [{
     }];
 
     let arguments = (ins
-        I32:$lhs,
-        I32:$rhs
+        MemRefTypeAttr:$elt_type
     );
 
     let results = (outs
-        I32:$res
+        Index:$id
     );
 
     let assemblyFormat = [{
-        attr-dict `:` $lhs `+` $rhs
+        attr-dict `:` $elt_type
     }];
 }
 
-
-def Verif_ParRegionOp : Verif_Op<"par_region", [
-            NoTerminator,
-            SingleBlock
-        ]> {
-    let summary = "Parallel region for verification.";
-    let description = [{
-        This operation defines a parallel region -- operations
-        in `par_region`'s region execute in parallel and
-        must have the `VerifTaskTrait` trait.
-
-        OpenMP-style fork/join parallelism, as many logical threads
-        as there are parallel tasks/loop iterations executed.
-    }];
-
-    //check for VerifTaskTrait
-    // let hasRegionVerifier = 1;
-    let regions = (region
-        AnyRegion:$par
-    );
-
-
-    let assemblyFormat = [{
-        attr-dict `:` regions
-    }];
-
-
-}
-
-def VerifTaskTrait : HasParent<"ParRegionOp">;
-
-def Verif_TaskOp : Verif_Op<"task", [
-            VerifTaskTrait,
-            NoTerminator,
-            SingleBlock
-        ]> {
-    let summary = "Single task executed.";
-    let description = [{
-    }];
-
-    // let assemblyFormat = [{
-    //     attr-dict `:` regions
-    // }];
-}
-
-
-def Verif_MemAllocOp : Verif_Op<"mem_alloc", [
+def Verif_FifoReadOp : Verif_Op<"fifo.read", [
         ]> {
     let summary = "";
     let description = [{
     }];
 
+    let arguments = (ins
+        Index:$fifoid
+    );
+
     let results = (outs
-        Verif_Ptr:$ptr
+        AnyMemRef:$res
     );
 
     let assemblyFormat = [{
-        attr-dict `:` type($ptr)
+        attr-dict $fifoid `:` type($res)
+    }];
+}
+
+def Verif_FifoWriteOp : Verif_Op<"fifo.write", [
+        ]> {
+    let summary = "";
+    let description = [{
+    }];
+
+    let arguments = (ins
+        Index:$fifoid,
+        AnyMemRef:$val
+    );
+
+    let assemblyFormat = [{
+        attr-dict $fifoid `,` $val `:` type($val)
     }];
 }
 
