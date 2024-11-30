@@ -64,7 +64,7 @@ def Verif_FifoInitOp : Verif_Op<"fifo.init", [
     );
 
     let results = (outs
-        Index:$id
+        Index:$fifo_id
     );
 
     let assemblyFormat = [{
@@ -77,9 +77,10 @@ def Verif_FifoReadOp : Verif_Op<"fifo.read", [
     let summary = "";
     let description = [{
     }];
+    let hasVerifier = 1;
 
     let arguments = (ins
-        Index:$fifoid
+        Index:$fifo_id
     );
 
     let results = (outs
@@ -87,7 +88,7 @@ def Verif_FifoReadOp : Verif_Op<"fifo.read", [
     );
 
     let assemblyFormat = [{
-        attr-dict $fifoid `:` type($res)
+        attr-dict $fifo_id `:` type($res)
     }];
 }
 
@@ -96,14 +97,15 @@ def Verif_FifoWriteOp : Verif_Op<"fifo.write", [
     let summary = "";
     let description = [{
     }];
+    let hasVerifier = 1;
 
     let arguments = (ins
-        Index:$fifoid,
+        Index:$fifo_id,
         AnyMemRef:$val
     );
 
     let assemblyFormat = [{
-        attr-dict $fifoid `,` $val `:` type($val)
+        attr-dict $fifo_id `,` $val `:` type($val)
     }];
 }
 
