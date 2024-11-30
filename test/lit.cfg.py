@@ -35,7 +35,7 @@ config.substitutions.append(("%testroot", config.test_source_root))
 config.substitutions.append(("%inputs", os.path.join(config.test_source_root, "Inputs")))
 
 # pastchecker with arguments
-config.substitutions.append(("%pastchecker", "pastchecker --enable-preprocessor --timing-mode --verbose"))
+config.substitutions.append(("%pastchecker", "pastchecker --enable-preprocessor --timing-mode --verbose --enable-subtrees"))
 
 llvm_config.with_system_environment(["HOME", "INCLUDE", "LIB", "TMP", "TEMP"])
 

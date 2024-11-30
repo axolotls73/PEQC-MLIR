@@ -19,7 +19,7 @@ set(VERIF_TEST_DEPENDS
 add_lit_testsuite(check-verif "Running the verif regression tests"
         ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS ${VERIF_TEST_DEPENDS}
-        ARGS "-j 1 --show-xfail"
+        ARGS "--show-xfail --timeout 10"
         )
 set_target_properties(check-verif PROPERTIES FOLDER "Tests")
 
