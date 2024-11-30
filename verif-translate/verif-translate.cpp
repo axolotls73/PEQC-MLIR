@@ -641,6 +641,11 @@ class PastTranslator {
   s_past_node_t* translate(math::ExpOp op) {
     return translateArithUnaryOp("math_exp", past_exp, op.getResult(), op.getOperand());
   }
+  //don't care about width, everything's int anyway
+  s_past_node_t* translate(arith::ExtUIOp op) {
+    return getDeclareAndAssign(op.getResult().getType(), "arith_extui",
+        op.getResult(), past_node_varref_create(getVarSymbol(op.getIn())));
+  }
 
   s_past_node_t* translate(arith::CmpIOp& op) {
     arith::CmpIPredicate pred = op.getPredicate();
@@ -1152,6 +1157,7 @@ class PastTranslator {
     else if (auto o = dyn_cast<math::SqrtOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::NegFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<math::ExpOp>(op)) res = translate(o);
+    else if (auto o = dyn_cast<arith::ExtUIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::CmpFOp>(op)) res = translate(o);
     else if (auto o = dyn_cast<arith::SelectOp>(op)) res = translate(o);
