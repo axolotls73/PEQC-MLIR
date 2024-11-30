@@ -5,7 +5,7 @@ epfile=$2
 outfile=$3
 projectroot=$4
 
-VTDIR=$projectroot/verif-translate
+VTDIR=$projectroot/experiments/polygeist-polybench/script
 VTDIR=`realpath $VTDIR`
 VTDIR=${VTDIR//\//\\/}
 

@@ -1,0 +1,17 @@
+{
+
+    "topdir": "medium-converted-affine-options-param",
+    "polybench_dir": "generated-polybench-medium-dataset",
+
+    "optionsets": [
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
+    "mliropt_args": "--affine-loop-normalize",
+
+    "output_dir": "affine-normalize"
+}
+
+]
+}

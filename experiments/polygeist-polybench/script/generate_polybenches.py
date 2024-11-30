@@ -33,6 +33,9 @@ for cfile in glob(f'{PB_DIR}/*.preproc.c'):
   # get rid of cpp stuff
   filestr = re.sub('# .*', '', filestr)
 
+  # for adi: get rid of cast
+  filestr = re.sub('\(double\)(\d+)', r'\1.0', filestr)
+
   # extract kernel, make function call out of signature and declare variables
   kernel, signature = re.search(f'(void kernel_{name.replace("-", "_")}\((.*?)\).*)int main',
       filestr, flags=re.DOTALL | re.MULTILINE).groups()
@@ -45,6 +48,12 @@ for cfile in glob(f'{PB_DIR}/*.preproc.c'):
 
   includes = '''
 #include <math.h>
+'''
+
+  interp_defines = '''
+#define expf exp
+#define powf pow
+
 '''
 
   epilogue = lambda asyncpragma : f'''
@@ -71,6 +80,7 @@ for cfile in glob(f'{PB_DIR}/*.preproc.c'):
   #   f.write(epilogue(True))
   #   f.write("#pragma pocc-region-end\n")
   with open(f'{newdir}/interp/{name}-interp-noasync.c', 'w') as f:
+    f.write(interp_defines)
     f.write("#pragma pocc-region-start\n")
     f.write(kernel)
     f.write(epilogue(False))

@@ -50,6 +50,12 @@ def getpath(s, isfunc):
 def getdirpath(d): return getpath(d, os.path.isdir)
 def getfilepath(f): return getpath(f, os.path.isfile)
 
+def pathtoname(path):
+  name = path.replace('/', '-')
+  if name[-1] == '-':
+    name = name[:-1]
+  return name
+
 BASEDIR = os.path.abspath(f'{os.path.dirname(__file__)}/..')
 
 # get all bench names

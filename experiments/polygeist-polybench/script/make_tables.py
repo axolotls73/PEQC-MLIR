@@ -47,7 +47,7 @@ for configfile in args.config_file:
     convertdata = pd.concat([convertdata, cdata])
 
 
-data = data.set_index(['name', 'dir'])
+data = data.set_index(['name', 'dir']).sort_index()
 convertdata = convertdata.set_index(['name', 'output_dir'])
 print(data)
 
@@ -60,8 +60,7 @@ runchartw = csv.writer(open(runchartfilename, 'w'))
 # convchartfilename = f'{args.out_prefix}_opt_vs_bench_run.csv'
 # convchartw = csv.writer(open(convchartfilename, 'w'))
 
-flags = ['"' + ('pluto + ' if len(opt['polymer_args']) else '') + opt['mliropt_args'] + '"'
-         for opt in opts]
+flags = [opt['output_dir'] for opt in opts]
 print(flags)
 runchartw.writerow([''] + flags)
 # convchartw.writerow([''] + flags)
@@ -73,9 +72,9 @@ for benchname in sorted(benchnames):
   for opt in opts:
     try:
       datarow = data.loc[(benchname, opt['output_dir'])]
-      result = datarow['result']
+      result = datarow['result'][0]
       for col in ['timeout', 'conflict', 'tree_difference', 'interp_error', 'out_of_bounds']:
-        if datarow[col] == 'yes':
+        if datarow[col][0] == 'yes':
           result += f'({col})'
     except Exception:
       result = 'N/A'
@@ -84,27 +83,25 @@ for benchname in sorted(benchnames):
 
   runchartw.writerow(runrow)
 
-
-
 # fail list
 
 faillistfilename = f'{args.out_prefix}_fail_list.csv'
 flw = csv.writer(open(faillistfilename, 'w'))
 
 for opt in opts:
-  optstr = '"' + ('pluto + ' if len(opt['polymer_args']) else '') + opt['mliropt_args'] + '"'
+  optstr = opt['output_dir']
   if not len(optstr): optstr = '(no flags)'
   frow = [f'{optstr}']
 
   for benchname in sorted(benchnames):
     try:
       datarow = data.loc[(benchname, opt['output_dir'])]
-      result = datarow['result']
+      result = datarow['result'][0]
       if result == 'pass': continue
 
       fb = benchname
-      for col in ['timeout', 'conflict', 'tree_difference', 'interp_error']:
-        if datarow[col] == 'yes':
+      for col in ['timeout', 'conflict', 'tree_difference', 'interp_error', 'out_of_bounds']:
+        if datarow[col][0] == 'yes':
           fb += f'({col})'
     except Exception:
       fb = benchname + '(not generated)'

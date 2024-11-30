@@ -1,0 +1,97 @@
+{
+
+    "topdir": "converted-small-affine-options-no-polymer",
+    "polybench_dir": "generated-polybench-use-scalar-lb-small-dataset",
+
+    "optionsets": [
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-fusion",
+
+    "output_dir": "affine-no-polymer-loop-fusion"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-invariant-code-motion",
+
+    "output_dir": "affine-no-polymer-loop-inv-code-motion"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-normalize",
+
+    "output_dir": "affine-no-polymer-normalize"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-tile=\"tile-size=32\"",
+
+    "output_dir": "affine-no-polymer-tile"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-unroll",
+
+    "output_dir": "affine-no-polymer-unroll"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-unroll-jam",
+
+    "output_dir": "affine-no-polymer-unroll-jam"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-normalize --canonicalize --affine-loop-tile=\"tile-size=32\" --affine-loop-unroll-jam=\"unroll-jam-factor=4\" --affine-loop-tile=\"tile-size=32\"",
+
+    "output_dir": "affine-no-polymer-tile-and-unroll-jam"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-normalize --canonicalize --affine-loop-fusion --affine-loop-tile=\"tile-size=32\"",
+
+    "output_dir": "affine-no-polymer-fuse-and-tile"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-parallelize=\"max-nested=1\"",
+
+    "output_dir": "affine-no-polymer-parallelize"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile=\"tile-size=32\" --affine-parallelize=\"max-nested=1\" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize",
+
+    "output_dir": "affine-no-polymer-all"
+},
+
+{
+    "cgeist_args": "-raise-scf-to-affine",
+    "polymer_args": "",
+    "mliropt_args": "--affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile=\"tile-size=32\" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize",
+
+    "output_dir": "affine-no-polymer-all-except-parallelize"
+}
+
+]
+}
