@@ -24,16 +24,6 @@ namespace mlir::verif {
 
 namespace {
 
-class VerifSubviewConvert
-    : public impl::VerifSubviewConvertBase<VerifSubviewConvert> {
-public:
-  using impl::VerifSubviewConvertBase<VerifSubviewConvert>::VerifSubviewConvertBase;
-
-  void runOnOperation() final {
-
-  }
-};
-
 class VerifDMAPattern : public OpConversionPattern<xilinx::air::DmaMemcpyNdOp> {
 public:
   using OpConversionPattern<xilinx::air::DmaMemcpyNdOp>::OpConversionPattern;

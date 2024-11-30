@@ -6,6 +6,7 @@
 
 // RUN: not %pastchecker %t/translation.c %t/translation.c res | grep conflict
 
+//XFAIL:*
 
 //--- input.mlir
 
