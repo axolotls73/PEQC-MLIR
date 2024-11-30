@@ -12,3 +12,8 @@ seidel-2d
 deriche
 
 nussinov: base ==> char
+
+change medium dataset size to be smaller:
+floyd-warshall
+ludcmp
+nussinov

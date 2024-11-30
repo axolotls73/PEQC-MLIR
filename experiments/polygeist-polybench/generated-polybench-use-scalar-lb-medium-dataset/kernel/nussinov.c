@@ -1,20 +1,20 @@
 
 #include <math.h>
-void kernel_nussinov(int n, int seq[ 500 + 0],
-      int table[ 500 + 0][500 + 0])
+void kernel_nussinov(int n, int seq[ 180 + 0],
+      int table[ 180 + 0][180 + 0])
 {
   int i, j, k;
 
 #pragma scop
- for (i = 500 -1; i >= 0; i--) {
-  for (j=i+1; j<500; j++) {
+ for (i = 180 -1; i >= 0; i--) {
+  for (j=i+1; j<180; j++) {
 
    if (j-1>=0)
       table[i][j] = ((table[i][j] >= table[i][j-1]) ? table[i][j] : table[i][j-1]);
-   if (i+1<500)
+   if (i+1<180)
       table[i][j] = ((table[i][j] >= table[i+1][j]) ? table[i][j] : table[i+1][j]);
 
-   if (j-1>=0 && i+1<500) {
+   if (j-1>=0 && i+1<180) {
 
      if (i<j-1)
         table[i][j] = ((table[i][j] >= table[i+1][j-1]+(((seq[i])+(seq[j])) == 3)) ? table[i][j] : table[i+1][j-1]+(((seq[i])+(seq[j])) == 3));

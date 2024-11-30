@@ -4,6 +4,13 @@
 * intermediate conversion files are in `converted-benches`
 * final translations are in `converted-benches/translated`
 
+## TODO
+
+* change medium dataset back to default:
+    * floyd-warshall
+    * ludcmp
+    * nussinov
+
 ## Scripts
 
 Tools you need in your PATH:
@@ -22,25 +29,36 @@ Tools you need in your PATH:
 
 ```sh
 $> ./script/generate_polybenches.py -DPOLYBENCH_USE_SCALAR_LB -DMINI_DATASET
+$> ./script/generate_polybenches.py -DPOLYBENCH_USE_SCALAR_LB -DSMALL_DATASET
 $> ./script/generate_polybenches.py -DPOLYBENCH_USE_SCALAR_LB -DMEDIUM_DATASET
 
 # adi hangs somewhere in polygeist, skip for now
 $> ./script/convert_polybenches.py config/default-config.json --skip adi
 
 # self check for generated files
-$> ./script/run.py --self converted-benches/translated
+$> ./script/run.py --self config/default-config.json
 # check against original C files
 $> ./script/run.py config/default-config.json --compare-against generated-polybench-use-scalar-lb-mini-dataset/interp
 ```
 
 Affine transfos tests:
 ```sh
-$> ./script/convert_polybenches.py config/affine-options-no-polymer.json --skip adi,deriche,durbin,gramschmidt,ludcmp
-$> ./script/run.py config/affine-options-no-polymer.json --timeout 60 --compare-against generated-polybench-use-scalar-lb-mini-dataset/interp
+$> ./script/convert_polybenches.py config/affine-options-no-polymer.json
+$> ./script/run.py config/affine-options-no-polymer.json --timeout 600 --compare-against generated-polybench-use-scalar-lb-mini-dataset/interp
 
 
-$> ./script/convert_polybenches.py config/affine-options.json --skip adi,deriche,durbin,gramschmidt,ludcmp
-$> ./script/run.py config/affine-options.json --timeout 60 --compare-against generated-polybench-use-scalar-lb-mini-dataset/interp
+$> ./script/convert_polybenches.py config/affine-options.json --skip adi
+$> ./script/run.py config/affine-options.json --timeout 600 --compare-against generated-polybench-use-scalar-lb-mini-dataset/interp
 
 $> ./script/make_tables.py config/affine-options.json config/affine-options-no-polymer.json  --csv-name run_stats_against_generated-polybench-use-scalar-lb-mini-dataset-interp.csv --out-prefix all-affine
+```
+
+medium:
+```sh
+$> ./script/convert_polybenches.py config/medium-affine-options-no-polymer.json --skip adi,durbin
+$> ./script/run.py config/affine-options-no-polymer.json --timeout 600 --compare-against generated-polybench-use-scalar-lb-mini-dataset/interp
+
+
+$> ./script/convert_polybenches.py config/medium-affine-options.json --skip adi,durbin
+$> ./script/run.py config/affine-options.json --timeout 600 --compare-against generated-polybench-use-scalar-lb-mini-dataset/interp
 ```
