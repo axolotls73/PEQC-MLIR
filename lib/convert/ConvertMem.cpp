@@ -17,7 +17,6 @@
 
 namespace mlir::verif {
 #define GEN_PASS_DEF_VERIFDMATOMEMREF
-#define GEN_PASS_DEF_VERIFSUBVIEWCONVERT
 #include "VerifPasses.h.inc"
 
 #define DEBUG_TYPE "verif-convert"

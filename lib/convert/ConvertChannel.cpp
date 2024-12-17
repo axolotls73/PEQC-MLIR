@@ -23,6 +23,30 @@ namespace mlir::verif {
 
 namespace {
 
+WalkResult processChannel(xilinx::air::ChannelOp chop, ModuleOp module) {
+
+  auto uses = chop.getSymbolUses(module);
+
+  chop.emitRemark();
+
+  auto size = chop.getSize();
+  for (Attribute s : size) {
+    s.print(llvm::errs());
+  }
+
+  if (!uses.has_value()) return WalkResult::advance();
+
+  chop.erase();
+
+
+  for (auto use : uses.value()) {
+    auto op = use.getUser();
+
+    op->erase();
+  }
+
+  return WalkResult::advance();
+}
 
 class VerifConvertChannel
     : public impl::VerifConvertChannelBase<VerifConvertChannel> {
@@ -33,6 +57,13 @@ public:
     auto module = getOperation();
     auto context = module.getContext();
 
+    // process channels
+    WalkResult res = module.walk([&] (xilinx::air::ChannelOp chop) {
+      return processChannel(chop, module);
+    });
+
+    if (res.wasInterrupted())
+      return signalPassFailure();
 
     return signalPassFailure();
   }

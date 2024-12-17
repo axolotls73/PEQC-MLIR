@@ -31,7 +31,7 @@ mlir::LogicalResult FifoWriteOp::verify() {
   if (!initop) {
     return emitOpError("fifo id must be defined by verif.fifo.init");
   }
-  if (initop.getEltType() != getVal ().getType()) {
+  if (initop.getEltType() != getVal().getType()) {
     return emitOpError("memref type doesn't match fifo type");
   }
   return success();
