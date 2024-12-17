@@ -1,15 +1,17 @@
-//===- verif-translate.cpp ---------------------------------*- C++ -*-===//
-//
-// This file is licensed under the Apache License v2.0 with LLVM Exceptions.
-// See https://llvm.org/LICENSE.txt for license information.
-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-//
-//===----------------------------------------------------------------------===//
-//
-// This is a command line utility that translates a file from/to MLIR using one
-// of the registered translations.
-//
-//===----------------------------------------------------------------------===//
+/*
+ * verif-translate.cpp: This file is part of the PEQC-MLIR project.
+ *
+ * Copyright (C) 2024 Colorado State University
+ *
+ * This program can be redistributed and/or modified under the terms
+ * of the license specified in the LICENSE.txt file at the root of the
+ * project.
+ *
+ * Contact: Louis-Noel Pouchet <pouchet@colostate.edu>
+ *          Emily Tucker <emily.tucker@colostate.edu>
+ * Author: Emily Tucker <emily.tucker@colostate.edu>
+ *
+ */
 
 #include <iterator>
 #include <fstream>

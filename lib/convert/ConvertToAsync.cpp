@@ -1,12 +1,18 @@
-//===- VerifPasses.cpp - Verif passes -----------------*- C++ -*-===//
-//
-// This file is licensed under the Apache License v2.0 with LLVM Exceptions.
-// See https://llvm.org/LICENSE.txt for license information.
-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-//
-//===----------------------------------------------------------------------===//
-// #include "mlir/Dialect/Func/IR/FuncOps.h"
-// #include "mlir/Dialect/MemRef/IR/MemRef.h"
+/*
+ * ConvertToAsync.cpp: This file is part of the PEQC-MLIR project.
+ *
+ * Copyright (C) 2024 Colorado State University
+ *
+ * This program can be redistributed and/or modified under the terms
+ * of the license specified in the LICENSE.txt file at the root of the
+ * project.
+ *
+ * Contact: Louis-Noel Pouchet <pouchet@colostate.edu>
+ *          Emily Tucker <emily.tucker@colostate.edu>
+ * Author: Emily Tucker <emily.tucker@colostate.edu>
+ *
+ */
+
 #include "llvm/ADT/STLExtras.h"
 #include "mlir/InitAllDialects.h"
 #include "mlir/IR/PatternMatch.h"

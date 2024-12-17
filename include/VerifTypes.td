@@ -1,20 +1,23 @@
-//===- VerifTypes.td - Verif dialect types -------*- tablegen -*-===//
-//
-// This file is licensed under the Apache License v2.0 with LLVM Exceptions.
-// See https://llvm.org/LICENSE.txt for license information.
-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-//
-//===----------------------------------------------------------------------===//
+/*
+ * VerifTypes.td: This file is part of the PEQC-MLIR project.
+ *
+ * Copyright (C) 2024 Colorado State University
+ *
+ * This program can be redistributed and/or modified under the terms
+ * of the license specified in the LICENSE.txt file at the root of the
+ * project.
+ *
+ * Contact: Louis-Noel Pouchet <pouchet@colostate.edu>
+ *          Emily Tucker <emily.tucker@colostate.edu>
+ * Author: Emily Tucker <emily.tucker@colostate.edu>
+ *
+ */
 
 #ifndef VERIF_TYPES
 #define VERIF_TYPES
 
 include "mlir/IR/AttrTypeBase.td"
 include "VerifDialect.td"
-
-//===----------------------------------------------------------------------===//
-// Verif type definitions
-//===----------------------------------------------------------------------===//
 
 class Verif_Type<string name, string typeMnemonic, list<Trait> traits = []>
     : TypeDef<Verif_Dialect, name, traits> {
