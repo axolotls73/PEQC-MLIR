@@ -24,4 +24,12 @@ class Verif_Type<string name, string typeMnemonic, list<Trait> traits = []>
   let mnemonic = typeMnemonic;
 }
 
+def Verif_CustomType : Verif_Type<"Custom", "custom"> {
+    let summary = "Verif custom type";
+    let description = "Custom type in verif dialect";
+    let parameters = (ins StringRefParameter<"the custom value">:$value);
+    let assemblyFormat = "`<` $value `>`";
+}
+
+
 #endif // VERIF_TYPES
