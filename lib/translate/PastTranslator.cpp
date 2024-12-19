@@ -229,7 +229,7 @@
   }
 
   void PastTranslator::nodeListClone(std::vector<s_past_node_t*>& list) {
-    for (int i = 0; i < list.size(); i++) {
+    for (int i = 0; i < (int)list.size(); i++) {
       list[i] = past_clone_subtree(list[i]);
     }
   }
@@ -315,7 +315,7 @@
       std::vector<s_past_node_t*> src_offsets, std::vector<s_past_node_t*> dst_offsets,
       std::vector<s_past_node_t*> sizes) {
     std::vector<s_past_node_t*> src_strides, dst_strides;
-    for (int i = 0; i < src_offsets.size(); i++) {
+    for (int i = 0; i < (int)src_offsets.size(); i++) {
       src_strides.push_back(past_node_value_create_from_int(1));
       dst_strides.push_back(past_node_value_create_from_int(1));
     }
@@ -328,17 +328,17 @@
     assert(dims.size() > 0);
     std::vector<s_past_node_t*> args;
     args.push_back(past_node_varref_create(src));
-    for (auto dim : dims) {
+    for (size_t i = 0; i < dims.size(); i++) {
       args.push_back(past_node_value_create_from_int(0));
     }
-    for (auto dim : dims) {
+    for (size_t i = 0; i < dims.size(); i++) {
       args.push_back(past_node_value_create_from_int(1));
     }
     args.push_back(past_node_varref_create(dst));
-    for (auto dim : dims) {
+    for (size_t i = 0; i < dims.size(); i++) {
       args.push_back(past_node_value_create_from_int(0));
     }
-    for (auto dim : dims) {
+    for (size_t i = 0; i < dims.size(); i++) {
       args.push_back(past_node_value_create_from_int(1));
     }
     for (auto dim : dims) {
@@ -500,7 +500,7 @@
   }
 
   s_past_node_t* PastTranslator::translate(arith::ConstantIntOp& op) {
-    u_past_value_data_t val = {.intval = op.value()};
+    u_past_value_data_t val = {.intval = (int)op.value()};
     ///FIXME: low prio, make this consistent with types
     // u_past_value_data_t val;
     // switch (getTypePast(op.getResult().getType())) {
@@ -519,7 +519,7 @@
   }
 
   s_past_node_t* PastTranslator::translate(arith::ConstantIndexOp& op) {
-    u_past_value_data_t val = { .intval = op.value() };
+    u_past_value_data_t val = { .intval = (int)op.value() };
     return translateConstant(op, op.getResult().getType(), val);
   }
 
