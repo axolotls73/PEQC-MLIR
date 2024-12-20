@@ -13,6 +13,7 @@ add_public_tablegen_target(MLIRVerifTypesIncGen)
 add_mlir_doc(VerifDialect VerifDialect Dialect/ -gen-dialect-doc)
 add_mlir_doc(VerifOps VerifOps Dialect/ -gen-op-doc)
 add_mlir_doc(VerifTypes VerifTypes Dialect/ -gen-typedef-doc)
+add_mlir_doc(VerifPasses VerifPasses Dialect/ -gen-pass-doc)
 
 set(LLVM_TARGET_DEFINITIONS VerifPasses.td)
 mlir_tablegen(VerifPasses.h.inc --gen-pass-decls)

@@ -23,6 +23,57 @@ include "mlir/IR/CommonAttrConstraints.td"
 include "mlir/IR/OpBase.td"
 
 
+def Verif_SemaphoreOp : Verif_Op<"semaphore", [
+        ]> {
+    let summary = "";
+    let description = [{
+Declares a new semaphore.
+    }];
+
+    let results = (outs
+        Verif_SemaphoreType:$sem
+    );
+
+    let assemblyFormat = [{
+        attr-dict
+    }];
+}
+
+def Verif_SemaphoreSetOp : Verif_Op<"semaphore.set", [
+        ]> {
+    let summary = "";
+    let description = [{
+Set semaphore `sem` to value `val`.
+    }];
+
+    let arguments = (ins
+        Verif_SemaphoreType:$sem,
+        Index:$val
+    );
+
+    let assemblyFormat = [{
+        $sem attr-dict `:` $val
+    }];
+}
+
+def Verif_SemaphoreWaitOp : Verif_Op<"semaphore.wait", [
+        ]> {
+    let summary = "";
+    let description = [{
+Blocking wait on semaphore `sem` until it is assigned the value `val`.
+    }];
+
+    let arguments = (ins
+        Verif_SemaphoreType:$sem,
+        Index:$val
+    );
+
+    let assemblyFormat = [{
+        $sem attr-dict `:` $val
+    }];
+}
+
+
 // from llvm/mlir/include/mlir/Dialect/MemRef/IR/MemRefOps.td
 /// A TypeAttr for memref types.
 def MemRefTypeAttr
