@@ -1,6 +1,6 @@
 // RUN: split-file %s %t && \
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
-// RUN: bash %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
+// RUN: bash %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
 // RUN: %pastchecker %t/translation.c %t/translation.c res1,res2 | grep YES
 

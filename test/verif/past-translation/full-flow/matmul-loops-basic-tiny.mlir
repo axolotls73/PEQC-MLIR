@@ -1,12 +1,12 @@
 // RUN: split-file %s %t && \
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
-// RUN: %testroot/add_epilogue.sh %t/result.c %testroot/Inputs/matmul-tiny-epilogue.c %t/translation.c %testroot/..
+// RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
 // RUN: %pastchecker --enable-preprocessor %t/translation.c %t/translation.c A,B,C | grep YES
 
-// RUN: %pastchecker %t/translation.c %inputs/matmul-tiny.c A,B,C | grep YES
+// RUN: %pastchecker %t/translation.c %t/compare.c A,B,C | grep YES
 
-// RUN: %pastchecker %t/translation.c %inputs/matmul-tiny-bug.c A,B,C | not grep YES
+// RUN: %pastchecker %t/translation.c %t/compare-bug.c A,B,C | not grep YES
 
 //--- input.mlir
 
@@ -50,3 +50,41 @@ module {
   }
 }
 
+//--- epilogue.c
+
+{
+  matmul_on_memref(A, B, C);
+}
+
+//--- compare.c
+
+#pragma pocc-region-start
+void matmul_on_memref(int** A, int** B, int** C) {
+  for (int i = 0; i < 10; i++)
+    for (int j = 0; j < 10; j++){
+      C[i][j] = 0;
+      for (int k = 0; k < 10; k++)
+        C[i][j] += A[i][k] * B[k][j];
+    }
+}
+{
+  matmul_on_memref(A, B, C);
+}
+#pragma pocc-region-end
+
+//--- compare-bug.c
+
+#pragma pocc-region-start
+void matmul_on_memref(int** A, int** B, int** C) {
+  for (int i = 0; i < 10; i++)
+    for (int j = 0; j < 10; j++){
+      C[i][j] = 0;
+      for (int k = 0; k < 10; k++)
+        C[i][j] += A[i][k] * B[k][j];
+    }
+  C[5][6] = 42;
+}
+{
+  matmul_on_memref(A, B, C);
+}
+#pragma pocc-region-end

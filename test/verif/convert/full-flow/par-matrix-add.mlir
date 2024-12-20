@@ -1,7 +1,7 @@
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-scf-parallel-to-async %t/input.mlir > %t/conversion.mlir && \
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
-// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
+// RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
 // RUN: cat %t/conversion.mlir | FileCheck %s
 

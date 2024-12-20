@@ -1,7 +1,7 @@
 // RUN: split-file %s %t
 
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
-// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
+// RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
 // RUN: %pastchecker %t/translation.c %t/translation.c x,y,z | grep YES
 
@@ -10,7 +10,7 @@
 // RUN: air-opt %t/input.mlir --air-dependency > %t/air-dep-convert.mlir && \
 // RUN: verif-opt %t/air-dep-convert.mlir --verif-air-execute-to-async > %t/air-dep-convert-async.mlir && \
 // RUN: verif-translate --translate-to-past %t/air-dep-convert-async.mlir > %t/air-dep-result.c && \
-// RUN: %testroot/add_epilogue.sh %t/air-dep-result.c %t/epilogue.c %t/air-dep-translation.c %testroot/..
+// RUN: %add_epilogue %t/air-dep-result.c %t/epilogue.c %t/air-dep-translation.c
 
 // COM: expect this to be an incorrect parallelization
 // RUN: not %pastchecker %t/air-dep-translation.c %t/air-dep-translation.c x,y,z 2>&1 | grep conflict

@@ -31,8 +31,7 @@ config.test_exec_root = os.path.join(config.verif_obj_root, "test")
 
 config.substitutions.append(("%PATH%", config.environment["PATH"]))
 config.substitutions.append(("%shlibext", config.llvm_shlib_ext))
-config.substitutions.append(("%testroot", config.test_source_root))
-config.substitutions.append(("%inputs", os.path.join(config.test_source_root, "Inputs")))
+config.substitutions.append(("%add_epilogue", os.path.join(config.verif_src_root, "verif-translate/scripts/add_epilogue.sh")))
 
 # pastchecker with arguments
 config.substitutions.append(("%pastchecker", "pastchecker --enable-preprocessor --timing-mode --verbose --enable-subtrees"))
