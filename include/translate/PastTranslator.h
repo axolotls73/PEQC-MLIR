@@ -14,7 +14,6 @@
  */
 
 #include "past/past.h"
-#include "past/pprint.h"
 
 #include "mlir/IR/BuiltinDialect.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
@@ -31,6 +30,7 @@
 
 #include "VerifDialect.h"
 #include "VerifUtil.h"
+#include "VerifOps.h"
 
 #define DEBUG_TYPE "verif-translate"
 
@@ -200,6 +200,10 @@ class PastTranslator {
 ///TODO: workaround!!
   s_past_node_t* translate(UnrealizedConversionCastOp op);
   s_past_node_t* translate(LLVM::UndefOp op);
+
+  s_past_node_t* translate(verif::SemaphoreOp op);
+  s_past_node_t* translate(verif::SemaphoreSetOp op);
+  s_past_node_t* translate(verif::SemaphoreWaitOp op);
 
   // returns a linked list of the translation of the contained blocks'
   // operations, chained
