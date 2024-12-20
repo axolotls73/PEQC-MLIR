@@ -52,7 +52,7 @@ Set semaphore `sem` to value `val`.
     );
 
     let assemblyFormat = [{
-        $sem attr-dict `:` $val
+        $sem attr-dict `,` $val
     }];
 }
 
@@ -69,7 +69,7 @@ Blocking wait on semaphore `sem` until it is assigned the value `val`.
     );
 
     let assemblyFormat = [{
-        $sem attr-dict `:` $val
+        $sem attr-dict `,` $val
     }];
 }
 

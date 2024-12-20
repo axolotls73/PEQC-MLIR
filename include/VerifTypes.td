@@ -18,15 +18,17 @@
 
 include "mlir/IR/AttrTypeBase.td"
 include "VerifDialect.td"
+include "mlir/IR/BuiltinTypeInterfaces.td"
 
 class Verif_Type<string name, string typeMnemonic, list<Trait> traits = []>
     : TypeDef<Verif_Dialect, name, traits> {
   let mnemonic = typeMnemonic;
 }
 
-def Verif_SemaphoreType : Verif_Type<"Semaphore", "semaphore"> {
-    let summary = "semaphore";
-    let description = "";
+def Verif_SemaphoreType : Verif_Type<"Semaphore", "semaphore",
+      [MemRefElementTypeInterface]> {
+  let summary = "semaphore";
+  let description = "";
 }
 
 
