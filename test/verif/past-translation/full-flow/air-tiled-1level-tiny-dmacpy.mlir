@@ -1,6 +1,6 @@
 // RUN: split-file %s %t && \
 // RUN: air-opt --convert-linalg-to-affine-loops --lower-affine %t/input.mlir > %t/input-lowered.mlir
-// RUN: verif-opt --verif-dma-to-memref --verif-scf-parallel-to-async %t/input-lowered.mlir > %t/conversion.mlir && \
+// RUN: verif-opt --verif-air-dma-to-memref --verif-scf-parallel-to-async %t/input-lowered.mlir > %t/conversion.mlir && \
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
 // RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 

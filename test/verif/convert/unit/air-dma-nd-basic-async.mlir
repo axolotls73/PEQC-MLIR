@@ -1,4 +1,4 @@
-// RUN: verif-opt --verif-dma-to-memref %s | FileCheck %s
+// RUN: verif-opt --verif-air-dma-to-memref %s | FileCheck %s
 
 module {
     func.func @dmatest(%a: memref<16xi32>, %b: memref<8xi32>) -> () {

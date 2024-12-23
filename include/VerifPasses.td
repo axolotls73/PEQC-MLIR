@@ -19,8 +19,13 @@
 include "mlir/Pass/PassBase.td"
 
 def VerifScfParallelToAsync: Pass<"verif-scf-parallel-to-async", "::mlir::ModuleOp"> {
-  let summary = "Convert acf.parallel to scf.for and async.execute";
+  let summary = "Convert scf.parallel to scf.for and async.execute";
   let description = [{
+Convert 'scf.parallel' to nested `scf.for` loops with an `async.execute` body.
+Requires the `scf.parallel` `init` argument types to implement `MemRefElementTypeInterface`,
+i.e. be storable in a memref.
+
+See tests `test/verif/convert/unit/par-basic.mlir`, `test/verif/convert/unit/par-docs-example.mlir`.
   }];
   let dependentDialects = ["async::AsyncDialect"];
 }
@@ -28,6 +33,15 @@ def VerifScfParallelToAsync: Pass<"verif-scf-parallel-to-async", "::mlir::Module
 def VerifAirExecuteToAsync: Pass<"verif-air-execute-to-async", "::mlir::ModuleOp"> {
   let summary = "Convert air.execute to async.execute";
   let description = [{
+Convert `air.execute` to `async.execute`, converting `air.token` dependencies and results to `async.token`.
+
+To avoid wrapping `air.execute` return variables in an `async.value`, this pass also moves the
+declaration of some return variables to make them visible outside the `async.execute` region.
+If declared inside the `air.execute` region,
+scalar return values are stored in a memref declared outside the region,
+and the `memref.alloc` ops are moved outside of the region.
+
+See tests `test/verif/convert/unit/air-exec-scalar.mlir`, `test/verif/convert/unit/air-exec-alloc.mlir`.
   }];
   let dependentDialects = ["async::AsyncDialect"];
 }
@@ -35,18 +49,27 @@ def VerifAirExecuteToAsync: Pass<"verif-air-execute-to-async", "::mlir::ModuleOp
 def VerifAirToScfPar: Pass<"verif-air-to-scf-par", "::mlir::ModuleOp"> {
   let summary = "Convert air.launch, air.segment, and air.herd to scf.parallel";
   let description = [{
+Convert `air.launch`, `air.segment`, and `air.herd` to an `scf.parallel` operation with
+loop iterators starting at 0.
+If air ops are `async`, the `scf.parallel` operation is wrapped in `async.execute`.
+
+See tests `test/verif/convert/unit/air-herd-basic.mlir`, `test/verif/convert/unit/air-launch-basic-async.mlir`.
   }];
   let dependentDialects = ["scf::SCFDialect", "async::AsyncDialect"];
 }
 
-def VerifDmaToMemref: Pass<"verif-dma-to-memref", "::mlir::ModuleOp"> {
-  let summary = "Convert dma_memcpy_nd to memref operations";
+def VerifDmaToMemref: Pass<"verif-air-dma-to-memref", "::mlir::ModuleOp"> {
+  let summary = "Convert air.dma_memcpy_nd to memref operations";
   let description = [{
+Convert `air.dma_memcpy_nd` to a combination of `memref.subview` and `memref.copy` operations,
+wrapping in `async.execute` if `async` is specified.
+
+See tests `test/verif/convert/unit/air-dma-nd-basic.mlir`, `test/verif/convert/unit/air-dma-nd-basic-async.mlir`.
   }];
   let dependentDialects = ["memref::MemRefDialect", "async::AsyncDialect"];
 }
 
-def VerifConvertChannel: Pass<"verif-convert-channel", "::mlir::ModuleOp"> {
+def VerifConvertChannel: Pass<"verif-air-convert-channel", "::mlir::ModuleOp"> {
   let summary = "Convert air.channel to memref operations and async.execute";
   let description = [{
   }];
