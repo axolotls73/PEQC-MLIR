@@ -122,11 +122,11 @@ public:
     auto context = module.getContext();
 
     TypeConverter converter;
-    converter.addConversion([&](Type type) -> std::optional<Type> {
+    converter.addConversion([&](Type type) -> Type {
       // convert air::AsyncTokenType to async::TokenType
-      if (auto t = type.dyn_cast<xilinx::air::AsyncTokenType>())
+      if (auto t = mlir::dyn_cast<xilinx::air::AsyncTokenType>(type))
         return async::TokenType::get(context);
-      if (auto t = type.dyn_cast<MemRefType>())
+      if (auto t = mlir::dyn_cast<MemRefType>(type))
         if (t.getMemorySpaceAsInt() != 0)
           return MemRefType::get(t.getShape(), t.getElementType(),
                                  t.getLayout(), 0);
@@ -135,7 +135,7 @@ public:
     auto addUnrealizedCast = [](OpBuilder &builder, Type type,
                                 ValueRange inputs, Location loc) {
       auto cast = builder.create<UnrealizedConversionCastOp>(loc, type, inputs);
-      return std::optional<Value>(cast.getResult(0));
+      return cast.getResult(0);
     };
     converter.addSourceMaterialization(addUnrealizedCast);
     converter.addTargetMaterialization(addUnrealizedCast);
