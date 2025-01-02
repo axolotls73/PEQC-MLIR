@@ -118,12 +118,17 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
     // check put and get ops
     auto putgetWellFormed = [&]
           (Operation* op, ValueRange offsets, ValueRange sizes, ValueRange strides, ValueRange indices) {
+      LLVM_DEBUG(
+        llvm::errs() << "CHANNEL PUT/GET:\nindices size: " << indices.size() << "\noffsets size: " << offsets.size()
+            << "\nsizes size: " << sizes.size() << "\nstrides size: " << strides.size() <<
+            "\nall ones: " << llvm::all_of(bsizes, [](int64_t n) {return n == 1;}) << "\n";
+      );
       if (sizes.size() != offsets.size() || offsets.size() != strides.size()) {
         op->emitError("expected air.channel.put/get to have equal numbers of offsets, sizes, and strides");
         return false;
       }
-      // sizes not all 1s -> same # of indices and sizes
-      if (!(!(indices.size() != sizes.size()) || llvm::all_of(bsizes, [](int64_t n) {return n == 1;}))) {
+      // bsizes not all 1s -> same # of indices and bsizes
+      if (!(llvm::all_of(bsizes, [](int64_t n) {return n == 1;}) || indices.size() == bsizes.size())) {
         op->emitError("expected air.channel.put/get to have indices equal to the number of channel sizes");
         return false;
       }
