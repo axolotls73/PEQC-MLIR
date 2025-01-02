@@ -73,7 +73,13 @@ def VerifConvertChannel: Pass<"verif-air-convert-channel", "::mlir::ModuleOp"> {
   let summary = "Convert air.channel to memref operations and async.execute";
   let description = [{
   }];
-  let dependentDialects = ["memref::MemRefDialect", "async::AsyncDialect"];
+  let dependentDialects = [
+    "memref::MemRefDialect",
+    "func::FuncDialect",
+    "scf::SCFDialect",
+    "async::AsyncDialect",
+    "verif::VerifDialect"
+  ];
 }
 
 #endif // VERIF_PASS

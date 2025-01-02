@@ -43,21 +43,14 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
   auto loc = chop.getLoc();
   auto builder = OpBuilder(chop.getOperation());
 
-  // auto functype = FunctionType::get(context, SmallVector<Type>{}, SmallVector<Type>{});
-  // auto funcop = builder.create<func::FuncOp>(loc, "beep", functype);
-  // mlir::SymbolTable::setSymbolVisibility(funcop, mlir::SymbolTable::Visibility::Private);
-  // auto funcblock = funcop.addEntryBlock();
-  // builder.setInsertionPointToStart(funcblock);
-  // builder.create<func::ReturnOp>(loc, funcop.getResultTypes(), SmallVector<Value>{});
-  // return WalkResult::advance();
-
   // find memref element type: needs to be the same for all uses
   Type elt_type = IntegerType::get(context, 64); // default type if no uses
   auto uses = chop.getSymbolUses(module);
-  for (auto use : uses.value()) {
-  ///FIXME: implement
+  if (uses.has_value())
+    for (auto use : uses.value()) {
+    ///FIXME: implement
 
-  }
+    }
 
   chop.emitRemark();
 
@@ -67,13 +60,14 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
   if (!bsizes_attr) bsizes_attr = chop.getSize();
   // only allow channel ops that have 2 sizes
   if (sizes_attr.size() != 2 || bsizes_attr.size() != 2) {
-    chop.emitError("Channels must have two sizes");
+    chop.emitError("expected air.channel to have two sizes");
     return WalkResult::interrupt();
   }
   auto sizes = SmallVector<int64_t, 2>();
   auto bsizes = SmallVector<int64_t, 2>();
   for (auto [size, bsize] :
         llvm::zip_equal(sizes_attr.getAsRange<IntegerAttr>(), bsizes_attr.getAsRange<IntegerAttr>())) {
+    ///FIXME: assert (bsize != size) -> (size == 1)
     sizes.push_back(size.getInt());
     bsizes.push_back(bsize.getInt());
   }
@@ -90,30 +84,90 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
   for (int64_t size : bsizes) {
+    llvm::errs() << "bsize: " << size << "\n";
     Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
     auto loop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1);
     loop_iters.push_back(loop.getInductionVar());
     builder.setInsertionPointToStart(loop.getBody());
   }
+  auto all1s = llvm::all_of(bsizes, [](int64_t n) {return n == 1;});
+  llvm::errs() << "all1s " << all1s << "\n";
   Value semarr_init_sem = builder.create<SemaphoreOp>(loc, cst_0).getResult();
   builder.create<memref::StoreOp>(loc, semarr_init_sem, channel_semarr, loop_iters);
   // doesn't work bc we don't know the memref size
   // Value bufarr_init_mr = builder.create<memref::AllocOp>(loc, dynamic_elt_type);
   // builder.create<memref::StoreOp>(loc, bufarr_init_mr, channel_bufarr, loop_iters);
 
-  // reset builder position
+  // reset builder position (TODO remove?)
   builder.setInsertionPoint(chop);
   chop.erase();
 
   if (!uses.has_value()) return WalkResult::advance();
 
   // handle channel put/get
+  ///TODO: reduce some code duplication here...
   for (auto use : uses.value()) {
     auto op = use.getUser();
+    op->emitRemark();
+    builder.setInsertionPoint(op);
+    Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
+    Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
 
-    if (mlir::dyn_cast<xilinx::air::ChannelPutOp>(op)) {
+    auto putgetWellFormed = [&]
+          (Operation* op, OperandRange offsets, OperandRange sizes, OperandRange strides, OperandRange indices) {
+      if (sizes.size() != offsets.size() || offsets.size() != strides.size()) {
+        op->emitError("expected air.channel.put/get to have equal numbers of offsets, sizes, and strides");
+        return false;
+      }
+      // sizes not all 1s -> same # of indices and sizes
+      if (!(!(indices.size() != sizes.size()) || llvm::all_of(bsizes, [](int64_t n) {return n == 1;}))) {
+        op->emitError("expected air.channel.put/get to have indices equal to the number of channel sizes");
+        return false;
+      }
+      return true;
+    };
+
+    if (auto putop = mlir::dyn_cast<xilinx::air::ChannelPutOp>(op)) {
+      if (!putgetWellFormed(putop.getOperation(), putop.getOffsets(), putop.getSizes(), putop.getStrides(), putop.getIndices()))
+        return WalkResult::interrupt();
+
+      // get memref to copy from, subview if necessary
+      Value srcmemref = putop.getMemref();
+      if (putop.getOffsets().size() > 0)
+        srcmemref = builder.create<memref::SubViewOp>(loc, putop.getMemref(),
+            putop.getOffsets(), putop.getSizes(), putop.getStrides());
+
+      auto default_indices = SmallVector<Value>{cst_0, cst_0};
+      ValueRange indices = putop.getIndices();
+      if (indices.size() == 0) indices = default_indices;
+      auto channel_indices = SmallVector<Value, 2>();
+      for (auto [size, bsize, index] : llvm::zip_equal(sizes, bsizes, indices)) {
+        if (size == bsize) {
+          channel_indices.push_back(index);
+          continue;
+        }
+        assert(0);
+        ///FIXME: implement loop creation for broadcast
+      }
+
+      auto loc = putop.getLoc();
+      // get and wait on semaphore
+      Value putsem = builder.create<memref::LoadOp>(loc, channel_semarr, channel_indices).getResult();
+      builder.create<SemaphoreWaitOp>(loc, putsem, cst_0);
+      // get and copy to buffer
+      Value putbuffer = builder.create<memref::LoadOp>(loc, channel_bufarr, channel_indices).getResult();
+      builder.create<memref::CopyOp>(loc, srcmemref, putbuffer);
+      // set semaphore: ready to read
+      builder.create<SemaphoreSetOp>(loc, putsem, cst_1);
+    }
+
+    else if (mlir::dyn_cast<xilinx::air::ChannelGetOp>(op)) {
 
     }
+
+    ///FIXME: pass channel memrefs as args to parent isolatedfromabove ops
+
+    op->erase();
   }
 
   return WalkResult::advance();
