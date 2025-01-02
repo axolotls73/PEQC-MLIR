@@ -12,6 +12,7 @@ module {
 // CHECK: scf.for [[I2:%.*]] = [[CST0]] to [[SIZE2]] step [[CST1]]
 // CHECK: [[SEMINIT:%.*]] = verif.semaphore init [[CST0]]
 // CHECK: memref.store [[SEMINIT]], [[SEM_ARR]][[[I1]], [[I2]]]
+// CHECK-NOT: air.channel
   air.channel @channel [1, 1]
 
 // CHECK: [[A:%.*]] = memref.alloc() : memref<1xi64>
@@ -24,6 +25,7 @@ module {
 // CHECK: [[PUTBUFFER:%.*]] = memref.load [[BUF_ARR]][[[PUT_CST0]], [[PUT_CST0]]]
 // CHECK: memref.copy [[A]], [[PUTBUFFER]]
 // CHECK: verif.semaphore.set [[PUTSEM]], [[PUT_CST1]]
+// CHECK-NOT: air.channel.put
   air.channel.put @channel[] (%a[] [] []) : (memref<1xi64>)
 
 // CHECK-DAG: [[GET_CST0:%.*]] = arith.constant 0 : index
@@ -33,6 +35,7 @@ module {
 // CHECK: [[GETBUFFER:%.*]] = memref.load [[BUF_ARR]][[[GET_CST0]], [[GET_CST0]]]
 // CHECK: memref.copy [[GETBUFFER]], [[A]]
 // CHECK: verif.semaphore.set [[GETSEM]], [[GET_CST0]]
+// CHECK-NOT: air.channel.get
   air.channel.get @channel[] (%a[] [] []) : (memref<1xi64>)
 }
 
