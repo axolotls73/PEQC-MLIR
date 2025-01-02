@@ -104,8 +104,8 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
 
   if (!uses.has_value()) return WalkResult::advance();
 
-  // handle channel put/get
-  ///TODO: reduce some code duplication here...
+
+  // handle channel put/get ops: look at all uses of channel
   for (auto use : uses.value()) {
     auto op = use.getUser();
     op->emitRemark();
@@ -113,8 +113,11 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
     Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
     Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
 
+    // sub-functions for put and get
+
+    // check put and get ops
     auto putgetWellFormed = [&]
-          (Operation* op, OperandRange offsets, OperandRange sizes, OperandRange strides, OperandRange indices) {
+          (Operation* op, ValueRange offsets, ValueRange sizes, ValueRange strides, ValueRange indices) {
       if (sizes.size() != offsets.size() || offsets.size() != strides.size()) {
         op->emitError("expected air.channel.put/get to have equal numbers of offsets, sizes, and strides");
         return false;
@@ -127,28 +130,40 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
       return true;
     };
 
-    if (auto putop = mlir::dyn_cast<xilinx::air::ChannelPutOp>(op)) {
-      if (!putgetWellFormed(putop.getOperation(), putop.getOffsets(), putop.getSizes(), putop.getStrides(), putop.getIndices()))
-        return WalkResult::interrupt();
+    // get memref to copy from, subview if necessary
+    auto getMemrefOrSubview = [&]
+          (Value og_memref, ValueRange offsets, ValueRange sizes, ValueRange strides) -> Value {
+      if (offsets.size() > 0)
+        return builder.create<memref::SubViewOp>(loc, og_memref, offsets, sizes, strides).getResult();
+      return og_memref;
+    };
 
-      // get memref to copy from, subview if necessary
-      Value srcmemref = putop.getMemref();
-      if (putop.getOffsets().size() > 0)
-        srcmemref = builder.create<memref::SubViewOp>(loc, putop.getMemref(),
-            putop.getOffsets(), putop.getSizes(), putop.getStrides());
-
+    auto getChannelIndices = [&] (ValueRange op_indices) -> SmallVector<Value>* {
       auto default_indices = SmallVector<Value>{cst_0, cst_0};
-      ValueRange indices = putop.getIndices();
-      if (indices.size() == 0) indices = default_indices;
-      auto channel_indices = SmallVector<Value, 2>();
-      for (auto [size, bsize, index] : llvm::zip_equal(sizes, bsizes, indices)) {
+      if (op_indices.size() == 0) op_indices = default_indices;
+      auto channel_indices = new SmallVector<Value>();
+      for (auto [size, bsize, index] : llvm::zip_equal(sizes, bsizes, op_indices)) {
         if (size == bsize) {
-          channel_indices.push_back(index);
+          channel_indices->push_back(index);
           continue;
         }
         assert(0);
         ///FIXME: implement loop creation for broadcast
       }
+      return channel_indices;
+    };
+
+
+    // handle put and get
+
+    if (auto putop = mlir::dyn_cast<xilinx::air::ChannelPutOp>(op)) {
+      if (!putgetWellFormed(putop.getOperation(), putop.getOffsets(), putop.getSizes(), putop.getStrides(), putop.getIndices()))
+        return WalkResult::interrupt();
+
+      Value srcmemref = getMemrefOrSubview(putop.getMemref(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
+
+      auto indices = getChannelIndices(putop.getIndices());
+      ValueRange channel_indices = *indices;
 
       auto loc = putop.getLoc();
       // get and wait on semaphore
@@ -161,8 +176,24 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
       builder.create<SemaphoreSetOp>(loc, putsem, cst_1);
     }
 
-    else if (mlir::dyn_cast<xilinx::air::ChannelGetOp>(op)) {
+    else if (auto getop = mlir::dyn_cast<xilinx::air::ChannelGetOp>(op)) {
+      if (!putgetWellFormed(getop.getOperation(), getop.getOffsets(), getop.getSizes(), getop.getStrides(), getop.getIndices()))
+        return WalkResult::interrupt();
 
+      Value dstmemref = getMemrefOrSubview(getop.getMemref(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
+
+      auto indices = getChannelIndices(getop.getIndices());
+      ValueRange channel_indices = *indices;
+
+      auto loc = getop.getLoc();
+      // get and wait on semaphore
+      Value putsem = builder.create<memref::LoadOp>(loc, channel_semarr, channel_indices).getResult();
+      builder.create<SemaphoreWaitOp>(loc, putsem, cst_1);
+      // get and copy from buffer
+      Value putbuffer = builder.create<memref::LoadOp>(loc, channel_bufarr, channel_indices).getResult();
+      builder.create<memref::CopyOp>(loc, putbuffer, dstmemref);
+      // set semaphore: ready to write
+      builder.create<SemaphoreSetOp>(loc, putsem, cst_0);
     }
 
     ///FIXME: pass channel memrefs as args to parent isolatedfromabove ops

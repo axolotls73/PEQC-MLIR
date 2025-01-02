@@ -21,11 +21,18 @@ module {
 // CHECK-DAG: [[PUT_CST1:%.*]] = arith.constant 1 : index
 // CHECK: [[PUTSEM:%.*]] = memref.load [[SEM_ARR]][[[PUT_CST0]], [[PUT_CST0]]]
 // CHECK: verif.semaphore.wait [[PUTSEM]], [[PUT_CST0]]
-// CHECK: [[BUFFER:%.*]] = memref.load [[BUF_ARR]][[[PUT_CST0]], [[PUT_CST0]]]
-// CHECK: memref.copy [[A]], [[BUFFER]]
+// CHECK: [[PUTBUFFER:%.*]] = memref.load [[BUF_ARR]][[[PUT_CST0]], [[PUT_CST0]]]
+// CHECK: memref.copy [[A]], [[PUTBUFFER]]
 // CHECK: verif.semaphore.set [[PUTSEM]], [[PUT_CST1]]
   air.channel.put @channel[] (%a[] [] []) : (memref<1xi64>)
 
+// CHECK-DAG: [[GET_CST0:%.*]] = arith.constant 0 : index
+// CHECK-DAG: [[GET_CST1:%.*]] = arith.constant 1 : index
+// CHECK: [[GETSEM:%.*]] = memref.load [[SEM_ARR]][[[GET_CST0]], [[GET_CST0]]]
+// CHECK: verif.semaphore.wait [[GETSEM]], [[GET_CST1]]
+// CHECK: [[GETBUFFER:%.*]] = memref.load [[BUF_ARR]][[[GET_CST0]], [[GET_CST0]]]
+// CHECK: memref.copy [[GETBUFFER]], [[A]]
+// CHECK: verif.semaphore.set [[GETSEM]], [[GET_CST0]]
   air.channel.get @channel[] (%a[] [] []) : (memref<1xi64>)
 }
 
