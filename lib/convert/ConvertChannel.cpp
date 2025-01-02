@@ -38,30 +38,87 @@ namespace mlir::verif {
 
 namespace {
 
-WalkResult processChannel(xilinx::air::ChannelOp chop, ModuleOp module) {
+WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, ModuleOp module) {
 
+  auto loc = chop.getLoc();
+  auto builder = OpBuilder(chop.getOperation());
+
+  // auto functype = FunctionType::get(context, SmallVector<Type>{}, SmallVector<Type>{});
+  // auto funcop = builder.create<func::FuncOp>(loc, "beep", functype);
+  // mlir::SymbolTable::setSymbolVisibility(funcop, mlir::SymbolTable::Visibility::Private);
+  // auto funcblock = funcop.addEntryBlock();
+  // builder.setInsertionPointToStart(funcblock);
+  // builder.create<func::ReturnOp>(loc, funcop.getResultTypes(), SmallVector<Value>{});
+  // return WalkResult::advance();
+
+  // find memref element type: needs to be the same for all uses
+  Type elt_type = IntegerType::get(context, 64); // default type if no uses
   auto uses = chop.getSymbolUses(module);
+  for (auto use : uses.value()) {
+  ///FIXME: implement
+
+  }
 
   chop.emitRemark();
 
-  auto size = chop.getSize();
-  for (Attribute s : size) {
-    s.print(llvm::errs());
+  // get channel sizes
+  ArrayAttr sizes_attr = chop.getSize();
+  auto bsizes_attr = chop.getBroadcastShape();
+  if (!bsizes_attr) bsizes_attr = chop.getSize();
+  // only allow channel ops that have 2 sizes
+  if (sizes_attr.size() != 2 || bsizes_attr.size() != 2) {
+    chop.emitError("Channels must have two sizes");
+    return WalkResult::interrupt();
   }
+  auto sizes = SmallVector<int64_t, 2>();
+  auto bsizes = SmallVector<int64_t, 2>();
+  for (auto [size, bsize] :
+        llvm::zip_equal(sizes_attr.getAsRange<IntegerAttr>(), bsizes_attr.getAsRange<IntegerAttr>())) {
+    sizes.push_back(size.getInt());
+    bsizes.push_back(bsize.getInt());
+  }
+
+  // create memrefs to store channel buffers and semaphores
+  auto dynamic_elt_type = MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type);
+  auto bufarr_type = MemRefType::get(bsizes, dynamic_elt_type);
+  auto semarr_type = MemRefType::get(bsizes, SemaphoreType::get(context));
+  Value channel_bufarr = builder.create<memref::AllocOp>(loc, bufarr_type).getResult();
+  Value channel_semarr = builder.create<memref::AllocOp>(loc, semarr_type).getResult();
+
+  // create nested for loops to initialize semaphores (and channel buffers?)
+  auto loop_iters = SmallVector<Value, 2>();
+  Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
+  Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
+  for (int64_t size : bsizes) {
+    Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
+    auto loop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1);
+    loop_iters.push_back(loop.getInductionVar());
+    builder.setInsertionPointToStart(loop.getBody());
+  }
+  Value semarr_init_sem = builder.create<SemaphoreOp>(loc, cst_0).getResult();
+  builder.create<memref::StoreOp>(loc, semarr_init_sem, channel_semarr, loop_iters);
+  // doesn't work bc we don't know the memref size
+  // Value bufarr_init_mr = builder.create<memref::AllocOp>(loc, dynamic_elt_type);
+  // builder.create<memref::StoreOp>(loc, bufarr_init_mr, channel_bufarr, loop_iters);
+
+  // reset builder position
+  builder.setInsertionPoint(chop);
+  chop.erase();
 
   if (!uses.has_value()) return WalkResult::advance();
 
-  chop.erase();
-
-
+  // handle channel put/get
   for (auto use : uses.value()) {
     auto op = use.getUser();
 
-    op->erase();
+    if (mlir::dyn_cast<xilinx::air::ChannelPutOp>(op)) {
+
+    }
   }
 
   return WalkResult::advance();
 }
+
 
 class VerifConvertChannel
     : public impl::VerifConvertChannelBase<VerifConvertChannel> {
@@ -74,13 +131,15 @@ public:
 
     // process channels
     WalkResult res = module.walk([&] (xilinx::air::ChannelOp chop) {
-      return processChannel(chop, module);
+      return processChannel(context, chop, module);
     });
 
     if (res.wasInterrupted())
       return signalPassFailure();
 
-    return signalPassFailure();
+    ///FIXME: check for channel put and get, fail if present (not checked by air verifier)
+
+    // return signalPassFailure();
   }
 };
 
