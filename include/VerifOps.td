@@ -30,12 +30,16 @@ def Verif_SemaphoreOp : Verif_Op<"semaphore", [
 Declares a new semaphore.
     }];
 
+    let arguments = (ins
+        Index:$init
+    );
+
     let results = (outs
         Verif_SemaphoreType:$sem
     );
 
     let assemblyFormat = [{
-        attr-dict
+        attr-dict `init` $init
     }];
 }
 
