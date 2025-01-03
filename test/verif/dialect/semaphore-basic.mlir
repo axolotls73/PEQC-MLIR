@@ -1,9 +1,7 @@
 // RUN: split-file %s %t
 
 // RUN: verif-opt %t/set.mlir
-
 // RUN: verif-opt %t/wait.mlir
-
 // RUN: verif-opt %t/memref.mlir
 
 //--- set.mlir

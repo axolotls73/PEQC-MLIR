@@ -92,6 +92,7 @@ std::string PastTranslator::getTypeName(const Type& t) {
     llvm::errs() << "gettypename: " << t << "\n";
   );
 
+  if (mlir::dyn_cast<verif::SemaphoreType>(t)) return "int";
   if (t.isIndex()) return "int";
 
   else if (t.isInteger()) {
@@ -1085,17 +1086,24 @@ s_past_node_t* PastTranslator::translate_unsupported(Operation* op) {
 
 s_past_node_t* PastTranslator::translate(verif::SemaphoreOp op) {
   std::vector<s_past_node_t*> nodes;
-
-  // nodes.push_back(getPastNewSemaphore(getVarSymbol(op.getResult(), "execute_token")));
-
+  nodes.push_back(past_node_statement_create(
+    getVarDecl(op.getSem(), "verif_semaphore")));
+  nodes.push_back(getPastNewSemaphore(getVarSymbol(op.getSem())));
+  return nodeChain(nodes);
 }
 
 s_past_node_t* PastTranslator::translate(verif::SemaphoreSetOp op) {
-
+  std::vector<s_past_node_t*> nodes;
+  nodes.push_back(getPastSetSemaphore
+      (getVarSymbol(op.getSem(), "verif_semaphore"), getVarSymbol(op.getVal())));
+  return nodeChain(nodes);
 }
 
 s_past_node_t* PastTranslator::translate(verif::SemaphoreWaitOp op) {
-
+  std::vector<s_past_node_t*> nodes;
+  nodes.push_back(getPastWaitSemaphore
+      (getVarSymbol(op.getSem(), "verif_semaphore"), getVarSymbol(op.getVal())));
+  return nodeChain(nodes);
 }
 
 s_past_node_t* PastTranslator::translate(Operation* op) {
