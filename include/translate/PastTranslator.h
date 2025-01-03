@@ -105,9 +105,9 @@ class PastTranslator {
   // macro call: COPY_[N]D(src, 0, [size of dim 1], ... 0, [size of dim N], dst, 0, [size of dim 1], ... 0, [size of dim N])
   s_past_node_t* getArrayCopy(const MemRefType& type, s_symbol_t* src, s_symbol_t* dst);
 
-  s_past_node_t* getPastWaitFinished(s_symbol_t* semaphore);
-  s_past_node_t* getPastWaitFinished(s_symbol_t* semaphore_arr, s_symbol_t* size);
-  s_past_node_t* getPastSetFinished(s_symbol_t* semaphore);
+  s_past_node_t* getPastWaitSemaphore(s_symbol_t* semaphore, s_symbol_t* val);
+  s_past_node_t* getPastWaitSemaphoreAll(s_symbol_t* semaphore_arr, s_symbol_t* size, s_symbol_t* val);
+  s_past_node_t* getPastSetSemaphore(s_symbol_t* semaphore, s_symbol_t* val);
   s_past_node_t* getPastNewSemaphore(s_symbol_t* semaphoreName);
 
 

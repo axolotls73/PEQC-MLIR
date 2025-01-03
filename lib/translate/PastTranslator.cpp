@@ -335,10 +335,10 @@ s_past_node_t* PastTranslator::getArrayCopy(const MemRefType& type, s_symbol_t* 
       nodeChain(args)));
 }
 
-s_past_node_t* PastTranslator::getPastWaitFinished(s_symbol_t* semaphore) {
+s_past_node_t* PastTranslator::getPastWaitSemaphore(s_symbol_t* semaphore, s_symbol_t* val) {
   std::vector<s_past_node_t*> args = {
     past_node_varref_create(semaphore),
-    past_node_varref_create(getSymbol("PAST_TASK_FINISHED"))
+    past_node_varref_create(val)
   };
   return past_node_statement_create(
     past_node_funcall_create(
@@ -346,11 +346,12 @@ s_past_node_t* PastTranslator::getPastWaitFinished(s_symbol_t* semaphore) {
       nodeChain(args)));
 }
 
-s_past_node_t* PastTranslator::getPastWaitFinished(s_symbol_t* semaphore_arr, s_symbol_t* size) {
+s_past_node_t* PastTranslator::getPastWaitSemaphoreAll
+      (s_symbol_t* semaphore_arr, s_symbol_t* size, s_symbol_t* val) {
   std::vector<s_past_node_t*> args = {
     past_node_varref_create(semaphore_arr),
     past_node_varref_create(size),
-    past_node_varref_create(getSymbol("PAST_TASK_FINISHED"))
+    past_node_varref_create(val)
   };
   return past_node_statement_create(
     past_node_funcall_create(
@@ -358,10 +359,10 @@ s_past_node_t* PastTranslator::getPastWaitFinished(s_symbol_t* semaphore_arr, s_
       nodeChain(args)));
 }
 
-s_past_node_t* PastTranslator::getPastSetFinished(s_symbol_t* semaphore) {
+s_past_node_t* PastTranslator::getPastSetSemaphore(s_symbol_t* semaphore, s_symbol_t* val) {
   std::vector<s_past_node_t*> args = {
     past_node_varref_create(semaphore),
-    past_node_varref_create(getSymbol("PAST_TASK_FINISHED"))
+    past_node_varref_create(val)
   };
   return past_node_statement_create(
     past_node_funcall_create(
@@ -936,9 +937,10 @@ s_past_node_t* PastTranslator::translate(async::AddToGroupOp op) {
 
 s_past_node_t* PastTranslator::translate(async::AwaitAllOp op) {
   s_symbol_t* groupIndex = asyncGroupIndex.find(op.getOperand())->second;
-  return getPastWaitFinished(
+  return getPastWaitSemaphoreAll(
       getVarSymbol(op.getOperand()),
-      groupIndex);
+      groupIndex,
+      getSymbol("PAST_TASK_FINISHED"));
 }
 
 s_past_node_t* PastTranslator::translate(async::ExecuteOp op) {
@@ -948,7 +950,7 @@ s_past_node_t* PastTranslator::translate(async::ExecuteOp op) {
   // wait on all dependencies
   for (auto dep : op.getDependencies()) {
     body.push_back(
-      getPastWaitFinished(getVarSymbol(dep)));
+      getPastWaitSemaphore(getVarSymbol(dep), getSymbol("PAST_TASK_FINISHED")));
   }
 
   // get semaphore value of token
@@ -956,7 +958,7 @@ s_past_node_t* PastTranslator::translate(async::ExecuteOp op) {
 
   // translate body, set semaphore to finished after
   body.push_back(translate(op.getBodyRegion()));
-  body.push_back(getPastSetFinished(getVarSymbol(op.getToken())));
+  body.push_back(getPastSetSemaphore(getVarSymbol(op.getToken()), getSymbol("PAST_TASK_FINISHED")));
 
   nodes.push_back(
     past_node_pragma_create(
