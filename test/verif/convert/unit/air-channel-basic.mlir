@@ -2,7 +2,7 @@
 
 // CHECK: module
 module {
-// CHECK-DAG: [[BUF_ARR:%.*]] = memref.alloc() : memref<1x1xmemref<?xi64>>
+// CHECK-DAG: [[BUF_ARR:%.*]] = memref.alloc() : memref<1x1xmemref<?xi32>>
 // CHECK-DAG: [[SEM_ARR:%.*]] = memref.alloc() : memref<1x1x!verif.semaphore>
 // CHECK-DAG: [[CST0:%.*]] = arith.constant 0 : index
 // CHECK-DAG: [[CST1:%.*]] = arith.constant 1 : index
@@ -15,8 +15,8 @@ module {
 // CHECK-NOT: air.channel
   air.channel @channel [1, 1]
 
-// CHECK: [[A:%.*]] = memref.alloc() : memref<1xi64>
-  %a = memref.alloc() : memref<1xi64>
+// CHECK: [[A:%.*]] = memref.alloc() : memref<1xi32>
+  %a = memref.alloc() : memref<1xi32>
 
 // CHECK-DAG: [[PUT_CST0:%.*]] = arith.constant 0 : index
 // CHECK-DAG: [[PUT_CST1:%.*]] = arith.constant 1 : index
@@ -26,7 +26,7 @@ module {
 // CHECK: memref.copy [[A]], [[PUTBUFFER]]
 // CHECK: verif.semaphore.set [[PUTSEM]], [[PUT_CST1]]
 // CHECK-NOT: air.channel.put
-  air.channel.put @channel[] (%a[] [] []) : (memref<1xi64>)
+  air.channel.put @channel[] (%a[] [] []) : (memref<1xi32>)
 
 // CHECK-DAG: [[GET_CST0:%.*]] = arith.constant 0 : index
 // CHECK-DAG: [[GET_CST1:%.*]] = arith.constant 1 : index
@@ -36,6 +36,6 @@ module {
 // CHECK: memref.copy [[GETBUFFER]], [[A]]
 // CHECK: verif.semaphore.set [[GETSEM]], [[GET_CST0]]
 // CHECK-NOT: air.channel.get
-  air.channel.get @channel[] (%a[] [] []) : (memref<1xi64>)
+  air.channel.get @channel[] (%a[] [] []) : (memref<1xi32>)
 }
 

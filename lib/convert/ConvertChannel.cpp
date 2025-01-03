@@ -46,13 +46,32 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
   // find memref element type: needs to be the same for all uses
   Type elt_type = IntegerType::get(context, 64); // default type if no uses
   auto uses = chop.getSymbolUses(module);
-  if (uses.has_value())
+  if (uses.has_value()) {
+    Type* current_type = nullptr;
     for (auto use : uses.value()) {
-    ///FIXME: implement
-
+      auto useop = use.getUser();
+      MemRefType usemr;
+      if (auto putop = mlir::dyn_cast<xilinx::air::ChannelPutOp>(useop)) {
+        usemr = mlir::dyn_cast<MemRefType>(putop.getMemref().getType());
+      }
+      else if (auto getop = mlir::dyn_cast<xilinx::air::ChannelGetOp>(useop)) {
+        usemr = mlir::dyn_cast<MemRefType>(getop.getMemref().getType());
+      }
+      Type usetype = usemr.getElementType();
+      if (!current_type) {
+        current_type = &usetype;
+        elt_type = usetype;
+      }
+      if (usetype != *current_type) {
+        chop.emitError("expected all uses to have the same memref element type");
+        return WalkResult::interrupt();
+      }
     }
+  }
 
-  chop.emitRemark();
+  LLVM_DEBUG(
+    chop.emitRemark();
+  );
 
   // get channel sizes
   ArrayAttr sizes_attr = chop.getSize();
@@ -84,14 +103,12 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
   for (int64_t size : bsizes) {
-    llvm::errs() << "bsize: " << size << "\n";
     Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
     auto loop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1);
     loop_iters.push_back(loop.getInductionVar());
     builder.setInsertionPointToStart(loop.getBody());
   }
   auto all1s = llvm::all_of(bsizes, [](int64_t n) {return n == 1;});
-  llvm::errs() << "all1s " << all1s << "\n";
   Value semarr_init_sem = builder.create<SemaphoreOp>(loc, cst_0).getResult();
   builder.create<memref::StoreOp>(loc, semarr_init_sem, channel_semarr, loop_iters);
   // doesn't work bc we don't know the memref size
@@ -234,8 +251,6 @@ public:
       return signalPassFailure();
 
     ///FIXME: check for channel put and get, fail if present (not checked by air verifier)
-
-    // return signalPassFailure();
   }
 };
 
