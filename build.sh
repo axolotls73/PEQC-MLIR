@@ -1,7 +1,7 @@
 #!/bin/bash
 
 AIR_REPO=/opt/mlir-air
-PAST_DIR=/root/data-host-share/pocc-devel/ir/past
+PAST_DIR=/data-host-share/pocc-devel/ir/past
 LLVM_REPO=$AIR_REPO/llvm
 
 # rm -r build CMakeFiles
