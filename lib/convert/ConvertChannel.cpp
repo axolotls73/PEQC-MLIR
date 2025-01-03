@@ -130,6 +130,38 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
     Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
     Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
 
+    Value bufarr = channel_bufarr;
+    Value semarr = channel_semarr;
+
+    // pass channel memrefs as args to parent isolatedfromabove ops, top down
+    auto getChannelArgs = [&] (Operation* op) {
+      auto _getargs = [&] (Operation* op, const auto& _getargs) {
+        if (!op) return;
+        _getargs(op->getParentOp(), _getargs);
+
+        if (auto launchop = mlir::dyn_cast<xilinx::air::LaunchOp>(op)) {
+          launchop.getLaunchOperandsMutable().append({bufarr, semarr});
+          auto  &launchblock = launchop.getBody().getBlocks().front();
+          bufarr = launchblock.addArgument(bufarr.getType(), loc);
+          semarr = launchblock.addArgument(semarr.getType(), loc);
+        }
+        if (auto segmentop = mlir::dyn_cast<xilinx::air::SegmentOp>(op)) {
+          segmentop.getSegmentOperandsMutable().append({bufarr, semarr});
+          auto  &segmentblock = segmentop.getBody().getBlocks().front();
+          bufarr = segmentblock.addArgument(bufarr.getType(), loc);
+          semarr = segmentblock.addArgument(semarr.getType(), loc);
+        }
+        if (auto herdop = mlir::dyn_cast<xilinx::air::HerdOp>(op)) {
+          herdop.getHerdOperandsMutable().append({bufarr, semarr});
+          auto  &herdblock = herdop.getBody().getBlocks().front();
+          bufarr = herdblock.addArgument(bufarr.getType(), loc);
+          semarr = herdblock.addArgument(semarr.getType(), loc);
+        }
+      };
+      _getargs(op, _getargs);
+    };
+    getChannelArgs(op);
+
     // sub-functions for put and get
 
     // check put and get ops
@@ -193,10 +225,10 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
       ValueRange channel_indices = *indices;
 
       // get and wait on semaphore
-      Value putsem = builder.create<memref::LoadOp>(loc, channel_semarr, channel_indices).getResult();
+      Value putsem = builder.create<memref::LoadOp>(loc, semarr, channel_indices).getResult();
       builder.create<SemaphoreWaitOp>(loc, putsem, cst_0);
       // get and copy to buffer
-      Value putbuffer = builder.create<memref::LoadOp>(loc, channel_bufarr, channel_indices).getResult();
+      Value putbuffer = builder.create<memref::LoadOp>(loc, bufarr, channel_indices).getResult();
       builder.create<memref::CopyOp>(loc, srcmemref, putbuffer);
       // set semaphore: ready to read
       builder.create<SemaphoreSetOp>(loc, putsem, cst_1);
@@ -212,16 +244,14 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
       ValueRange channel_indices = *indices;
 
       // get and wait on semaphore
-      Value putsem = builder.create<memref::LoadOp>(loc, channel_semarr, channel_indices).getResult();
+      Value putsem = builder.create<memref::LoadOp>(loc, semarr, channel_indices).getResult();
       builder.create<SemaphoreWaitOp>(loc, putsem, cst_1);
       // get and copy from buffer
-      Value putbuffer = builder.create<memref::LoadOp>(loc, channel_bufarr, channel_indices).getResult();
+      Value putbuffer = builder.create<memref::LoadOp>(loc, bufarr, channel_indices).getResult();
       builder.create<memref::CopyOp>(loc, putbuffer, dstmemref);
       // set semaphore: ready to write
       builder.create<SemaphoreSetOp>(loc, putsem, cst_0);
     }
-
-    ///FIXME: pass channel memrefs as args to parent isolatedfromabove ops
 
     op->erase();
     LLVM_DEBUG(
