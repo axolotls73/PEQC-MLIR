@@ -108,7 +108,7 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
   // handle channel put/get ops: look at all uses of channel
   for (auto use : uses.value()) {
     auto op = use.getUser();
-    op->emitRemark();
+    auto loc = op->getLoc();
     builder.setInsertionPoint(op);
     Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
     Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
@@ -143,17 +143,22 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
       return og_memref;
     };
 
-    auto getChannelIndices = [&] (ValueRange op_indices) -> SmallVector<Value>* {
+    // gets the indices to load channel buffers from - if broadcast is true, this also
+    // sets buffer's insertion point to inside a for loop if necessary
+    auto getChannelIndices = [&]
+          (ValueRange op_indices, bool broadcast = false) -> SmallVector<Value>* {
       auto default_indices = SmallVector<Value>{cst_0, cst_0};
       if (op_indices.size() == 0) op_indices = default_indices;
       auto channel_indices = new SmallVector<Value>();
       for (auto [size, bsize, index] : llvm::zip_equal(sizes, bsizes, op_indices)) {
-        if (size == bsize) {
+        if (size == bsize || !broadcast) {
           channel_indices->push_back(index);
           continue;
         }
-        assert(0);
-        ///FIXME: implement loop creation for broadcast
+        Value bsize_val = builder.create<arith::ConstantIndexOp>(loc, bsize);
+        auto loop = builder.create<scf::ForOp>(loc, cst_0, bsize_val, cst_1);
+        builder.setInsertionPointToStart(loop.getBody());
+        channel_indices->push_back(loop.getInductionVar());
       }
       return channel_indices;
     };
@@ -167,10 +172,9 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
 
       Value srcmemref = getMemrefOrSubview(putop.getMemref(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
 
-      auto indices = getChannelIndices(putop.getIndices());
+      auto indices = getChannelIndices(putop.getIndices(), true);
       ValueRange channel_indices = *indices;
 
-      auto loc = putop.getLoc();
       // get and wait on semaphore
       Value putsem = builder.create<memref::LoadOp>(loc, channel_semarr, channel_indices).getResult();
       builder.create<SemaphoreWaitOp>(loc, putsem, cst_0);
@@ -190,7 +194,6 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
       auto indices = getChannelIndices(getop.getIndices());
       ValueRange channel_indices = *indices;
 
-      auto loc = getop.getLoc();
       // get and wait on semaphore
       Value putsem = builder.create<memref::LoadOp>(loc, channel_semarr, channel_indices).getResult();
       builder.create<SemaphoreWaitOp>(loc, putsem, cst_1);
@@ -204,6 +207,9 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
     ///FIXME: pass channel memrefs as args to parent isolatedfromabove ops
 
     op->erase();
+    LLVM_DEBUG(
+      module.emitRemark();
+    );
   }
 
   return WalkResult::advance();
