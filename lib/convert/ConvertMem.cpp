@@ -78,7 +78,9 @@ public:
     // get subview if offsets etc are present
     auto createSubview =
         [&](TypedValue<MemRefType> val, ValueRange offsets, ValueRange sizes, ValueRange strides) {
-      llvm::errs() << offsets.size() << " " << sizes.size() << " " << strides.size() << "\n";
+      LLVM_DEBUG(
+        llvm::errs() << "VerifDMAPattern: getSubview " << offsets.size() << " " << sizes.size() << " " << strides.size() << "\n";
+      );
       if (offsets.empty() && sizes.empty() && strides.empty())
         return val;
       else assert(!offsets.empty() && !sizes.empty() && !strides.empty());

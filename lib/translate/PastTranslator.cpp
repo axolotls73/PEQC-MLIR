@@ -265,7 +265,9 @@ s_past_node_t* PastTranslator::getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
       std::vector<s_past_node_t*> src_offsets, std::vector<s_past_node_t*> dst_offsets,
       std::vector<s_past_node_t*> src_strides, std::vector<s_past_node_t*> dst_strides,
       std::vector<s_past_node_t*> sizes) {
-  llvm::errs() << src_offsets.size() << " " << src_strides.size() << " " << sizes.size() << "\n";
+  LLVM_DEBUG(
+    llvm::errs() << "getArrayCopy: " << src_offsets.size() << " " << src_strides.size() << " " << sizes.size() << "\n";
+  );
   assert(src_offsets.size() == dst_offsets.size() &&
           src_offsets.size() == sizes.size() &&
           src_offsets.size() > 0);
@@ -1023,8 +1025,6 @@ s_past_node_t* PastTranslator::translate(Region& region) {
         return false;
       };
       if (valDefinedInBlock(block, val)) {
-        llvm::errs() << b.first << " " << b.second << "\n";
-        // assert(0);
         stmts.push_back(b.second);
         toremove.push_back(val);
       }
