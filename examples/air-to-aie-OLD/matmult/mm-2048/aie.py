@@ -42,9 +42,9 @@ with air.ir.Context() as ctx, Location.unknown():
             %fill_1 = transform.air.fuse_into_containing_op %fill into %loops#1
             transform.air.linalg_promote %fill_1 {"operands_to_promote"=[1], "memory_space"="L2"}
             transform.air.linalg_promote %matmul_1 {"operands_to_promote"=[2], "memory_space"="L2"}
-            %matmul_2, %reduction_loop_1 = transform.air.linalg_tile %matmul_1 [0, 0, 256]
-            transform.air.linalg_promote %matmul_2 {"operands_to_promote"=[0,1], "memory_space"="L2"}
-            %matmul_3, %loops_2:2 = transform.air.linalg_tile %matmul_2 [32, 32, 0]
+            //%matmul_2, %reduction_loop_1 = transform.air.linalg_tile %matmul_1 [0, 0, 256]
+            //transform.air.linalg_promote %matmul_2 {"operands_to_promote"=[0,1], "memory_space"="L2"}
+            //%matmul_3, %loops_2:2 = transform.air.linalg_tile %matmul_2 [32, 32, 0]
             %fill_2 = transform.air.fuse_into_containing_op %fill_1 into %loops_2#1
             transform.air.linalg_promote %fill_2 {"operands_to_promote"=[1], "memory_space"="L1"}
             transform.air.linalg_promote %matmul_3 {"operands_to_promote"=[2], "memory_space"="L1"}
