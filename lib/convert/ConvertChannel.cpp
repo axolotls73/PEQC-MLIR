@@ -166,19 +166,14 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
 
     // check put and get ops
     auto putgetWellFormed = [&]
-          (Operation* op, ValueRange offsets, ValueRange sizes, ValueRange strides, ValueRange indices) {
+          (Operation* op, bool isput, ValueRange opoffsets, ValueRange opsizes, ValueRange opstrides, ValueRange opindices) {
       LLVM_DEBUG(
-        llvm::errs() << "CHANNEL PUT/GET:\nindices size: " << indices.size() << "\noffsets size: " << offsets.size()
-            << "\nsizes size: " << sizes.size() << "\nstrides size: " << strides.size() <<
+        llvm::errs() << "CHANNEL PUT/GET:\nindices size: " << opindices.size() << "\noffsets size: " << opoffsets.size()
+            << "\nsizes size: " << opsizes.size() << "\nstrides size: " << opstrides.size() <<
             "\nall ones: " << llvm::all_of(bsizes, [](int64_t n) {return n == 1;}) << "\n";
       );
-      if (sizes.size() != offsets.size() || offsets.size() != strides.size()) {
+      if (opsizes.size() != opoffsets.size() || opoffsets.size() != opstrides.size()) {
         op->emitError("expected air.channel.put/get to have equal numbers of offsets, sizes, and strides");
-        return false;
-      }
-      // bsizes not all 1s -> same # of indices and bsizes
-      if (!(llvm::all_of(bsizes, [](int64_t n) {return n == 1;}) || indices.size() == bsizes.size())) {
-        op->emitError("expected air.channel.put/get to have indices equal to the number of channel sizes");
         return false;
       }
       return true;
@@ -216,8 +211,13 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
     // handle put and get
 
     if (auto putop = mlir::dyn_cast<xilinx::air::ChannelPutOp>(op)) {
-      if (!putgetWellFormed(putop.getOperation(), putop.getOffsets(), putop.getSizes(), putop.getStrides(), putop.getIndices()))
+      if (!putgetWellFormed(putop.getOperation(), true, putop.getOffsets(), putop.getSizes(), putop.getStrides(), putop.getIndices()))
         return WalkResult::interrupt();
+      // for put: sizes not all 1s -> same # of indices and sizes
+      if (!(llvm::all_of(sizes, [](int64_t n) {return n == 1;}) || putop.getIndices().size() == sizes.size())) {
+        op->emitError("expected air.channel.put to have indices equal to the number of channel sizes");
+        return WalkResult::interrupt();
+      }
 
       Value srcmemref = getMemrefOrSubview(putop.getMemref(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
 
@@ -235,8 +235,13 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
     }
 
     else if (auto getop = mlir::dyn_cast<xilinx::air::ChannelGetOp>(op)) {
-      if (!putgetWellFormed(getop.getOperation(), getop.getOffsets(), getop.getSizes(), getop.getStrides(), getop.getIndices()))
+      if (!putgetWellFormed(getop.getOperation(), false, getop.getOffsets(), getop.getSizes(), getop.getStrides(), getop.getIndices()))
         return WalkResult::interrupt();
+      // // for get: bsizes not all 1s -> same # of indices and bsizes
+      if (!(llvm::all_of(bsizes, [](int64_t n) {return n == 1;}) || getop.getIndices().size() == bsizes.size())) {
+        op->emitError("expected air.channel.get to have indices equal to the number of channel broadcast sizes");
+        return WalkResult::interrupt();
+      }
 
       Value dstmemref = getMemrefOrSubview(getop.getMemref(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
 

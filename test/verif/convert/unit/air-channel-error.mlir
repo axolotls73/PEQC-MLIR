@@ -4,7 +4,6 @@
 // RUN: not verif-opt --verif-air-convert-channel %t/size-not2-2.mlir
 // RUN: not verif-opt --verif-air-convert-channel %t/type-mismatch.mlir
 // RUN: not verif-opt --verif-air-convert-channel %t/indices-mismatch-put.mlir
-// RUN: not verif-opt --verif-air-convert-channel %t/indices-mismatch-put-2.mlir
 // RUN: not verif-opt --verif-air-convert-channel %t/indices-mismatch-get.mlir
 // RUN: not verif-opt --verif-air-convert-channel %t/indices-mismatch-get-2.mlir
 
@@ -56,15 +55,6 @@ module {
 
 module {
   air.channel @channel_7 [1, 2]
-
-  %a = memref.alloc() : memref<1xi64>
-  air.channel.put @channel_7[] (%a[] [] []) : (memref<1xi64>)
-}
-
-//--- indices-mismatch-put-2.mlir
-
-module {
-  air.channel @channel_7 [1, 1] {broadcast_shape = [1, 2]}
 
   %a = memref.alloc() : memref<1xi64>
   air.channel.put @channel_7[] (%a[] [] []) : (memref<1xi64>)
