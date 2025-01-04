@@ -22,6 +22,7 @@
 #include "VerifDialect.h"
 #include "VerifPasses.h"
 #include "air/Dialect/AIR/AIRDialect.h"
+#include "aie/Dialect/AIE/IR/AIEDialect.h"
 
 int main(int argc, char **argv) {
   // mlir::registerAllPasses();
@@ -42,6 +43,7 @@ int main(int argc, char **argv) {
     >();
 
   registry.insert<xilinx::air::airDialect>();
+  registry.insert<xilinx::AIE::AIEDialect>();
   registry.insert<mlir::LLVM::LLVMDialect>();
 
   // Add the following to include *all* MLIR Core dialects, or selectively
