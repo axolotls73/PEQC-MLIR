@@ -109,7 +109,8 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
     builder.setInsertionPointToStart(loop.getBody());
   }
   auto all1s = llvm::all_of(bsizes, [](int64_t n) {return n == 1;});
-  Value semarr_init_sem = builder.create<SemaphoreOp>(loc, cst_0).getResult();
+  Value semarr_init_sem = builder.create<SemaphoreOp>(loc).getResult();
+  builder.create<SemaphoreSetOp>(loc, semarr_init_sem, cst_0);
   builder.create<memref::StoreOp>(loc, semarr_init_sem, channel_semarr, loop_iters);
   // doesn't work bc we don't know the memref size
   // Value bufarr_init_mr = builder.create<memref::AllocOp>(loc, dynamic_elt_type);

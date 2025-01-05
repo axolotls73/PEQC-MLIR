@@ -6,7 +6,7 @@ module {
 // CHECK: PAST_NEW_SEMAPHORE([[SEM:.*]])
   %0 = arith.constant 0 : index
   %1 = arith.constant 1 : index
-  %sem = verif.semaphore init %0
+  %sem = verif.semaphore
 
 // CHECK: PAST_WAIT_SEMAPHORE([[SEM]], [[C0]])
   verif.semaphore.wait %sem, %0
