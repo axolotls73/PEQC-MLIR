@@ -11,8 +11,8 @@ module {
     %c1 = arith.constant 1 : index
     %c2 = arith.constant 2 : index
     %c0 = arith.constant 0 : index
-    %alloca = memref.alloca() : memref<f64>
     %0 = llvm.mlir.undef : f64
+    %alloca = memref.alloca() : memref<f64>
     memref.store %0, %alloca[] : memref<f64>
     scf.for %arg5 = %c0 to %c2 step %c1 {
       %1 = arith.muli %arg5, %c32 : index

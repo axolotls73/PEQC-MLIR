@@ -6,31 +6,31 @@ void kernel_durbin(int func_arg_0, double* func_arg_1, double* func_arg_2)
   int arith_const_5 = 40; 
   int arith_const_6 = 1; 
   int arith_const_7 = 0; 
-  double arith_const_8 = 0.000000; 
-  double arith_const_9 = 1.000000; 
-  double* memref_alloca_10; 
-  double _11; 
-  memref_alloca_10[0] = _11; 
+  double _8; 
+  double arith_const_9 = 0.000000; 
+  double arith_const_10 = 1.000000; 
+  double* memref_alloca_11; 
+  memref_alloca_11[0] = _8; 
   double* memref_alloca_12; 
-  memref_alloca_12[0] = _11; 
+  memref_alloca_12[0] = _8; 
   double* memref_alloca_13; 
-  memref_alloca_13[0] = _11; 
+  memref_alloca_13[0] = _8; 
   double* memref_alloca_14; 
   double memref_load_15 = func_arg_1[arith_const_7]; 
   double arith_negf_16 = -(memref_load_15); 
   func_arg_2[arith_const_7] = arith_negf_16; 
-  memref_alloca_12[0] = arith_const_9; 
+  memref_alloca_12[0] = arith_const_10; 
   double memref_load_17 = func_arg_1[arith_const_7]; 
   double arith_negf_18 = -(memref_load_17); 
   memref_alloca_13[0] = arith_negf_18; 
   for (int for_iter_19 = arith_const_6; for_iter_19 < arith_const_5; for_iter_19 += arith_const_6) {
     double memref_load_20 = memref_alloca_13[0]; 
     double arith_mulf_21 = (memref_load_20 * memref_load_20); 
-    double arith_subf_22 = (arith_const_9 - arith_mulf_21); 
+    double arith_subf_22 = (arith_const_10 - arith_mulf_21); 
     double memref_load_23 = memref_alloca_12[0]; 
     double arith_mulf_24 = (arith_subf_22 * memref_load_23); 
     memref_alloca_12[0] = arith_mulf_24; 
-    memref_alloca_10[0] = arith_const_8; 
+    memref_alloca_11[0] = arith_const_9; 
     for (int for_iter_25 = arith_const_7; for_iter_25 < for_iter_19; for_iter_25 += arith_const_6) {
       int arith_muli_26 = (for_iter_25 * arith_const_4); 
       int arith_addi_27 = (for_iter_19 + arith_muli_26); 
@@ -38,12 +38,12 @@ void kernel_durbin(int func_arg_0, double* func_arg_1, double* func_arg_2)
       double memref_load_29 = func_arg_1[arith_addi_28]; 
       double memref_load_30 = func_arg_2[for_iter_25]; 
       double arith_mulf_31 = (memref_load_29 * memref_load_30); 
-      double memref_load_32 = memref_alloca_10[0]; 
+      double memref_load_32 = memref_alloca_11[0]; 
       double arith_addf_33 = (memref_load_32 + arith_mulf_31); 
-      memref_alloca_10[0] = arith_addf_33; 
+      memref_alloca_11[0] = arith_addf_33; 
     }
     double memref_load_34 = func_arg_1[for_iter_19]; 
-    double memref_load_35 = memref_alloca_10[0]; 
+    double memref_load_35 = memref_alloca_11[0]; 
     double arith_addf_36 = (memref_load_34 + memref_load_35); 
     double arith_negf_37 = -(arith_addf_36); 
     double arith_divf_38 = (arith_negf_37 / arith_mulf_24); 

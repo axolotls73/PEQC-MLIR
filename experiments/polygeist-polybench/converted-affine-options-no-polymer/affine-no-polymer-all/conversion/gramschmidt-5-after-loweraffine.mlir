@@ -1,8 +1,8 @@
 module {
   func.func @kernel_gramschmidt(%arg0: i32, %arg1: i32, %arg2: memref<?x30xf64>, %arg3: memref<?x30xf64>, %arg4: memref<?x30xf64>) {
+    %0 = llvm.mlir.undef : f64
     %cst = arith.constant 0.000000e+00 : f64
     %alloca = memref.alloca() : memref<f64>
-    %0 = llvm.mlir.undef : f64
     memref.store %0, %alloca[] : memref<f64>
     %c0 = arith.constant 0 : index
     %c1 = arith.constant 1 : index

@@ -8,61 +8,61 @@ void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* fun
   int arith_const_10 = 32; 
   int arith_const_11 = 64; 
   int arith_const_12 = 0; 
-  float arith_const_13 = 1.000000; 
-  float arith_const_14 = 2.000000; 
-  float arith_const_15 = -2.000000; 
-  float arith_const_16 = 0.000000; 
-  float* memref_alloc_17; 
-  float _18; 
+  float _13; 
+  float arith_const_14 = 1.000000; 
+  float arith_const_15 = 2.000000; 
+  float arith_const_16 = -2.000000; 
+  float arith_const_17 = 0.000000; 
+  float* memref_alloc_18; 
   float* memref_alloca_19; 
-  memref_alloca_19[0] = _18; 
+  memref_alloca_19[0] = _13; 
   float* memref_alloca_20; 
-  memref_alloca_20[0] = _18; 
+  memref_alloca_20[0] = _13; 
   float* memref_alloca_21; 
-  memref_alloca_21[0] = _18; 
+  memref_alloca_21[0] = _13; 
   float* memref_alloca_22; 
-  memref_alloca_22[0] = _18; 
+  memref_alloca_22[0] = _13; 
   float* memref_alloca_23; 
-  memref_alloca_23[0] = _18; 
+  memref_alloca_23[0] = _13; 
   float* memref_alloca_24; 
-  memref_alloca_24[0] = _18; 
+  memref_alloca_24[0] = _13; 
   float* memref_alloca_25; 
-  memref_alloca_25[0] = _18; 
+  memref_alloca_25[0] = _13; 
   float* memref_alloca_26; 
-  memref_alloca_26[0] = _18; 
+  memref_alloca_26[0] = _13; 
   float* memref_alloca_27; 
-  memref_alloca_27[0] = _18; 
+  memref_alloca_27[0] = _13; 
   float* memref_alloca_28; 
-  memref_alloca_28[0] = _18; 
+  memref_alloca_28[0] = _13; 
   float arith_negf_29 = -(func_arg_2); 
   float math_exp_30 = exp(arith_negf_29); 
-  float arith_subf_31 = (arith_const_13 - math_exp_30); 
+  float arith_subf_31 = (arith_const_14 - math_exp_30); 
   float arith_mulf_32 = (arith_subf_31 * arith_subf_31); 
   float arith_mulf_33 = (func_arg_2 * math_exp_30); 
-  float arith_mulf_34 = (arith_mulf_33 * arith_const_14); 
-  float arith_addf_35 = (arith_mulf_34 + arith_const_13); 
-  float arith_mulf_36 = (func_arg_2 * arith_const_14); 
+  float arith_mulf_34 = (arith_mulf_33 * arith_const_15); 
+  float arith_addf_35 = (arith_mulf_34 + arith_const_14); 
+  float arith_mulf_36 = (func_arg_2 * arith_const_15); 
   float math_exp_37 = exp(arith_mulf_36); 
   float arith_subf_38 = (arith_addf_35 - math_exp_37); 
   float arith_divf_39 = (arith_mulf_32 / arith_subf_38); 
   float arith_mulf_40 = (arith_divf_39 * math_exp_30); 
-  float arith_subf_41 = (func_arg_2 - arith_const_13); 
+  float arith_subf_41 = (func_arg_2 - arith_const_14); 
   float arith_mulf_42 = (arith_mulf_40 * arith_subf_41); 
-  float arith_addf_43 = (func_arg_2 + arith_const_13); 
+  float arith_addf_43 = (func_arg_2 + arith_const_14); 
   float arith_mulf_44 = (arith_mulf_40 * arith_addf_43); 
   float arith_negf_45 = -(arith_divf_39); 
-  float arith_mulf_46 = (func_arg_2 * arith_const_15); 
+  float arith_mulf_46 = (func_arg_2 * arith_const_16); 
   float math_exp_47 = exp(arith_mulf_46); 
   float arith_mulf_48 = (arith_negf_45 * math_exp_47); 
-  float math_powf_49 = pow(arith_const_14, arith_negf_29); 
+  float math_powf_49 = pow(arith_const_15, arith_negf_29); 
   float arith_negf_50 = -(math_exp_47); 
   for (int for_iter_51 = arith_const_12; for_iter_51 < arith_const_11; for_iter_51 += arith_const_10) {
     int arith_addi_52 = (for_iter_51 + arith_const_10); 
     for (int for_iter_53 = for_iter_51; for_iter_53 < arith_addi_52; for_iter_53 += arith_const_9) {
-      memref_alloca_20[0] = arith_const_16; 
-      memref_alloca_19[0] = arith_const_16; 
-      memref_alloca_24[0] = arith_const_16; 
-      memref_alloca_23[0] = arith_const_16; 
+      memref_alloca_20[0] = arith_const_17; 
+      memref_alloca_19[0] = arith_const_17; 
+      memref_alloca_24[0] = arith_const_17; 
+      memref_alloca_23[0] = arith_const_17; 
       for (int for_iter_54 = arith_const_12; for_iter_54 < arith_const_11; for_iter_54 += arith_const_9) {
         float memref_load_55 = memref_alloca_24[0]; 
         float arith_mulf_56 = (arith_mulf_44 * memref_load_55); 
@@ -97,9 +97,9 @@ void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* fun
       for (int for_iter_77 = for_iter_74; for_iter_77 < arith_addi_76; for_iter_77 += arith_const_9) {
         int arith_addi_78 = (for_iter_75 + arith_const_10); 
         for (int for_iter_79 = for_iter_75; for_iter_79 < arith_addi_78; for_iter_79 += arith_const_9) {
-          memref_alloca_26[0] = arith_const_16; 
-          memref_alloca_25[0] = arith_const_16; 
-          memref_alloca_28[0] = arith_const_16; 
+          memref_alloca_26[0] = arith_const_17; 
+          memref_alloca_25[0] = arith_const_17; 
+          memref_alloca_28[0] = arith_const_17; 
           float memref_load_80 = func_arg_3[for_iter_77][for_iter_79]; 
           float arith_mulf_81 = (arith_divf_39 * memref_load_80); 
           float memref_load_82 = memref_alloca_28[0]; 
@@ -117,10 +117,10 @@ void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* fun
           memref_alloca_25[0] = memref_load_85; 
           float memref_load_92 = func_arg_5[for_iter_77][for_iter_79]; 
           memref_alloca_26[0] = memref_load_92; 
-          memref_alloca_20[0] = arith_const_16; 
-          memref_alloca_19[0] = arith_const_16; 
-          memref_alloca_24[0] = arith_const_16; 
-          memref_alloca_23[0] = arith_const_16; 
+          memref_alloca_20[0] = arith_const_17; 
+          memref_alloca_19[0] = arith_const_17; 
+          memref_alloca_24[0] = arith_const_17; 
+          memref_alloca_23[0] = arith_const_17; 
           int arith_muli_93 = (for_iter_79 * arith_const_8); 
           int arith_addi_94 = (arith_muli_93 + arith_const_7); 
           float memref_load_95 = memref_alloca_24[0]; 
@@ -158,17 +158,17 @@ void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* fun
   for (int for_iter_117 = arith_const_12; for_iter_117 < arith_const_11; for_iter_117 += arith_const_10) {
     int arith_addi_118 = (for_iter_117 + arith_const_10); 
     for (int for_iter_119 = for_iter_117; for_iter_119 < arith_addi_118; for_iter_119 += arith_const_9) {
-      memref_alloca_22[0] = arith_const_16; 
-      memref_alloca_21[0] = arith_const_16; 
-      memref_alloca_20[0] = arith_const_16; 
-      memref_alloca_19[0] = arith_const_16; 
+      memref_alloca_22[0] = arith_const_17; 
+      memref_alloca_21[0] = arith_const_17; 
+      memref_alloca_20[0] = arith_const_17; 
+      memref_alloca_19[0] = arith_const_17; 
       for (int for_iter_120 = arith_const_12; for_iter_120 < arith_const_11; for_iter_120 += arith_const_9) {
         int arith_muli_121 = (for_iter_120 * arith_const_8); 
         int arith_addi_122 = (arith_muli_121 + arith_const_7); 
         float memref_load_123 = func_arg_5[arith_addi_122][for_iter_119]; 
         float memref_load_124 = func_arg_6[arith_addi_122][for_iter_119]; 
         float arith_addf_125 = (memref_load_123 + memref_load_124); 
-        memref_alloc_17[arith_const_12][arith_const_12] = arith_addf_125; 
+        memref_alloc_18[arith_const_12][arith_const_12] = arith_addf_125; 
         float memref_load_126 = memref_alloca_22[0]; 
         float arith_mulf_127 = (arith_mulf_44 * memref_load_126); 
         float memref_load_128 = memref_alloca_21[0]; 
@@ -184,7 +184,7 @@ void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* fun
         int arith_addi_138 = (arith_muli_137 + arith_const_7); 
         func_arg_6[arith_addi_138][for_iter_119] = arith_addf_136; 
         memref_alloca_21[0] = memref_load_126; 
-        float memref_load_139 = memref_alloc_17[arith_const_12][arith_const_12]; 
+        float memref_load_139 = memref_alloc_18[arith_const_12][arith_const_12]; 
         memref_alloca_22[0] = memref_load_139; 
         memref_alloca_19[0] = memref_load_131; 
         int arith_muli_140 = (for_iter_120 * arith_const_8); 
@@ -200,9 +200,9 @@ void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* fun
       for (int for_iter_146 = for_iter_143; for_iter_146 < arith_addi_145; for_iter_146 += arith_const_9) {
         int arith_addi_147 = (for_iter_144 + arith_const_10); 
         for (int for_iter_148 = for_iter_144; for_iter_148 < arith_addi_147; for_iter_148 += arith_const_9) {
-          memref_alloca_27[0] = arith_const_16; 
-          memref_alloca_26[0] = arith_const_16; 
-          memref_alloca_25[0] = arith_const_16; 
+          memref_alloca_27[0] = arith_const_17; 
+          memref_alloca_26[0] = arith_const_17; 
+          memref_alloca_25[0] = arith_const_17; 
           float memref_load_149 = func_arg_4[for_iter_146][for_iter_148]; 
           float arith_mulf_150 = (arith_divf_39 * memref_load_149); 
           float memref_load_151 = memref_alloca_27[0]; 
@@ -220,10 +220,10 @@ void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* fun
           memref_alloca_25[0] = memref_load_154; 
           float memref_load_161 = func_arg_5[for_iter_146][for_iter_148]; 
           memref_alloca_26[0] = memref_load_161; 
-          memref_alloca_22[0] = arith_const_16; 
-          memref_alloca_21[0] = arith_const_16; 
-          memref_alloca_20[0] = arith_const_16; 
-          memref_alloca_19[0] = arith_const_16; 
+          memref_alloca_22[0] = arith_const_17; 
+          memref_alloca_21[0] = arith_const_17; 
+          memref_alloca_20[0] = arith_const_17; 
+          memref_alloca_19[0] = arith_const_17; 
           int arith_muli_162 = (for_iter_146 * arith_const_8); 
           int arith_addi_163 = (arith_muli_162 + arith_const_7); 
           float memref_load_164 = memref_alloca_22[0]; 

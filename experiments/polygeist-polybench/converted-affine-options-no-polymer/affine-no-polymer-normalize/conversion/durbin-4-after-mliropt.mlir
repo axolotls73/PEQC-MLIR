@@ -2,10 +2,10 @@
 #map1 = affine_map<(d0) -> (d0)>
 module {
   func.func @kernel_durbin(%arg0: i32, %arg1: memref<?xf64>, %arg2: memref<?xf64>) {
+    %0 = llvm.mlir.undef : f64
     %cst = arith.constant 0.000000e+00 : f64
     %cst_0 = arith.constant 1.000000e+00 : f64
     %alloca = memref.alloca() : memref<f64>
-    %0 = llvm.mlir.undef : f64
     affine.store %0, %alloca[] : memref<f64>
     %alloca_1 = memref.alloca() : memref<f64>
     affine.store %0, %alloca_1[] : memref<f64>

@@ -8,9 +8,9 @@
 #map7 = affine_map<(d0, d1) -> (d0 + d1 + 1)>
 module {
   func.func @kernel_gramschmidt(%arg0: i32, %arg1: i32, %arg2: memref<?x30xf64>, %arg3: memref<?x30xf64>, %arg4: memref<?x30xf64>) {
+    %0 = llvm.mlir.undef : f64
     %cst = arith.constant 0.000000e+00 : f64
     %alloca = memref.alloca() : memref<f64>
-    %0 = llvm.mlir.undef : f64
     affine.store %0, %alloca[] : memref<f64>
     affine.parallel (%arg5) = (0) to (1) {
       %1 = affine.apply #map(%arg5)

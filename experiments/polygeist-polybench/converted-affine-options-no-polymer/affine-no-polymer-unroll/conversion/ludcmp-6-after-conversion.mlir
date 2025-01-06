@@ -8,8 +8,8 @@ module {
     %c1 = arith.constant 1 : index
     %c40 = arith.constant 40 : index
     %c0 = arith.constant 0 : index
-    %alloca = memref.alloca() : memref<f64>
     %0 = llvm.mlir.undef : f64
+    %alloca = memref.alloca() : memref<f64>
     memref.store %0, %alloca[] : memref<f64>
     scf.for %arg5 = %c0 to %c40 step %c1 {
       scf.for %arg6 = %c0 to %arg5 step %c1 {

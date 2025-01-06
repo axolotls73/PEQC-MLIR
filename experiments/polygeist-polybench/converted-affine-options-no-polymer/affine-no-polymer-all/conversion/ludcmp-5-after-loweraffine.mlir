@@ -1,7 +1,7 @@
 module {
   func.func @kernel_ludcmp(%arg0: i32, %arg1: memref<?x40xf64>, %arg2: memref<?xf64>, %arg3: memref<?xf64>, %arg4: memref<?xf64>) {
-    %alloca = memref.alloca() : memref<f64>
     %0 = llvm.mlir.undef : f64
+    %alloca = memref.alloca() : memref<f64>
     memref.store %0, %alloca[] : memref<f64>
     %c0 = arith.constant 0 : index
     %c2 = arith.constant 2 : index

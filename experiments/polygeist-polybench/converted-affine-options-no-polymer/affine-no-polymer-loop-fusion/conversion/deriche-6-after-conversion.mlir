@@ -5,12 +5,12 @@ module {
     %c1 = arith.constant 1 : index
     %c64 = arith.constant 64 : index
     %c0 = arith.constant 0 : index
+    %0 = llvm.mlir.undef : f32
     %cst = arith.constant 1.000000e+00 : f32
     %cst_0 = arith.constant 2.000000e+00 : f32
     %cst_1 = arith.constant -2.000000e+00 : f32
     %cst_2 = arith.constant 0.000000e+00 : f32
     %alloc = memref.alloc() : memref<1x1xf32>
-    %0 = llvm.mlir.undef : f32
     %alloca = memref.alloca() : memref<f32>
     memref.store %0, %alloca[] : memref<f32>
     %alloca_3 = memref.alloca() : memref<f32>

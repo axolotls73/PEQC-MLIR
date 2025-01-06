@@ -7,22 +7,22 @@ void kernel_gramschmidt(int func_arg_0, int func_arg_1, double* func_arg_2, doub
   int arith_const_7 = 32; 
   int arith_const_8 = 30; 
   int arith_const_9 = 0; 
-  double arith_const_10 = 0.000000; 
-  double* memref_alloca_11; 
-  double _12; 
-  memref_alloca_11[0] = _12; 
+  double _10; 
+  double arith_const_11 = 0.000000; 
+  double* memref_alloca_12; 
+  memref_alloca_12[0] = _10; 
   for (int for_iter_13 = arith_const_9; for_iter_13 < arith_const_8; for_iter_13 += arith_const_7) {
     int arith_addi_14 = (for_iter_13 + arith_const_8); 
     for (int for_iter_15 = for_iter_13; for_iter_15 < arith_addi_14; for_iter_15 += arith_const_6) {
-      memref_alloca_11[0] = arith_const_10; 
+      memref_alloca_12[0] = arith_const_11; 
       for (int for_iter_16 = arith_const_9; for_iter_16 < arith_const_5; for_iter_16 += arith_const_6) {
         double memref_load_17 = func_arg_2[for_iter_16][for_iter_15]; 
         double arith_mulf_18 = (memref_load_17 * memref_load_17); 
-        double memref_load_19 = memref_alloca_11[0]; 
+        double memref_load_19 = memref_alloca_12[0]; 
         double arith_addf_20 = (memref_load_19 + arith_mulf_18); 
-        memref_alloca_11[0] = arith_addf_20; 
+        memref_alloca_12[0] = arith_addf_20; 
       }
-      double memref_load_21 = memref_alloca_11[0]; 
+      double memref_load_21 = memref_alloca_12[0]; 
       double math_sqrt_22 = sqrt(memref_load_21); 
       func_arg_3[for_iter_15][for_iter_15] = math_sqrt_22; 
       for (int for_iter_23 = arith_const_9; for_iter_23 < arith_const_5; for_iter_23 += arith_const_6) {
@@ -33,7 +33,7 @@ void kernel_gramschmidt(int func_arg_0, int func_arg_1, double* func_arg_2, doub
       }
       int arith_addi_27 = (for_iter_15 + arith_const_6); 
       for (int for_iter_28 = arith_addi_27; for_iter_28 < arith_const_8; for_iter_28 += arith_const_6) {
-        func_arg_3[for_iter_15][for_iter_28] = arith_const_10; 
+        func_arg_3[for_iter_15][for_iter_28] = arith_const_11; 
         for (int for_iter_29 = arith_const_9; for_iter_29 < arith_const_5; for_iter_29 += arith_const_6) {
           double memref_load_30 = func_arg_4[for_iter_29][for_iter_15]; 
           double memref_load_31 = func_arg_2[for_iter_29][for_iter_28]; 

@@ -12,10 +12,10 @@ void kernel_gramschmidt(int func_arg_0, int func_arg_1, double* func_arg_2, doub
   int arith_const_13 = 32; 
   int arith_const_14 = 1; 
   int arith_const_15 = 0; 
-  double arith_const_16 = 0.000000; 
-  double* memref_alloca_17; 
-  double _18; 
-  memref_alloca_17[0] = _18; 
+  double _16; 
+  double arith_const_17 = 0.000000; 
+  double* memref_alloca_18; 
+  memref_alloca_18[0] = _16; 
   int* async_group_19; 
   int async_group_index_20 = 0; 
   int for_iter_arg_22 = arith_const_15; 
@@ -26,34 +26,34 @@ void kernel_gramschmidt(int func_arg_0, int func_arg_1, double* func_arg_2, doub
       int arith_muli_24 = (for_iter_21 * arith_const_13); 
       for (int for_iter_25 = arith_const_15; for_iter_25 < arith_const_12; for_iter_25 += arith_const_14) {
         int arith_addi_26 = (arith_muli_24 + for_iter_25); 
-        memref_alloca_17[0] = arith_const_16; 
+        memref_alloca_18[0] = arith_const_17; 
         for (int for_iter_27 = arith_const_15; for_iter_27 < arith_const_11; for_iter_27 += arith_const_14) {
           int arith_muli_28 = (for_iter_27 * arith_const_10); 
           double memref_load_29 = func_arg_2[arith_muli_28][arith_addi_26]; 
           double arith_mulf_30 = (memref_load_29 * memref_load_29); 
-          double memref_load_31 = memref_alloca_17[0]; 
+          double memref_load_31 = memref_alloca_18[0]; 
           double arith_addf_32 = (memref_load_31 + arith_mulf_30); 
-          memref_alloca_17[0] = arith_addf_32; 
+          memref_alloca_18[0] = arith_addf_32; 
           int arith_addi_33 = (arith_muli_28 + arith_const_14); 
           double memref_load_34 = func_arg_2[arith_addi_33][arith_addi_26]; 
           double arith_mulf_35 = (memref_load_34 * memref_load_34); 
-          double memref_load_36 = memref_alloca_17[0]; 
+          double memref_load_36 = memref_alloca_18[0]; 
           double arith_addf_37 = (memref_load_36 + arith_mulf_35); 
-          memref_alloca_17[0] = arith_addf_37; 
+          memref_alloca_18[0] = arith_addf_37; 
           int arith_addi_38 = (arith_muli_28 + arith_const_9); 
           double memref_load_39 = func_arg_2[arith_addi_38][arith_addi_26]; 
           double arith_mulf_40 = (memref_load_39 * memref_load_39); 
-          double memref_load_41 = memref_alloca_17[0]; 
+          double memref_load_41 = memref_alloca_18[0]; 
           double arith_addf_42 = (memref_load_41 + arith_mulf_40); 
-          memref_alloca_17[0] = arith_addf_42; 
+          memref_alloca_18[0] = arith_addf_42; 
           int arith_addi_43 = (arith_muli_28 + arith_const_8); 
           double memref_load_44 = func_arg_2[arith_addi_43][arith_addi_26]; 
           double arith_mulf_45 = (memref_load_44 * memref_load_44); 
-          double memref_load_46 = memref_alloca_17[0]; 
+          double memref_load_46 = memref_alloca_18[0]; 
           double arith_addf_47 = (memref_load_46 + arith_mulf_45); 
-          memref_alloca_17[0] = arith_addf_47; 
+          memref_alloca_18[0] = arith_addf_47; 
         }
-        double memref_load_48 = memref_alloca_17[0]; 
+        double memref_load_48 = memref_alloca_18[0]; 
         double math_sqrt_49 = sqrt(memref_load_48); 
         func_arg_3[arith_addi_26][arith_addi_26] = math_sqrt_49; 
         double memref_load_50 = func_arg_3[arith_addi_26][arith_addi_26]; 
@@ -85,7 +85,7 @@ void kernel_gramschmidt(int func_arg_0, int func_arg_1, double* func_arg_2, doub
         for (int for_iter_71 = arith_const_15; for_iter_71 < arith_addi_70; for_iter_71 += arith_const_14) {
           int arith_addi_72 = (arith_addi_26 + for_iter_71); 
           int arith_addi_73 = (arith_addi_72 + arith_const_14); 
-          func_arg_3[arith_addi_26][arith_addi_73] = arith_const_16; 
+          func_arg_3[arith_addi_26][arith_addi_73] = arith_const_17; 
           for (int for_iter_74 = arith_const_15; for_iter_74 < arith_const_11; for_iter_74 += arith_const_14) {
             int arith_muli_75 = (for_iter_74 * arith_const_10); 
             double memref_load_76 = func_arg_4[arith_muli_75][arith_addi_26]; 

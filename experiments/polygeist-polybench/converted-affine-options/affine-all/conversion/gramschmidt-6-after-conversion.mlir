@@ -23,10 +23,11 @@ module {
     %c32 = arith.constant 32 : index
     %c1 = arith.constant 1 : index
     %c0 = arith.constant 0 : index
+    %0 = llvm.mlir.undef : f64
     %cst = arith.constant 0.000000e+00 : f64
     %alloca = memref.alloca() : memref<f64>
-    %0 = async.create_group %c1 : !async.group
-    %1 = scf.for %arg5 = %c0 to %c1 step %c1 iter_args(%arg6 = %c0) -> (index) {
+    %1 = async.create_group %c1 : !async.group
+    %2 = scf.for %arg5 = %c0 to %c1 step %c1 iter_args(%arg6 = %c0) -> (index) {
       %token = async.execute {
         %7 = arith.muli %arg5, %c32 : index
         scf.for %arg7 = %c0 to %c29 step %c1 {
@@ -87,13 +88,12 @@ module {
         }
         async.yield
       }
-      %5 = async.add_to_group %token, %0 : !async.token
+      %5 = async.add_to_group %token, %1 : !async.token
       %6 = arith.addi %arg6, %c1 : index
       scf.yield %6 : index
     }
-    async.await_all %0
-    %2 = llvm.mlir.undef : f64
-    memref.store %2, %alloca[] : memref<f64>
+    async.await_all %1
+    memref.store %0, %alloca[] : memref<f64>
     %3 = async.create_group %c1 : !async.group
     %4 = scf.for %arg5 = %c0 to %c1 step %c1 iter_args(%arg6 = %c0) -> (index) {
       %token = async.execute {
