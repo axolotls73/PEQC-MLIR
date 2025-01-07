@@ -38,7 +38,80 @@ namespace mlir::verif {
 
 namespace {
 
+LogicalResult processLock(xilinx::AIE::LockOp op) {
+  LLVM_DEBUG(
+    llvm::errs() << "processing lock op: ";
+    op.emitRemark();
+  );
 
+  auto builder = OpBuilder(op);
+
+  // create and initialize semaphore
+  auto loc = op.getLoc();
+  Value sem = builder.create<SemaphoreOp>(loc);
+  auto init = op.getInit();
+  if (init.has_value()) {
+    op.emitError("lockop init not supported");
+    ///FIXME: implement this
+    // Value val = builder.create<arith::ConstantIndexOp>(loc, init.value());
+    // builder.create<SemaphoreSetOp>(loc, sem, val);
+  }
+
+  // convert use_lock ops to semaphore wait and set
+  for (auto& use : op.getResult().getUses()) {
+    auto uop = use.getOwner();
+    if (auto useop = dyn_cast<xilinx::AIE::UseLockOp>(uop)) {
+      LLVM_DEBUG(
+        llvm::errs() << "processing use_lock op: ";
+        useop.emitRemark();
+      );
+      if (useop.getBlocking() == xilinx::AIE::LockBlocking::NonBlocking) {
+        useop.emitError("non-blocking locks not supported");
+        return failure();
+      }
+      auto useval = useop.getValue();
+      if (!useval.has_value()) {
+        useop.emitError("use_lock must have value");
+        return failure();
+      }
+
+      builder.setInsertionPoint(useop);
+      auto loc = useop.getLoc();
+      Value val = builder.create<arith::ConstantIndexOp>(loc, useval.value());
+      switch (useop.getAction()) {
+        case xilinx::AIE::LockAction::Acquire:
+          builder.create<SemaphoreWaitOp>(loc, sem, val);
+          break;
+        case xilinx::AIE::LockAction::Release:
+          builder.create<SemaphoreSetOp>(loc, sem, val);
+          break;
+        case xilinx::AIE::LockAction::AcquireGreaterEqual:
+          useop.emitError("aie.use_lock must use Acquire or Release");
+          return failure();
+      }
+      useop.erase();
+    }
+  }
+  op.erase();
+  return success();
+}
+
+LogicalResult processLocks(ModuleOp module) {
+
+  auto lockops = SmallVector<xilinx::AIE::LockOp>();
+  WalkResult res = module.walk([&] (xilinx::AIE::LockOp op) {
+    lockops.push_back(op);
+    return WalkResult::advance();
+  });
+
+  ///FIXME: ideally this would be in the module.walk call, but I'd need a
+  /// backwards iterator to use as Iterator in walk() -- does this exaist somewhere?
+
+  for (auto & op : lockops) {
+    if (processLock(op).failed()) return failure();
+  }
+  return success();
+}
 
 class VerifConvertAIE
     : public impl::VerifConvertAIEBase<VerifConvertAIE> {
@@ -46,8 +119,11 @@ public:
   using impl::VerifConvertAIEBase<VerifConvertAIE>::VerifConvertAIEBase;
 
   void runOnOperation() final {
-    return signalPassFailure();
+    auto module = getOperation();
+    auto context = module.getContext();
 
+    LogicalResult res = processLocks(module);
+    if (res.failed()) return signalPassFailure();
   }
 };
 
