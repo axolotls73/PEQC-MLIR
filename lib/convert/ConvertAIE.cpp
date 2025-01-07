@@ -114,8 +114,35 @@ LogicalResult processLocks(ModuleOp module) {
 }
 
 LogicalResult processCores(ModuleOp module) {
+  auto res = module.walk([] (xilinx::AIE::CoreOp op) {
+    LLVM_DEBUG(
+      llvm::errs() << "processing core op: ";
+      op.emitRemark();
+    );
+    if (!op.getResult().getUses().empty()) {
+      op.emitError("core result has users: not supported");
+      return WalkResult::interrupt();
+    }
 
-  return success();
+    auto builder = OpBuilder(op);
+    builder.create<async::ExecuteOp>(op.getLoc(),
+        SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
+        [&] (OpBuilder &b, Location loc, ValueRange v) {
+          IRMapping map;
+          for (auto& o : op.getBody().getOps()) {
+            if (isa<xilinx::AIE::EndOp>(o)) {
+              b.create<async::YieldOp>(loc, SmallVector<Value>{});
+              continue;
+            }
+            b.clone(o, map);
+          }
+        });
+    op.erase();
+
+    return WalkResult::advance();
+  });
+  module.emitRemark();
+  return res.wasInterrupted() ? failure() : success();
 }
 
 LogicalResult processBuffers(ModuleOp module) {
