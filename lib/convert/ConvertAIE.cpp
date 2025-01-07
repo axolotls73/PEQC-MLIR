@@ -113,6 +113,33 @@ LogicalResult processLocks(ModuleOp module) {
   return success();
 }
 
+LogicalResult processCores(ModuleOp module) {
+
+  return success();
+}
+
+LogicalResult processBuffers(ModuleOp module) {
+  auto res = module.walk([] (xilinx::AIE::BufferOp op) {
+    LLVM_DEBUG(
+      llvm::errs() << "processing buffer op: ";
+      op.emitRemark();
+    );
+    if (op.getAddress().has_value() || op.getMemBank().has_value() || op.getInitialValue().has_value()) {
+      op.emitError("buffer attrs not supported");
+      return WalkResult::interrupt();
+      ///FIXME: implement
+    }
+
+    auto builder = OpBuilder(op);
+    Value mres = builder.create<memref::AllocOp>(op.getLoc(), op.getResult().getType()).getResult();
+    op.getResult().replaceAllUsesWith(mres);
+    op.erase();
+
+    return WalkResult::advance();
+  });
+  return res.wasInterrupted() ? failure() : success();
+}
+
 class VerifConvertAIE
     : public impl::VerifConvertAIEBase<VerifConvertAIE> {
 public:
@@ -124,6 +151,13 @@ public:
 
     LogicalResult res = processLocks(module);
     if (res.failed()) return signalPassFailure();
+
+    res = processCores(module);
+    if (res.failed()) return signalPassFailure();
+
+    res = processBuffers(module);
+    if (res.failed()) return signalPassFailure();
+
   }
 };
 
