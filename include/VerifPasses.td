@@ -90,6 +90,7 @@ def VerifConvertAIE: Pass<"verif-convert-aie", "::mlir::ModuleOp"> {
     "memref::MemRefDialect",
     "func::FuncDialect",
     "scf::SCFDialect",
+    "cf::ControlFlowDialect",
     "async::AsyncDialect",
     "verif::VerifDialect"
   ];
