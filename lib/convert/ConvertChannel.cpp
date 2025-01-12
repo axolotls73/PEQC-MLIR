@@ -38,6 +38,48 @@ namespace mlir::verif {
 
 namespace {
 
+///FIXME: put this somewhere it can be reused
+void addAirTokenConversion(TypeConverter& tc, MLIRContext* context) {
+  tc.addConversion([&](Type type) -> Type {
+    // convert air::AsyncTokenType to async::TokenType
+    if (auto t = mlir::dyn_cast<xilinx::air::AsyncTokenType>(type))
+      return async::TokenType::get(context);
+    return type;
+  });
+  auto addUnrealizedCast = [](OpBuilder &builder, Type type,
+                              ValueRange inputs, Location loc) {
+    auto cast = builder.create<UnrealizedConversionCastOp>(loc, type, inputs);
+    return cast.getResult(0);
+  };
+  tc.addSourceMaterialization(addUnrealizedCast);
+  tc.addTargetMaterialization(addUnrealizedCast);
+}
+
+// creates new async op, sets builder's insertion point to async body
+///TODO: can I use more of the existing conversion stuff to do this?
+void handleAsync(MLIRContext* context, Location loc,
+      OpBuilder& builder, Value res, OperandRange deps) {
+  auto dep = deps.front();
+  TypeConverter converter;
+  addAirTokenConversion(converter, context);
+
+  SmallVector<Value> newdeps = llvm::map_to_vector(deps, [&](Value v) {
+    return converter.materializeTargetConversion(builder, loc, async::TokenType::get(context), v);
+  });
+
+  auto asyncExec = builder.create<async::ExecuteOp>(
+      loc, SmallVector<Type>{}, newdeps, SmallVector<Value>{},
+      [&](OpBuilder &b, Location loc, ValueRange v) {
+    b.create<async::YieldOp>(loc, SmallVector<Value>{});
+  });
+
+  Value newres = converter.materializeSourceConversion
+      (builder, loc, xilinx::air::AsyncTokenType::get(context), asyncExec.getResult(0));
+  res.replaceAllUsesWith(newres);
+
+  builder.setInsertionPointToStart(asyncExec.getBody());
+}
+
 WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, ModuleOp module) {
 
   auto loc = chop.getLoc();
@@ -222,6 +264,11 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
 
       Value srcmemref = getMemrefOrSubview(putop.getMemref(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
 
+      if (putop.getResults().size() > 0) {
+        handleAsync(context, putop.getLoc(), builder, putop.getAsyncToken(), putop.getAsyncDependencies());
+      }
+
+      ///FIXME: these are leaked
       auto indices = getChannelIndices(putop.getIndices(), true);
       ValueRange channel_indices = *indices;
 
@@ -246,6 +293,11 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
 
       Value dstmemref = getMemrefOrSubview(getop.getMemref(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
 
+      if (getop.getResults().size() > 0) {
+        handleAsync(context, getop.getLoc(), builder, getop.getAsyncToken(), getop.getAsyncDependencies());
+      }
+
+      ///FIXME: these are leaked
       auto indices = getChannelIndices(getop.getIndices());
       ValueRange channel_indices = *indices;
 
