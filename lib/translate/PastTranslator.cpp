@@ -191,6 +191,15 @@ e_past_value_type_t PastTranslator::getTypePast(const Type& t) {
   assert(0);
 }
 
+static bool isNestedMemref(const Type& t) {
+  auto mrtype = dyn_cast<MemRefType>(t);
+  if (!mrtype) return false;
+
+  if (!isa<MemRefType>(mrtype.getElementType())) return false;
+
+  return true;
+}
+
 // returns node at start of list
 s_past_node_t* PastTranslator::nodeChain(std::vector<s_past_node_t*> nodes) {
   s_past_node_t* start = nullptr;
@@ -794,10 +803,58 @@ s_past_node_t* PastTranslator::translate(scf::YieldOp op) {
 // memref
 
 s_past_node_t* PastTranslator::translate(memref::AllocOp op) {
-  return past_node_statement_create(declareVar(op.getResult(), "memref_alloc"));
+  if (!isNestedMemref(op.getType()))
+    return past_node_statement_create(declareVar(op.getResult(), "memref_alloc"));
+
+  auto mrtype = dyn_cast<MemRefType>(op.getType());
+  assert(mrtype);
+  auto submrtype = dyn_cast<MemRefType>(mrtype.getElementType());
+  assert(submrtype);
+
+  if (isa<MemRefType>(submrtype.getElementType())) {
+    op.emitError(">2 nested memref types not supported");
+    exit(1);
+  }
+  if (mrtype.getNumDynamicDims() > 0) {
+    op.emitError("dynamic memref of memrefs not supported");
+    exit(1);
+  }
+  if (mrtype.getShape().size() != 2) {
+    ///FIXME: implement!!
+    op.emitError("only 2D memref of memrefs supported");
+    exit(1);
+  }
+
+  Value res = op.getResult();
+  auto sizes = mrtype.getShape();
+  std::vector<s_past_node_t*> nodes;
+  // declare outer array as void
+  nodes.push_back(past_node_statement_create(
+    declareVar(getSymbol("void"), getVarSymbol(res, "memref_alloc"))));
+
+  // create sub array for each index in outer array
+  for (int i = 0; i < sizes.front(); i++) {
+    for (int j = 0; j < sizes.back(); j++) {
+      auto tmpsym = getTempVarSymbol("nested_memref_alloc");
+      nodes.push_back(past_node_statement_create(
+        declareVar(getTypeSymbol(submrtype), tmpsym)));
+      nodes.push_back(past_node_statement_create(
+        past_node_binary_create(past_assign,
+          getArrayAccess(getVarSymbol(res), std::vector<s_past_node_t*>{
+            past_node_value_create_from_int(i), past_node_value_create_from_int(j)}),
+          past_node_varref_create(tmpsym))));
+    }
+  }
+
+  return nodeChain(nodes);
 }
 
 s_past_node_t* PastTranslator::translate(memref::AllocaOp op) {
+  if (isNestedMemref(op.getType())) {
+    ///FIXME: implement this!!
+    op.emitError("nested memrefs not supported in memref.alloca");
+    exit(1);
+  }
   return past_node_statement_create(declareVar(op.getResult(), "memref_alloca"));
 }
 
