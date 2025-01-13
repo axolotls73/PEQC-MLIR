@@ -24,7 +24,8 @@ module {
 // CHECK: [[PUTSEM:%.*]] = memref.load [[SEM_ARR]][[[PUT_CST0]], [[PUT_CST0]]]
 // CHECK: verif.semaphore.wait [[PUTSEM]], [[PUT_CST0]]
 // CHECK: [[PUTBUFFER:%.*]] = memref.load [[BUF_ARR]][[[PUT_CST0]], [[PUT_CST0]]]
-// CHECK: memref.copy [[A]], [[PUTBUFFER]]
+// CHECK: [[PBUF:%.*]] = unrealized_conversion_cast [[PUTBUFFER]]
+// CHECK: memref.copy [[A]], [[PBUF]]
 // CHECK: verif.semaphore.set [[PUTSEM]], [[PUT_CST1]]
 // CHECK-NOT: air.channel.put
   air.channel.put @channel[] (%a[] [] []) : (memref<1xi32>)
@@ -34,7 +35,8 @@ module {
 // CHECK: [[GETSEM:%.*]] = memref.load [[SEM_ARR]][[[GET_CST0]], [[GET_CST0]]]
 // CHECK: verif.semaphore.wait [[GETSEM]], [[GET_CST1]]
 // CHECK: [[GETBUFFER:%.*]] = memref.load [[BUF_ARR]][[[GET_CST0]], [[GET_CST0]]]
-// CHECK: memref.copy [[GETBUFFER]], [[A]]
+// CHECK: [[GBUF:%.*]] = unrealized_conversion_cast [[GETBUFFER]]
+// CHECK: memref.copy [[GBUF]], [[A]]
 // CHECK: verif.semaphore.set [[GETSEM]], [[GET_CST0]]
 // CHECK-NOT: air.channel.get
   air.channel.get @channel[] (%a[] [] []) : (memref<1xi32>)

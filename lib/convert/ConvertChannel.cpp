@@ -225,8 +225,30 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
     // get memref to copy from, subview if necessary
     auto getMemrefOrSubview = [&]
           (Value og_memref, ValueRange offsets, ValueRange sizes, ValueRange strides) -> Value {
-      if (offsets.size() > 0)
-        return builder.create<memref::SubViewOp>(loc, og_memref, offsets, sizes, strides).getResult();
+
+    ///FIXME: factor out this and the one in convertmem,
+    /// actually verify that strides are 1
+
+      SmallVector<Value> strides1;
+      for (int i = 0; i < strides.size(); i++) {
+        strides1.push_back(cst_1);
+      }
+
+      auto getFoldRange = []
+            (ValueRange range) {
+        SmallVector<OpFoldResult> newrange;
+        for (Value val : range) {
+          newrange.push_back(getAsOpFoldResult(val));
+        }
+        return newrange;
+      };
+
+      if (offsets.size() > 0) {
+        return builder.create<memref::SubViewOp>(loc, og_memref,
+            getFoldRange(offsets), getFoldRange(sizes), getFoldRange(strides1)).getResult();
+      }
+
+      //   return builder.create<memref::SubViewOp>(loc, og_memref, offsets, sizes, strides).getResult();
       return og_memref;
     };
 
@@ -277,6 +299,9 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
       builder.create<SemaphoreWaitOp>(loc, putsem, cst_0);
       // get and copy to buffer
       Value putbuffer = builder.create<memref::LoadOp>(loc, bufarr, channel_indices).getResult();
+      ///FIXME: change these to memref casts or infer type
+      putbuffer = builder.create<UnrealizedConversionCastOp>(loc,
+          srcmemref.getType(), putbuffer).getResult(0);
       builder.create<memref::CopyOp>(loc, srcmemref, putbuffer);
       // set semaphore: ready to read
       builder.create<SemaphoreSetOp>(loc, putsem, cst_1);
@@ -302,13 +327,16 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
       ValueRange channel_indices = *indices;
 
       // get and wait on semaphore
-      Value putsem = builder.create<memref::LoadOp>(loc, semarr, channel_indices).getResult();
-      builder.create<SemaphoreWaitOp>(loc, putsem, cst_1);
+      Value getsem = builder.create<memref::LoadOp>(loc, semarr, channel_indices).getResult();
+      builder.create<SemaphoreWaitOp>(loc, getsem, cst_1);
       // get and copy from buffer
-      Value putbuffer = builder.create<memref::LoadOp>(loc, bufarr, channel_indices).getResult();
-      builder.create<memref::CopyOp>(loc, putbuffer, dstmemref);
+      Value getbuffer = builder.create<memref::LoadOp>(loc, bufarr, channel_indices).getResult();
+      ///FIXME: change these to memref casts or infer type
+      getbuffer = builder.create<UnrealizedConversionCastOp>(loc,
+          dstmemref.getType(), getbuffer).getResult(0);
+      builder.create<memref::CopyOp>(loc, getbuffer, dstmemref);
       // set semaphore: ready to write
-      builder.create<SemaphoreSetOp>(loc, putsem, cst_0);
+      builder.create<SemaphoreSetOp>(loc, getsem, cst_0);
     }
 
     op->erase();
