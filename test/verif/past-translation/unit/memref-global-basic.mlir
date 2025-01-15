@@ -11,8 +11,9 @@ module {
 // CHECK: int [[I:.*]] =
         %i = arith.constant 42 : i32
 
-        // %global = memref.get_global @global : memref<2xi32>
-        // memref.store %i, %global[%0] : memref<2xi32>
+        %global = memref.get_global @global : memref<2xi32>
+// CHECK: [[G]][[[CST_0]]] = [[I]]
+        memref.store %i, %global[%0] : memref<2xi32>
         return
     }
 }

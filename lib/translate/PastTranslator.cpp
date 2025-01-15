@@ -29,23 +29,29 @@ s_symbol_t* PastTranslator::getSymbol(std::string name) {
 s_symbol_t* PastTranslator::getVarSymbol(Value val, std::string name) {
   //value in map already
   if (valueNames.find(val) != valueNames.end()) {
-    auto symbol = symbol_get_or_insert
-        (symbolTable, valueNames.find(val)->second.c_str(), nullptr);
+    auto symbol = valueNames.find(val)->second;
     assert(symbol);
     return symbol;
   }
 
   std::string symbolName = name + "_" + std::to_string(varSuffix++);
-  valueNames[val] = symbolName;
-  return symbol_get_or_insert(symbolTable, symbolName.c_str(), nullptr);
+  auto symbol = symbol_get_or_insert(symbolTable, symbolName.c_str(), nullptr);
+  valueNames[val] = symbol;
+  return symbol;
+}
+
+s_symbol_t* PastTranslator::getAndMapSymbol(s_symbol_t* exists, Value newval) {
+  assert(symbol_find(symbolTable, exists));
+  s_symbol_t* symbol = symbol_find(symbolTable, exists);
+  valueNames[newval] = symbol;
+  return symbol;
 }
 
 // give the second value the same symbol as the first, return symbol
 s_symbol_t* PastTranslator::getAndMapSymbol(Value exists, Value newval) {
   assert(valueNames.find(exists) != valueNames.end());
-  std::string ret = valueNames.find(exists)->second;
-  valueNames[newval] = ret;
-  return symbol_get_or_insert(symbolTable, ret.c_str(), nullptr);
+  s_symbol_t* symbol = valueNames.find(exists)->second;
+  return getAndMapSymbol(symbol, newval);
 }
 
 s_symbol_t* PastTranslator::getTempVarSymbol(std::string name) {
@@ -863,11 +869,17 @@ s_past_node_t* PastTranslator::translate(memref::GlobalOp op) {
   // create and map new symbol for array
   s_symbol_t* var = getTempVarSymbol("memref_global");
   memrefGlobalNames[op.getSymName().str()] = var;
+
   return translateAlloc(op.getOperation(), op.getType(), var);
 }
 
 ///TODO: check for use-after-free bugs?
 s_past_node_t* PastTranslator::translate(memref::DeallocOp op) {
+  return nullptr;
+}
+
+s_past_node_t* PastTranslator::translate(memref::GetGlobalOp op) {
+  getAndMapSymbol(memrefGlobalNames[op.getName().str()], op.getResult());
   return nullptr;
 }
 
@@ -1211,6 +1223,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<memref::AllocaOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::GlobalOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::DeallocOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<memref::GetGlobalOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::LoadOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::CopyOp>(op)) res = translate(o);

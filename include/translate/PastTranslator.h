@@ -48,10 +48,10 @@ class PastTranslator {
   bool allow_unsupported_ops = false;
 
   symbol_table_t* symbolTable = symbol_table_malloc();
-  std::unordered_map<Value, std::string> valueNames;
+  std::unordered_map<Value, s_symbol_t*> valueNames;
 
   // map memref.global names to variable names
-  std::unordered_map<std::string, symbol_t*> memrefGlobalNames;
+  std::unordered_map<std::string, s_symbol_t*> memrefGlobalNames;
 
   // assuming FuncOp sym_names are unique since I can't find a
   // hash function for ops.
@@ -71,6 +71,7 @@ class PastTranslator {
 
   s_symbol_t* getSymbol(std::string name);
   s_symbol_t* getVarSymbol(Value val, std::string name = "var");
+  s_symbol_t* getAndMapSymbol(s_symbol_t* exists, Value newval);
   // give the second value the same symbol as the first, return symbol
   s_symbol_t* getAndMapSymbol(Value exists, Value newval);
   s_symbol_t* getTempVarSymbol(std::string name = "var");
@@ -186,6 +187,7 @@ class PastTranslator {
   ///TODO: check for use-after-free bugs?
   s_past_node_t* translate(memref::DeallocOp op);
 
+  s_past_node_t* translate(memref::GetGlobalOp op);
   s_past_node_t* translate(memref::LoadOp op);
   s_past_node_t* translate(memref::StoreOp op);
   s_past_node_t* translate(memref::CopyOp op);
