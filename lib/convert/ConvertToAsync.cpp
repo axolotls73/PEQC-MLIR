@@ -226,11 +226,22 @@ public:
   LogicalResult
   matchAndRewrite(xilinx::air::WaitAllOp op, OpAdaptor adaptor,
                   ConversionPatternRewriter &rewriter) const final {
+    auto loc = op.getLoc();
     auto asyncExec = rewriter.create<async::ExecuteOp>(
-        op->getLoc(), SmallVector<Type>{}, adaptor.getAsyncDependencies(), SmallVector<Value>{},
+        loc, SmallVector<Type>{}, adaptor.getAsyncDependencies(), SmallVector<Value>{},
         [&](OpBuilder &b, Location loc, ValueRange v) {
           b.create<async::YieldOp>(loc, SmallVector<Value>{});
         });
+
+    if (!op.getAsyncToken()) {
+      // not async: just wait on the token produced by asyncExec
+      Value cst_0 = rewriter.create<arith::ConstantIndexOp>(loc, 0).getResult();
+      Value group = rewriter.create<async::CreateGroupOp>(loc, cst_0).getResult();
+      rewriter.create<async::AddToGroupOp>(loc, asyncExec.getResult(0), group);
+      auto waitop = rewriter.create<async::AwaitAllOp>(loc, group);
+      rewriter.replaceOp(op, waitop);
+      return success();
+    }
 
     rewriter.replaceOp(op, asyncExec);
     return success();
