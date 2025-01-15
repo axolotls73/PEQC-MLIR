@@ -262,11 +262,11 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
         return WalkResult::interrupt();
       }
 
-      Value srcmemref = getMemrefOrSubview(putop.getMemref(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
-
       if (putop.getResults().size() > 0) {
         handleAsync(context, putop.getLoc(), builder, putop.getAsyncToken(), putop.getAsyncDependencies());
       }
+
+      Value srcmemref = getMemrefOrSubview(putop.getMemref(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
 
       ///FIXME: these are leaked
       auto indices = getChannelIndices(putop.getIndices(), true);
@@ -294,11 +294,11 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
         return WalkResult::interrupt();
       }
 
-      Value dstmemref = getMemrefOrSubview(getop.getMemref(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
-
       if (getop.getResults().size() > 0) {
         handleAsync(context, getop.getLoc(), builder, getop.getAsyncToken(), getop.getAsyncDependencies());
       }
+
+      Value dstmemref = getMemrefOrSubview(getop.getMemref(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
 
       ///FIXME: these are leaked
       auto indices = getChannelIndices(getop.getIndices());
