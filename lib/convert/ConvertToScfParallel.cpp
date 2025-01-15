@@ -229,7 +229,8 @@ public:
         memref::MemRefDialect,
         async::AsyncDialect,
         xilinx::air::airDialect,
-        mlir::BuiltinDialect
+        mlir::BuiltinDialect,
+        VerifDialect
       >();
 
     target.addIllegalOp<

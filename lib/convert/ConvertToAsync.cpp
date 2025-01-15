@@ -399,6 +399,8 @@ public:
 
     ConversionTarget target(*context);
 
+    ///TODO: why do these need to be explicitly marked
+    /// legal for a /partial/ conversion?? specifically arith
     target.addLegalDialect<
         func::FuncDialect,
         arith::ArithDialect,
@@ -406,7 +408,14 @@ public:
         scf::SCFDialect,
         memref::MemRefDialect,
         async::AsyncDialect,
-        mlir::BuiltinDialect
+        mlir::BuiltinDialect,
+        xilinx::air::airDialect
+      >();
+
+    target.addIllegalOp<
+        xilinx::air::ExecuteOp,
+        xilinx::air::WaitAllOp,
+        scf::ParallelOp
       >();
 
     auto res = applyPartialConversion(module, target, std::move(patterns));
