@@ -123,6 +123,36 @@ with open("air_sync.mlir", "w") as f:
 ## Extract event dependency and optimize schedule
 ################################################
 
+##START modified section
+simple_air_module = Module.parse(open("air_sync.mlir").read(), context=context)
+pipeline = (
+    "builtin.module("
+    + ",".join(
+        [
+            "air-dependency",
+            # "air-dependency-schedule-opt",
+            # "air-specialize-dma-broadcast",
+            "air-dma-to-channel",
+            # "canonicalize",
+            # "cse",
+            "air-dependency-canonicalize",
+            # "canonicalize",
+            # "cse",
+            # "air-label-scf-for-to-ping-pong",
+
+            # "air-isolate-async-dma-loop-nests",
+            # "air-specialize-channel-wrap-and-stride",
+            # "canonicalize",
+        ]
+    )
+    + ")"
+)
+pm = air.passmanager.PassManager.parse(pipeline, context=context)
+pm.run(simple_air_module.operation)
+with open("air_sync_channels.mlir", "w") as f:
+    f.write(str(simple_air_module))
+##END modified section
+
 pipeline = (
     "builtin.module("
     + ",".join(
@@ -201,7 +231,8 @@ with open("air_placed.mlir", "w") as f:
 # ################################################
 
 air_to_aie_pass = (
-    "air-to-aie{row-offset=2 col-offset=0 device=npu1_4col emit-while-loop=true"
+    "air-to-aie{row-offset=2 col-offset=0 device=npu1_4col emit-while-loop=true \
+        use-objectfifo=true generate-shim-dma=false"
 )
 if opts.trace_size > 0:
     air_to_aie_pass = air_to_aie_pass + " insert-trace-packet-flow=true"
