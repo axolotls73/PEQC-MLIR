@@ -27,7 +27,12 @@ i.e. be storable in a memref.
 
 See tests `test/verif/convert/unit/par-basic.mlir`, `test/verif/convert/unit/par-docs-example.mlir`.
   }];
-  let dependentDialects = ["async::AsyncDialect"];
+  let dependentDialects = [
+    "arith::ArithDialect",
+    "scf::SCFDialect",
+    "memref::MemRefDialect",
+    "async::AsyncDialect"
+  ];
 }
 
 def VerifAirExecuteToAsync: Pass<"verif-air-execute-to-async", "::mlir::ModuleOp"> {
@@ -43,7 +48,11 @@ and the `memref.alloc` ops are moved outside of the region.
 
 See tests `test/verif/convert/unit/air-exec-scalar.mlir`, `test/verif/convert/unit/air-exec-alloc.mlir`.
   }];
-  let dependentDialects = ["async::AsyncDialect"];
+  let dependentDialects = [
+    "arith::ArithDialect",
+    "memref::MemRefDialect",
+    "async::AsyncDialect"
+  ];
 }
 
 def VerifAirToScfPar: Pass<"verif-air-to-scf-par", "::mlir::ModuleOp"> {
@@ -55,7 +64,11 @@ If air ops are `async`, the `scf.parallel` operation is wrapped in `async.execut
 
 See tests `test/verif/convert/unit/air-herd-basic.mlir`, `test/verif/convert/unit/air-launch-basic-async.mlir`.
   }];
-  let dependentDialects = ["scf::SCFDialect", "async::AsyncDialect"];
+  let dependentDialects = [
+    "arith::ArithDialect",
+    "scf::SCFDialect",
+    "async::AsyncDialect"
+  ];
 }
 
 def VerifDmaToMemref: Pass<"verif-air-dma-to-memref", "::mlir::ModuleOp"> {
@@ -66,7 +79,11 @@ wrapping in `async.execute` if `async` is specified.
 
 See tests `test/verif/convert/unit/air-dma-nd-basic.mlir`, `test/verif/convert/unit/air-dma-nd-basic-async.mlir`.
   }];
-  let dependentDialects = ["memref::MemRefDialect", "async::AsyncDialect"];
+  let dependentDialects = [
+    "arith::ArithDialect",
+    "memref::MemRefDialect",
+    "async::AsyncDialect"
+  ];
 }
 
 def VerifConvertChannel: Pass<"verif-air-convert-channel", "::mlir::ModuleOp"> {
@@ -74,8 +91,8 @@ def VerifConvertChannel: Pass<"verif-air-convert-channel", "::mlir::ModuleOp"> {
   let description = [{
   }];
   let dependentDialects = [
+    "arith::ArithDialect",
     "memref::MemRefDialect",
-    "func::FuncDialect",
     "scf::SCFDialect",
     "async::AsyncDialect",
     "verif::VerifDialect"
@@ -87,6 +104,7 @@ def VerifConvertAIE: Pass<"verif-convert-aie", "::mlir::ModuleOp"> {
   let description = [{
   }];
   let dependentDialects = [
+    "arith::ArithDialect",
     "memref::MemRefDialect",
     "func::FuncDialect",
     "scf::SCFDialect",
