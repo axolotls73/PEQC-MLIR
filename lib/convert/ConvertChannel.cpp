@@ -137,13 +137,20 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
   auto dynamic_elt_type = MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type);
   auto bufarr_type = MemRefType::get(bsizes, dynamic_elt_type);
   auto semarr_type = MemRefType::get(bsizes, SemaphoreType::get(context));
-  Value channel_bufarr = builder.create<memref::AllocOp>(loc, bufarr_type).getResult();
-  Value channel_semarr = builder.create<memref::AllocOp>(loc, semarr_type).getResult();
+  auto bufarr_name = chop.getSymName().str() + "_buffer";
+  auto semarr_name = chop.getSymName().str() + "_sem";
+  builder.create<memref::GlobalOp>(loc, StringAttr::get(context, bufarr_name),
+      StringAttr::get(context, "private"),TypeAttr::get(bufarr_type),
+      Attribute{}, UnitAttr{}, IntegerAttr{});
+  builder.create<memref::GlobalOp>(loc, StringAttr::get(context, semarr_name),
+      StringAttr::get(context, "private"), TypeAttr::get(semarr_type),
+      Attribute{}, UnitAttr{}, IntegerAttr{});
 
   // create nested for loops to initialize semaphores (and channel buffers?)
   auto loop_iters = SmallVector<Value, 2>();
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
+  Value channel_semarr = builder.create<memref::GetGlobalOp>(loc, semarr_type, semarr_name);
   for (int64_t size : bsizes) {
     Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
     auto loop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1);
@@ -173,37 +180,8 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
     Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
     Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
 
-    Value bufarr = channel_bufarr;
-    Value semarr = channel_semarr;
-
-    // pass channel memrefs as args to parent isolatedfromabove ops, top down
-    auto getChannelArgs = [&] (Operation* op) {
-      auto _getargs = [&] (Operation* op, const auto& _getargs) {
-        if (!op) return;
-        _getargs(op->getParentOp(), _getargs);
-
-        if (auto launchop = mlir::dyn_cast<xilinx::air::LaunchOp>(op)) {
-          launchop.getLaunchOperandsMutable().append({bufarr, semarr});
-          auto  &launchblock = launchop.getBody().getBlocks().front();
-          bufarr = launchblock.addArgument(bufarr.getType(), loc);
-          semarr = launchblock.addArgument(semarr.getType(), loc);
-        }
-        if (auto segmentop = mlir::dyn_cast<xilinx::air::SegmentOp>(op)) {
-          segmentop.getSegmentOperandsMutable().append({bufarr, semarr});
-          auto  &segmentblock = segmentop.getBody().getBlocks().front();
-          bufarr = segmentblock.addArgument(bufarr.getType(), loc);
-          semarr = segmentblock.addArgument(semarr.getType(), loc);
-        }
-        if (auto herdop = mlir::dyn_cast<xilinx::air::HerdOp>(op)) {
-          herdop.getHerdOperandsMutable().append({bufarr, semarr});
-          auto  &herdblock = herdop.getBody().getBlocks().front();
-          bufarr = herdblock.addArgument(bufarr.getType(), loc);
-          semarr = herdblock.addArgument(semarr.getType(), loc);
-        }
-      };
-      _getargs(op, _getargs);
-    };
-    getChannelArgs(op);
+    Value bufarr = builder.create<memref::GetGlobalOp>(loc, bufarr_type, bufarr_name);
+    Value semarr = builder.create<memref::GetGlobalOp>(loc, semarr_type, semarr_name);
 
     // sub-functions for put and get
 
