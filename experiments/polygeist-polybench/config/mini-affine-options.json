@@ -1,96 +1,96 @@
 {
 
-    "topdir": "converted-affine-options-no-polymer",
-    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset",
+    "topdir": "converted-mini-affine-options",
+    "polybench_dir": "generated-polybench-mini-dataset-use-scalar-lb",
 
     "optionsets": [
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-loop-fusion",
 
-    "output_dir": "affine-no-polymer-loop-fusion"
+    "output_dir": "affine-loop-fusion"
 },
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-loop-invariant-code-motion",
 
-    "output_dir": "affine-no-polymer-loop-inv-code-motion"
+    "output_dir": "affine-loop-inv-code-motion"
 },
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-loop-normalize",
 
-    "output_dir": "affine-no-polymer-normalize"
+    "output_dir": "affine-normalize"
 },
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-loop-tile=\"tile-size=32\"",
 
-    "output_dir": "affine-no-polymer-tile"
+    "output_dir": "affine-tile"
 },
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-loop-unroll",
 
-    "output_dir": "affine-no-polymer-unroll"
+    "output_dir": "affine-unroll"
 },
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-loop-unroll-jam",
 
-    "output_dir": "affine-no-polymer-unroll-jam"
+    "output_dir": "affine-unroll-jam"
 },
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-loop-normalize --canonicalize --affine-loop-tile=\"tile-size=32\" --affine-loop-unroll-jam=\"unroll-jam-factor=4\" --affine-loop-tile=\"tile-size=32\"",
 
-    "output_dir": "affine-no-polymer-tile-and-unroll-jam"
+    "output_dir": "affine-tile-and-unroll-jam"
 },
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-loop-normalize --canonicalize --affine-loop-fusion --affine-loop-tile=\"tile-size=32\"",
 
-    "output_dir": "affine-no-polymer-fuse-and-tile"
+    "output_dir": "affine-fuse-and-tile"
 },
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-parallelize=\"max-nested=1\"",
 
-    "output_dir": "affine-no-polymer-parallelize"
+    "output_dir": "affine-parallelize"
 },
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile=\"tile-size=32\" --affine-parallelize=\"max-nested=1\" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize",
 
-    "output_dir": "affine-no-polymer-all"
+    "output_dir": "affine-all"
 },
 
 {
     "cgeist_args": "-raise-scf-to-affine",
-    "polymer_args": "",
+    "polymer_args": "-reg2mem -extract-scop-stmt -pluto-opt",
     "mliropt_args": "--affine-loop-unroll --affine-loop-unroll-jam --affine-loop-tile=\"tile-size=32\" --affine-loop-invariant-code-motion --affine-loop-fusion --affine-loop-normalize",
 
-    "output_dir": "affine-no-polymer-all-except-parallelize"
+    "output_dir": "affine-all-except-parallelize"
 }
 
 ]

@@ -1,7 +1,7 @@
 {
 
     "topdir": "converted-small-affine-options",
-    "polybench_dir": "generated-polybench-use-scalar-lb-small-dataset",
+    "polybench_dir": "generated-polybench-small-dataset-use-scalar-lb",
 
     "optionsets": [
 

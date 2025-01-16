@@ -29,16 +29,17 @@ convertdata = None
 opts = []
 for configfile in args.config_file:
   configobj = json.load(open(configfile))
-  print(configobj)
+  # print(configobj)
 
   opts += configobj['optionsets']
   topdir = configobj['topdir']
 
-  cdata = pd.read_csv(f'{topdir}/{args.csv_name}')
-  if data is None:
-    data = cdata
-  else:
-    data = pd.concat([data, cdata])
+  for file in glob(f'{topdir}/**/{args.csv_name}', recursive=True):
+    cdata = pd.read_csv(file)
+    if data is None:
+      data = cdata
+    else:
+      data = pd.concat([data, cdata])
 
   cdata = pd.read_csv(f'{topdir}/conversion_stats.csv')
   if convertdata is None:
@@ -49,7 +50,7 @@ for configfile in args.config_file:
 
 data = data.set_index(['name', 'dir']).sort_index()
 convertdata = convertdata.set_index(['name', 'output_dir'])
-print(data)
+# print(data)
 
 
 # bench vs opt chart
@@ -61,7 +62,7 @@ runchartw = csv.writer(open(runchartfilename, 'w'))
 # convchartw = csv.writer(open(convchartfilename, 'w'))
 
 flags = [opt['output_dir'] for opt in opts]
-print(flags)
+# print(flags)
 runchartw.writerow([''] + flags)
 # convchartw.writerow([''] + flags)
 
@@ -72,9 +73,9 @@ for benchname in sorted(benchnames):
   for opt in opts:
     try:
       datarow = data.loc[(benchname, opt['output_dir'])]
-      result = datarow['result'][0]
+      result = datarow['result']
       for col in ['timeout', 'conflict', 'tree_difference', 'interp_error', 'out_of_bounds']:
-        if datarow[col][0] == 'yes':
+        if datarow[col] == 'yes':
           result += f'({col})'
     except Exception:
       result = 'N/A'

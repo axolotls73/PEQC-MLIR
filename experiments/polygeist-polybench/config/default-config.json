@@ -1,6 +1,6 @@
 {
     "topdir": "converted-benches-no-flags",
-    "polybench_dir": "generated-polybench-use-scalar-lb-mini-dataset",
+    "polybench_dir": "generated-polybench-mini-dataset-use-scalar-lb",
 
     "optionsets": [
 {
