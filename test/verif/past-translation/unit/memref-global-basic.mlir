@@ -1,7 +1,7 @@
 // RUN: verif-translate --translate-to-past %s | FileCheck %s
 
 module {
-// CHECK: int* [[G:.*]];
+// CHECK: int* global;
   memref.global "private" @global : memref<2xi32>
 
 // CHECK: void test_func
@@ -12,7 +12,7 @@ module {
         %i = arith.constant 42 : i32
 
         %global = memref.get_global @global : memref<2xi32>
-// CHECK: [[G]][[[CST_0]]] = [[I]]
+// CHECK: global[[[CST_0]]] = [[I]]
         memref.store %i, %global[%0] : memref<2xi32>
         return
     }

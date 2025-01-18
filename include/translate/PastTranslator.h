@@ -50,9 +50,6 @@ class PastTranslator {
   symbol_table_t* symbolTable = symbol_table_malloc();
   std::unordered_map<Value, s_symbol_t*> valueNames;
 
-  // map memref.global names to variable names
-  std::unordered_map<std::string, s_symbol_t*> memrefGlobalNames;
-
   // assuming FuncOp sym_names are unique since I can't find a
   // hash function for ops.
   std::unordered_map<std::string, std::vector<s_symbol_t*>*> functionReturnVars;

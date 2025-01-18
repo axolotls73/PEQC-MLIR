@@ -866,9 +866,7 @@ s_past_node_t* PastTranslator::translate(memref::GlobalOp op) {
   if (!isa<ModuleOp>(op.getOperation()->getParentOp())) {
     op.emitError("memref.global must have module parent");
   }
-  // create and map new symbol for array
-  s_symbol_t* var = getTempVarSymbol("memref_global");
-  memrefGlobalNames[op.getSymName().str()] = var;
+  s_symbol_t* var = getSymbol(op.getSymName().str());
 
   return translateAlloc(op.getOperation(), op.getType(), var);
 }
@@ -879,7 +877,7 @@ s_past_node_t* PastTranslator::translate(memref::DeallocOp op) {
 }
 
 s_past_node_t* PastTranslator::translate(memref::GetGlobalOp op) {
-  getAndMapSymbol(memrefGlobalNames[op.getName().str()], op.getResult());
+  getAndMapSymbol(getSymbol(op.getName().str()), op.getResult());
   return nullptr;
 }
 
