@@ -15,6 +15,7 @@
 
 #include <iterator>
 #include <fstream>
+#include <filesystem>
 #include <iostream>
 #include <regex>
 #include "past/past.h"
@@ -44,17 +45,21 @@ namespace verif {
 
 
   LogicalResult translateToPast(Operation* op, llvm::raw_ostream &output, bool textOutput) {
+    if (!isa<ModuleOp>(op)) {
+      op->emitError("past translation: top-level operation must be a module");
+    }
+
     PastTranslator translator;
     s_past_node_t* res = translator.translate(op);
 
     ///TODO: find a better way to interface btwn FILE and ostream?
-    std::string filename = "translate_temp" + //file weirdness when testing. dumb hack
-        std::to_string(std::chrono::system_clock::now().time_since_epoch() / std::chrono::nanoseconds(1)) + ".txt";
-    auto file = std::fopen(filename.c_str(), "w");
+    char filename_buffer[L_tmpnam];
+    char* filename = tmpnam(filename_buffer);
+    auto file = std::fopen(filename, "w");
     past_pprint(file, res);
     std::ifstream infile(filename);
     std::fclose(file);
-    std::remove(filename.c_str());
+    std::remove(filename);
 
     output << "#pragma pocc-region-start\n";
     std::string line;

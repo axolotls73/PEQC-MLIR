@@ -50,12 +50,9 @@ class PastTranslator {
   symbol_table_t* symbolTable = symbol_table_malloc();
   std::unordered_map<Value, s_symbol_t*> valueNames;
 
-  // assuming FuncOp sym_names are unique since I can't find a
-  // hash function for ops.
-  std::unordered_map<std::string, std::vector<s_symbol_t*>*> functionReturnVars;
+  s_past_node_t* mainFunction = nullptr;
 
-  int varSuffix = 0;
-  int semaphoreId = 0;
+  std::unordered_map<std::string, std::vector<s_symbol_t*>*> functionReturnVars;
 
   std::unordered_map<Value, s_symbol_t*> asyncGroupIndex;
 
@@ -65,6 +62,9 @@ class PastTranslator {
   // if value is declared in block, add this statement to the end of the block.
   // dumb hack for subview copy back.
   std::unordered_map<Value, s_past_node_t*> blockAddAtEnd;
+
+  int varSuffix = 0;
+  int semaphoreId = 0;
 
   s_symbol_t* getSymbol(std::string name);
   s_symbol_t* getVarSymbol(Value val, std::string name = "var");

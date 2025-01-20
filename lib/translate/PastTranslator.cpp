@@ -400,30 +400,21 @@ s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName) {
 
 
 
-
-// builtin
-
-s_past_node_t* PastTranslator::translate(ModuleOp& op) {
-  // if it's not a function, wrap in block
-  auto body = translate(op.getRegion());
-  if (!past_node_is_a(body, past_fundecl)) {
-    body = past_node_block_create(body);
-  }
-
-  // prepend new functions and globals generated
-  newGlobalDecls.insert(newGlobalDecls.end(), newFunctionDecls.begin(), newFunctionDecls.end());
-  s_past_node_t* moduleStart = nodeChain(newGlobalDecls);
-  s_past_node_t* moduleEnd = getNodeListEnd(moduleStart);
-
-  if (moduleEnd) moduleEnd->next = body;
-  else moduleStart = body;
-  s_past_node_t* ret = past_node_root_create(symbolTable, moduleStart);
-  return ret;
-}
-
 // func
 
 s_past_node_t* PastTranslator::translate(func::FuncOp& op) {
+  //handle main function
+  if (op.getSymName().str() == "main") {
+    auto type = op.getFunctionType();
+    if (type.getNumInputs() > 0 || type.getNumResults() > 0) {
+      op.emitError("main function with args/results not supported");
+      exit(1);
+    }
+    mainFunction = past_node_block_create(
+      translate(op.getRegion()));
+    return nullptr;
+  }
+
   std::vector<s_past_node_t*> args;
   for (auto arg : op.getRegion().getArguments()) {
     args.push_back(getVarDecl(arg, "func_arg"));
@@ -450,6 +441,11 @@ s_past_node_t* PastTranslator::translate(func::FuncOp& op) {
 s_past_node_t* PastTranslator::translate(func::ReturnOp& op) {
   auto func = op.getParentOp<func::FuncOp>();
   assert(func);
+
+  // main function: don't return anything
+  if (func.getSymName().str() == "main") {
+    return nullptr;
+  }
 
   s_past_node_t* ret = nullptr;
   s_past_node_t* cur = nullptr;
@@ -1248,4 +1244,45 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
     res = translate_unsupported(op);
   }
   return res;
+}
+
+
+// module: entry point for translation
+s_past_node_t* PastTranslator::translate(ModuleOp& op) {
+  auto regionops = op.getRegion().getOps();
+  if (regionops.empty()) return nullptr;
+
+  // check for accepted format: only non-func ops, or only
+  // memref.global + func ops
+  bool funcpresent = isa<func::FuncOp>(*regionops.begin());
+  bool onlyfuncorglobal = isa<func::FuncOp>(*regionops.begin()) ||
+      isa<memref::GlobalOp>(*regionops.begin());
+  for (auto& o : regionops) {
+    funcpresent = funcpresent || isa<func::FuncOp>(o);
+    onlyfuncorglobal = onlyfuncorglobal && isa<func::FuncOp>(*regionops.begin()) ||
+      isa<memref::GlobalOp>(*regionops.begin());
+    if (funcpresent && !onlyfuncorglobal) {
+      o.emitError("");
+      exit(1);
+    }
+  }
+
+  auto body = translate(op.getRegion());
+
+  // main region: entire block if not list of functions,
+  // otherwise main function if present
+  s_past_node_t* main = mainFunction;
+  if (!funcpresent) {
+    main = past_node_block_create(body);
+    body = nullptr;
+  }
+
+  // translation: new globals and functions generated, then body and main
+  auto translation = newGlobalDecls;
+  translation.insert(newGlobalDecls.end(), newFunctionDecls.begin(), newFunctionDecls.end());
+  translation.push_back(body);
+  translation.push_back(main);
+
+  s_past_node_t* ret = past_node_root_create(symbolTable, nodeChain(translation));
+  return ret;
 }
