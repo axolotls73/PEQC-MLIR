@@ -114,41 +114,42 @@ class PastTranslator {
 
   // builtin
 
-  s_past_node_t* translate(ModuleOp& op);
+  s_past_node_t* translate(ModuleOp op);
 
 
   // func
 
-  s_past_node_t* translate(func::FuncOp& op);
-  s_past_node_t* translate(func::ReturnOp& op);
+  s_past_node_t* translate(func::FuncOp op);
+  s_past_node_t* translate(func::ReturnOp op);
+  s_past_node_t* translate(func::CallOp op);
 
 
   // arith
 
-  s_past_node_t* translateConstant(arith::ConstantOp& op,
+  s_past_node_t* translateConstant(arith::ConstantOp op,
       const Type& type, u_past_value_data_t val);
-  s_past_node_t* translate(arith::ConstantIntOp& op);
-  s_past_node_t* translate(arith::ConstantIndexOp& op);
-  s_past_node_t* translate(arith::ConstantFloatOp& op);
+  s_past_node_t* translate(arith::ConstantIntOp op);
+  s_past_node_t* translate(arith::ConstantIndexOp op);
+  s_past_node_t* translate(arith::ConstantFloatOp op);
 
   s_past_node_t* translateArithBinop
             (const char* resultName, const cs_past_node_type_t* pastType,
              Value res, Value lhs, Value rhs);
-  s_past_node_t* translate(arith::AddIOp& op);
-  s_past_node_t* translate(arith::SubIOp& op);
-  s_past_node_t* translate(arith::MulIOp& op);
-  s_past_node_t* translate(arith::DivSIOp& op);
-  s_past_node_t* translate(arith::DivUIOp& op);
-  s_past_node_t* translate(arith::RemSIOp& op);
-  s_past_node_t* translate(arith::AndIOp& op);
-  s_past_node_t* translate(arith::OrIOp& op);
-  s_past_node_t* translate(arith::MaxSIOp& op);
-  s_past_node_t* translate(arith::MinSIOp& op);
-  s_past_node_t* translate(arith::AddFOp& op);
-  s_past_node_t* translate(arith::SubFOp& op);
-  s_past_node_t* translate(arith::MulFOp& op);
-  s_past_node_t* translate(arith::DivFOp& op);
-  s_past_node_t* translate(math::PowFOp& op);
+  s_past_node_t* translate(arith::AddIOp op);
+  s_past_node_t* translate(arith::SubIOp op);
+  s_past_node_t* translate(arith::MulIOp op);
+  s_past_node_t* translate(arith::DivSIOp op);
+  s_past_node_t* translate(arith::DivUIOp op);
+  s_past_node_t* translate(arith::RemSIOp op);
+  s_past_node_t* translate(arith::AndIOp op);
+  s_past_node_t* translate(arith::OrIOp op);
+  s_past_node_t* translate(arith::MaxSIOp op);
+  s_past_node_t* translate(arith::MinSIOp op);
+  s_past_node_t* translate(arith::AddFOp op);
+  s_past_node_t* translate(arith::SubFOp op);
+  s_past_node_t* translate(arith::MulFOp op);
+  s_past_node_t* translate(arith::DivFOp op);
+  s_past_node_t* translate(math::PowFOp op);
 
   s_past_node_t* translateArithUnaryOp
             (const char* resultName, const cs_past_node_type_t* pastType,
@@ -159,8 +160,8 @@ class PastTranslator {
 
   s_past_node_t* translate(arith::ExtUIOp op);
 
-  s_past_node_t* translate(arith::CmpIOp& op);
-  s_past_node_t* translate(arith::CmpFOp& op);
+  s_past_node_t* translate(arith::CmpIOp op);
+  s_past_node_t* translate(arith::CmpFOp op);
 
   s_past_node_t* translate(arith::SelectOp op);
 

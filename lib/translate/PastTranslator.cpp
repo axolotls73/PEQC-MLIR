@@ -402,7 +402,7 @@ s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName) {
 
 // func
 
-s_past_node_t* PastTranslator::translate(func::FuncOp& op) {
+s_past_node_t* PastTranslator::translate(func::FuncOp op) {
   //handle main function
   if (op.getSymName().str() == "main") {
     auto type = op.getFunctionType();
@@ -425,8 +425,9 @@ s_past_node_t* PastTranslator::translate(func::FuncOp& op) {
   for (auto type : op.getResultTypes()) {
     s_symbol_t* sym = getTempVarSymbol("func_arg_ret");
     (*vec).push_back(sym);
-    // args.push_back(getVarDecl(getTypeSymbol(type), sym));
-    args.push_back(getVarDecl(getSymbol("int*"), sym));
+    // pass a reference: make type a memref if necessary
+    if (!isa<MemRefType>(type)) type = MemRefType::get(SmallVector<int64_t>{1}, type);
+    args.push_back(getVarDecl(getTypeSymbol(type), sym));
   }
 
   s_past_node_t* ret = past_node_fundecl_create(
@@ -438,7 +439,7 @@ s_past_node_t* PastTranslator::translate(func::FuncOp& op) {
   return ret;
 }
 
-s_past_node_t* PastTranslator::translate(func::ReturnOp& op) {
+s_past_node_t* PastTranslator::translate(func::ReturnOp op) {
   auto func = op.getParentOp<func::FuncOp>();
   assert(func);
 
@@ -484,21 +485,17 @@ s_past_node_t* PastTranslator::translate(func::ReturnOp& op) {
   if (cur) cur->next = end;
   else ret = end;
   return ret;
-  // assert(op.getNumOperands() == 1);
-  // return past_node_statement_create(
-  //   past_node_keyword_create(e_past_keyword_return_value,
-  //     getVar(op.getOperand(0))));
 }
 
 
 // arith
 
-s_past_node_t* PastTranslator::translateConstant(arith::ConstantOp& op, const Type& type, u_past_value_data_t val) {
+s_past_node_t* PastTranslator::translateConstant(arith::ConstantOp op, const Type& type, u_past_value_data_t val) {
   OpResult res = op->getResult(0);
   return getDeclareAndAssign(type, "arith_const", res, past_node_value_create(getTypePast(type), val));
 }
 
-s_past_node_t* PastTranslator::translate(arith::ConstantIntOp& op) {
+s_past_node_t* PastTranslator::translate(arith::ConstantIntOp op) {
   u_past_value_data_t val = {.intval = (int)op.value()};
   ///FIXME: low prio, make this consistent with types
   // u_past_value_data_t val;
@@ -517,12 +514,12 @@ s_past_node_t* PastTranslator::translate(arith::ConstantIntOp& op) {
   return translateConstant(op, op.getResult().getType(), val);
 }
 
-s_past_node_t* PastTranslator::translate(arith::ConstantIndexOp& op) {
+s_past_node_t* PastTranslator::translate(arith::ConstantIndexOp op) {
   u_past_value_data_t val = { .intval = (int)op.value() };
   return translateConstant(op, op.getResult().getType(), val);
 }
 
-s_past_node_t* PastTranslator::translate(arith::ConstantFloatOp& op) {
+s_past_node_t* PastTranslator::translate(arith::ConstantFloatOp op) {
   u_past_value_data_t val;
   switch (getTypePast(op.getResult().getType())) {
     case e_past_value_float:
@@ -545,49 +542,49 @@ s_past_node_t* PastTranslator::translateArithBinop
         past_node_varref_create(getVarSymbol(rhs))));
 }
 
-s_past_node_t* PastTranslator::translate(arith::AddIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::AddIOp op) {
   return translateArithBinop("arith_addi", past_add, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::SubIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::SubIOp op) {
   return translateArithBinop("arith_subi", past_sub, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::MulIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::MulIOp op) {
   return translateArithBinop("arith_muli", past_mul, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::DivSIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::DivSIOp op) {
   return translateArithBinop("arith_divi", past_div, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::DivUIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::DivUIOp op) {
   return translateArithBinop("arith_divi", past_div, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::RemSIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::RemSIOp op) {
   return translateArithBinop("arith_remsi", past_mod, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::AndIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::AndIOp op) {
   return translateArithBinop("arith_andi", past_band, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::OrIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::OrIOp op) {
   return translateArithBinop("arith_ori", past_bor, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::MaxSIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::MaxSIOp op) {
   return translateArithBinop("arith_maxsi", past_max, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::MinSIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::MinSIOp op) {
   return translateArithBinop("arith_minsi", past_min, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::AddFOp& op) {
+s_past_node_t* PastTranslator::translate(arith::AddFOp op) {
   return translateArithBinop("arith_addf", past_add, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::SubFOp& op) {
+s_past_node_t* PastTranslator::translate(arith::SubFOp op) {
   return translateArithBinop("arith_subf", past_sub, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::MulFOp& op) {
+s_past_node_t* PastTranslator::translate(arith::MulFOp op) {
   return translateArithBinop("arith_mulf", past_mul, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(arith::DivFOp& op) {
+s_past_node_t* PastTranslator::translate(arith::DivFOp op) {
   return translateArithBinop("arith_divf", past_div, op.getResult(), op.getLhs(), op.getRhs());
 }
-s_past_node_t* PastTranslator::translate(math::PowFOp& op) {
+s_past_node_t* PastTranslator::translate(math::PowFOp op) {
   return translateArithBinop("math_powf", past_pow, op.getResult(), op.getLhs(), op.getRhs());
 }
 
@@ -615,7 +612,7 @@ s_past_node_t* PastTranslator::translate(arith::ExtUIOp op) {
       op.getResult(), past_node_varref_create(getVarSymbol(op.getIn())));
 }
 
-s_past_node_t* PastTranslator::translate(arith::CmpIOp& op) {
+s_past_node_t* PastTranslator::translate(arith::CmpIOp op) {
   arith::CmpIPredicate pred = op.getPredicate();
   cs_past_node_type_t* cmptype = nullptr;
   switch (pred) {
@@ -655,7 +652,7 @@ s_past_node_t* PastTranslator::translate(arith::CmpIOp& op) {
       cond));
 }
 
-s_past_node_t* PastTranslator::translate(arith::CmpFOp& op) {
+s_past_node_t* PastTranslator::translate(arith::CmpFOp op) {
   arith::CmpFPredicate pred = op.getPredicate();
   cs_past_node_type_t* cmptype = nullptr;
   switch (pred) {
@@ -1248,7 +1245,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
 
 
 // module: entry point for translation
-s_past_node_t* PastTranslator::translate(ModuleOp& op) {
+s_past_node_t* PastTranslator::translate(ModuleOp op) {
   auto regionops = op.getRegion().getOps();
   if (regionops.empty()) return nullptr;
 
@@ -1259,8 +1256,8 @@ s_past_node_t* PastTranslator::translate(ModuleOp& op) {
       isa<memref::GlobalOp>(*regionops.begin());
   for (auto& o : regionops) {
     funcpresent = funcpresent || isa<func::FuncOp>(o);
-    onlyfuncorglobal = onlyfuncorglobal && isa<func::FuncOp>(*regionops.begin()) ||
-      isa<memref::GlobalOp>(*regionops.begin());
+    onlyfuncorglobal = onlyfuncorglobal && (isa<func::FuncOp>(*regionops.begin()) ||
+      isa<memref::GlobalOp>(*regionops.begin()));
     if (funcpresent && !onlyfuncorglobal) {
       o.emitError("");
       exit(1);
