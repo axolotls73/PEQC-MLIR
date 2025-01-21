@@ -20,6 +20,8 @@
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Math/IR/Math.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
+#include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
+#include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/Async/IR/Async.h"
@@ -49,6 +51,7 @@ class PastTranslator {
 
   symbol_table_t* symbolTable = symbol_table_malloc();
   std::unordered_map<Value, s_symbol_t*> valueNames;
+  std::unordered_map<Block*, s_symbol_t*> blockNames;
 
   s_past_node_t* mainFunction = nullptr;
 
@@ -64,10 +67,12 @@ class PastTranslator {
   std::unordered_map<Value, s_past_node_t*> blockAddAtEnd;
 
   int varSuffix = 0;
+  int blockSuffix = 0;
   int semaphoreId = 0;
 
   s_symbol_t* getSymbol(std::string name);
   s_symbol_t* getVarSymbol(Value val, std::string name = "var");
+  s_symbol_t* getBlockSymbol(Block* block);
   s_symbol_t* getAndMapSymbol(s_symbol_t* exists, Value newval);
   // give the second value the same symbol as the first, return symbol
   s_symbol_t* getAndMapSymbol(Value exists, Value newval);
@@ -174,6 +179,9 @@ class PastTranslator {
 
   s_past_node_t* translate(scf::YieldOp op);
 
+  // cf
+
+  s_past_node_t* translate(cf::BranchOp op);
 
   // memref
 

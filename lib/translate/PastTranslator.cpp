@@ -40,6 +40,20 @@ s_symbol_t* PastTranslator::getVarSymbol(Value val, std::string name) {
   return symbol;
 }
 
+s_symbol_t* PastTranslator::getBlockSymbol(Block* block) {
+  //value in map already
+  if (blockNames.find(block) != blockNames.end()) {
+    auto symbol = blockNames.find(block)->second;
+    assert(symbol);
+    return symbol;
+  }
+
+  std::string symbolName = "block_" + std::to_string(blockSuffix++);
+  auto symbol = symbol_get_or_insert(symbolTable, symbolName.c_str(), nullptr);
+  blockNames[block] = symbol;
+  return symbol;
+}
+
 s_symbol_t* PastTranslator::getAndMapSymbol(s_symbol_t* exists, Value newval) {
   assert(symbol_find(symbolTable, exists));
   s_symbol_t* symbol = symbol_find(symbolTable, exists);
@@ -799,6 +813,18 @@ s_past_node_t* PastTranslator::translate(scf::YieldOp op) {
 }
 
 
+// cf
+
+s_past_node_t* PastTranslator::translate(cf::BranchOp op) {
+  if (op.getDestOperands().size() > 0) {
+    op.emitError("cf.br with operands not supported");
+    exit(1);
+  }
+  return past_node_statement_create(
+    past_node_keyword_create(e_past_keyword_goto,
+      past_node_varref_create(getBlockSymbol(op.getDest()))));
+}
+
 // memref
 
 s_past_node_t* PastTranslator::translateAlloc(Operation* op, Type type, s_symbol_t* result) {
@@ -1065,6 +1091,8 @@ s_past_node_t* PastTranslator::translate(LLVM::UndefOp op) {
 s_past_node_t* PastTranslator::translate(Region& region) {
   std::vector<s_past_node_t*> stmts;
   for(Block& block : region.getBlocks()) {
+    int firststmt = stmts.size();
+
     for (Operation& op : block.getOperations()) {
       if (auto stmt = translate(&op)) {
         // work around a parser rule not being implemented
@@ -1073,6 +1101,16 @@ s_past_node_t* PastTranslator::translate(Region& region) {
         //   continue;
         stmts.push_back(stmt);
       }
+    }
+
+    // block has users: print label at first statement
+    if (!block.getUses().empty()) {
+      assert(stmts.size() > firststmt); //block has to have >0 stmts
+      s_symbol_t* labelname = getBlockSymbol(&block);
+      s_past_node_t* label = past_node_label_create(
+        past_node_varref_create(labelname),
+        stmts[firststmt]);
+      stmts[firststmt] = label;
     }
 
     // if value in blockAddAtEnd is declared in block,
@@ -1209,6 +1247,8 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<scf::IfOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
+
+  else if (auto o = dyn_cast<cf::BranchOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::AllocaOp>(op)) res = translate(o);

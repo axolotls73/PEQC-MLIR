@@ -87,6 +87,7 @@ int main(int argc, char **argv) {
             mlir::arith::ArithDialect,
             mlir::math::MathDialect,
             mlir::scf::SCFDialect,
+            cf::ControlFlowDialect,
             mlir::func::FuncDialect,
             mlir::memref::MemRefDialect,
             mlir::async::AsyncDialect,
