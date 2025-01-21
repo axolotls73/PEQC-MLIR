@@ -22,7 +22,7 @@
 #define DEBUG_TYPE "verif-translate"
 
 
-s_symbol_t* PastTranslator::getSymbol(std::string name) {
+s_symbol_t* PastTranslator::getSymbol(const std::string name) {
   return symbol_get_or_insert(symbolTable, name.c_str(), nullptr);
 }
 
@@ -437,6 +437,10 @@ s_past_node_t* PastTranslator::translate(func::FuncOp op) {
   auto vec = new std::vector<s_symbol_t*>();
   functionReturnVars[op.getSymName().str()] = vec;
   for (auto type : op.getResultTypes()) {
+    if (isa<MemRefType>(type) && dyn_cast<MemRefType>(type).getNumDynamicDims() > 0) {
+      op.emitError("func dynamic memref result not supported");
+      exit(1);
+    }
     s_symbol_t* sym = getTempVarSymbol("func_arg_ret");
     (*vec).push_back(sym);
     // pass a reference: make type a memref if necessary
@@ -462,10 +466,7 @@ s_past_node_t* PastTranslator::translate(func::ReturnOp op) {
     return nullptr;
   }
 
-  s_past_node_t* ret = nullptr;
-  s_past_node_t* cur = nullptr;
-
-  auto getSymVar = [this](s_symbol_t* returned, Value val) {
+  auto getVarCopy = [this](s_symbol_t* returned, Value val) {
     auto type = val.getType();
     // temporary: treat scalars as arrays for copy
     if (!dyn_cast<MemRefType>(type))
@@ -481,24 +482,58 @@ s_past_node_t* PastTranslator::translate(func::ReturnOp op) {
     return getArrayCopy(dyn_cast<MemRefType>(type), getVarSymbol(val), returned);
   };
 
-  int i = 0;
   assert(functionReturnVars.find(func.getSymName().str()) != functionReturnVars.end());
-  for (s_symbol_t* sym : *(functionReturnVars.find(func.getSymName().str())->second)) {
-    if (!ret) ret = cur = getSymVar(sym, op.getOperand(i));
-    else {
-      cur->next = getSymVar(sym, op.getOperand(i));
-      cur = cur->next;
-    }
-    i++;
+  std::vector<s_past_node_t*> stmts;
+  for (auto [sym, operand] : llvm::zip_equal(
+        *(functionReturnVars.find(func.getSymName().str())->second), op.getOperands())) {
+    stmts.push_back(getVarCopy(sym, operand));
   }
 
-  s_past_node_t* end = past_node_statement_create(
-    past_node_keyword_create(e_past_keyword_return, nullptr)
-  );
+  stmts.push_back(past_node_statement_create(
+    past_node_keyword_create(e_past_keyword_return, nullptr)));
+  return nodeChain(stmts);
+}
 
-  if (cur) cur->next = end;
-  else ret = end;
-  return ret;
+s_past_node_t* PastTranslator::translate(func::CallOp op) {
+  std::vector<s_past_node_t*> stmts;
+  std::vector<s_past_node_t*> stmtsAfterCall;
+  std::vector<s_past_node_t*> args;
+
+  for (Value arg : op.getArgOperands()) {
+    args.push_back(past_node_varref_create(getVarSymbol(arg)));
+  }
+
+  for (Value res : op.getResults()) {
+    if (isa<MemRefType>(res.getType())) {
+      args.push_back(past_node_varref_create(getVarSymbol(res, "func_call")));
+      stmts.push_back(past_node_statement_create(
+        declareVar(res)));
+      continue;
+    }
+
+    auto type = MemRefType::get(SmallVector<int64_t>{1}, res.getType());
+    s_symbol_t* tmpvar = getTempVarSymbol("func_call_arg");
+    args.push_back(past_node_varref_create(tmpvar));
+
+    // declare tmpvar
+    stmts.push_back(past_node_statement_create(
+      declareVar(getTypeSymbol(type), tmpvar)));
+    // recover scalar from tmpvar array
+    stmtsAfterCall.push_back(past_node_statement_create(
+      past_node_binary_create(past_assign,
+        declareVar(res, "func_call"),
+        past_node_binary_create(past_arrayref,
+          past_node_varref_create(tmpvar),
+          past_node_value_create_from_int(0)))));
+  }
+
+  stmts.push_back(past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol(op.getCallee().str())),
+      nodeChain(args))));
+
+  stmts.insert(stmts.end(), stmtsAfterCall.begin(), stmtsAfterCall.end());
+  return nodeChain(stmts);
 }
 
 
@@ -1091,7 +1126,7 @@ s_past_node_t* PastTranslator::translate(LLVM::UndefOp op) {
 s_past_node_t* PastTranslator::translate(Region& region) {
   std::vector<s_past_node_t*> stmts;
   for(Block& block : region.getBlocks()) {
-    int firststmt = stmts.size();
+    auto firststmt = stmts.size();
 
     for (Operation& op : block.getOperations()) {
       if (auto stmt = translate(&op)) {
@@ -1217,6 +1252,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   if (auto o = dyn_cast<ModuleOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<func::FuncOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<func::ReturnOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<func::CallOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<arith::ConstantIntOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::ConstantIndexOp>(op)) res = translate(o);
