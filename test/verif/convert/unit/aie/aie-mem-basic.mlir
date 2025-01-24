@@ -3,45 +3,48 @@
 module {
   %tile14 = aie.tile(1, 4)
 
-// CHECK: func.func @[[FUNCNAME:.*]]([[FUNCARG:%.*]]: index)
+// function generated for dma_start ^bd0
+// CHECK: func.func @[[MEM_FUNC_1:.*]]([[CHANNEL_1:%.*]]: index, [[ISIN_1:%.*]]: index)
+// CHECK:   cf.br ^[[BD0_1:.*]]
+// CHECK: ^[[BD0_1]]:
+// CHECK:   cf.br ^[[END_1:.*]]
+// CHECK: ^[[END_1]]:
+// CHECK:   cf.br ^[[FUNCEND_1:.*]]
+// CHECK: ^[[FUNCEND_1]]:
+// CHECK:   return
 
-// first block, to handle destination block ^bd0 in dma_start
-// CHECK: [[BD0I:%.*]] = arith.constant [[BD0IVAL:.*]] : index
-// CHECK: [[BD0CMP:%.*]] = arith.cmpi eq, [[FUNCARG]], [[BD0I]]
-// fork to end block
-// CHECK: async.execute
-// CHECK:   [[CALLI:%.*]] = arith.constant [[ENDIVAL:.*]] : index
-// CHECK:   func.call @[[FUNCNAME]]([[CALLI]])
-// CHECK: cf.cond_br [[BD0CMP]], ^[[BD0BLOCK:.*]], ^[[ENDTESTBLOCK:.*]]([[FUNCARG]]
-
-// second block, to handle destination block ^end in dma_start
-// CHECK: ^[[ENDTESTBLOCK]]([[ENDBLOCKARG:.*]]: index
-// CHECK: [[ENDI:%.*]] = arith.constant [[ENDIVAL]] : index
-// CHECK: [[ENDCMP:%.*]] = arith.cmpi eq, [[ENDBLOCKARG]], [[ENDI]]
-// CHECK: cf.cond_br [[ENDCMP]], ^[[ENDBLOCK:.*]], ^[[RETBLOCK:.*]]
-
-// CHECK: ^[[BD0BLOCK]]
-// CHECK:   cf.br ^[[ENDBLOCK]]
-
-// CHECK: ^[[ENDBLOCK]]
-// CHECK:   cf.br ^[[RETBLOCK]]
-
-// CHECK: ^[[RETBLOCK]]
+// function generated for dma_start ^end
+// CHECK: func.func @[[MEM_FUNC_2:.*]]([[CHANNEL_2:%.*]]: index, [[ISIN_2:%.*]]: index)
+// CHECK:   cf.br ^[[END_2:.*]]
+// CHECK: ^[[BD0_2:.*]]:
+// CHECK:   cf.br ^[[END_2]]
+// CHECK: ^[[END_2]]:
+// CHECK:   cf.br ^[[FUNCEND_2:.*]]
+// CHECK: ^[[FUNCEND_2]]:
 // CHECK:   return
 
 
 // CHECK: async.execute
+// CHECK-NOT: aie.mem
   %mem14 = aie.mem(%tile14) {
 
-// CHECK: [[CALLVAL:%.*]] = arith.constant [[BD0IVAL]]
-// CHECK: func.call @[[FUNCNAME]]([[CALLVAL]]
+// handle chain to ^end
+// CHECK: async.execute
+// CHECK-DAG: [[CHARG_2:%.*]] = arith.constant 0
+// CHECK-DAG: [[DIRARG_2:%.*]] = arith.constant 0
+// CHECK: func.call @[[MEM_FUNC_2]]([[CHARG_2]], [[DIRARG_2]]
+// CHECK: }
     aie.dma_start("MM2S", 0, ^bd0, ^end)
 
-// CHECK: }
+// dst block to ^bd0
+// CHECK-DAG: [[CHARG_1:%.*]] = arith.constant 0
+// CHECK-DAG: [[DIRARG_1:%.*]] = arith.constant 0
+// CHECK: func.call @[[MEM_FUNC_1]]([[CHARG_1]], [[DIRARG_1]]
     ^bd0:
         aie.next_bd ^end
     ^end:
         aie.end
   }
 }
+// CHECK: }
 

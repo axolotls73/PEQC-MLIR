@@ -28,6 +28,8 @@
 #include "mlir/Dialect/Async/IR/Async.h"
 #include "aie/Dialect/AIE/IR/AIEDialect.h"
 
+#include "aie/Dialect/AIE/IR/AIETargetModel.h"
+
 #include "VerifPasses.h"
 #include "VerifDialect.h"
 #include "VerifUtil.h"
@@ -49,6 +51,7 @@ private:
 
   uint32_t tile_id = 0;
   std::unordered_map<Value, int64_t> tile_id_map;
+  std::unordered_map<Value, Value> tile_dma_bd;
 
   uint32_t mem_id = 0;
 
@@ -195,12 +198,7 @@ public:
     return res.wasInterrupted() ? failure() : success();
   }
 
-
-  static void cloneBlocks(OpBuilder builder, BlockRange blocks) {
-
-  }
-
-  LogicalResult dmaStartToAsync(xilinx::AIE::MemOp mem_op) {
+  LogicalResult processDMA(xilinx::AIE::MemOp mem_op, Block* newblock) {
     for (auto& o : mem_op.getOps()) {
       if (!isa<
           xilinx::AIE::DMAStartOp,
@@ -214,7 +212,7 @@ public:
       }
     }
 
-    // create a list of blocks to copy
+    // create a list of blocks to copy to each new function
     auto& blocklist = mem_op.getBody().getBlocks();
     auto blocks = SmallVector<Block*>();
     for (auto& block : blocklist) {
@@ -229,116 +227,124 @@ public:
       mem_op.emitError("expected aie.mem to start with aie.dma_start and have >1 block");
       return failure();
     }
+    auto firststartop = dyn_cast<xilinx::AIE::DMAStartOp>(firstblockops.front());
+    assert(firststartop);
 
     // remove first block from list, since it doesn't need to be copied
     blocks.erase(&blocks.front());
 
     auto loc = mem_op.getLoc();
-    auto builder = OpBuilder(mem_op);
+
+    // each block gets its own new function of type (channel : index, channeldir : index) -> ()
+    std::unordered_map<Block*, func::FuncOp> block_to_func;
+
+    int block_id = 0;
     int64_t tile_id = tile_id_map[mem_op.getTile()];
-    std::string funcname = "tile_mem_" + std::to_string(tile_id);
-    auto funcop = builder.create<func::FuncOp>(loc, StringRef(funcname),
-        FunctionType::get(context, SmallVector<Type>{IndexType::get(context)}, SmallVector<Type>{}));
+    mem_op.walk([&] (xilinx::AIE::DMAStartOp op) {
+      auto builder = OpBuilder(mem_op);
 
-    llvm::errs() << funcop.getBlocks().size() << "\n";
-    Block* entryblock = funcop.addEntryBlock();
+      for (auto block : {op.getDest(), op.getChain()}) {
 
-    // map corresponding blocks, clone all ops
-    IRMapping map;
-    auto funcblocks = SmallVector<Block*>();
-    for (Block* block : blocks) {
-      auto newblock = funcop.addBlock();
-      map.map(block, newblock);
-      funcblocks.push_back(newblock);
-    }
-    for (auto [memblock, funcblock] : llvm::zip_equal(blocks, funcblocks)) {
-      builder.setInsertionPointToStart(funcblock);
-      for (auto& o : memblock->getOperations()) {
-        builder.clone(o, map);
+        //get or build func for block
+        func::FuncOp func = nullptr;
+        auto mapres = block_to_func.find(block);
+        if (mapres != block_to_func.end()) {
+          func = mapres->second;
+        }
+        else {
+          auto funcname = new std::string("tile_mem_" + std::to_string(tile_id) + "_" + std::to_string(block_id++));
+          // ^ leaked
+          auto functype = FunctionType::get(context,
+              SmallVector<Type>{IndexType::get(context), IndexType::get(context)}, SmallVector<Type>{});
+          builder.setInsertionPoint(mem_op);
+          auto funcop = builder.create<func::FuncOp>(loc, StringRef(funcname->c_str()), functype);
+          block_to_func[block] = funcop;
+          func = funcop;
+        }
+
+        // add calls to funcs
+        auto loc = op.getLoc();
+        builder.setInsertionPoint(op);
+        // first start op is the entry point: put inside new async
+        if (op == firststartop) {
+          builder.setInsertionPointToStart(newblock);
+        }
+
+        if (block == op.getChain()) {
+          auto asyncExec = builder.create<async::ExecuteOp>(loc,
+              SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
+            [&](OpBuilder &b, Location loc, ValueRange v) {
+              b.create<async::YieldOp>(loc, SmallVector<Value>{});
+            });
+          builder.setInsertionPointToStart(asyncExec.getBody());
+        }
+        // channeldir is 1 if copy in, 0 if copy out
+        int channeldir = op.getChannelDir() == xilinx::AIE::DMAChannelDir::S2MM;
+        Value channelval = builder.create<arith::ConstantIndexOp>(loc, op.getChannelIndex()).getResult();
+        Value dirval = builder.create<arith::ConstantIndexOp>(loc, channeldir).getResult();
+        builder.create<func::CallOp>(loc, func, SmallVector<Value>{channelval, dirval});
       }
-    }
 
-    // add return to the last block in funcop
-    Block* endblock = funcop.addBlock();
-    builder.setInsertionPointToStart(endblock);
-    builder.create<func::ReturnOp>(loc);
-
-    // replace all aie.end ops with a branch to return
-    funcop.walk([&] (xilinx::AIE::EndOp op) {
-      builder.setInsertionPoint(op);
-      builder.create<cf::BranchOp>(op.getLoc(), endblock);
       op.erase();
-
       return WalkResult::advance();
     });
 
-    // replace aie.next_bd with cf.br
-    funcop.walk([&] (xilinx::AIE::NextBDOp op) {
-      builder.setInsertionPoint(op);
-      builder.create<cf::BranchOp>(op.getLoc(), op.getDest());
-      op.erase();
-    });
+    for (auto [dstblock, funcop] : block_to_func) {
+      Block* entryblock = funcop.addEntryBlock();
+      auto builder = OpBuilder(funcop);
+      auto loc = funcop.getLoc();
 
-    int dma_id = 0;
-    Operation* prevbranch = nullptr;
-    auto processDMAStart = [&] (xilinx::AIE::DMAStartOp op) {
-      auto loc = op.getLoc();
-
-      int dst_id = dma_id++;
-      int chain_id = dma_id++;
-      for (auto [block, id] : llvm::zip_equal
-          (SmallVector<Block*>{op.getDest(), op.getChain()}, SmallVector<int>{dst_id, chain_id})) {
-
-        auto currentblock = entryblock;
-        // prevbranch -> not the first iteration
-        if (prevbranch != nullptr) {
-          currentblock = builder.createBlock(funcblocks[0],
-              SmallVector<Type>{IndexType::get(context)}, SmallVector<Location>{loc});
-          // adjust last branch to move to this one if false
-          builder.setInsertionPoint(prevbranch);
-          cf::CondBranchOp prevcfop = dyn_cast<cf::CondBranchOp>(prevbranch);
-          assert(prevcfop);
-          builder.create<cf::CondBranchOp>(loc, prevcfop.getCondition(),
-              prevcfop.getTrueDest(), SmallVector<Value>{},
-              currentblock, currentblock->getPrevNode()->getArgument(0));
-          prevbranch->erase();
+      // map corresponding blocks, clone all ops
+      IRMapping map;
+      auto funcblocks = SmallVector<Block*>();
+      for (Block* block : blocks) {
+        auto newblock = funcop.addBlock();
+        map.map(block, newblock);
+        funcblocks.push_back(newblock);
+      }
+      for (auto [memblock, funcblock] : llvm::zip_equal(blocks, funcblocks)) {
+        builder.setInsertionPointToStart(funcblock);
+        for (auto& o : memblock->getOperations()) {
+          builder.clone(o, map);
         }
-
-        builder.setInsertionPointToStart(currentblock);
-        Value blockarg = currentblock->getArgument(0);
-        Value idval = builder.create<arith::ConstantIndexOp>(loc, id).getResult();
-        Value cmpval = builder.create<arith::CmpIOp>(loc, arith::CmpIPredicate::eq,
-            blockarg, idval).getResult();
-
-        // handle chain block: spawn new thread with async.execute, then call function with
-        // the value for the chain block
-        if (block == op.getDest()) {
-          assert(chain_id != -1);
-          builder.create<async::ExecuteOp>(loc, SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
-              [&] (OpBuilder &b, Location loc, ValueRange v) {
-            Value dstval = b.create<arith::ConstantIndexOp>(loc, chain_id).getResult();
-            b.create<func::CallOp>(loc, funcop, SmallVector<Value>{dstval});
-            b.create<async::YieldOp>(loc, SmallVector<Value>{});
-          });
-        }
-
-        prevbranch = builder.create<cf::CondBranchOp>(loc, cmpval,
-              map.lookupOrDefault(block), endblock).getOperation();
       }
 
-      // replace aie.dma_start with function call
-      builder.setInsertionPoint(op);
-      Value callval = builder.create<arith::ConstantIndexOp>(loc, dst_id).getResult();
-      builder.create<func::CallOp>(loc, funcop, SmallVector<Value>{callval});
+      // add branch to block
+      builder.setInsertionPointToStart(entryblock);
+      builder.create<cf::BranchOp>(loc, map.lookupOrNull(dstblock));
 
-      return WalkResult::advance();
-    };
+      // add return to the last block in funcop
+      Block* endblock = funcop.addBlock();
+      builder.setInsertionPointToStart(endblock);
+      builder.create<func::ReturnOp>(loc);
 
-    auto res = mem_op.walk(processDMAStart);
-    if (res.wasInterrupted()) return failure();
+      // newly replaced dma_start blocks have no terminators, replace
+      // with a branch to endblock
+      for (auto& b : funcop.getBlocks()) {
+        assert(b.getOperations().size() > 0);
+        auto lastop = b.getOperations().end();
+        lastop--;
+        if (lastop->hasTrait<OpTrait::IsTerminator>()) continue;
+        builder.setInsertionPointToEnd(&b);
+        builder.create<cf::BranchOp>(funcop.getLoc(), endblock);
+      }
 
-    res = funcop.walk(processDMAStart);
-    if (res.wasInterrupted()) return failure();
+      // replace all aie.end ops with a branch to return
+      funcop.walk([&] (xilinx::AIE::EndOp op) {
+        builder.setInsertionPoint(op);
+        builder.create<cf::BranchOp>(op.getLoc(), endblock);
+        op.erase();
+
+        return WalkResult::advance();
+      });
+
+      // replace aie.next_bd with cf.br
+      funcop.walk([&] (xilinx::AIE::NextBDOp op) {
+        builder.setInsertionPoint(op);
+        builder.create<cf::BranchOp>(op.getLoc(), op.getDest());
+        op.erase();
+      });
+    }
 
     return success();
   }
@@ -346,25 +352,19 @@ public:
   LogicalResult processMem() {
     auto res = module.walk([&] (xilinx::AIE::MemOp op) {
 
-      auto res = dmaStartToAsync(op);
-module.emitRemark();
-      if (res.failed()) return WalkResult::interrupt();
-
       auto builder = OpBuilder(op);
-      builder.create<async::ExecuteOp>(op.getLoc(),
+      builder.setInsertionPointAfter(op);
+      auto asyncExec = builder.create<async::ExecuteOp>(op.getLoc(),
           SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
           [&] (OpBuilder &b, Location loc, ValueRange v) {
-        IRMapping map;
-        // copy first 2 ops
-        ///FIXME: probably a bad workaround -- the goal here is to replace
-        /// the aie.mem op with an async.execute while only keeping the newly
-        /// added function call
-        for (const auto& [i, o] : llvm::enumerate(op.getBody().getOps())) {
-          if (i > 1) break;
-          b.clone(o, map);
-        }
         b.create<async::YieldOp>(op.getLoc(), SmallVector<Value>{});
       });
+
+      auto res = processDMA(op, asyncExec.getBody());
+      LLVM_DEBUG(
+        module.emitRemark("module after dmaStartToAsync");
+      );
+      if (res.failed()) return WalkResult::interrupt();
 
       op.erase();
 
