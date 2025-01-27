@@ -40,6 +40,9 @@ namespace mlir::verif {
 
 #define DEBUG_TYPE "verif-aie"
 
+#define DEFAULT_NUM_DMA_CHANNELS 8
+///TODO: figure out!!!
+
 namespace {
 
 class AIEConverter {
@@ -49,10 +52,12 @@ private:
   MLIRContext* context;
   ModuleOp module;
 
-  uint32_t tile_id = 0;
   std::unordered_map<Value, int64_t> tile_id_map;
-  std::unordered_map<Value, Value> tile_dma_bd;
+  std::unordered_map<Value, std::string> tile_dma_buffer;
+  std::unordered_map<Value, Type> tile_dma_type;
 
+  uint32_t current_tile_id = 0;
+  uint32_t current_buffer_id = 0;
   uint32_t mem_id = 0;
 
 public:
@@ -62,8 +67,40 @@ public:
   // assign each tile value a unique id, remove tile ops
   LogicalResult processTiles() {
     auto res = module.walk([&] (xilinx::AIE::TileOp op) {
-      tile_id_map[op.getResult()] = tile_id++;
-      // op.erase();
+      auto tile_id = current_tile_id++;
+      tile_id_map[op.getResult()] = tile_id;
+
+      // infer type of dma buffer
+      auto memop = op.getMemOp();
+      if (!memop) return WalkResult::advance();
+      Type elt_type = nullptr;
+      auto walkres = memop.walk([&] (xilinx::AIE::DMABDOp op) {
+        auto buffertype = op.getBuffer().getType();
+        if (!elt_type) {
+          elt_type = buffertype.getElementType();
+          return WalkResult::advance();
+        }
+        if (elt_type != buffertype) {
+          memop.emitError("expected all aie.mem ops to only use buffers of a single type");
+          return WalkResult::interrupt();
+        }
+        return WalkResult::advance();
+      });
+      if (walkres.wasInterrupted()) return WalkResult::interrupt();
+      if (!elt_type) return WalkResult::advance();
+
+      // create dma buffer if used by dma_bd ops
+      auto builder = OpBuilder(op);
+      auto loc = op.getLoc();
+      auto dynamic_elt_type =
+          MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type);
+      auto mrtype = MemRefType::get(SmallVector<int64_t>{DEFAULT_NUM_DMA_CHANNELS}, dynamic_elt_type);
+      std::string dma_name = "tile_" + std::to_string(tile_id) + "_dma";
+      builder.create<memref::GlobalOp>(loc, StringAttr::get(context, dma_name),
+          StringAttr::get(context, "private"),TypeAttr::get(mrtype),
+          Attribute{}, UnitAttr{}, IntegerAttr{});
+      tile_dma_buffer[op.getResult()] = dma_name;
+      tile_dma_type[op.getResult()] = mrtype;
 
       return WalkResult::advance();
     });
@@ -177,7 +214,7 @@ public:
   }
 
   LogicalResult processBuffers() {
-    auto res = module.walk([] (xilinx::AIE::BufferOp op) {
+    auto res = module.walk([&] (xilinx::AIE::BufferOp op) {
       LLVM_DEBUG(
         llvm::errs() << "processing buffer op: ";
         op.emitRemark();
@@ -189,13 +226,64 @@ public:
       }
 
       auto builder = OpBuilder(op);
-      Value mres = builder.create<memref::AllocOp>(op.getLoc(), op.getResult().getType()).getResult();
-      op.getResult().replaceAllUsesWith(mres);
+      Value res = op.getResult();
+      // Value mres = builder.create<memref::AllocOp>(op.getLoc(), op.getResult().getType()).getResult();
+      std::string bufname = "buffer_" + std::to_string(current_buffer_id++);
+      builder.create<memref::GlobalOp>(op.getLoc(), StringAttr::get(context, bufname),
+          StringAttr::get(context, "private"), TypeAttr::get(res.getType()),
+          Attribute{}, UnitAttr{}, IntegerAttr{});
+
+      // replace buffer value used as memref to memref.global
+      SmallVector<OpOperand*> uses;
+      SmallVector<Value> replacevals;
+      for (auto& use : res.getUses()) {
+        auto user = use.getOwner();
+        builder.setInsertionPoint(user);
+        Value newbuf = builder.create<memref::GetGlobalOp>(user->getLoc(), res.getType(), bufname).getResult();
+        uses.push_back(&use);
+        replacevals.push_back(newbuf);
+        ///TODO: this invalidates iterator? weird
+        // use.assign(newbuf);
+      }
+      for (auto [use, replaceval] : llvm::zip_equal(uses, replacevals)) {
+        use->assign(replaceval);
+      }
+
       op.erase();
 
       return WalkResult::advance();
     });
     return res.wasInterrupted() ? failure() : success();
+  }
+
+  LogicalResult processDMABD(xilinx::AIE::DMABDOp op, Value tileval, Value channel, Value inout) {
+    auto builder = OpBuilder(op);
+    auto loc = op.getLoc();
+
+    // get dma buffer for channel
+    assert(tileval);
+    assert(tile_dma_buffer.count(tileval));
+    assert(tile_dma_type.count(tileval));
+    Value bufferarr = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_buffer[tileval]);
+    Value buffer = builder.create<memref::LoadOp>(loc, bufferarr, SmallVector<Value>{channel});
+    Value casted_buffer = builder.create<memref::CastOp>(loc, op.getBuffer().getType(), buffer);
+
+    Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0);
+    Value cmpval = builder.create<arith::CmpIOp>(loc, arith::CmpIPredicate::eq, cst_0, inout).getResult();
+    builder.create<scf::IfOp>(loc, cmpval,
+      // then block: handle copy out
+      [&] (OpBuilder b, Location loc) {
+        b.create<memref::CopyOp>(loc, op.getBuffer(), casted_buffer);
+        b.create<scf::YieldOp>(loc, SmallVector<Value>{});
+      },
+      // else block: handle copy in
+      [&] (OpBuilder b, Location loc) {
+        b.create<memref::CopyOp>(loc, casted_buffer, op.getBuffer());
+        b.create<scf::YieldOp>(loc, SmallVector<Value>{});
+      });
+
+    op.erase();
+    return success();
   }
 
   LogicalResult processDMA(xilinx::AIE::MemOp mem_op, Block* newblock) {
@@ -239,6 +327,7 @@ public:
     std::unordered_map<Block*, func::FuncOp> block_to_func;
 
     int block_id = 0;
+    assert(tile_id_map.count(mem_op.getTile()));
     int64_t tile_id = tile_id_map[mem_op.getTile()];
     mem_op.walk([&] (xilinx::AIE::DMAStartOp op) {
       auto builder = OpBuilder(mem_op);
@@ -329,6 +418,16 @@ public:
         builder.create<cf::BranchOp>(funcop.getLoc(), endblock);
       }
 
+      // handle dma_bd ops
+      auto walkres = funcop.walk([&] (xilinx::AIE::DMABDOp op) {
+        assert(funcop.getArguments().size() == 2);
+        Value channel = funcop.getArgument(0);
+        Value inout = funcop.getArgument(1);
+        if (processDMABD(op, mem_op.getTile(), channel, inout).failed()) return WalkResult::interrupt();
+        else return WalkResult::advance();
+      });
+      if (walkres.wasInterrupted()) return failure();
+
       // replace all aie.end ops with a branch to return
       funcop.walk([&] (xilinx::AIE::EndOp op) {
         builder.setInsertionPoint(op);
@@ -400,6 +499,12 @@ public:
 
     res = ac.processBuffers();
     if (res.failed()) return signalPassFailure();
+
+    // remove tile ops
+    module.walk([] (xilinx::AIE::TileOp op) {
+      op.erase();
+      return WalkResult::advance();
+    });
 
   }
 };
