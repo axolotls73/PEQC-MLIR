@@ -1,52 +1,123 @@
 # PEQC-MLIR
 
+<!-- todo -->
 
 ## Building PEQC-MLIR
 
-To build, source the script below:
+
+To build PEQC-MLIR, first install its dependencies: LLVM version 20.0.0git, MLIR-AIR commit 07174f8a, and MLIR-AIE commit c8dafd9.
+Instructions to build a docker image with these installed can be found
+[here](https://github.com/pouchet/docker-ubuntu-xilinx-dev).
+
+Then,
 
 ```sh
-source install-and-build.sh [path to mlir-air]
+source install-and-build.sh [path to llvm] [path to mlir-air]
+# e.g. source install-and-build.sh /opt/mlir-air/llvm /opt/mlir-air
 ```
 
-This script installs
+This script first installs
 [PAST 0.7.2](https://sourceforge.net/projects/pocc/)
-and adds `past-0.7.2/src` to your `PATH`: this is needed for tests.
+and adds `past-0.7.2/src` to your `PATH` (this is needed for tests):
+
+```sh
+wget -O past-0.7.2.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/past-0.7.2.tar.gz/download'
+tar -xf past-0.7.2.tar.gz
+cd past-0.7.2
+./configure
+make
+pastpath=`realpath src`
+export PATH="$pastpath:$PATH"
+cd ..
+```
+
+Then defines variables needed for the build (arguments in the script):
+
+```sh
+AIR_DIR="$2"
+PAST_DIR=`realpath past-0.7.2`
+LLVM_DIR="$1"
+```
+
+Then configures and builds via CMake:
+
+```sh
+mkdir -p build && cd build
+cmake -G Ninja .. \
+  -DLLVM_DIR=$LLVM_DIR/build/lib/cmake/llvm \
+  -DMLIR_DIR=$LLVM_DIR/build/lib/cmake/mlir \
+  -DAIR_DIR=$AIR_DIR \
+  -DPAST_DIR=$PAST_DIR
+
+cmake --build . --target mlir-doc
+cmake --build . --target check-verif
+```
+
+Currently, around 16 tests will fail after building, but the executables `build/bin/verif-opt` and `build/bin/verif-translate` should exist after running these commands.
+
+### Troubleshooting
+
+
+
 
 ## Usage
 
-An end-to-end example can be found in [`examples/README.md`](examples/README.md).
+`peqc-mlir.py` (-h for options) is a wrapper script for the other tools below -- it takes two MLIR files and interprets them to attempt to prove that they must produce the same outputs for the same inputs.
+The files taken as input have the following restrictions:
 
-<!-- [link](#conversion-passes-verif-opt) -->
+* the MLIR file must have a `func.func @main () -> ()` to serve as the entry point of the program (see files in `examples/matmul` for examples).
+* variables checked for equivalence must be declared as `memref.global` variables.
 
-## Supported operations
+Example usage and output:
 
-### Translator (`verif-translate`)
+```sh
+$> ./peqc-mlir.py examples/matmul/matmul-linalg.mlir examples/matmul/matmul-tile-and-parallelize.mlir A,B,C
+
+YES, examples/matmul/matmul-linalg.mlir and examples/matmul/matmul-tile-and-parallelize.mlir are equivalent
+```
+
+More detailed information can be found in [`examples/README.md`](examples/README.md) and below.
+
+
+## MLIR-to-C translation
+
+The `verif-translate` tool translates the supported MLIR operations below to C files interpretable by PEQC.
+
+Example usage:
+
+```sh
+verif-translate --translate-to-past [input file]
+```
+
+### Supported operations
 
 * operations in the `verif` dialect, listed [here](#operations-in-the-verif-dialect)
 * basic `arith` ops: constant, add, mul, div
-* `scf.for`, `yield`
-* `func.func`, `return`
-* `memref.alloc`
-* `memref.dealloc`
-* `memref.load`
-* `memref.store`
+* `scf.for`, `scf.yield`
+* `scf.if`
+* `func.func`, `func.call`, `func.return`
+* `memref.alloc`, `memref.alloca`, `memref.dealloc`
+* `memref.global`, `memref.get_global`
+* `memref.load`, `memref.store`
 * `memref.copy`
 * `memref.subview` restriction: stride 1
-* `async.create_group`
-* `async.add_to_group`
-* `async.await_all`
 * `async.execute`, `yield`
+* `async.create_group`, `async.add_to_group`, `async.await_all`
 
-### Converter (`verif-opt`)
+
+## MLIR-to-MLIR conversion
+
+The `verif-opt` tool converts operations not supported by the translator to a combination of operations that are supported, using the passes defined
+[here](#conversion-passes-verif-opt).
+
+### Supported operations
 
 * `air.execute`
-* `air.herd`
-* `air.segment`
-* `air.launch`
+* `air.herd`, `air.segment`, `air.launch`
 * `air.dma_memcpy_nd` restriction: src and dst same rank
 * `air.channel`
-* `scf.parallel` restriction: `init` types have to implement `
+* `scf.parallel` restriction: `init` types have to implement `MemRefElementTypeInterface`
+
 
 
 ## Conversion passes (`verif-opt`)

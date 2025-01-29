@@ -1,5 +1,5 @@
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
     echo "usage: $0 [mlir-air directory]"
     return
 fi
@@ -15,9 +15,9 @@ if [ ! -d past-0.7.2 ]; then
     cd ..
 fi
 
-AIR_DIR="$1"
+AIR_DIR="$2"
 PAST_DIR=`realpath past-0.7.2`
-LLVM_DIR=$AIR_REPO/llvm
+LLVM_DIR="$1"
 
 # rm -r build CMakeFiles
 mkdir -p build && cd build
