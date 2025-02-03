@@ -13,9 +13,13 @@
  *
  */
 
+#ifndef PASTTRANSLATOR_H
+#define PASTTRANSLATOR_H
+
+
 #include "past/past.h"
 
-#include "mlir/IR/BuiltinDialect.h"
+#include "mlir/IR/Dialect.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Math/IR/Math.h"
@@ -25,7 +29,6 @@
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/Async/IR/Async.h"
-#include "air/Dialect/AIR/AIRDialect.h"
 
 #include "mlir/Tools/mlir-translate/MlirTranslateMain.h"
 #include "mlir/Tools/mlir-translate/Translation.h"
@@ -35,6 +38,9 @@
 #include "VerifOps.h"
 
 #define DEBUG_TYPE "verif-translate"
+
+
+namespace mlir::verif {
 
 class PastTranslator {
 
@@ -225,3 +231,7 @@ class PastTranslator {
   s_past_node_t* translate_unsupported(Operation* op);
 
 };
+
+} // namespace mlir::verif
+
+#endif // PASTTRANSLATOR_H

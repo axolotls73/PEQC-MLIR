@@ -14,6 +14,13 @@ add_mlir_doc(VerifDialect VerifDialect Dialect/ -gen-dialect-doc)
 add_mlir_doc(VerifOps VerifOps Dialect/ -gen-op-doc)
 add_mlir_doc(VerifTypes VerifTypes Dialect/ -gen-typedef-doc)
 add_mlir_doc(VerifPasses VerifPasses Dialect/ -gen-pass-doc)
+add_mlir_doc(VerifAirPasses VerifAirPasses Dialect/ -gen-pass-doc)
+
+if (COMPILE_WITH_AIR)
+  set(LLVM_TARGET_DEFINITIONS VerifAirPasses.td)
+  mlir_tablegen(VerifAirPasses.h.inc --gen-pass-decls)
+  add_public_tablegen_target(MLIRVerifAirPassesIncGen)
+endif()
 
 set(LLVM_TARGET_DEFINITIONS VerifPasses.td)
 mlir_tablegen(VerifPasses.h.inc --gen-pass-decls)

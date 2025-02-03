@@ -30,13 +30,13 @@
 
 #include "aie/Dialect/AIE/IR/AIETargetModel.h"
 
-#include "VerifPasses.h"
+#include "VerifAirPasses.h"
 #include "VerifDialect.h"
 #include "VerifUtil.h"
 
-namespace mlir::verif {
+namespace mlir::verif::air {
 #define GEN_PASS_DEF_VERIFCONVERTAIE
-#include "VerifPasses.h.inc"
+#include "VerifAirPasses.h.inc"
 
 #define DEBUG_TYPE "verif-aie"
 

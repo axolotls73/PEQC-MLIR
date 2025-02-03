@@ -3,6 +3,13 @@ project(verif-dialect LANGUAGES CXX C)
 
 set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
 
+set(COMPILE_WITH_AIR OFF)
+if (DEFINED AIR_DIR)
+  set(COMPILE_WITH_AIR ON)
+  add_definitions(-DCOMPILE_WITH_AIR)
+endif()
+
+
 set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard to conform to")
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
@@ -39,21 +46,24 @@ set(VERIF_SOURCE_DIR ${PROJECT_SOURCE_DIR})
 set(VERIF_BINARY_DIR ${PROJECT_BINARY_DIR})
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})
-include_directories(${AIR_DIR}/mlir/include)
-include_directories(${AIR_DIR}/build-xrt/mlir/include)
-include_directories(${AIR_DIR}/install-xrt/include)
-include_directories(${AIR_DIR}/mlir-aie/include)
-include_directories(${AIR_DIR}/mlir-aie/build/include)
 include_directories(${VERIF_SOURCE_DIR}/include)
 include_directories(${VERIF_BINARY_DIR}/include)
 include_directories(${PAST_DIR}/past/include)
 link_directories(${LLVM_BUILD_LIBRARY_DIR})
-link_directories(${AIR_DIR}/build-xrt/lib)
-link_directories(${AIR_DIR}/build-xrt/mlir/lib)
-link_directories(${AIR_DIR}/mlir-aie/build/lib)
-link_libraries(${AIR_DIR}/mlir-aie/build/lib/libAIE.a)
-# ^ this one needs to be specified separately, no idea why
 add_definitions(${LLVM_DEFINITIONS})
+
+if (COMPILE_WITH_AIR)
+  include_directories(${AIR_DIR}/mlir/include)
+  include_directories(${AIR_DIR}/build-xrt/mlir/include)
+  include_directories(${AIR_DIR}/install-xrt/include)
+  include_directories(${AIR_DIR}/mlir-aie/include)
+  include_directories(${AIR_DIR}/mlir-aie/build/include)
+  link_directories(${AIR_DIR}/build-xrt/lib)
+  link_directories(${AIR_DIR}/build-xrt/mlir/lib)
+  link_directories(${AIR_DIR}/mlir-aie/build/lib)
+  link_libraries(${AIR_DIR}/mlir-aie/build/lib/libAIE.a)
+  # ^ this one needs to be specified separately, no idea why
+endif()
 
 set(libpast ${PAST_DIR}/past/.libs/libpast.so)
 

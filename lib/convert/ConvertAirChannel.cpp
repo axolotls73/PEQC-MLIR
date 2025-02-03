@@ -26,13 +26,13 @@
 #include "mlir/Dialect/Async/IR/Async.h"
 #include "air/Dialect/AIR/AIRDialect.h"
 
-#include "VerifPasses.h"
+#include "VerifAirPasses.h"
 #include "VerifDialect.h"
 #include "VerifUtil.h"
 
-namespace mlir::verif {
+namespace mlir::verif::air {
 #define GEN_PASS_DEF_VERIFCONVERTCHANNEL
-#include "VerifPasses.h.inc"
+#include "VerifAirPasses.h.inc"
 
 #define DEBUG_TYPE "verif-channel"
 

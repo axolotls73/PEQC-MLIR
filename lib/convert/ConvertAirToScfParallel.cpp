@@ -1,5 +1,5 @@
 /*
- * ConvertToScfParallel.cpp: This file is part of the PEQC-MLIR project.
+ * ConvertAirToScfParallel.cpp: This file is part of the PEQC-MLIR project.
  *
  * Copyright (C) 2024 Colorado State University
  *
@@ -26,13 +26,13 @@
 #include "mlir/Dialect/Async/IR/Async.h"
 #include "air/Dialect/AIR/AIRDialect.h"
 
-#include "VerifPasses.h"
+#include "VerifAirPasses.h"
 #include "VerifDialect.h"
 #include "VerifUtil.h"
 
-namespace mlir::verif {
+namespace mlir::verif::air {
 #define GEN_PASS_DEF_VERIFAIRTOSCFPAR
-#include "VerifPasses.h.inc"
+#include "VerifAirPasses.h.inc"
 
 #define DEBUG_TYPE "verif-convert"
 

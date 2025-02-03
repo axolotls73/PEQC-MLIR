@@ -21,12 +21,19 @@
 
 #include "VerifDialect.h"
 #include "VerifPasses.h"
-#include "air/Dialect/AIR/AIRDialect.h"
-#include "aie/Dialect/AIE/IR/AIEDialect.h"
+
+#ifdef COMPILE_WITH_AIR
+  #include "VerifAirPasses.h"
+  #include "air/Dialect/AIR/AIRDialect.h"
+  #include "aie/Dialect/AIE/IR/AIEDialect.h"
+#endif
 
 int main(int argc, char **argv) {
   // mlir::registerAllPasses();
   mlir::verif::registerPasses();
+#ifdef COMPILE_WITH_AIR
+  mlir::verif::air::registerPasses();
+#endif
   mlir::registerAsyncParallelForPass();
 
   mlir::DialectRegistry registry;
@@ -39,12 +46,14 @@ int main(int argc, char **argv) {
       mlir::memref::MemRefDialect,
       mlir::async::AsyncDialect,
       mlir::bufferization::BufferizationDialect,
-      mlir::tensor::TensorDialect
+      mlir::tensor::TensorDialect,
+      mlir::LLVM::LLVMDialect
     >();
 
+#ifdef COMPILE_WITH_AIR
   registry.insert<xilinx::air::airDialect>();
   registry.insert<xilinx::AIE::AIEDialect>();
-  registry.insert<mlir::LLVM::LLVMDialect>();
+#endif
 
   // Add the following to include *all* MLIR Core dialects, or selectively
   // include what you need like above. You only need to register dialects that

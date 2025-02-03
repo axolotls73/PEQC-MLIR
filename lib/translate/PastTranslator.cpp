@@ -22,6 +22,8 @@
 #define DEBUG_TYPE "verif-translate"
 
 
+namespace mlir::verif {
+
 s_symbol_t* PastTranslator::getSymbol(const std::string name) {
   return symbol_get_or_insert(symbolTable, name.c_str(), nullptr);
 }
@@ -166,10 +168,6 @@ std::string PastTranslator::getTypeName(const Type& t) {
     return ret;
   }
 
-  ///TODO: remove!! workaround!!
-  else if (auto tt = dyn_cast<xilinx::air::AsyncTokenType>(t)) {
-    return "int";
-  }
   else if (auto tt = dyn_cast<async::TokenType>(t)) {
     return "int";
   }
@@ -1359,3 +1357,5 @@ s_past_node_t* PastTranslator::translate(ModuleOp op) {
   s_past_node_t* ret = past_node_root_create(symbolTable, nodeChain(translation));
   return ret;
 }
+
+} // namespace mlir::verif

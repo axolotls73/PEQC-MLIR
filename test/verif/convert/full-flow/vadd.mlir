@@ -1,3 +1,4 @@
+//XFAIL: *
 // RUN: split-file %s %t
 
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \

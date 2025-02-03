@@ -26,10 +26,11 @@
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Math/IR/Math.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
+#include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
+#include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/Async/IR/Async.h"
-#include "air/Dialect/AIR/AIRDialect.h"
 
 #include "mlir/Tools/mlir-translate/MlirTranslateMain.h"
 #include "mlir/Tools/mlir-translate/Translation.h"
@@ -77,7 +78,7 @@ namespace verif {
 int main(int argc, char **argv) {
 
   mlir::TranslateFromMLIRRegistration withdescription(
-      "translate-to-past", "todo",
+      "translate-to-past", "Translate supported operations to interpretable C",
       [](mlir::Operation *op, llvm::raw_ostream &output) {
         return mlir::verif::translateToPast(op, output, true);
       },
@@ -87,11 +88,10 @@ int main(int argc, char **argv) {
             mlir::arith::ArithDialect,
             mlir::math::MathDialect,
             mlir::scf::SCFDialect,
-            cf::ControlFlowDialect,
+            mlir::cf::ControlFlowDialect,
             mlir::func::FuncDialect,
             mlir::memref::MemRefDialect,
             mlir::async::AsyncDialect,
-            xilinx::air::airDialect,
             mlir::LLVM::LLVMDialect
           >();
       });
