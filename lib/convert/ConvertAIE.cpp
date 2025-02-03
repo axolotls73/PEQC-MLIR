@@ -54,7 +54,7 @@ private:
 
   std::unordered_map<Value, int64_t> tile_id_map;
   std::unordered_map<Value, std::string> tile_dma_buffer;
-  std::unordered_map<Value, Type> tile_dma_type;
+  std::unordered_map<Value, MemRefType> tile_dma_type;
 
   uint32_t current_tile_id = 0;
   uint32_t current_buffer_id = 0;
@@ -72,22 +72,25 @@ public:
 
       // infer type of dma buffer
       auto memop = op.getMemOp();
-      if (!memop) return WalkResult::advance();
       Type elt_type = nullptr;
-      auto walkres = memop.walk([&] (xilinx::AIE::DMABDOp op) {
-        auto buffertype = op.getBuffer().getType();
-        if (!elt_type) {
-          elt_type = buffertype.getElementType();
+      if (memop) {
+        auto walkres = memop.walk([&] (xilinx::AIE::DMABDOp op) {
+          auto buffertype = op.getBuffer().getType();
+          if (!elt_type) {
+            elt_type = buffertype.getElementType();
+            return WalkResult::advance();
+          }
+          if (elt_type != buffertype) {
+            memop.emitError("expected all aie.mem ops to only use buffers of a single type");
+            return WalkResult::interrupt();
+          }
           return WalkResult::advance();
-        }
-        if (elt_type != buffertype) {
-          memop.emitError("expected all aie.mem ops to only use buffers of a single type");
-          return WalkResult::interrupt();
-        }
-        return WalkResult::advance();
-      });
-      if (walkres.wasInterrupted()) return WalkResult::interrupt();
-      if (!elt_type) return WalkResult::advance();
+        });
+        if (walkres.wasInterrupted()) return WalkResult::interrupt();
+      }
+
+      // default type if not inferred
+      if (!elt_type) elt_type = IndexType::get(context);
 
       // create dma buffer if used by dma_bd ops
       auto builder = OpBuilder(op);
@@ -102,6 +105,54 @@ public:
       tile_dma_buffer[op.getResult()] = dma_name;
       tile_dma_type[op.getResult()] = mrtype;
 
+      return WalkResult::advance();
+    });
+    return res.wasInterrupted() ? failure() : success();
+  }
+
+  LogicalResult processFlows() {
+    auto res = module.walk([&] (xilinx::AIE::FlowOp op) {
+      auto loc = op.getLoc();
+      auto builder = OpBuilder(op);
+
+      if (op.getSourceBundle() != xilinx::AIE::WireBundle::DMA ||
+          op.getDestBundle() != xilinx::AIE::WireBundle::DMA) {
+        op.emitError("only DMA aie.flows supported");
+        return WalkResult::interrupt();
+      }
+
+      // for (auto tile)
+
+      // get dma globals
+      Value srctile = op.getSource();
+      Value dsttile = op.getDest();
+      assert(tile_dma_buffer.count(srctile) && tile_dma_type.count(srctile));
+      assert(tile_dma_buffer.count(dsttile) && tile_dma_type.count(dsttile));
+      if (tile_dma_type[srctile] != tile_dma_type[dsttile]) {
+        op.emitError("aie.flow: source and dest DMA buffers don't have the same type");
+        return WalkResult::interrupt();
+      }
+      MemRefType mrelt_type = dyn_cast<MemRefType>(tile_dma_type[srctile].getElementType());
+      assert(mrelt_type); // tile_dma_types should be memrefs of memrefs
+      Type elt_type = mrelt_type.getElementType();
+
+      // allocate and cast memref for flow
+      ///TODO: type??? both size and element: will get casted anyway but for completeness
+      auto mrtype = MemRefType::get(SmallVector<int64_t>{0}, elt_type);
+      Value flowarr = builder.create<memref::AllocOp>(loc, mrtype);
+      Value cflowarr = builder.create<memref::CastOp>
+          (loc, MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type), flowarr).getResult();
+
+      // store flowarr in dma globals
+      for (auto [tile, channel] : llvm::zip_equal(
+            SmallVector<Value>{srctile, dsttile}, SmallVector<int32_t>{op.getSourceChannel(), op.getDestChannel()})) {
+        auto buf = builder.create<memref::GetGlobalOp>(loc,
+            tile_dma_type[tile], tile_dma_buffer[tile]).getResult();
+        Value index = builder.create<arith::ConstantIndexOp>(loc, channel);
+        builder.create<memref::StoreOp>(loc, cflowarr, buf, SmallVector<Value>{index});
+      }
+
+      op.erase();
       return WalkResult::advance();
     });
     return res.wasInterrupted() ? failure() : success();
@@ -489,6 +540,9 @@ public:
     if (res.failed()) return signalPassFailure();
 
     res = ac.processMem();
+    if (res.failed()) return signalPassFailure();
+
+    res = ac.processFlows();
     if (res.failed()) return signalPassFailure();
 
     res = ac.processLocks();
