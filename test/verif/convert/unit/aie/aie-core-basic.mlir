@@ -1,3 +1,4 @@
+// REQUIRES: air
 // RUN: verif-opt --verif-convert-aie %s | FileCheck %s
 
 module {

@@ -1,3 +1,4 @@
+// REQUIRES: air
 // RUN: split-file %s %t
 
 // RUN: verif-opt --verif-air-convert-channel %t/put-allow-no-indices-broadcast.mlir

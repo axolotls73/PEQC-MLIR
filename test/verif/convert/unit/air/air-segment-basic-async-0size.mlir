@@ -1,3 +1,4 @@
+// REQUIRES: air
 // RUN: verif-opt --verif-air-to-scf-par %s | FileCheck %s
 
 module {

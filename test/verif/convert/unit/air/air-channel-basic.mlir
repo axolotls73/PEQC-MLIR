@@ -1,3 +1,4 @@
+// REQUIRES: air
 // RUN: verif-opt --verif-air-convert-channel %s | FileCheck %s
 
 // CHECK: module

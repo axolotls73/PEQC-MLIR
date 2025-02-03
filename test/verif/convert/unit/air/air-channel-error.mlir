@@ -1,3 +1,4 @@
+// REQUIRES: air
 // RUN: split-file %s %t
 
 // RUN: not verif-opt --verif-air-convert-channel %t/size-not2.mlir

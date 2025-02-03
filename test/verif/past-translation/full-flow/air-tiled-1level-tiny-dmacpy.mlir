@@ -1,3 +1,4 @@
+// REQUIRES: air
 // RUN: split-file %s %t && \
 // RUN: air-opt --convert-linalg-to-affine-loops --lower-affine %t/input.mlir > %t/input-lowered.mlir
 // RUN: verif-opt --verif-air-dma-to-memref --verif-scf-parallel-to-async %t/input-lowered.mlir > %t/conversion.mlir && \

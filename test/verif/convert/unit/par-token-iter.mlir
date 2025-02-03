@@ -1,3 +1,4 @@
+// REQUIRES: air
 //XFAIL: *
 // COM: not sure if we actually need to support this case: scf.parallel with
 // COM: a token accumulator. weird pattern and not present in current driver

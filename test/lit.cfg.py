@@ -64,6 +64,9 @@ tools = [
 
 llvm_config.add_tool_substitutions(tools, tool_dirs)
 
+if 'AIR' in lit_config.params:
+    config.available_features.add('air')
+
 llvm_config.with_environment(
     "PYTHONPATH",
     [

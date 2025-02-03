@@ -1,3 +1,4 @@
+// REQUIRES: air
 // RUN: verif-opt --verif-air-execute-to-async %s | FileCheck %s
 
 module {

@@ -1,3 +1,4 @@
+// REQUIRES: air
 //XFAIL: *
 // RUN: split-file %s %t
 

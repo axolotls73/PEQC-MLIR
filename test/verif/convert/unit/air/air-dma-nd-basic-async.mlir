@@ -1,3 +1,4 @@
+// REQUIRES: air
 // RUN: verif-opt --verif-air-dma-to-memref %s | FileCheck %s
 
 module {
