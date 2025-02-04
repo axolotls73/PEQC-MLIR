@@ -1,24 +1,27 @@
 # PEQC-MLIR
 
-<!-- todo -->
+
 
 ## Building PEQC-MLIR
 
+### Prerequisites
 
-To build PEQC-MLIR, first install its dependencies: LLVM version 20.0.0git, MLIR-AIR commit 07174f8a, and MLIR-AIE commit c8dafd9.
+To build PEQC-MLIR, first install its dependencies: LLVM version 20.0.0git,
+and optionally MLIR-AIR commit 07174f8a and MLIR-AIE commit c8dafd9.
 Instructions to build a docker image with these installed can be found
 [here](https://github.com/pouchet/docker-ubuntu-xilinx-dev).
 
-Then,
+#### MLIR-AIR
 
-```sh
-source install-and-build.sh [path to llvm] [path to mlir-air]
-# e.g. source install-and-build.sh /opt/mlir-air/llvm /opt/mlir-air
-```
+MLIR_AIR is an optional dependency
 
-This script first installs
-[PAST 0.7.2](https://sourceforge.net/projects/pocc/)
-and adds `past-0.7.2/src` to your `PATH` (this is needed for tests):
+installing air and past instructions, copy pasted (eg polygeist repo)
+
+#### PAST/PEQC
+
+To install
+[PAST 0.7.2](https://sourceforge.net/projects/pocc/),
+run the commands below, and add `past-0.7.2/src` to your `PATH` (this is needed for tests):
 
 ```sh
 wget -O past-0.7.2.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/past-0.7.2.tar.gz/download'
@@ -26,54 +29,128 @@ tar -xf past-0.7.2.tar.gz
 cd past-0.7.2
 ./configure
 make
+
 pastpath=`realpath src`
 export PATH="$pastpath:$PATH"
 cd ..
 ```
 
-Then defines variables needed for the build (arguments in the script):
 
-```sh
-AIR_DIR="$2"
-PAST_DIR=`realpath past-0.7.2`
-LLVM_DIR="$1"
-```
+### Building
 
-Then configures and builds via CMake:
+After installing the prerequisites, run the commands below to build PEQC-MLIR with the following substitutions:
+
+* `[llvm-cmake]` replaced with LLVM's CMake configuration directory, e.g. `/opt/mlir-air/llvm/build/lib/cmake`.
+* `[air-repo]` replaced with the MLIR-AIR project root, e.g. `/opt/mlir-air`. This line should be omitted if compiling without air.
+* `[past]` replaced with the location of PAST/PEQC, e.g. `./past-0.7.2`.
 
 ```sh
 mkdir -p build && cd build
 cmake -G Ninja .. \
-  -DLLVM_DIR=$LLVM_DIR/build/lib/cmake/llvm \
-  -DMLIR_DIR=$LLVM_DIR/build/lib/cmake/mlir \
-  -DAIR_DIR=$AIR_DIR \
-  -DPAST_DIR=$PAST_DIR
+  -DLLVM_DIR=[llvm-cmake]/llvm \
+  -DMLIR_DIR=[llvm-cmake]/mlir \
+  -DAIR_DIR=[air-repo] \
+  -DPAST_DIR=[past]
 
 cmake --build . --target mlir-doc
 cmake --build . --target check-verif
+```
+
+If `AIR_DIR` isn't passed to CMake as a definition, PEQC-MLIR will be built without MLIR-AIR passes.
+
+
+This script downloads and installs PAST/PEQC in the current directory (as described
+[above](#pastpeqc)),
+then configures and builds via CMake
+
+```sh
+source install-and-build.sh [path to llvm build/lib/cmake directory] [optional: path to mlir-air project root]
+# e.g. source install-and-build.sh /opt/mlir-air/llvm/build/lib/cmake /opt/mlir-air
 ```
 
 Currently, around 16 tests will fail after building, but the executables `build/bin/verif-opt` and `build/bin/verif-translate` should exist after running these commands.
 
 ### Troubleshooting
 
+find errors
 
+
+## Overview
+
+how the script works
 
 
 ## Usage
 
 `peqc-mlir.py` (-h for options) is a wrapper script for the other tools below -- it takes two MLIR files and interprets them to attempt to prove that they must produce the same outputs for the same inputs.
+
+```
+$> ./peqc-mlir.py -h
+
+usage: peqc-mlir.py [-h] [--verbose] [--debug] [--peqc-options PEQC_OPTIONS] [--keep]
+                    [--temp-dir TEMP_DIR] [--seq-verif-only]
+                    file1 file2 liveoutvars
+
+Check two MLIR files for equivalence: each file must define 'func.func @main' as the entry point of the program.
+
+positional arguments:
+  file1                 MLIR file to check for equivalence
+  file2                 MLIR file to check for equivalence
+  liveoutvars           comma-separated list of variable names to check for equivalence: each must
+                        be declared as memref.global
+
+options:
+  -h, --help            show this help message and exit
+  --verbose             show output from PEQC
+  --debug               runs PEQC with "--verbose --debug"
+  --peqc-options PEQC_OPTIONS
+                        replaces default options to PEQC (overrides --verbose and --debug above)
+  --keep                keep intermediate translation/conversion files
+  --temp-dir TEMP_DIR   the directory to store intermediate files in, default .peqc-files
+  --seq-verif-only      runs PEQC with "--seq-verif-only"
+```
+
 The files taken as input have the following restrictions:
 
-* the MLIR file must have a `func.func @main () -> ()` to serve as the entry point of the program (see files in `examples/matmul` for examples).
-* variables checked for equivalence must be declared as `memref.global` variables.
+* The top-level operation in the MLIR file must be `builtin.module`.
+* The MLIR file must contain a `func.func @main () -> ()` to serve as the entry point of the program (see files in `examples/matmul` for more examples).
+* Variables checked for equivalence must be declared as `memref.global` variables.
 
-Example usage and output:
+Example usage and output shown below: this checks that `examples/matmul/matmul-linalg.mlir` is equivalent to itself.
 
-```sh
-$> ./peqc-mlir.py examples/matmul/matmul-linalg.mlir examples/matmul/matmul-tile-and-parallelize.mlir A,B,C
+```
+$> cat examples/matmul/matmul-linalg.mlir
 
-YES, examples/matmul/matmul-linalg.mlir and examples/matmul/matmul-tile-and-parallelize.mlir are equivalent
+// module must be the top-level operation
+module {
+  func.func @matmul_on_memref(%arg0: memref<32x32xi32>, %arg1: memref<32x32xi32>) -> memref<32x32xi32> {
+    %c0_i32 = arith.constant 0 : i32
+    %0 = memref.alloc() : memref<32x32xi32>
+    linalg.fill ins(%c0_i32 : i32) outs(%0 : memref<32x32xi32>)
+    linalg.matmul ins(%arg0, %arg1 : memref<32x32xi32>, memref<32x32xi32>) outs(%0 : memref<32x32xi32>)
+    return %0 : memref<32x32xi32>
+  }
+
+// to check A, B, and C for equivalence, declare as memref.global
+  memref.global "private" @A : memref<32x32xi32>
+  memref.global "private" @B : memref<32x32xi32>
+  memref.global "private" @C : memref<32x32xi32>
+
+// entry point of the program: calls matmul_on_memref with A and B
+  func.func @main () -> () {
+    %c = arith.constant 1 : i1
+    %A = memref.get_global @A : memref<32x32xi32>
+    %B = memref.get_global @B : memref<32x32xi32>
+    %C = memref.get_global @C : memref<32x32xi32>
+    %res = func.call @matmul_on_memref(%A, %B) : (memref<32x32xi32>, memref<32x32xi32>) -> memref<32x32xi32>
+    memref.copy %res, %C : memref<32x32xi32> to memref<32x32xi32>
+    return
+  }
+}
+
+$> ./peqc-mlir.py examples/matmul/matmul-linalg.mlir examples/matmul/matmul-linalg.mlir A,B,C
+
+YES, examples/matmul/matmul-linalg.mlir and examples/matmul/matmul-linalg.mlir are equivalent
 ```
 
 More detailed information can be found in [`examples/README.md`](examples/README.md) and below.
@@ -108,7 +185,7 @@ verif-translate --translate-to-past [input file]
 ## MLIR-to-MLIR conversion
 
 The `verif-opt` tool converts operations not supported by the translator to a combination of operations that are supported, using the passes defined
-[here](#conversion-passes-verif-opt).
+[below](#conversion-passes-verif-opt).
 
 ### Supported operations
 
@@ -231,3 +308,18 @@ Blocking wait on semaphore `sem` until it is assigned the value `val`.
 | `sem` | semaphore
 | `val` | index
 
+## Polybench exps
+
+command line, link to exps
+
+## Citing PEQC-MLIR
+
+```
+@inproceedings{peqc-fpga24,
+  title={Formal Verification of Source-to-Source Transformations for HLS},
+  author={Pouchet, Louis-No{\"e}l and Tucker, Emily and Zhang, Niansong and Chen, Hongzheng and Pal, Debjit and Rodr{\'\i}guez, Gabriel and Zhang, Zhiru},
+  booktitle={Proceedings of the 2024 ACM/SIGDA International Symposium on Field Programmable Gate Arrays},
+  pages={97--107},
+  year={2024}
+}
+```
