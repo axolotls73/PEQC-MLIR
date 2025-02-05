@@ -82,19 +82,5 @@ def VerifConvertChannel: Pass<"verif-air-convert-channel", "::mlir::ModuleOp"> {
   ];
 }
 
-def VerifConvertAIE: Pass<"verif-convert-aie", "::mlir::ModuleOp"> {
-  let summary = "Convert aie operations";
-  let description = [{
-  }];
-  let dependentDialects = [
-    "arith::ArithDialect",
-    "memref::MemRefDialect",
-    "func::FuncDialect",
-    "scf::SCFDialect",
-    "cf::ControlFlowDialect",
-    "async::AsyncDialect",
-    "verif::VerifDialect"
-  ];
-}
 
 #endif // VERIF_PASS
