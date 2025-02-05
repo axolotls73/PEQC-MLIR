@@ -1,0 +1,15 @@
+aie support first:
+    aie.core
+    aie.mem
+    aie.dma_bd
+    aie.use_lock
+    aie.dma_start
+    aie.next_bd
+    aie.flow
+    cf.br
+    labels
+    objfifo
+
+todo:
+figure out what assumptions we can make abt aie programs, define <- also assumption
+
