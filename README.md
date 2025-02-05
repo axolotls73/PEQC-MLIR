@@ -6,7 +6,7 @@
 
 ### Prerequisites
 
-To build PEQC-MLIR, first install its dependencies: LLVM version 20.0.0git,
+To build PEQC-MLIR, first install its dependencies: LLVM version 20.0.0git with MLIR,
 and optionally MLIR-AIR commit 07174f8a and MLIR-AIE commit c8dafd9.
 Instructions to build a docker image with these installed can be found
 [here](https://github.com/pouchet/docker-ubuntu-xilinx-dev).
@@ -95,7 +95,17 @@ Currently, around 16 tests will fail after building, but the executables `build/
 
 ### Troubleshooting
 
-find errors
+If you see the following error message, you may not have built LLVM with `-DLLVM_ENABLE_PROJECTS=mlir` or specified the wrong CMake directory for `install-and-build.sh` or `-DLLVM_DIR/-DMLIR_DIR` when configuring CMake:
+
+```
+Could not find a package configuration file provided by "MLIR" with any of
+the following names:
+
+  MLIRConfig.cmake
+  mlir-config.cmake
+```
+
+If you're trying to build with MLIR-AIR support and see "Unsupported" tests, or see an error message of the form `air/ ... .h: No such file or directory`, you may have specified the wrong MLIR-AIR directory for `install-and-build.sh` or `-DAIR_DIR` when configuring CMake.
 
 
 ## Overview

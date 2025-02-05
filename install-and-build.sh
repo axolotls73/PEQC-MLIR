@@ -12,7 +12,7 @@ fi
 
 LLVM_CMAKE_DIR="$1"
 AIR_ROOT_STR=""
-if [ "$#" -eq 3 ]; then
+if [ "$#" -eq 2 ]; then
   AIR_ROOT_STR="-DAIR_DIR=$2"
 fi
 
