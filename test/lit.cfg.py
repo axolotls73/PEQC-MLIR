@@ -21,7 +21,7 @@ config.name = "VERIF"
 config.test_format = lit.formats.ShTest(not llvm_config.use_lit_shell)
 
 # suffixes: A list of file extensions to treat as test files.
-config.suffixes = [".mlir"]
+config.suffixes = [".mlir", ".lit"]
 
 # test_source_root: The root path where tests are located.
 config.test_source_root = os.path.dirname(__file__)
@@ -55,11 +55,17 @@ config.substitutions.append(("%verif_libs", config.verif_libs_dir))
 # Tweak the PATH to include the tools dir.
 llvm_config.with_environment("PATH", config.llvm_tools_dir, append_path=True)
 
-tool_dirs = [config.verif_tools_dir, config.llvm_tools_dir]
+tool_dirs = [
+    config.llvm_tools_dir,
+    config.verif_tools_dir,
+    config.verif_src_root,
+]
+
 tools = [
     "mlir-opt",
     "verif-opt",
     "verif-translate",
+    "peqc-mlir.py"
 ]
 
 llvm_config.add_tool_substitutions(tools, tool_dirs)

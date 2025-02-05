@@ -1,0 +1,5 @@
+
+// RUN: peqc-mlir.py --temp-dir %t --verbose %S/matmul._mlir %S/matmul._mlir A,B,C | FileCheck %s
+
+// CHECK: [PAST] Verify equivalence of programs by abstract interpretation.
+// CHECK: [PAST] YES =>

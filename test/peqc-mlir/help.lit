@@ -1,0 +1,9 @@
+
+// RUN: peqc-mlir.py -h
+
+// CHECK: --verbose
+// CHECK: --debug
+// CHECK: --peqc-options
+// CHECK: --keep
+// CHECK: --temp-dir
+// CHECK: --seq-verif-only

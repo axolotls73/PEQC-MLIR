@@ -3,6 +3,7 @@
 from subprocess import run as subprocess_run
 from glob import glob
 import os
+import sys
 import tempfile
 import argparse
 import re
@@ -19,8 +20,18 @@ argparser.add_argument('file2', type=str,
     help='MLIR file to check for equivalence')
 argparser.add_argument('liveoutvars', type=lambda t: [s.strip() for s in t.split(',')],
     help='comma-separated list of variable names to check for equivalence: each must be declared as memref.global')
+argparser.add_argument('--verbose', action='store_true',
+    help='show output from PEQC')
+argparser.add_argument('--debug', action='store_true',
+    help='runs PEQC with "--verbose --debug"')
+argparser.add_argument('--peqc-options', type=lambda t: {s.strip() for s in t.split()},
+    help='replaces default options to PEQC (overrides --verbose and --debug above)')
 argparser.add_argument('--keep', action='store_true',
     help='keep intermediate translation/conversion files')
+argparser.add_argument('--temp-dir', type=str, default='.peqc-files',
+    help='the directory to store intermediate files in, default .peqc-files')
+argparser.add_argument('--seq-verif-only', action='store_true',
+    help='runs PEQC with "--seq-verif-only"')
 args = argparser.parse_args()
 
 file1 = args.file1
@@ -31,11 +42,16 @@ def run(arg):
   out = subprocess_run(arg, shell=True, capture_output=True)
   return out.stdout.decode(), out.stderr.decode(), out.returncode
 
+tempfiles = []
+removetempdir = False
+
 def die():
   global tempfiles
   if not args.keep:
     for file in set(tempfiles):
       os.remove(file)
+    if removetempdir:
+      os.rmdir(args.temp_dir)
   exit(1)
 
 CLR_RED = '\033[31m'
@@ -44,7 +60,21 @@ CLR_YLW = '\033[33m'
 CLR_GRAY = '\033[90m'
 CLR_NONE = '\033[0m'
 
-PASTCOMMAND = 'pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees'
+pastoptions = {
+  '--verbose',
+  '--timing-mode',
+  '--enable-preprocessor',
+  '--enable-subtrees',
+  '--symbolic-conditionals',
+}
+if args.seq_verif_only:
+  pastoptions.add('--seq-verif-only')
+if args.debug:
+  pastoptions = pastoptions.union({'--debug', '--verbose'})
+if args.peqc_options:
+  pastoptions = args.peqc_options
+
+PASTCOMMAND = f'pastchecker {" ".join(pastoptions)}'
 
 SCRIPTDIR = os.path.dirname(os.path.realpath(__file__))
 VERIFDIR = SCRIPTDIR
@@ -62,19 +92,20 @@ for filename in [file1, file2]:
     assert re.search(rf'(?<!%)memref.global.*@{var}\s+:', file), \
         f'memref.global declaration for variable "{var}" not found in {filename}'
 
-tempfiles = []
 eqfiles = []
 
 # convert and translate files
-for filename in [file1, file2]:
+for filename, id in zip([file1, file2], ['1', '2']):
   file = open(filename).read()
 
-  # gettmp = lambda : tempfile.NamedTemporaryFile('w+t', delete=False)
-
-  filedir, filebasename = os.path.split(filename)
-  lfilename = f'{filedir}/peqc-{filebasename}-lowered.mlir'
-  cfilename = f'{filedir}/peqc-{filebasename}-conversion.mlir'
-  tfilename = f'{filedir}/peqc-{filebasename}-translation.c'
+  tempdir = args.temp_dir
+  _, filebasename = os.path.split(filename)
+  if not os.path.isdir(tempdir):
+    os.mkdir(tempdir)
+    removetempdir = True
+  lfilename = f'{tempdir}/peqc-{id}-{filebasename}-lowered.mlir'
+  cfilename = f'{tempdir}/peqc-{id}-{filebasename}-conversion.mlir'
+  tfilename = f'{tempdir}/peqc-{id}-{filebasename}-translation.c'
   eqfiles += [tfilename]
   tempfiles += [tfilename, cfilename, lfilename]
 
@@ -121,6 +152,11 @@ for filename in [file1, file2]:
 # check equivalence
 liveoutvars = ','.join(liveoutvars)
 out, err, rc = run(f'{PASTCOMMAND} {eqfiles[0]} {eqfiles[1]} "{liveoutvars}"')
+
+if args.verbose:
+  print(out)
+  print(err, file=sys.stderr)
+
 if rc:
   print(f'{err}\n{CLR_RED}PEQC error{CLR_NONE}')
   die()
