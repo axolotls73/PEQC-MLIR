@@ -8,8 +8,6 @@
 
 To build PEQC-MLIR, first install its dependencies: LLVM version 20.0.0git with MLIR,
 and optionally MLIR-AIR commit 07174f8a and MLIR-AIE commit c8dafd9.
-Instructions to build a docker image with these installed can be found
-[here](https://github.com/pouchet/docker-ubuntu-xilinx-dev).
 
 #### MLIR-AIR
 
