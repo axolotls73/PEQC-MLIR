@@ -13,9 +13,29 @@ Instructions to build a docker image with these installed can be found
 
 #### MLIR-AIR
 
-MLIR_AIR is an optional dependency
+MLIR_AIR is an optional dependency: if installed, PEQC-MLIR will support a subset of operations in the AIR dialect.
 
-installing air and past instructions, copy pasted (eg polygeist repo)
+Instructions for building MLIR-AIR can be found
+[here](https://xilinx.github.io/mlir-air/buildingRyzenLin.html), copied below:
+
+```sh
+# clone repo
+git clone https://github.com/Xilinx/mlir-air.git
+cd mlir-air
+source utils/setup_python_packages.sh
+
+# clone and build dependencies
+./utils/clone-llvm.sh
+./utils/build-llvm-local.sh llvm
+./utils/github-clone-build-libxaie.sh
+./utils/clone-mlir-aie.sh
+./utils/build-mlir-aie-local.sh llvm mlir-aie/cmake/modulesXilinx aienginev2 mlir-aie
+
+# build
+./utils/build-mlir-air-xrt.sh llvm mlir-aie/cmake/modulesXilinx mlir-aie aienginev2 /opt/xilinx/xrt
+source utils/env_setup.sh install-xrt/ mlir-aie/install/ llvm/install/
+```
+
 
 #### PAST/PEQC
 
@@ -38,6 +58,19 @@ cd ..
 
 ### Building
 
+#### Option 1: Build via script
+
+This script downloads and installs PAST/PEQC in the current directory (as described
+[above](#pastpeqc)),
+then configures and builds via CMake:
+
+```sh
+source install-and-build.sh [path to llvm build/lib/cmake directory] [optional: path to mlir-air project root]
+# e.g. source install-and-build.sh /opt/mlir-air/llvm/build/lib/cmake /opt/mlir-air
+```
+
+#### Option 2: Manual build
+
 After installing the prerequisites, run the commands below to build PEQC-MLIR with the following substitutions:
 
 * `[llvm-cmake]` replaced with LLVM's CMake configuration directory, e.g. `/opt/mlir-air/llvm/build/lib/cmake`.
@@ -58,16 +91,6 @@ cmake --build . --target check-verif
 
 If `AIR_DIR` isn't passed to CMake as a definition, PEQC-MLIR will be built without MLIR-AIR passes.
 
-
-This script downloads and installs PAST/PEQC in the current directory (as described
-[above](#pastpeqc)),
-then configures and builds via CMake
-
-```sh
-source install-and-build.sh [path to llvm build/lib/cmake directory] [optional: path to mlir-air project root]
-# e.g. source install-and-build.sh /opt/mlir-air/llvm/build/lib/cmake /opt/mlir-air
-```
-
 Currently, around 16 tests will fail after building, but the executables `build/bin/verif-opt` and `build/bin/verif-translate` should exist after running these commands.
 
 ### Troubleshooting
@@ -77,12 +100,15 @@ find errors
 
 ## Overview
 
-how the script works
+PEQC-MLIR is composed of two main parts: an [MLIR-to-MLIR converter](#mlir-to-mlir-conversion) (`verif-opt`) and an [MLIR-to-C translator](#mlir-to-c-translation) (`verif-translate`).
+The MLIR-to-C translator only supports a subset of MLIR operations: the converter's job is to convert other operations into a semantically equivalent collection of supported operations.
+`peqc-mlir.py` wraps these scripts for convenience, more information below.
 
 
 ## Usage
 
 `peqc-mlir.py` (-h for options) is a wrapper script for the other tools below -- it takes two MLIR files and interprets them to attempt to prove that they must produce the same outputs for the same inputs.
+Requires Python >= 3.10.
 
 ```
 $> ./peqc-mlir.py -h
@@ -308,9 +334,19 @@ Blocking wait on semaphore `sem` until it is assigned the value `val`.
 | `sem` | semaphore
 | `val` | index
 
-## Polybench exps
+## Polybench experiments
 
-command line, link to exps
+To run polybench verification experiments (using `MINI_DATASET`):
+
+```sh
+cd experiments/polygeist-polybench
+./script/run_mini_pb.sh
+```
+
+Requirements:
+* Python >= 3.10
+* GNU Time: in `/usr/bin/time`
+
 
 ## Citing PEQC-MLIR
 

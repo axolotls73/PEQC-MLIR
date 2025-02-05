@@ -1,9 +1,4 @@
 
-if [ "$#" -ne 2 ]; then
-    echo "usage: $0 [mlir-air directory]"
-    return
-fi
-
 if [ ! -d past-0.7.2 ]; then
     wget -O past-0.7.2.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/past-0.7.2.tar.gz/download'
     tar -xf past-0.7.2.tar.gz
@@ -15,16 +10,20 @@ if [ ! -d past-0.7.2 ]; then
     cd ..
 fi
 
-AIR_DIR="$2"
+LLVM_CMAKE_DIR="$1"
+AIR_ROOT_STR=""
+if [ "$#" -eq 3 ]; then
+  AIR_ROOT_STR="-DAIR_DIR=$2"
+fi
+
 PAST_DIR=`realpath past-0.7.2`
-LLVM_DIR="$1"
 
 # rm -r build CMakeFiles
 mkdir -p build && cd build
 cmake -G Ninja .. \
-  -DLLVM_DIR=$LLVM_DIR/build/lib/cmake/llvm \
-  -DMLIR_DIR=$LLVM_DIR/build/lib/cmake/mlir \
-  -DAIR_DIR=$AIR_DIR \
+  -DLLVM_DIR=$LLVM_CMAKE_DIR/llvm \
+  -DMLIR_DIR=$LLVM_CMAKE_DIR/mlir \
+  $AIR_ROOT_STR \
   -DPAST_DIR=$PAST_DIR
 
 cmake --build . --target mlir-doc

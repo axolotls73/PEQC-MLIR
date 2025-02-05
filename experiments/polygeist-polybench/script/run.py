@@ -61,9 +61,12 @@ def getbenches(dir):
   # print(benches)
   return benches
 
+numfail = 0
+numpass = 0
 
 def checkpairs(pairs, outdir, configdir):
-  global failedruns
+  global numfail
+  global numpass
   global cw
   global statsfile
 
@@ -84,8 +87,10 @@ def checkpairs(pairs, outdir, configdir):
     runpass = stdout and 'YES' in stdout
     if runpass:
       print(f'pass: {name}: {file1} {file2} {CLR_GRAY}(command line: {command}){CLR_NONE}')
+      numpass += 1
     else:
       print(f'{CLR_RED}FAIL: {name}: {file1} {file2} {CLR_GRAY}(command line: {command}){CLR_NONE}')
+      numfail += 1
 
 
 
@@ -111,3 +116,4 @@ for config in configs:
 
   checkpairs(pairs, outdir, config["output_dir"])
 
+print(f'FAILED: {numfail}\nPASSED: {numpass}')
