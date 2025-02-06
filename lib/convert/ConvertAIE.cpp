@@ -58,6 +58,7 @@ private:
 
   uint32_t current_tile_id = 0;
   uint32_t current_buffer_id = 0;
+  uint32_t current_semaphore_id = 0;
   uint32_t mem_id = 0;
 
 public:
@@ -164,18 +165,35 @@ public:
       op.emitRemark();
     );
 
+    if (!dyn_cast<ModuleOp>(op.getOperation()->getParentOp())) {
+      op.emitError("expected aie.lock to have module parent");
+      return failure();
+    }
+
     auto builder = OpBuilder(op);
 
     // create and initialize semaphore
     auto loc = op.getLoc();
     Value sem = builder.create<SemaphoreOp>(loc);
+
     auto init = op.getInit();
     if (init.has_value()) {
       op.emitError("lockop init not supported");
+      return failure();
       ///FIXME: implement this
       // Value val = builder.create<arith::ConstantIndexOp>(loc, init.value());
       // builder.create<SemaphoreSetOp>(loc, sem, val);
     }
+
+    // create memref.global, store semaphore
+    auto mrtype = MemRefType::get(SmallVector<int64_t>{1}, SemaphoreType::get(context));
+    std::string semarr_name = "semaphore_arr_" + std::to_string(current_semaphore_id++);
+    builder.create<memref::GlobalOp>(loc, StringAttr::get(context, semarr_name),
+        StringAttr::get(context, "private"),TypeAttr::get(mrtype),
+        Attribute{}, UnitAttr{}, IntegerAttr{});
+    Value semarr = builder.create<memref::GetGlobalOp>(loc, mrtype, semarr_name).getResult();
+    Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0);
+    builder.create<memref::StoreOp>(loc, sem, semarr, SmallVector<Value>{cst_0});
 
     // convert use_lock ops to semaphore wait and set
     for (auto& use : op.getResult().getUses()) {
@@ -196,6 +214,9 @@ public:
         }
 
         builder.setInsertionPoint(useop);
+        Value semarr = builder.create<memref::GetGlobalOp>(loc, mrtype, semarr_name).getResult();
+        Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0);
+        Value sem = builder.create<memref::LoadOp>(loc, semarr, SmallVector<Value>{cst_0}).getResult();
         auto loc = useop.getLoc();
         Value val = builder.create<arith::ConstantIndexOp>(loc, useval.value());
         switch (useop.getAction()) {

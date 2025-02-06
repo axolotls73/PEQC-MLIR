@@ -18,18 +18,31 @@
 // RUN: verif-opt --verif-convert-aie %s | FileCheck %s
 
 module {
+// just have this one so it's not captured below
+// CHECK: memref.global
   %tile14 = aie.tile(1, 4)
+
+// CHECK-DAG: [[SEM1:%.*]] = verif.semaphore
+// CHECK-DAG: memref.global "private" @[[SEMGLOBAL:.*]] :
+// CHECK: [[SEMARR1:%.*]] = memref.get_global @[[SEMGLOBAL]]
+// CHECK: [[C01:%.*]] = arith.constant 0
+// CHECK: memref.store [[SEM1]], [[SEMARR1]][[[C01]]]
+  %lock14_6 = aie.lock(%tile14, 7)
+
   aie.core(%tile14) {
 
-  // CHECK: [[LOCK:%.*]] = verif.semaphore
-    %lock14_6 = aie.lock(%tile14, 7)
-
-  // CHECK: [[CST0:%.*]] = arith.constant 0
-  // CHECK: verif.semaphore.wait [[LOCK]], [[CST0]]
+// CHECK: [[SEMARR2:%.*]] = memref.get_global @[[SEMGLOBAL]]
+// CHECK: [[C021:%.*]] = arith.constant 0
+// CHECK: [[SEM2:%.*]] = memref.load [[SEMARR2]][[[C021]]]
+// CHECK: [[C022:%.*]] = arith.constant 0
+// CHECK: verif.semaphore.wait [[SEM2]], [[C022]]
     aie.use_lock(%lock14_6, "Acquire", 0)
 
-  // CHECK: [[CST1:%.*]] = arith.constant 1
-  // CHECK: verif.semaphore.set [[LOCK]], [[CST1]]
+// CHECK: [[SEMARR3:%.*]] = memref.get_global @[[SEMGLOBAL]]
+// CHECK: [[C03:%.*]] = arith.constant 0
+// CHECK: [[SEM3:%.*]] = memref.load [[SEMARR3]][[[C03]]]
+// CHECK: [[C1:%.*]] = arith.constant 1
+// CHECK: verif.semaphore.set [[SEM3]], [[C1]]
     aie.use_lock(%lock14_6, "Release", 1)
 
     aie.end
