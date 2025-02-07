@@ -1,0 +1,24 @@
+module {
+
+  func.func @matmul_on_memref(%arg0: memref<32x32xi32>, %arg1: memref<32x32xi32>) -> memref<32x32xi32> {
+    %c0_i32 = arith.constant 0 : i32
+    %0 = memref.alloc() : memref<32x32xi32>
+    linalg.fill ins(%c0_i32 : i32) outs(%0 : memref<32x32xi32>)
+    linalg.matmul ins(%arg0, %arg1 : memref<32x32xi32>, memref<32x32xi32>) outs(%0 : memref<32x32xi32>)
+    return %0 : memref<32x32xi32>
+  }
+
+  memref.global "private" @A : memref<32x32xi32>
+  memref.global "private" @B : memref<32x32xi32>
+  memref.global "private" @C : memref<32x32xi32>
+
+  func.func @main () -> () {
+    %c = arith.constant 1 : i1
+    %A = memref.get_global @A : memref<32x32xi32>
+    %B = memref.get_global @B : memref<32x32xi32>
+    %C = memref.get_global @C : memref<32x32xi32>
+    %res = func.call @matmul_on_memref(%A, %B) : (memref<32x32xi32>, memref<32x32xi32>) -> memref<32x32xi32>
+    memref.copy %res, %C : memref<32x32xi32> to memref<32x32xi32>
+    return
+  }
+}
