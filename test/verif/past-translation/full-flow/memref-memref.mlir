@@ -48,7 +48,7 @@ module {
 #pragma pocc-region-start
 {
   // %cst_5
-  memref_load_14 = 5.0;
+  memref_load_12 = 5.0;
   // %cst_4
   memref_load_14 = 4.0;
 }
