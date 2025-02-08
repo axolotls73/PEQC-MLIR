@@ -65,8 +65,9 @@ def die():
   global tempfiles
   if not args.keep:
     for file in set(tempfiles):
-      os.remove(file)
-    if removetempdir:
+      if os.path.isfile(file):
+        os.remove(file)
+    if removetempdir and os.path.isdir(args.temp_dir):
       os.rmdir(args.temp_dir)
   exit(1)
 

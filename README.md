@@ -118,6 +118,8 @@ The MLIR-to-C translator only supports a subset of MLIR operations: the converte
 `peqc-mlir.py` (-h for options) is a wrapper script for the other tools below -- it takes two MLIR files and interprets them to attempt to prove that they must produce the same outputs for the same inputs.
 Requires Python >= 3.10.
 
+To use, make sure `build/bin` is in your PATH.
+
 ```
 $> ./peqc-mlir.py -h
 
@@ -344,6 +346,8 @@ Blocking wait on semaphore `sem` until it is assigned the value `val`.
 
 ## Polybench experiments
 
+More information on experiments can be found [here](experiments/polygeist-polybench/README.md).
+
 To run polybench verification experiments (using `MINI_DATASET`):
 
 ```sh
@@ -352,7 +356,7 @@ cd experiments/polygeist-polybench
 ```
 
 Requirements:
-* Python >= 3.10
+* Python >= 3.10 (+ packages in `requirements.txt`)
 * GNU Time: in `/usr/bin/time`
 
 
