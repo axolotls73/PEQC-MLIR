@@ -1,0 +1,63 @@
+#!/bin/sh
+
+help()
+{
+	echo "Usage: ./$0 [mlir-file-1] [mlir-file-2] [epilogue.c file]";
+}
+
+
+if [ $# -ne 3 ]; then
+	help;
+	exit 1;
+fi;
+
+check_command_avail()
+{
+	res=`which "$1"`;
+	if [ -z "$res" ]; then
+		echo "Command $1 unavailable. Check your PATH variable";
+		exit 1;
+	fi;
+}
+
+abort_on_error()
+{
+	if [ "$1" -ne 0 ]; then exit "$1"; fi;
+}
+
+FILE1="$1";
+FILE2="$2";
+EPI="$3";
+
+VERIF_OPT_FLAGS="--verif-air-to-scf-par --verif-scf-parallel-to-async --verif-air-convert-channel --verif-air-execute-to-async --verif-air-dma-to-memref --verif-scf-parallel-to-async";
+#VERIF_OPT_FLAGS="--verif-scf-parallel-to-async";
+
+check_command_avail "mlir-opt";
+check_command_avail "verif-translate";
+check_command_avail "verif-opt";
+check_command_avail "pastchecker";
+
+
+for tf in "$1" "$2"; do
+	air-opt --convert-linalg-to-affine-loops --lower-affine "$tf" > "$tf.lowered.mlir";
+	abort_on_error $?;
+	cp "$tf.lowered.mlir" "_input.mlir";
+#	verif-opt $VERIF_OPT_FLAGS "_input.mlir" > "_output.mlir"; mv "_output.mlir" "_input.mlir";
+	for f in $VERIF_OPT_FLAGS; do
+		echo "Conversion: run verif-opt $f";
+		verif-opt $f "_input.mlir" > "_output.mlir";
+		abort_on_error $?;
+		mv "_output.mlir" "_input.mlir";
+	done;
+	mv "_input.mlir" "$tf.translated.mlir";
+	verif-translate --translate-to-past "$tf.translated.mlir" > "$tf.c";
+	abort_on_error $?;
+	pathvt=`which verif-translate`;
+	pathvt=`dirname "$pathvt"`;
+	$pathvt/../../verif-translate/scripts/add_epilogue.sh "$tf.c" "$EPI" "$tf.with_main.c";
+	abort_on_error $?;
+	echo "Generated $tf.with_main.c from $tf";
+done;
+pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees --symbolic-conditionals --cdag-normalizations-ac "$1.with_main.c" "$2.with_main.c" "A,B,C";
+
+
