@@ -32,7 +32,7 @@ if [ "$#" -eq 2 ]; then
   AIR_ROOT_STR="-DAIR_DIR=$2"
 fi
 
-PAST_DIR=`realpath past-0.7.2`
+PAST_DIR="$base_dir/$PAST_VERSION";
 
 # rm -r build CMakeFiles
 mkdir -p build && cd build
