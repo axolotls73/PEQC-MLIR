@@ -14,7 +14,7 @@ and optionally MLIR-AIR commit 07174f8a and MLIR-AIE commit c8dafd9.
 MLIR_AIR is an optional dependency: if installed, PEQC-MLIR will support a subset of operations in the AIR dialect.
 
 Instructions for building MLIR-AIR can be found
-[here](https://xilinx.github.io/mlir-air/buildingRyzenLin.html), copied below:
+[here](https://xilinx.github.io/mlir-air/buildingRyzenLin.html), copied below and fixing the install directory for aienginev2:
 
 ```sh
 # clone repo
@@ -27,10 +27,10 @@ source utils/setup_python_packages.sh
 ./utils/build-llvm-local.sh llvm
 ./utils/github-clone-build-libxaie.sh
 ./utils/clone-mlir-aie.sh
-./utils/build-mlir-aie-local.sh llvm mlir-aie/cmake/modulesXilinx aienginev2 mlir-aie
+./utils/build-mlir-aie-local.sh llvm mlir-aie/cmake/modulesXilinx aienginev2/install mlir-aie
 
 # build
-./utils/build-mlir-air-xrt.sh llvm mlir-aie/cmake/modulesXilinx mlir-aie aienginev2 /opt/xilinx/xrt
+./utils/build-mlir-air-xrt.sh llvm mlir-aie/cmake/modulesXilinx mlir-aie aienginev2/install /opt/xilinx/xrt
 source utils/env_setup.sh install-xrt/ mlir-aie/install/ llvm/install/
 ```
 
@@ -38,13 +38,13 @@ source utils/env_setup.sh install-xrt/ mlir-aie/install/ llvm/install/
 #### PAST/PEQC
 
 To install
-[PAST 0.7.2](https://sourceforge.net/projects/pocc/),
-run the commands below, and add `past-0.7.2/src` to your `PATH` (this is needed for tests):
+[PAST 0.7.3-beta](https://sourceforge.net/projects/pocc/),
+run the commands below, and add `past-0.7.3-beta/src` to your `PATH` (this is needed for tests):
 
 ```sh
-wget -O past-0.7.2.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/past-0.7.2.tar.gz/download'
-tar -xf past-0.7.2.tar.gz
-cd past-0.7.2
+wget -O past-0.7.3-beta.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/unstable-testing/past-0.7.3-beta.tar.gz/download'
+tar -xf past-0.7.3-beta.tar.gz
+cd past-0.7.3-beta
 ./configure
 make
 
