@@ -7,7 +7,7 @@
 ### Prerequisites
 
 To build PEQC-MLIR, first install its dependencies: LLVM version 20.0.0git with MLIR,
-and optionally MLIR-AIR commit 07174f8a and MLIR-AIE commit c8dafd9.
+and optionally MLIR-AIR commit 07174f8a and MLIR-AIE commit c8dafd9. A Docker image is available in the docker/ directory that contains all required packages to successfully install all the tools below, including mlir-air and llvm.
 
 #### MLIR-AIR
 
