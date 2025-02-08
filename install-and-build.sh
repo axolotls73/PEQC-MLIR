@@ -14,16 +14,16 @@
 #
 #
 
-
-if [ ! -d past-0.7.2 ]; then
-    wget -O past-0.7.2.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/past-0.7.2.tar.gz/download'
-    tar -xf past-0.7.2.tar.gz
-    cd past-0.7.2
-    ./configure
-    make
-    pastpath=`realpath src`
-    export PATH="$pastpath:$PATH"
-    cd ..
+PAST_VERSION="past-0.7.3-beta";
+PAST_WEBLINK="https://downloads.sourceforge.net/project/pocc/1.6/testing/modules/unstable-testing";
+base_dir=`pwd`;
+if [ ! -d "$PAST_VERSION" ]; then
+    wget "$PAST_WEBLINK/$PAST_VERSION.tar.gz";
+    tar xzf "$PAST_VERSION.tar.gz";
+    cd "$PAST_VERSION" && ./configure && make; cd -;
+    PAST_BIN_DIR="$base_dir/$PAST_VERSION/src"
+    export PATH="$PAST_BIN_DIR:$PATH"
+    cd "$base_dir";
 fi
 
 LLVM_CMAKE_DIR="$1"
