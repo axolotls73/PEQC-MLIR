@@ -27,27 +27,22 @@ void __internal_initialize_semaphores() {
   for (int __past_ai_global_nocheck_sem_index = 0; __past_ai_global_nocheck_sem_index < arr_size; __past_ai_global_nocheck_sem_index++) \
     _past_ai_api_concurrent_wait_until_semaphore(sem[__past_ai_global_nocheck_sem_index], val)
 
-void _past_array_copy_1d
-                        (int* src, int soffs, int sstr,
-                         int* dst, int doffs, int dstr,
-                         int N) {
-  for (int i = 0; i < N; i++) {
-    dst[i * dstr + doffs] = src[i * sstr + soffs];
-  }
+#define _past_array_copy_1d(src, soffs, sstr, dst, doffs, dstr, N) { \
+  for (int i = 0; i < N; i++) { \
+    dst[i * dstr + doffs] = src[i * sstr + soffs]; \
+  } \
 }
 
-// void _past_array_copy_2d
-//                         (int** src, int sof1, int sof2, int sstr1, int sstr2,
-//                         int** dst, int dof1, int dof2, int dstr1, int dstr2,
-//                         int N1, int N2) {
-//   for (int i = 0; i < N1; i++) {
-//     for (int j = 0; j < N2; j++) {
-//       dst[i * dstr1 + dof1][j * dstr2 + dof2] = src[i * sstr1 + sof1][j * sstr2 + sof2];
-//     }
-//   }
-// }
+#define _past_array_copy_2d(src, srcs1, srcs2, dst, dsts1, dsts2, N1, N2) { \
+  for (int i = 0; i < N1; i++) {					\
+    for (int j = 0; j < N2; j++) {					\
+      dst[i + dsts1][j + dsts2] = src[i + srcs1][j + srcs2];		\
+    }									\
+  }									\
+}
 
-void _past_array_copy_2d
+
+void _past_array_copy_2d_debug
                         (int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2,
                         int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2,
                         int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2) {
