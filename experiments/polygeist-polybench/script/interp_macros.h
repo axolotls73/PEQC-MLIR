@@ -28,15 +28,15 @@ void __internal_initialize_semaphores() {
     _past_ai_api_concurrent_wait_until_semaphore(sem[__past_ai_global_nocheck_sem_index], val)
 
 #define _past_array_copy_1d(src, soffs, sstr, dst, doffs, dstr, N) { \
-  for (int i = 0; i < N; i++) { \
-    dst[i * dstr + doffs] = src[i * sstr + soffs]; \
+  for (int i = 0; i < (N); i++) { \
+    dst[i * (dstr) + (doffs)] = src[i * (sstr) + (soffs)]; \
   } \
 }
 
 #define _past_array_copy_2d(src, srcs1, srcs2, dst, dsts1, dsts2, N1, N2) { \
-  for (int i = 0; i < N1; i++) {					\
-    for (int j = 0; j < N2; j++) {					\
-      dst[i + dsts1][j + dsts2] = src[i + srcs1][j + srcs2];		\
+  for (int i = 0; i < (N1); i++) {					\
+    for (int j = 0; j < (N2); j++) {					\
+      dst[i + (dsts1)][j + (dsts2)] = src[i + (srcs1)][j + (srcs2)];		\
     }									\
   }									\
 }
