@@ -89,5 +89,5 @@ pastchecker --enable-preprocessor air_input_translated_main.c air_tiled_translat
 Finally, for convenience, all these steps are wrapped in the peqc-air-verif script:
 
 ```bash
-peqc-air-verif air-to-aie/matmul/mm-16/air_input.mlir air-to-aie/matmul/mm-16/air_tiled.mlir air-to-aie/matmul/mm-16/epilogue.c
+./peqc-air-verif air-to-aie/matmul/mm-16/air_input.mlir air-to-aie/matmul/mm-16/air_tiled.mlir air-to-aie/matmul/mm-16/epilogue.c
 ```
