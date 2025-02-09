@@ -1,6 +1,8 @@
 # PEQC-MLIR
 
-
+PEQC-MLIR is a framework to verify the semantic equivalence between a pair of MLIR programs using the PEQC hybrid concrete-symbolic verification system.
+It is restricted to programs with a statically-interpretable control-flow.
+PEQC-MLIR is in active development and subject to arbitrary changes without notice: consider this software unstable.
 
 ## Building PEQC-MLIR
 
