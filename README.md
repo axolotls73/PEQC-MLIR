@@ -73,7 +73,7 @@ After installing the prerequisites, run the commands below to build PEQC-MLIR wi
 
 * `[llvm-cmake]` replaced with LLVM's CMake configuration directory, e.g. `/opt/mlir-air/llvm/build/lib/cmake`.
 * `[air-repo]` replaced with the MLIR-AIR project root, e.g. `/opt/mlir-air`. This line should be omitted if compiling without air.
-* `[past]` replaced with the location of PAST/PEQC, e.g. `./past-0.7.2`.
+* `[past]` replaced with the location of PAST/PEQC, e.g. `./past-0.7.3-beta`.
 
 ```sh
 mkdir -p build && cd build
