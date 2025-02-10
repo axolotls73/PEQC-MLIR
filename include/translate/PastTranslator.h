@@ -191,6 +191,9 @@ class PastTranslator {
 
   // memref
 
+  void generateNestedMemref
+      (int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
+       MemRefType submrtype, s_symbol_t* result);
   s_past_node_t* translateAlloc(Operation* op, Type type, s_symbol_t* result);
   s_past_node_t* translate(memref::AllocOp op);
   s_past_node_t* translate(memref::AllocaOp op);

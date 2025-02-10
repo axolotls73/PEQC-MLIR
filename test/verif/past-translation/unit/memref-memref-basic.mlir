@@ -25,4 +25,19 @@ module {
 // CHECK: [[A]][0][1] = [[SUBARR2]]
   %a = memref.alloc() : memref<1x2xmemref<2x2xf32>>
 
+// CHECK: void [[B:.*]];
+// CHECK: float* [[SUBARR3:.*]];
+// CHECK: [[B]][0] = [[SUBARR3]]
+// CHECK: float* [[SUBARR4:.*]];
+// CHECK: [[B]][1] = [[SUBARR4]]
+// CHECK: float* [[SUBARR4:.*]];
+// CHECK: [[B]][2] = [[SUBARR4]]
+  %b = memref.alloc() : memref<3xmemref<1xf32>>
+
+// CHECK: void [[C:.*]];
+// CHECK: float* [[SUBARR5:.*]];
+// CHECK: [[C]][0][0][0] = [[SUBARR5]]
+// CHECK: float* [[SUBARR6:.*]];
+// CHECK: [[C]][0][0][1] = [[SUBARR6]]
+  %c = memref.alloc() : memref<1x1x2xmemref<?xf32>>
 }

@@ -860,6 +860,32 @@ s_past_node_t* PastTranslator::translate(cf::BranchOp op) {
 
 // memref
 
+void PastTranslator::generateNestedMemref
+      (int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
+       MemRefType submrtype, s_symbol_t* result) {
+  for (int i = 0; i < sizes[sizei]; i++) {
+      indices[sizei] = i;
+    // base case: indices array filled
+    if (sizei >= sizes.size() - 1) {
+      std::vector<s_past_node_t*> past_indices;
+      for (auto index : indices) {
+        past_indices.push_back(past_node_value_create_from_int(index));
+      }
+
+      auto tmpsym = getTempVarSymbol("nested_alloc");
+      nodes.push_back(past_node_statement_create(
+        declareVar(getTypeSymbol(submrtype), tmpsym)));
+      nodes.push_back(past_node_statement_create(
+        past_node_binary_create(past_assign,
+          getArrayAccess(result, past_indices),
+          past_node_varref_create(tmpsym))));
+    }
+    else {
+      generateNestedMemref(sizei + 1, sizes, indices, nodes, submrtype, result);
+    }
+  }
+}
+
 s_past_node_t* PastTranslator::translateAlloc(Operation* op, Type type, s_symbol_t* result) {
   if (!isNestedMemref(type))
     return past_node_statement_create(declareVar(getTypeSymbol(type), result));
@@ -877,31 +903,16 @@ s_past_node_t* PastTranslator::translateAlloc(Operation* op, Type type, s_symbol
     op->emitError("dynamic memref of memrefs not supported");
     exit(1);
   }
-  if (mrtype.getShape().size() != 2) {
-    ///FIXME: implement!!
-    op->emitError("only 2D memref of memrefs supported");
-    exit(1);
-  }
 
-  auto sizes = mrtype.getShape();
   std::vector<s_past_node_t*> nodes;
   // declare outer array as void
   nodes.push_back(past_node_statement_create(
     declareVar(getSymbol("void"), result)));
 
-  // create sub array for each index in outer array
-  for (int i = 0; i < sizes.front(); i++) {
-    for (int j = 0; j < sizes.back(); j++) {
-      auto tmpsym = getTempVarSymbol("nested_alloc");
-      nodes.push_back(past_node_statement_create(
-        declareVar(getTypeSymbol(submrtype), tmpsym)));
-      nodes.push_back(past_node_statement_create(
-        past_node_binary_create(past_assign,
-          getArrayAccess(result, std::vector<s_past_node_t*>{
-            past_node_value_create_from_int(i), past_node_value_create_from_int(j)}),
-          past_node_varref_create(tmpsym))));
-    }
-  }
+  SmallVector<int64_t> sizes = llvm::map_to_vector(mrtype.getShape(), [](int64_t v) {return v;});
+  SmallVector<int> indices;
+  indices.resize(sizes.size());
+  generateNestedMemref(0, sizes, indices, nodes, submrtype, result);
 
   return nodeChain(nodes);
 }
