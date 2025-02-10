@@ -210,6 +210,7 @@ class PastTranslator {
   s_past_node_t* translate(memref::CopyOp op);
 
   s_past_node_t* translate(memref::SubViewOp op);
+  s_past_node_t* translate(memref::CastOp op);
 
 
   // async

@@ -1046,6 +1046,13 @@ s_past_node_t* PastTranslator::translate(memref::SubViewOp op) {
   return nodeChain(stmts);
 }
 
+s_past_node_t* PastTranslator::translate(memref::CastOp op) {
+  getAndMapSymbol(op.getSource(), op.getResult());
+  return nullptr;
+}
+
+// async
+
 s_past_node_t* PastTranslator::translate(async::CreateGroupOp op) {
   NodeVec stmts;
   // declare buffer
@@ -1256,6 +1263,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::CopyOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::SubViewOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<memref::CastOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<async::CreateGroupOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<async::AddToGroupOp>(op)) res = translate(o);
