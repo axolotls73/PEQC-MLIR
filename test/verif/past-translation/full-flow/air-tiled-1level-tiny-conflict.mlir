@@ -20,7 +20,7 @@
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
 // RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
-// RUN: not %pastchecker %t/translation.c %t/translation.c A,B,C | grep conflict
+// RUN: not %pastchecker %t/translation.c %t/translation.c A,B,C 2>&1 | grep conflict
 
 //--- input.mlir
 

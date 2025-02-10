@@ -122,8 +122,6 @@ public:
         return WalkResult::interrupt();
       }
 
-      // for (auto tile)
-
       // get dma globals
       Value srctile = op.getSource();
       Value dsttile = op.getDest();
@@ -299,7 +297,6 @@ public:
 
       auto builder = OpBuilder(op);
       Value res = op.getResult();
-      // Value mres = builder.create<memref::AllocOp>(op.getLoc(), op.getResult().getType()).getResult();
       std::string bufname = "buffer_" + std::to_string(current_buffer_id++);
       builder.create<memref::GlobalOp>(op.getLoc(), StringAttr::get(context, bufname),
           StringAttr::get(context, "private"), TypeAttr::get(res.getType()),
