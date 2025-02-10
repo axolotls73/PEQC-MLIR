@@ -297,7 +297,9 @@ public:
 
       auto builder = OpBuilder(op);
       Value res = op.getResult();
-      std::string bufname = "buffer_" + std::to_string(current_buffer_id++);
+      std::string bufferid = op.getSymName().has_value() ? op.getSymName().value().str()
+          : std::to_string(current_buffer_id++);
+      std::string bufname = "buffer_" + bufferid;
       builder.create<memref::GlobalOp>(op.getLoc(), StringAttr::get(context, bufname),
           StringAttr::get(context, "private"), TypeAttr::get(res.getType()),
           Attribute{}, UnitAttr{}, IntegerAttr{});

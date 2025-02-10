@@ -30,5 +30,9 @@ module {
 // CHECK: [[BUFVAL:%.*]] = memref.get_global @[[BUFNAME]] : memref<5xi32>
 // CHECK: memref.store [[VAL]], [[BUFVAL]]
   memref.store %val, %buf[%0] : memref<5xi32>
+
+// use sym_name
+// CHECK: memref.global "private" @buffer_tile14_buf :
+  %buf2 = aie.buffer(%tile14) { sym_name = "tile14_buf" } : memref<5xi32>
 }
 
