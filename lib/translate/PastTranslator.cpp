@@ -86,7 +86,7 @@ s_past_node_t* PastTranslator::declareVar(s_symbol_t* type, s_symbol_t* var) {
     return s[strlen(s) - 1] == '*';
   };
   if (all_arrays_global && isarray(type->name_str)) {
-    newGlobalDecls.push_back(
+    globalDecls.push_back(
       past_node_statement_create(
         getVarDecl(type, var)
     ));
@@ -176,7 +176,9 @@ std::string PastTranslator::getTypeName(const Type& t) {
 
 e_past_value_type_t PastTranslator::getTypePast(const Type& t) {
   LLVM_DEBUG(
-    llvm::errs() << "getTypePast: " << t << "  " << t.getIntOrFloatBitWidth() << "\n";
+    llvm::errs() << "getTypePast: " << t << "  "
+        // << t.getIntOrFloatBitWidth()
+        << "\n";
   );
   if (t.isIndex()) return e_past_value_int;
 
@@ -219,7 +221,7 @@ static bool isNestedMemref(const Type& t) {
 }
 
 // returns node at start of list
-s_past_node_t* PastTranslator::nodeChain(std::vector<s_past_node_t*> nodes) {
+s_past_node_t* PastTranslator::nodeChain(NodeVec nodes) {
   s_past_node_t* start = nullptr;
   s_past_node_t* end = nullptr;
   for (auto n : nodes) {
@@ -240,7 +242,7 @@ s_past_node_t* PastTranslator::getNodeListEnd(s_past_node_t* nodeList) {
   return end;
 }
 
-void PastTranslator::nodeListClone(std::vector<s_past_node_t*>& list) {
+void PastTranslator::nodeListClone(NodeVec& list) {
   for (int i = 0; i < (int)list.size(); i++) {
     list[i] = past_clone_subtree(list[i]);
   }
@@ -257,7 +259,7 @@ s_past_node_t* PastTranslator::getDeclareAndAssign(Type type, const char* varnam
         assignval));
 }
 
-s_past_node_t* PastTranslator::getArrayAccess(s_symbol_t* arr, std::vector<s_past_node_t*> ops) {
+s_past_node_t* PastTranslator::getArrayAccess(s_symbol_t* arr, NodeVec ops) {
   s_past_node_t* ret = nullptr;
   for (auto op : ops) {
     if (!ret) {
@@ -277,7 +279,7 @@ s_past_node_t* PastTranslator::getArrayAccess(s_symbol_t* arr, std::vector<s_pas
 }
 
 s_past_node_t* PastTranslator::getArrayAccess(Value arr, OperandRange ops) {
-  std::vector<s_past_node_t*> vops;
+  NodeVec vops;
   for (auto o : ops) {
     vops.push_back(past_node_varref_create(getVarSymbol(o)));
   }
@@ -289,9 +291,9 @@ s_past_node_t* PastTranslator::getArrayAccess(Value arr, OperandRange ops) {
 }
 
 s_past_node_t* PastTranslator::getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
-      std::vector<s_past_node_t*> src_offsets, std::vector<s_past_node_t*> dst_offsets,
-      std::vector<s_past_node_t*> src_strides, std::vector<s_past_node_t*> dst_strides,
-      std::vector<s_past_node_t*> sizes) {
+      NodeVec src_offsets, NodeVec dst_offsets,
+      NodeVec src_strides, NodeVec dst_strides,
+      NodeVec sizes) {
   LLVM_DEBUG(
     llvm::errs() << "getArrayCopy: " << src_offsets.size() << " " << src_strides.size() << " " << sizes.size() << "\n";
   );
@@ -300,7 +302,7 @@ s_past_node_t* PastTranslator::getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
           src_offsets.size() > 0);
   auto numdims = src_offsets.size();
 
-  std::vector<s_past_node_t*> args;
+  NodeVec args;
   args.push_back(past_node_varref_create(src));
   for (auto offs : src_offsets) {
     args.push_back(offs);
@@ -326,9 +328,9 @@ s_past_node_t* PastTranslator::getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
 }
 
 s_past_node_t* PastTranslator::getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
-    std::vector<s_past_node_t*> src_offsets, std::vector<s_past_node_t*> dst_offsets,
-    std::vector<s_past_node_t*> sizes) {
-  std::vector<s_past_node_t*> src_strides, dst_strides;
+    NodeVec src_offsets, NodeVec dst_offsets,
+    NodeVec sizes) {
+  NodeVec src_strides, dst_strides;
   for (int i = 0; i < (int)src_offsets.size(); i++) {
     src_strides.push_back(past_node_value_create_from_int(1));
     dst_strides.push_back(past_node_value_create_from_int(1));
@@ -340,7 +342,7 @@ s_past_node_t* PastTranslator::getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
 s_past_node_t* PastTranslator::getArrayCopy(const MemRefType& type, s_symbol_t* src, s_symbol_t* dst) {
   auto dims = type.getShape();
   assert(dims.size() > 0);
-  std::vector<s_past_node_t*> args;
+  NodeVec args;
   args.push_back(past_node_varref_create(src));
   for (size_t i = 0; i < dims.size(); i++) {
     args.push_back(past_node_value_create_from_int(0));
@@ -366,7 +368,7 @@ s_past_node_t* PastTranslator::getArrayCopy(const MemRefType& type, s_symbol_t* 
 }
 
 s_past_node_t* PastTranslator::getPastWaitSemaphore(s_symbol_t* semaphore, s_symbol_t* val) {
-  std::vector<s_past_node_t*> args = {
+  NodeVec args = {
     past_node_varref_create(semaphore),
     past_node_varref_create(val)
   };
@@ -378,7 +380,7 @@ s_past_node_t* PastTranslator::getPastWaitSemaphore(s_symbol_t* semaphore, s_sym
 
 s_past_node_t* PastTranslator::getPastWaitSemaphoreAll
       (s_symbol_t* semaphore_arr, s_symbol_t* size, s_symbol_t* val) {
-  std::vector<s_past_node_t*> args = {
+  NodeVec args = {
     past_node_varref_create(semaphore_arr),
     past_node_varref_create(size),
     past_node_varref_create(val)
@@ -390,7 +392,7 @@ s_past_node_t* PastTranslator::getPastWaitSemaphoreAll
 }
 
 s_past_node_t* PastTranslator::getPastSetSemaphore(s_symbol_t* semaphore, s_symbol_t* val) {
-  std::vector<s_past_node_t*> args = {
+  NodeVec args = {
     past_node_varref_create(semaphore),
     past_node_varref_create(val)
   };
@@ -401,7 +403,7 @@ s_past_node_t* PastTranslator::getPastSetSemaphore(s_symbol_t* semaphore, s_symb
 }
 
 s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName) {
-  std::vector<s_past_node_t*> args = {
+  NodeVec args = {
     past_node_varref_create(semaphoreName)
   };
   return past_node_statement_create(
@@ -427,7 +429,7 @@ s_past_node_t* PastTranslator::translate(func::FuncOp op) {
     return nullptr;
   }
 
-  std::vector<s_past_node_t*> args;
+  NodeVec args;
   for (auto arg : op.getRegion().getArguments()) {
     args.push_back(getVarDecl(arg, "func_arg"));
   }
@@ -481,7 +483,7 @@ s_past_node_t* PastTranslator::translate(func::ReturnOp op) {
   };
 
   assert(functionReturnVars.find(func.getSymName().str()) != functionReturnVars.end());
-  std::vector<s_past_node_t*> stmts;
+  NodeVec stmts;
   for (auto [sym, operand] : llvm::zip_equal(
         *(functionReturnVars.find(func.getSymName().str())->second), op.getOperands())) {
     stmts.push_back(getVarCopy(sym, operand));
@@ -493,9 +495,9 @@ s_past_node_t* PastTranslator::translate(func::ReturnOp op) {
 }
 
 s_past_node_t* PastTranslator::translate(func::CallOp op) {
-  std::vector<s_past_node_t*> stmts;
-  std::vector<s_past_node_t*> stmtsAfterCall;
-  std::vector<s_past_node_t*> args;
+  NodeVec stmts;
+  NodeVec stmtsAfterCall;
+  NodeVec args;
 
   for (Value arg : op.getArgOperands()) {
     args.push_back(past_node_varref_create(getVarSymbol(arg)));
@@ -761,7 +763,7 @@ s_past_node_t* PastTranslator::translate(arith::SelectOp op) {
 
 s_past_node_t* PastTranslator::translate(scf::ForOp op) {
   s_symbol_t* iterator = getVarSymbol(op.getInductionVar(), "for_iter");
-  std::vector<s_past_node_t*> stmts;
+  NodeVec stmts;
 
   //handle loop-carried variables
   assert(op.getResults().size() == op.getInitArgs().size() && \
@@ -802,7 +804,7 @@ s_past_node_t* PastTranslator::translate(scf::ForOp op) {
 
 s_past_node_t* PastTranslator::translate(scf::IfOp op) {
   assert(op.getResults().empty());
-  std::vector<s_past_node_t*> nodes;
+  NodeVec nodes;
   for (Value res : op.getResults()) {
     nodes.push_back(past_node_statement_create(
       declareVar(res, "scf_if")));
@@ -819,7 +821,7 @@ s_past_node_t* PastTranslator::translate(scf::YieldOp op) {
   if (op.getOperands().size() == 0)
     return nullptr;
 
-  std::vector<s_past_node_t*> stmts;
+  NodeVec stmts;
 
   // handle scf.for:
   // set loop-carried vars equal to yield operands
@@ -861,7 +863,7 @@ s_past_node_t* PastTranslator::translate(cf::BranchOp op) {
 // memref
 
 void PastTranslator::generateNestedMemref
-      (int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
+      (unsigned int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
        MemRefType submrtype, s_symbol_t* result) {
   for (int i = 0; i < sizes[sizei]; i++) {
       indices[sizei] = i;
@@ -904,7 +906,7 @@ s_past_node_t* PastTranslator::translateAlloc(Operation* op, Type type, s_symbol
     exit(1);
   }
 
-  std::vector<s_past_node_t*> nodes;
+  NodeVec nodes;
   // declare outer array as void
   nodes.push_back(past_node_statement_create(
     declareVar(getSymbol("void"), result)));
@@ -931,7 +933,8 @@ s_past_node_t* PastTranslator::translate(memref::GlobalOp op) {
   }
   s_symbol_t* var = getSymbol(op.getSymName().str());
 
-  return translateAlloc(op.getOperation(), op.getType(), var);
+  globalDecls.push_back(translateAlloc(op.getOperation(), op.getType(), var));
+  return nullptr;
 }
 
 ///TODO: check for use-after-free bugs?
@@ -965,7 +968,7 @@ s_past_node_t* PastTranslator::translate(memref::CopyOp op) {
 }
 
 s_past_node_t* PastTranslator::translate(memref::SubViewOp op) {
-  std::vector<s_past_node_t*> stmts;
+  NodeVec stmts;
 
   auto getFoldResultNode = [&](OpFoldResult res) {
     if (res.is<Value>()) {
@@ -990,20 +993,20 @@ s_past_node_t* PastTranslator::translate(memref::SubViewOp op) {
       declareVar(op.getResult(), "subview")));
 
   // copy to subview var
-  std::vector<s_past_node_t*> src_offsets;
-  std::vector<s_past_node_t*> dst_offsets;
+  NodeVec src_offsets;
+  NodeVec dst_offsets;
   for (auto offs : op.getMixedOffsets()) {
     src_offsets.push_back(getFoldResultNode(offs));
     dst_offsets.push_back(past_node_value_create_from_int(0));
   }
 
-  std::vector<s_past_node_t*> src_strides, dst_strides;
+  NodeVec src_strides, dst_strides;
   for (auto str : op.getMixedStrides()) {
     src_strides.push_back(getFoldResultNode(str));
     dst_strides.push_back(past_node_value_create_from_int(1));
   }
 
-  std::vector<s_past_node_t*> sizes;
+  NodeVec sizes;
   for (auto size : op.getMixedSizes()) {
     sizes.push_back(getFoldResultNode(size));
   }
@@ -1047,7 +1050,7 @@ s_past_node_t* PastTranslator::translate(memref::CastOp op) {
 // async
 
 s_past_node_t* PastTranslator::translate(async::CreateGroupOp op) {
-  std::vector<s_past_node_t*> stmts;
+  NodeVec stmts;
   // declare buffer
   stmts.push_back(past_node_statement_create(
     past_node_binary_create(past_vardecl,
@@ -1065,7 +1068,7 @@ s_past_node_t* PastTranslator::translate(async::CreateGroupOp op) {
 }
 
 s_past_node_t* PastTranslator::translate(async::AddToGroupOp op) {
-  std::vector<s_past_node_t*> stmts;
+  NodeVec stmts;
   s_symbol_t* groupIndex = asyncGroupIndex.find(op.getGroup())->second;
   // set group[group_index] = k
   stmts.push_back(
@@ -1092,8 +1095,8 @@ s_past_node_t* PastTranslator::translate(async::AwaitAllOp op) {
 }
 
 s_past_node_t* PastTranslator::translate(async::ExecuteOp op) {
-  std::vector<s_past_node_t*> nodes;
-  std::vector<s_past_node_t*> body;
+  NodeVec nodes;
+  NodeVec body;
 
   // wait on all dependencies
   for (auto dep : op.getDependencies()) {
@@ -1137,62 +1140,6 @@ s_past_node_t* PastTranslator::translate(LLVM::UndefOp op) {
     declareVar(op.getResult(), ""));
 }
 
-// returns a linked list of the translation of the contained blocks'
-// operations, chained
-s_past_node_t* PastTranslator::translate(Region& region) {
-  std::vector<s_past_node_t*> stmts;
-  for(Block& block : region.getBlocks()) {
-    auto firststmt = stmts.size();
-
-    for (Operation& op : block.getOperations()) {
-      if (auto stmt = translate(&op)) {
-        // work around a parser rule not being implemented
-        // if (past_node_is_a(stmt, past_statement) &&
-        //     past_node_is_a(PAST_NODE_AS(stmt, statement)->body, past_varref))
-        //   continue;
-        stmts.push_back(stmt);
-      }
-    }
-
-    // block has users: print label at first statement
-    if (!block.getUses().empty()) {
-      assert(stmts.size() > firststmt); //block has to have >0 stmts
-      s_symbol_t* labelname = getBlockSymbol(&block);
-      s_past_node_t* label = past_node_label_create(
-        past_node_varref_create(labelname),
-        stmts[firststmt]);
-      stmts[firststmt] = label;
-    }
-
-    // if value in blockAddAtEnd is declared in block,
-    // add associated statement here
-    std::vector<Value> toremove;
-    for (auto &b : blockAddAtEnd) {
-      Value val = b.first;
-      // if (llvm::find(block.getOperations(), *(val.getDefiningOp())) !=
-      //     block.getOperations().end()) {
-      ///TODO: there's GOTTA be a better way to do this...
-      auto valDefinedInBlock = [](Block& block, Value val) {
-        for (auto &op : block.getOperations()) {
-          auto o = &op;
-          for (auto res : o->getResults()) {
-            if (val == res) return true;
-          }
-        }
-        return false;
-      };
-      if (valDefinedInBlock(block, val)) {
-        stmts.push_back(b.second);
-        toremove.push_back(val);
-      }
-    }
-    for (auto val : toremove) {
-      blockAddAtEnd.erase(val);
-    }
-  }
-  return nodeChain(stmts);
-}
-
 s_past_node_t* PastTranslator::translate_unsupported(Operation* op) {
   assert(op);
 
@@ -1222,7 +1169,7 @@ s_past_node_t* PastTranslator::translate_unsupported(Operation* op) {
   char* str = (char*)malloc((s.size() + 1) * sizeof(char));
   strcpy(str, s.c_str());
 
-  std::vector<s_past_node_t*> nodes;
+  NodeVec nodes;
   // declare results of operation so future uses are ok
   for (auto res : op->getResults()) {
     nodes.push_back(past_node_statement_create(
@@ -1242,7 +1189,7 @@ s_past_node_t* PastTranslator::translate_unsupported(Operation* op) {
 }
 
 s_past_node_t* PastTranslator::translate(verif::SemaphoreOp op) {
-  std::vector<s_past_node_t*> nodes;
+  NodeVec nodes;
   nodes.push_back(past_node_statement_create(
     getVarDecl(op.getSem(), "verif_semaphore")));
   nodes.push_back(getPastNewSemaphore(getVarSymbol(op.getSem())));
@@ -1250,14 +1197,14 @@ s_past_node_t* PastTranslator::translate(verif::SemaphoreOp op) {
 }
 
 s_past_node_t* PastTranslator::translate(verif::SemaphoreSetOp op) {
-  std::vector<s_past_node_t*> nodes;
+  NodeVec nodes;
   nodes.push_back(getPastSetSemaphore
       (getVarSymbol(op.getSem(), "verif_semaphore"), getVarSymbol(op.getVal())));
   return nodeChain(nodes);
 }
 
 s_past_node_t* PastTranslator::translate(verif::SemaphoreWaitOp op) {
-  std::vector<s_past_node_t*> nodes;
+  NodeVec nodes;
   nodes.push_back(getPastWaitSemaphore
       (getVarSymbol(op.getSem(), "verif_semaphore"), getVarSymbol(op.getVal())));
   return nodeChain(nodes);
@@ -1337,41 +1284,105 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
 }
 
 
+// returns a linked list of the translation of the contained blocks'
+// operations, chained
+s_past_node_t* PastTranslator::translate(Region& region) {
+  NodeVec stmts;
+  for(Block& block : region.getBlocks()) {
+    auto firststmt = stmts.size();
+
+    for (Operation& op : block.getOperations()) {
+      if (auto stmt = translate(&op)) {
+        // work around a parser rule not being implemented
+        // if (past_node_is_a(stmt, past_statement) &&
+        //     past_node_is_a(PAST_NODE_AS(stmt, statement)->body, past_varref))
+        //   continue;
+        stmts.push_back(stmt);
+      }
+    }
+
+    // block has users: print label at first statement
+    if (!block.getUses().empty()) {
+      assert(stmts.size() > firststmt); //block has to have >0 stmts
+      s_symbol_t* labelname = getBlockSymbol(&block);
+      s_past_node_t* label = past_node_label_create(
+        past_node_varref_create(labelname),
+        stmts[firststmt]);
+      stmts[firststmt] = label;
+    }
+
+    // if value in blockAddAtEnd is declared in block,
+    // add associated statement here
+    std::vector<Value> toremove;
+    for (auto &b : blockAddAtEnd) {
+      Value val = b.first;
+      // if (llvm::find(block.getOperations(), *(val.getDefiningOp())) !=
+      //     block.getOperations().end()) {
+      ///TODO: there's GOTTA be a better way to do this...
+      auto valDefinedInBlock = [](Block& block, Value val) {
+        for (auto &op : block.getOperations()) {
+          auto o = &op;
+          for (auto res : o->getResults()) {
+            if (val == res) return true;
+          }
+        }
+        return false;
+      };
+      if (valDefinedInBlock(block, val)) {
+        stmts.push_back(b.second);
+        toremove.push_back(val);
+      }
+    }
+    for (auto val : toremove) {
+      blockAddAtEnd.erase(val);
+    }
+  }
+  return nodeChain(stmts);
+}
+
 // module: entry point for translation
 s_past_node_t* PastTranslator::translate(ModuleOp op) {
   auto regionops = op.getRegion().getOps();
   if (regionops.empty()) return nullptr;
 
-  // check for accepted format: only non-func ops, or only
-  // memref.global + func ops
-  bool funcpresent = isa<func::FuncOp>(*regionops.begin());
-  bool onlyfuncorglobal = isa<func::FuncOp>(*regionops.begin()) ||
-      isa<memref::GlobalOp>(*regionops.begin());
-  for (auto& o : regionops) {
-    funcpresent = funcpresent || isa<func::FuncOp>(o);
-    onlyfuncorglobal = onlyfuncorglobal && (isa<func::FuncOp>(*regionops.begin()) ||
-      isa<memref::GlobalOp>(*regionops.begin()));
-    if (funcpresent && !onlyfuncorglobal) {
-      o.emitError("");
-      exit(1);
-    }
-  }
-
   auto body = translate(op.getRegion());
 
-  // main region: entire block if not list of functions,
-  // otherwise main function if present
-  s_past_node_t* main = mainFunction;
-  if (!funcpresent) {
-    main = past_node_block_create(body);
-    body = nullptr;
+  // remove fundecls from body, move to functionDecls
+  s_past_node_t* prev = nullptr;
+  s_past_node_t* current = body;
+  while (current) {
+    s_past_node_t* next = current->next;
+    if (past_node_is_a(current, past_fundecl)) {
+      if (prev) prev->next = next;
+      if (current == body) body = next;
+      current->next = nullptr;
+      functionDecls.push_back(current);
+    }
+    else {
+      prev = current;
+    }
+    current = next;
   }
 
-  // translation: new globals and functions generated, then body and main
-  auto translation = newGlobalDecls;
-  translation.insert(newGlobalDecls.end(), newFunctionDecls.begin(), newFunctionDecls.end());
-  translation.push_back(body);
-  translation.push_back(main);
+  // want the main region to either be implicit via body OR explicit via @main func
+  if (body && mainFunction &&
+      // only funcs and globals with a main function is allowed
+      !llvm::all_of(regionops, [] (Operation& op) {
+          return isa<func::FuncOp, memref::GlobalOp>(op);})) {
+    op.emitError("module has more than one entry point");
+    exit(1);
+  }
+
+  // translation: globals and functions, then main
+  auto translation = globalDecls;
+  translation.insert(translation.end(), functionDecls.begin(), functionDecls.end());
+  if (mainFunction) {
+    translation.push_back(body);
+    translation.push_back(mainFunction);
+  }
+  else if (body) {
+    translation.push_back(past_node_block_create(body));
+  }
 
   s_past_node_t* ret = past_node_root_create(symbolTable, nodeChain(translation));
   return ret;

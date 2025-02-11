@@ -43,6 +43,7 @@
 namespace mlir::verif {
 
 class PastTranslator {
+  using NodeVec = std::vector<s_past_node_t*>;
 
   public:
 
@@ -65,8 +66,8 @@ class PastTranslator {
 
   std::unordered_map<Value, s_symbol_t*> asyncGroupIndex;
 
-  std::vector<s_past_node_t*> newGlobalDecls;
-  std::vector<s_past_node_t*> newFunctionDecls;
+  NodeVec globalDecls;
+  NodeVec functionDecls;
 
   // if value is declared in block, add this statement to the end of the block.
   // dumb hack for subview copy back.
@@ -94,25 +95,26 @@ class PastTranslator {
   e_past_value_type_t getTypePast(const Type& t);
 
   // returns node at start of list
-  s_past_node_t* nodeChain(std::vector<s_past_node_t*> nodes);
+  s_past_node_t* nodeChain(NodeVec nodes);
+  void nodeUnChain(s_past_node_t* nodelist, NodeVec& v);
   s_past_node_t* getNodeListEnd(s_past_node_t* nodeList);
-  void nodeListClone(std::vector<s_past_node_t*>& list);
+  void nodeListClone(NodeVec& list);
 
   // type varname = assignval;
   s_past_node_t* getDeclareAndAssign(Type type, const char* varname,
             Value varvalue, s_past_node_t* assignval);
 
-  s_past_node_t* getArrayAccess(s_symbol_t* arr, std::vector<s_past_node_t*> ops);
+  s_past_node_t* getArrayAccess(s_symbol_t* arr, NodeVec ops);
   s_past_node_t* getArrayAccess(Value arr, OperandRange ops);
 
   s_past_node_t* getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
-        std::vector<s_past_node_t*> src_offsets, std::vector<s_past_node_t*> dst_offsets,
-        std::vector<s_past_node_t*> src_strides, std::vector<s_past_node_t*> dst_strides,
-        std::vector<s_past_node_t*> sizes);
+        NodeVec src_offsets, NodeVec dst_offsets,
+        NodeVec src_strides, NodeVec dst_strides,
+        NodeVec sizes);
 
   s_past_node_t* getArrayCopy(s_symbol_t* src, s_symbol_t* dst,
-      std::vector<s_past_node_t*> src_offsets, std::vector<s_past_node_t*> dst_offsets,
-      std::vector<s_past_node_t*> sizes);
+      NodeVec src_offsets, NodeVec dst_offsets,
+      NodeVec sizes);
 
   // macro call: COPY_[N]D(src, 0, [size of dim 1], ... 0, [size of dim N], dst, 0, [size of dim 1], ... 0, [size of dim N])
   s_past_node_t* getArrayCopy(const MemRefType& type, s_symbol_t* src, s_symbol_t* dst);
@@ -192,7 +194,7 @@ class PastTranslator {
   // memref
 
   void generateNestedMemref
-      (int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
+      (unsigned int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
        MemRefType submrtype, s_symbol_t* result);
   s_past_node_t* translateAlloc(Operation* op, Type type, s_symbol_t* result);
   s_past_node_t* translate(memref::AllocOp op);
