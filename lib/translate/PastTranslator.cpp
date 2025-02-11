@@ -1307,8 +1307,10 @@ s_past_node_t* PastTranslator::translate(Region& region) {
       s_symbol_t* labelname = getBlockSymbol(&block);
       s_past_node_t* label = past_node_label_create(
         past_node_varref_create(labelname),
-        stmts[firststmt]);
-      stmts[firststmt] = label;
+        // empty statement to be robust to declarations following
+        past_node_statement_create(
+            past_node_varref_create(symbol_get_or_insert(symbolTable, "", nullptr))));
+      stmts.insert(stmts.begin() + firststmt, label);
     }
 
     // if value in blockAddAtEnd is declared in block,
