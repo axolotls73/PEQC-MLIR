@@ -86,7 +86,7 @@ s_past_node_t* PastTranslator::declareVar(s_symbol_t* type, s_symbol_t* var) {
     return s[strlen(s) - 1] == '*';
   };
   if (all_arrays_global && isarray(type->name_str)) {
-    newGlobalDecls.push_back(
+    globalDecls.push_back(
       past_node_statement_create(
         getVarDecl(type, var)
     ));
@@ -868,7 +868,7 @@ s_past_node_t* PastTranslator::translate(cf::BranchOp op) {
 // memref
 
 void PastTranslator::generateNestedMemref
-      (int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
+      (unsigned int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
        MemRefType submrtype, s_symbol_t* result) {
   for (int i = 0; i < sizes[sizei]; i++) {
       indices[sizei] = i;
@@ -911,7 +911,7 @@ s_past_node_t* PastTranslator::translateAlloc(Operation* op, Type type, s_symbol
     exit(1);
   }
 
-  std::vector<s_past_node_t*> nodes;
+  NodeVec nodes;
   // declare outer array as void
   nodes.push_back(past_node_statement_create(
     declareVar(getSymbol("void"), result)));
@@ -938,7 +938,8 @@ s_past_node_t* PastTranslator::translate(memref::GlobalOp op) {
   }
   s_symbol_t* var = getSymbol(op.getSymName().str());
 
-  return translateAlloc(op.getOperation(), op.getType(), var);
+  globalDecls.push_back(translateAlloc(op.getOperation(), op.getType(), var));
+  return nullptr;
 }
 
 ///TODO: check for use-after-free bugs?
@@ -1344,42 +1345,49 @@ s_past_node_t* PastTranslator::translate(Region& region) {
   return nodeChain(stmts);
 }
 
-
 // module: entry point for translation
 s_past_node_t* PastTranslator::translate(ModuleOp op) {
   auto regionops = op.getRegion().getOps();
   if (regionops.empty()) return nullptr;
 
-  // check for accepted format: only non-func ops, or only
-  // memref.global + func ops
-  bool funcpresent = isa<func::FuncOp>(*regionops.begin());
-  bool onlyfuncorglobal = isa<func::FuncOp>(*regionops.begin()) ||
-      isa<memref::GlobalOp>(*regionops.begin());
-  for (auto& o : regionops) {
-    funcpresent = funcpresent || isa<func::FuncOp>(o);
-    onlyfuncorglobal = onlyfuncorglobal && (isa<func::FuncOp>(*regionops.begin()) ||
-      isa<memref::GlobalOp>(*regionops.begin()));
-    if (funcpresent && !onlyfuncorglobal) {
-      o.emitError("");
-      exit(1);
-    }
-  }
-
   auto body = translate(op.getRegion());
 
-  // main region: entire block if not list of functions,
-  // otherwise main function if present
-  s_past_node_t* main = mainFunction;
-  if (!funcpresent) {
-    main = past_node_block_create(body);
-    body = nullptr;
+  // remove fundecls from body, move to functionDecls
+  s_past_node_t* prev = nullptr;
+  s_past_node_t* current = body;
+  while (current) {
+    s_past_node_t* next = current->next;
+    if (past_node_is_a(current, past_fundecl)) {
+      if (prev) prev->next = next;
+      if (current == body) body = next;
+      current->next = nullptr;
+      functionDecls.push_back(current);
+    }
+    else {
+      prev = current;
+    }
+    current = next;
   }
 
-  // translation: new globals and functions generated, then body and main
-  auto translation = newGlobalDecls;
-  translation.insert(newGlobalDecls.end(), newFunctionDecls.begin(), newFunctionDecls.end());
-  translation.push_back(body);
-  translation.push_back(main);
+  // want the main region to either be implicit via body OR explicit via @main func
+  if (body && mainFunction &&
+      // only funcs and globals with a main function is allowed
+      !llvm::all_of(regionops, [] (Operation& op) {
+          return isa<func::FuncOp, memref::GlobalOp>(op);})) {
+    op.emitError("module has more than one entry point");
+    exit(1);
+  }
+
+  // translation: globals and functions, then main
+  auto translation = globalDecls;
+  translation.insert(translation.end(), functionDecls.begin(), functionDecls.end());
+  if (mainFunction) {
+    translation.push_back(body);
+    translation.push_back(mainFunction);
+  }
+  else if (body) {
+    translation.push_back(past_node_block_create(body));
+  }
 
   s_past_node_t* ret = past_node_root_create(symbolTable, nodeChain(translation));
   return ret;

@@ -66,8 +66,8 @@ class PastTranslator {
 
   std::unordered_map<Value, s_symbol_t*> asyncGroupIndex;
 
-  NodeVec newGlobalDecls;
-  NodeVec newFunctionDecls;
+  NodeVec globalDecls;
+  NodeVec functionDecls;
 
   // if value is declared in block, add this statement to the end of the block.
   // dumb hack for subview copy back.
@@ -96,6 +96,7 @@ class PastTranslator {
 
   // returns node at start of list
   s_past_node_t* nodeChain(NodeVec nodes);
+  void nodeUnChain(s_past_node_t* nodelist, NodeVec& v);
   s_past_node_t* getNodeListEnd(s_past_node_t* nodeList);
   void nodeListClone(NodeVec& list);
 
@@ -194,7 +195,7 @@ class PastTranslator {
   // memref
 
   void generateNestedMemref
-      (int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
+      (unsigned int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
        MemRefType submrtype, s_symbol_t* result);
   s_past_node_t* translateAlloc(Operation* op, Type type, s_symbol_t* result);
   s_past_node_t* translate(memref::AllocOp op);

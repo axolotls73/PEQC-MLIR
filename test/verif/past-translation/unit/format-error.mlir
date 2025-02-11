@@ -16,20 +16,10 @@
 
 // RUN: split-file %s %t
 
-// RUN: not verif-translate --translate-to-past %t/mixed-ops.mlir
 // RUN: not verif-translate --translate-to-past %t/main-signature-wrong.mlir
 // RUN: not verif-translate --translate-to-past %t/main-signature-wrong-2.mlir
+// RUN: not verif-translate --translate-to-past %t/two-main.mlir
 
-
-//--- mixed-ops.mlir
-
-module {
-  %1 = arith.constant 1 : index
-  func.func @test () {
-    %2 = arith.constant 1 : index
-    return
-  }
-}
 
 //--- main-signature-wrong.mlir
 
@@ -47,4 +37,16 @@ module {
     %1 = arith.constant 1 : index
     return
   }
+}
+
+//--- two-main.mlir
+
+
+module {
+  %1 = arith.constant 1 : index
+  func.func @main () {
+    %2 = arith.constant 1 : index
+    return
+  }
+  memref.global "private" @global : memref<1xindex>
 }
