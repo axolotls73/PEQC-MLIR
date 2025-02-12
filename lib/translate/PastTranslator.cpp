@@ -938,8 +938,12 @@ s_past_node_t* PastTranslator::translate(memref::GlobalOp op) {
   }
   s_symbol_t* var = getSymbol(op.getSymName().str());
 
-  globalDecls.push_back(translateAlloc(op.getOperation(), op.getType(), var));
-  return nullptr;
+  // split global decl from possible sub-decls
+  s_past_node_t* alloc = translateAlloc(op.getOperation(), op.getType(), var);
+  s_past_node_t* decls = alloc->next;
+  alloc->next = nullptr;
+  globalDecls.push_back(alloc);
+  return decls;
 }
 
 ///TODO: check for use-after-free bugs?
