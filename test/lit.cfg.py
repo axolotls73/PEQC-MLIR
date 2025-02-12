@@ -31,7 +31,7 @@ config.test_exec_root = os.path.join(config.verif_obj_root, "test")
 
 config.substitutions.append(("%PATH%", config.environment["PATH"]))
 config.substitutions.append(("%shlibext", config.llvm_shlib_ext))
-config.substitutions.append(("%add_epilogue", os.path.join(config.verif_src_root, "verif-translate/scripts/add_epilogue.sh")))
+config.substitutions.append(("%add_epilogue", os.path.join(config.verif_src_root, "script/add_epilogue.py")))
 
 # pastchecker with arguments
 config.substitutions.append(("%pastchecker", "pastchecker --enable-preprocessor --timing-mode --verbose --enable-subtrees"))
@@ -58,7 +58,7 @@ llvm_config.with_environment("PATH", config.llvm_tools_dir, append_path=True)
 tool_dirs = [
     config.llvm_tools_dir,
     config.verif_tools_dir,
-    config.verif_src_root,
+    os.path.join(config.verif_src_root, 'script'),
 ]
 
 tools = [
