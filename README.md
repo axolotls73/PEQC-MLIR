@@ -1,20 +1,22 @@
 # PEQC-MLIR
 
-
+PEQC-MLIR is a framework to verify the semantic equivalence between a pair of MLIR programs using the PEQC hybrid concrete-symbolic verification system.
+It is restricted to programs with a statically-interpretable control-flow.
+PEQC-MLIR is in active development and subject to arbitrary changes without notice: consider this software unstable.
 
 ## Building PEQC-MLIR
 
 ### Prerequisites
 
 To build PEQC-MLIR, first install its dependencies: LLVM version 20.0.0git with MLIR,
-and optionally MLIR-AIR commit 07174f8a and MLIR-AIE commit c8dafd9.
+and optionally MLIR-AIR commit 07174f8a and MLIR-AIE commit c8dafd9. A Docker image is available in the docker/ directory that contains all required packages to successfully install all the tools below, including mlir-air and llvm.
 
 #### MLIR-AIR
 
 MLIR_AIR is an optional dependency: if installed, PEQC-MLIR will support a subset of operations in the AIR dialect.
 
 Instructions for building MLIR-AIR can be found
-[here](https://xilinx.github.io/mlir-air/buildingRyzenLin.html), copied below:
+[here](https://xilinx.github.io/mlir-air/buildingRyzenLin.html), copied below and fixing the install directory for aienginev2:
 
 ```sh
 # clone repo
@@ -27,10 +29,10 @@ source utils/setup_python_packages.sh
 ./utils/build-llvm-local.sh llvm
 ./utils/github-clone-build-libxaie.sh
 ./utils/clone-mlir-aie.sh
-./utils/build-mlir-aie-local.sh llvm mlir-aie/cmake/modulesXilinx aienginev2 mlir-aie
+./utils/build-mlir-aie-local.sh llvm mlir-aie/cmake/modulesXilinx aienginev2/install mlir-aie
 
 # build
-./utils/build-mlir-air-xrt.sh llvm mlir-aie/cmake/modulesXilinx mlir-aie aienginev2 /opt/xilinx/xrt
+./utils/build-mlir-air-xrt.sh llvm mlir-aie/cmake/modulesXilinx mlir-aie aienginev2/install /opt/xilinx/xrt
 source utils/env_setup.sh install-xrt/ mlir-aie/install/ llvm/install/
 ```
 
@@ -38,13 +40,13 @@ source utils/env_setup.sh install-xrt/ mlir-aie/install/ llvm/install/
 #### PAST/PEQC
 
 To install
-[PAST 0.7.2](https://sourceforge.net/projects/pocc/),
-run the commands below, and add `past-0.7.2/src` to your `PATH` (this is needed for tests):
+[PAST 0.7.3-beta](https://sourceforge.net/projects/pocc/),
+run the commands below, and add `past-0.7.3-beta/src` to your `PATH` (this is needed for tests):
 
 ```sh
-wget -O past-0.7.2.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/past-0.7.2.tar.gz/download'
-tar -xf past-0.7.2.tar.gz
-cd past-0.7.2
+wget -O past-0.7.3-beta.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/unstable-testing/past-0.7.3-beta.tar.gz/download'
+tar -xf past-0.7.3-beta.tar.gz
+cd past-0.7.3-beta
 ./configure
 make
 
@@ -73,7 +75,7 @@ After installing the prerequisites, run the commands below to build PEQC-MLIR wi
 
 * `[llvm-cmake]` replaced with LLVM's CMake configuration directory, e.g. `/opt/mlir-air/llvm/build/lib/cmake`.
 * `[air-repo]` replaced with the MLIR-AIR project root, e.g. `/opt/mlir-air`. This line should be omitted if compiling without air.
-* `[past]` replaced with the location of PAST/PEQC, e.g. `./past-0.7.2`.
+* `[past]` replaced with the location of PAST/PEQC, e.g. `./past-0.7.3-beta`.
 
 ```sh
 mkdir -p build && cd build
@@ -117,6 +119,8 @@ The MLIR-to-C translator only supports a subset of MLIR operations: the converte
 
 `peqc-mlir.py` (-h for options) is a wrapper script for the other tools below -- it takes two MLIR files and interprets them to attempt to prove that they must produce the same outputs for the same inputs.
 Requires Python >= 3.10.
+
+To use, make sure `build/bin` is in your PATH.
 
 ```
 $> ./peqc-mlir.py -h
@@ -344,6 +348,8 @@ Blocking wait on semaphore `sem` until it is assigned the value `val`.
 
 ## Polybench experiments
 
+More information on experiments can be found [here](experiments/polygeist-polybench/README.md).
+
 To run polybench verification experiments (using `MINI_DATASET`):
 
 ```sh
@@ -352,7 +358,7 @@ cd experiments/polygeist-polybench
 ```
 
 Requirements:
-* Python >= 3.10
+* Python >= 3.10 (+ packages in `requirements.txt`)
 * GNU Time: in `/usr/bin/time`
 
 

@@ -22,7 +22,6 @@ if (COMPILE_WITH_AIR)
     convert/ConvertAirToScfParallel.cpp
     convert/ConvertAirMem.cpp
     convert/ConvertAirChannel.cpp
-    convert/ConvertAIE.cpp
     ${LIB_SOURCES}
   )
 endif()

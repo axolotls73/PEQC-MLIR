@@ -10,6 +10,8 @@
 
 ## Scripts
 
+Before running these scripts, run `pip3 install -r requirements.txt` to install dependencies.
+
 Tools you need in your PATH:
 * verif-opt, verif-translate
 * MLIR: mlir-opt

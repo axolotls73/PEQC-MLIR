@@ -65,8 +65,9 @@ def die():
   global tempfiles
   if not args.keep:
     for file in set(tempfiles):
-      os.remove(file)
-    if removetempdir:
+      if os.path.isfile(file):
+        os.remove(file)
+    if removetempdir and os.path.isdir(args.temp_dir):
       os.rmdir(args.temp_dir)
   exit(1)
 
@@ -131,12 +132,12 @@ for filename, id in zip([file1, file2], ['1', '2']):
     print(f'{err}\n{CLR_RED}mlir-opt error{CLR_NONE}')
     die()
 
-  out, err, rc = run(f'verif-opt --verif-scf-parallel-to-async {lfilename} > {cfilename}')
+  out, err, rc = run(f'{VERIFDIR}/build/bin/verif-opt --verif-scf-parallel-to-async {lfilename} > {cfilename}')
   if rc:
     print(f'{err}\n{CLR_RED}verif-opt error{CLR_NONE}')
     die()
 
-  out, err, rc = run(f'verif-translate --translate-to-past {cfilename}')
+  out, err, rc = run(f'{VERIFDIR}/build/bin/verif-translate --translate-to-past {cfilename}')
   if rc:
     print(f'{err}\n{CLR_RED}verif-translate error{CLR_NONE}')
     die()

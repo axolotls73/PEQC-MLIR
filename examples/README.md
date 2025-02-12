@@ -1,13 +1,15 @@
-# PEQC-MLIR examples
+# Examples
 
-The `matmul` directory contains a few versions of matrix multiply over memrefs.
+The `matmul` directory contains a few versions of matrix multiply over memrefs. These files can be processed with the AIR-independent peqc-mlir.py script.
 
-The `air-to-aie/matmul` directory contains example conversions/translations from
+The `air-to-aie/matmul` directory contains example conversions/translations from Linalg to AMD AIR/AIE dialects with air-opt, from
 [an mlir-air test](https://github.com/Xilinx/mlir-air/blob/9f75b4658e2e732bc093882ff2c88942f7d3555d/test/xrt/01_air_to_npu/aie.py).
+For these examples, use the dedicated peqc-mlir-air script in the examples/ directory.
+
 
 ## Usage examples
 
-### Using `peqc-mlir.py`
+### Using `peqc-mlir.py` on non-AIR files
 
 `peqc-mlir.py` composes transformations performed in `verif-opt` and `verif-translate`, and runs the PEQC interpreter to verify equivalence.
 An example that uses the tools separately can be found
@@ -45,7 +47,7 @@ module {
 
 
 
-### Individual steps
+### Individual steps to convert and translate AIR files
 
 
 First, the linalg operations in `air_input.mlir` need to be converted to the subset of operations supported in `verif-translate`.
@@ -82,4 +84,10 @@ After translating both files to C, we can use `pastchecker` to verify their equi
 
 ```bash
 pastchecker --enable-preprocessor air_input_translated_main.c air_tiled_translated_main.c A,B,C
+```
+
+Finally, for convenience, all these steps are wrapped in the peqc-air-verif script:
+
+```bash
+./peqc-air-verif air-to-aie/matmul/mm-16/air_input.mlir air-to-aie/matmul/mm-16/air_tiled.mlir air-to-aie/matmul/mm-16/epilogue.c
 ```
