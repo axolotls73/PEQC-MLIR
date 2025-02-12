@@ -3,10 +3,11 @@
 from util import runsh
 from util import *
 from glob import glob
-from sys import argv
+import sys
 import os
 import json
 import argparse
+import shutil
 
 
 PASTCOMMAND = 'pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees'
@@ -26,6 +27,15 @@ argparser.add_argument('--skip', type=lambda t: [s.strip() for s in t.split(',')
 argparser.add_argument('--only', type=lambda t: [s.strip() for s in t.split(',')], default=[],
     help='only run this comma-separated list of bench names')
 args = argparser.parse_args()
+
+executables = [
+  'pastchecker',
+  '/usr/bin/time'
+]
+for ex in executables:
+  if shutil.which(ex) is None:
+    print(f'{ex} must exist/be in PATH', file=sys.stderr)
+    exit(1)
 
 configobj = json.load(open(args.config_file))
 configs = configobj['optionsets']
@@ -100,14 +110,14 @@ for config in configs:
   runsh(f'mkdir -p {outdir}')
 
   benches = getbenches(benchdir)
-  print(benches)
+  # print(benches)
 
   if args.self:
     pairs = [(file, file, name, benchtoliveout[name]) for file, name in benches]
 
   elif args.compare_against:
     compareagainstbenches = getbenches(args.compare_against)
-    print(compareagainstbenches)
+    # print(compareagainstbenches)
     pairs = []
     for cbfile, cbname in compareagainstbenches:
       otherfiles = [(file, name) for file, name in benches if name == cbname]

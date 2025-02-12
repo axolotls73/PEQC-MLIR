@@ -20,7 +20,7 @@ from subprocess import run as subprocess_run
 from glob import glob
 import os
 import sys
-import tempfile
+import shutil
 import argparse
 import re
 
@@ -49,6 +49,15 @@ argparser.add_argument('--temp-dir', type=str, default='.peqc-files',
 argparser.add_argument('--seq-verif-only', action='store_true',
     help='runs PEQC with "--seq-verif-only"')
 args = argparser.parse_args()
+
+executables = [
+  'mlir-opt',
+  'pastchecker'
+]
+for ex in executables:
+  if shutil.which(ex) is None:
+    print(f'{ex} must be in PATH', file=sys.stderr)
+    exit(1)
 
 file1 = args.file1
 file2 = args.file2
