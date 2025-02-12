@@ -1,5 +1,5 @@
 /*
- * ConvertToAsync.cpp: This file is part of the PEQC-MLIR project.
+ * ConvertAirToAsync.cpp: This file is part of the PEQC-MLIR project.
  *
  * Copyright (C) 2024 Colorado State University
  *

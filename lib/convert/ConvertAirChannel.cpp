@@ -1,5 +1,5 @@
 /*
- * ConvertChannel.cpp: This file is part of the PEQC-MLIR project.
+ * ConvertAirChannel.cpp: This file is part of the PEQC-MLIR project.
  *
  * Copyright (C) 2024 Colorado State University
  *
