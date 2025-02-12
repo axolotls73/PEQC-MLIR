@@ -18,8 +18,7 @@
 
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-scf-parallel-to-async %t/input.mlir > %t/conversion.mlir && \
-// RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
-// RUN: %add_epilogue %t/result.c %testroot/Inputs/matmul-tiny-epilogue.c %t/translation.c
+// RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c
 
 //--- input.mlir
 

@@ -123,7 +123,7 @@ Requires Python >= 3.10.
 To use, make sure `build/bin` is in your PATH.
 
 ```
-$> ./peqc-mlir.py -h
+$> ./script/peqc-mlir.py -h
 
 usage: peqc-mlir.py [-h] [--verbose] [--debug] [--peqc-options PEQC_OPTIONS] [--keep]
                     [--temp-dir TEMP_DIR] [--seq-verif-only]
@@ -186,7 +186,7 @@ module {
   }
 }
 
-$> ./peqc-mlir.py examples/matmul/matmul-linalg.mlir examples/matmul/matmul-linalg.mlir A,B,C
+$> ./script/peqc-mlir.py examples/matmul/matmul-linalg.mlir examples/matmul/matmul-linalg.mlir A,B,C
 
 YES, examples/matmul/matmul-linalg.mlir and examples/matmul/matmul-linalg.mlir are equivalent
 ```
