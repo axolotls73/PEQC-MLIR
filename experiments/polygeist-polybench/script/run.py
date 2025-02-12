@@ -26,6 +26,8 @@ argparser.add_argument('--skip', type=lambda t: [s.strip() for s in t.split(',')
     help='comma-separated list of bench names to skip')
 argparser.add_argument('--only', type=lambda t: [s.strip() for s in t.split(',')], default=[],
     help='only run this comma-separated list of bench names')
+argparser.add_argument('--seq-verif-only', action='store_true',
+    help='run pastchecker with --seq-verif-only')
 args = argparser.parse_args()
 
 executables = [
@@ -48,6 +50,9 @@ elif args.compare_against:
   check_suffix = f'against_{pathtoname(args.compare_against)}'
 if args.only:
   check_suffix += '-only-' + '-'.join(args.only)
+
+if args.seq_verif_only:
+  PASTCOMMAND += ' --seq-verif-only'
 
 
 def getbenchname(file):
