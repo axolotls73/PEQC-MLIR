@@ -35,12 +35,14 @@ int main(int argc, char **argv) {
   mlir::verif::air::registerPasses();
 #endif
   mlir::registerAsyncParallelForPass();
+  mlir::registerConvertAffineToStandard();
 
   mlir::DialectRegistry registry;
   registry.insert<
       mlir::verif::VerifDialect,
       mlir::arith::ArithDialect,
       mlir::math::MathDialect,
+      mlir::affine::AffineDialect,
       mlir::scf::SCFDialect,
       mlir::func::FuncDialect,
       mlir::memref::MemRefDialect,

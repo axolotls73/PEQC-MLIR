@@ -21,6 +21,7 @@
 #include "mlir/IR/BuiltinDialect.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
+#include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/Async/IR/Async.h"
@@ -161,7 +162,8 @@ void buildChannelInit(SmallVector<int64_t>& bsizes) {
 }
 
 
-void buildCopy(Operation* putgetop, bool isput, TypedValue<MemRefType> mref,
+void buildCopy(Operation* putgetop, bool isput,
+      TypedValue<MemRefType> mref, SmallVector<int64_t>& ch_sizes, SmallVector<int64_t>& ch_bsizes,
       const ValueRange indices, const ValueRange opoffsets, const ValueRange opsizes, const ValueRange opstrides) {
   auto loc = putgetop->getLoc();
   auto builder = OpBuilder(putgetop);
@@ -205,6 +207,9 @@ void buildCopy(Operation* putgetop, bool isput, TypedValue<MemRefType> mref,
     strides = stridevec;
   }
 
+  assert(offsets.size() == sizes.size() && sizes.size() == strides.size());
+  auto numsizes = sizes.size();
+
   LLVM_DEBUG(
     llvm::errs() << "PROCESS PUT/GET\n";
     llvm::errs() << "  offsets: ";
@@ -227,9 +232,31 @@ void buildCopy(Operation* putgetop, bool isput, TypedValue<MemRefType> mref,
   Value bufarr = builder.create<memref::GetGlobalOp>(loc, bufarr_type, bufarr_name);
   Value semarr = builder.create<memref::GetGlobalOp>(loc, semarr_type, semarr_name);
 
-  // generate for loops, save list of iterators, set builder to body
+  // generate for loops, save list of iterators, insertion point to innermost
+  SmallVector<Value> iterators;
+  for (Value size : sizes) {
+    auto forop = builder.create<scf::ForOp>(loc, cst_0, size, cst_1);
+    iterators.push_back(forop.getInductionVar());
+    builder.setInsertionPointToStart(forop.getBody());
+  }
 
-  // create affine map w/ iterators to linearize index, zip offsets and strides
+  // create affine map w/ iterators to linearize index
+  AffineExpr indexexpr = builder.getAffineConstantExpr(0);
+  SmallVector<Value> affsyms;
+  for (size_t i = 0, offi = 0, stri = 1; i < numsizes; i++, offi += 2, stri += 2) {
+    auto offset = builder.getAffineSymbolExpr(offi);
+    auto stride = builder.getAffineSymbolExpr(stri);
+    auto iter = builder.getAffineDimExpr(i);
+    indexexpr = indexexpr + ((iter + offset) * stride);
+    affsyms.push_back(offsets[i]);
+    affsyms.push_back(strides[i]);
+  }
+  ///TODO: concatenate ranges instead somehow
+  SmallVector<Value> affoperands;
+  affoperands.append(iterators);
+  affoperands.append(affsyms);
+  AffineMap indexmap = AffineMap::get(numsizes, numsizes * 2, indexexpr, context);
+  builder.create<affine::AffineApplyOp>(loc, indexmap, affoperands);
 
   // delinearize index
 
@@ -279,7 +306,7 @@ LogicalResult processUse(SymbolTable::SymbolUse use, SmallVector<int64_t>& sizes
       handleAsync(context, putop.getLoc(), builder, putop.getAsyncToken(), putop.getAsyncDependencies());
     }
 
-    buildCopy(putop.getOperation(), true, putop.getSrc(),
+    buildCopy(putop.getOperation(), true, putop.getSrc(), sizes, bsizes,
         putop.getIndices(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
   }
 
@@ -296,7 +323,7 @@ LogicalResult processUse(SymbolTable::SymbolUse use, SmallVector<int64_t>& sizes
       handleAsync(context, getop.getLoc(), builder, getop.getAsyncToken(), getop.getAsyncDependencies());
     }
 
-    buildCopy(getop.getOperation(), true, getop.getDst(),
+    buildCopy(getop.getOperation(), true, getop.getDst(), sizes, bsizes,
         getop.getIndices(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
   }
 

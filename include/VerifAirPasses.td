@@ -77,6 +77,7 @@ def VerifConvertChannel: Pass<"verif-air-convert-channel", "::mlir::ModuleOp"> {
     "arith::ArithDialect",
     "memref::MemRefDialect",
     "scf::SCFDialect",
+    "affine::AffineDialect",
     "async::AsyncDialect",
     "verif::VerifDialect"
   ];
