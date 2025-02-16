@@ -80,65 +80,60 @@ void handleAsync(MLIRContext* context, Location loc,
   builder.setInsertionPointToStart(asyncExec.getBody());
 }
 
-WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, ModuleOp module) {
 
+class ChannelConverter {
+
+public:
+
+ChannelConverter(MLIRContext* context, ModuleOp module, xilinx::air::ChannelOp chop) :
+    context(context), module(module), chop(chop) {}
+
+private:
+
+MLIRContext* context;
+ModuleOp module;
+
+xilinx::air::ChannelOp chop;
+
+Type elt_type = nullptr;
+std::string bufarr_name;
+MemRefType bufarr_type = nullptr;
+std::string semarr_name;
+MemRefType semarr_type = nullptr;
+
+
+std::optional<Type> getChannelEltType() {
+  Type elt_type = IntegerType::get(context, 64); // default type if no uses
+  auto uses = chop.getSymbolUses(module);
+  if (!uses.has_value()) return elt_type;
+  Type* current_type = nullptr;
+  for (auto use : uses.value()) {
+    auto useop = use.getUser();
+    MemRefType usemr;
+    if (auto putop = mlir::dyn_cast<xilinx::air::ChannelPutOp>(useop)) {
+      usemr = mlir::dyn_cast<MemRefType>(putop.getMemref().getType());
+    }
+    else if (auto getop = mlir::dyn_cast<xilinx::air::ChannelGetOp>(useop)) {
+      usemr = mlir::dyn_cast<MemRefType>(getop.getMemref().getType());
+    }
+    Type usetype = usemr.getElementType();
+    if (!current_type) {
+      current_type = &usetype;
+      elt_type = usetype;
+    }
+    if (usetype != *current_type) {
+      chop.emitError("expected all uses to have the same memref element type");
+      return {};
+    }
+  }
+  return elt_type;
+}
+
+void buildChannelInit(SmallVector<int64_t>& bsizes) {
   auto loc = chop.getLoc();
   auto builder = OpBuilder(chop.getOperation());
 
-  // find memref element type: needs to be the same for all uses
-  Type elt_type = IntegerType::get(context, 64); // default type if no uses
-  auto uses = chop.getSymbolUses(module);
-  if (uses.has_value()) {
-    Type* current_type = nullptr;
-    for (auto use : uses.value()) {
-      auto useop = use.getUser();
-      MemRefType usemr;
-      if (auto putop = mlir::dyn_cast<xilinx::air::ChannelPutOp>(useop)) {
-        usemr = mlir::dyn_cast<MemRefType>(putop.getMemref().getType());
-      }
-      else if (auto getop = mlir::dyn_cast<xilinx::air::ChannelGetOp>(useop)) {
-        usemr = mlir::dyn_cast<MemRefType>(getop.getMemref().getType());
-      }
-      Type usetype = usemr.getElementType();
-      if (!current_type) {
-        current_type = &usetype;
-        elt_type = usetype;
-      }
-      if (usetype != *current_type) {
-        chop.emitError("expected all uses to have the same memref element type");
-        return WalkResult::interrupt();
-      }
-    }
-  }
-
-  LLVM_DEBUG(
-    chop.emitRemark();
-  );
-
-  // get channel sizes
-  ArrayAttr sizes_attr = chop.getSize();
-  auto bsizes_attr = chop.getBroadcastShape();
-  if (!bsizes_attr) bsizes_attr = chop.getSize();
-  // only allow channel ops that have 2 sizes
-  if (sizes_attr.size() != 2 || bsizes_attr.size() != 2) {
-    chop.emitError("expected air.channel to have two sizes");
-    return WalkResult::interrupt();
-  }
-  auto sizes = SmallVector<int64_t, 2>();
-  auto bsizes = SmallVector<int64_t, 2>();
-  for (auto [size, bsize] :
-        llvm::zip_equal(sizes_attr.getAsRange<IntegerAttr>(), bsizes_attr.getAsRange<IntegerAttr>())) {
-    ///FIXME: assert (bsize != size) -> (size == 1)
-    sizes.push_back(size.getInt());
-    bsizes.push_back(bsize.getInt());
-  }
-
   // create memrefs to store channel buffers and semaphores
-  auto dynamic_elt_type = MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type);
-  auto bufarr_type = MemRefType::get(bsizes, dynamic_elt_type);
-  auto semarr_type = MemRefType::get(bsizes, SemaphoreType::get(context));
-  auto bufarr_name = chop.getSymName().str() + "_buffer";
-  auto semarr_name = chop.getSymName().str() + "_sem";
   builder.create<memref::GlobalOp>(loc, StringAttr::get(context, bufarr_name),
       StringAttr::get(context, "private"),TypeAttr::get(bufarr_type),
       Attribute{}, UnitAttr{}, IntegerAttr{});
@@ -161,16 +156,55 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
   Value semarr_init_sem = builder.create<SemaphoreOp>(loc).getResult();
   builder.create<SemaphoreSetOp>(loc, semarr_init_sem, cst_0);
   builder.create<memref::StoreOp>(loc, semarr_init_sem, channel_semarr, loop_iters);
-  // doesn't work bc we don't know the memref size
+  ///TODO: doesn't work bc we don't know the memref size
   // Value bufarr_init_mr = builder.create<memref::AllocOp>(loc, dynamic_elt_type);
   // builder.create<memref::StoreOp>(loc, bufarr_init_mr, channel_bufarr, loop_iters);
+}
 
-  // reset builder position (TODO remove?)
-  builder.setInsertionPoint(chop);
-  chop.erase();
 
-  if (!uses.has_value()) return WalkResult::advance();
+public:
 
+LogicalResult processChannel() {
+  LLVM_DEBUG(
+    chop.emitRemark();
+  );
+
+  auto loc = chop.getLoc();
+  auto builder = OpBuilder(chop.getOperation());
+
+  // find memref element type: needs to be the same for all uses
+  auto elt_type_opt = getChannelEltType();
+  if (!elt_type_opt.has_value()) return failure();
+  elt_type = elt_type_opt.value();
+
+  // get channel sizes
+  ArrayAttr sizes_attr = chop.getSize();
+  auto bsizes_attr = chop.getBroadcastShape();
+  if (!bsizes_attr) bsizes_attr = chop.getSize();
+  // only allow channel ops that have 2 sizes
+  if (sizes_attr.size() != 2 || bsizes_attr.size() != 2) {
+    chop.emitError("expected air.channel to have two sizes");
+    return failure();
+  }
+  auto sizes = SmallVector<int64_t>();
+  auto bsizes = SmallVector<int64_t>();
+  for (auto [size, bsize] :
+        llvm::zip_equal(sizes_attr.getAsRange<IntegerAttr>(), bsizes_attr.getAsRange<IntegerAttr>())) {
+    ///FIXME: assert (bsize != size) -> (size == 1)
+    sizes.push_back(size.getInt());
+    bsizes.push_back(bsize.getInt());
+  }
+
+  auto dynamic_elt_type = MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type);
+  bufarr_type = MemRefType::get(bsizes, dynamic_elt_type);
+  semarr_type = MemRefType::get(bsizes, SemaphoreType::get(context));
+  bufarr_name = chop.getSymName().str() + "_buffer";
+  semarr_name = chop.getSymName().str() + "_sem";
+
+  buildChannelInit(bsizes);
+
+  auto uses = chop.getSymbolUses(module);
+  if (!uses.has_value()) return success();
 
   // handle channel put/get ops: look at all uses of channel
   for (auto use : uses.value()) {
@@ -255,11 +289,11 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
 
     if (auto putop = mlir::dyn_cast<xilinx::air::ChannelPutOp>(op)) {
       if (!putgetWellFormed(putop.getOperation(), true, putop.getOffsets(), putop.getSizes(), putop.getStrides(), putop.getIndices()))
-        return WalkResult::interrupt();
+        return failure();
       // for put: sizes not all 1s -> same # of indices and sizes
       if (!(llvm::all_of(sizes, [](int64_t n) {return n == 1;}) || putop.getIndices().size() == sizes.size())) {
         op->emitError("expected air.channel.put to have indices equal to the number of channel sizes");
-        return WalkResult::interrupt();
+        return failure();
       }
 
       if (putop.getResults().size() > 0) {
@@ -287,11 +321,11 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
 
     else if (auto getop = mlir::dyn_cast<xilinx::air::ChannelGetOp>(op)) {
       if (!putgetWellFormed(getop.getOperation(), false, getop.getOffsets(), getop.getSizes(), getop.getStrides(), getop.getIndices()))
-        return WalkResult::interrupt();
+        return failure();
       // // for get: bsizes not all 1s -> same # of indices and bsizes
       if (!(llvm::all_of(bsizes, [](int64_t n) {return n == 1;}) || getop.getIndices().size() == bsizes.size())) {
         op->emitError("expected air.channel.get to have indices equal to the number of channel broadcast sizes");
-        return WalkResult::interrupt();
+        return failure();
       }
 
       if (getop.getResults().size() > 0) {
@@ -323,8 +357,11 @@ WalkResult processChannel(MLIRContext* context, xilinx::air::ChannelOp chop, Mod
     );
   }
 
-  return WalkResult::advance();
+  chop.erase();
+  return success();
 }
+
+}; // class ChannelConverter
 
 
 class VerifConvertChannel
@@ -338,7 +375,8 @@ public:
 
     // process channels
     WalkResult res = module.walk([&] (xilinx::air::ChannelOp chop) {
-      return processChannel(context, chop, module);
+      ChannelConverter converter = ChannelConverter(context, module, chop);
+      return converter.processChannel().succeeded() ? WalkResult::advance() : WalkResult::interrupt();
     });
 
     if (res.wasInterrupted())
