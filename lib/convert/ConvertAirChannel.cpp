@@ -37,6 +37,9 @@ namespace mlir::verif::air {
 
 #define DEBUG_TYPE "verif-channel"
 
+#define READY_TO_PUT 0
+#define READY_TO_GET 1
+
 namespace {
 
 ///FIXME: put this somewhere it can be reused
@@ -164,13 +167,23 @@ void buildChannelInit(SmallVector<int64_t>& bsizes) {
 
 void buildCopy(Operation* putgetop, bool isput,
       TypedValue<MemRefType> mref, SmallVector<int64_t>& ch_sizes, SmallVector<int64_t>& ch_bsizes,
-      const ValueRange indices, const ValueRange opoffsets, const ValueRange opsizes, const ValueRange opstrides) {
+      const ValueRange opindices, const ValueRange opoffsets, const ValueRange opsizes, const ValueRange opstrides) {
   auto loc = putgetop->getLoc();
   auto builder = OpBuilder(putgetop);
   auto mrtype = mref.getType();
 
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
+
+  // get canonical indices: 0 x 2 if not present
+  ValueRange indices = opindices;
+  SmallVector<Value> indvec;
+  if (opindices.size() == 0) {
+    for (int i = 0; i < 2; i++) {
+      indvec.push_back(cst_0);
+    }
+    indices = indvec;
+  }
 
   // get canonical offsets: 0 x memref rank if not present
   ValueRange offsets = opoffsets;
@@ -199,7 +212,6 @@ void buildCopy(Operation* putgetop, bool isput,
   if (strides.size() == 0) {
     int64_t prev = 1;
     for (auto size : llvm::reverse(mrtype.getShape())) {
-      llvm::errs() << "STRIDE!! " << size << "\n";
       Value prevval = builder.create<arith::ConstantIndexOp>(loc, prev).getResult();
       stridevec.push_back(prevval);
       prev = size;
@@ -256,19 +268,59 @@ void buildCopy(Operation* putgetop, bool isput,
   affoperands.append(iterators);
   affoperands.append(affsyms);
   AffineMap indexmap = AffineMap::get(numsizes, numsizes * 2, indexexpr, context);
-  builder.create<affine::AffineApplyOp>(loc, indexmap, affoperands);
+  Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, affoperands).getResult();
 
   // delinearize index
+  // auto getConstantVector
+  auto delinop = builder.create<affine::AffineDelinearizeIndexOp>(loc,
+      linearindex, mrtype.getShape());
+  ValueRange delinindices = delinop.getResults();
 
   // create inner loop if applicable (parallel for?) that broadcasts, set builder to body
+  SmallVector<Value> ch_indices = indices;
+//   auto getChannelIndices = [&]
+//   (ValueRange op_indices, bool broadcast = false) -> SmallVector<Value>* {
+// auto default_indices = SmallVector<Value>{cst_0, cst_0};
+// if (op_indices.size() == 0) op_indices = default_indices;
+// auto channel_indices = new SmallVector<Value>();
+// for (auto [size, bsize, index] : llvm::zip_equal(sizes, bsizes, op_indices)) {
+// if (size == bsize || !broadcast) {
+//   channel_indices->push_back(index);
+//   continue;
+// }
+// Value bsize_val = builder.create<arith::ConstantIndexOp>(loc, bsize);
+// auto loop = builder.create<scf::ForOp>(loc, cst_0, bsize_val, cst_1);
+// builder.setInsertionPointToStart(loop.getBody());
+// channel_indices->push_back(loop.getInductionVar());
+// }
+// return channel_indices;
+// };
 
-  // wait on semaphore
+  // wait for semaphore
+  Value sem = builder.create<memref::LoadOp>(loc, semarr, ch_indices).getResult();
+  int wait = isput ? READY_TO_PUT : READY_TO_GET;
+  int set = isput ? READY_TO_GET : READY_TO_PUT;
+  Value waitval = builder.create<arith::ConstantIndexOp>(loc, wait);
+  builder.create<SemaphoreWaitOp>(loc, sem, waitval);
+
+  // right now the channel is size 1, so the index into the buffer is 0
+  Value bufindex = cst_0;
+  Value buf = builder.create<memref::LoadOp>(loc, bufarr, ch_indices).getResult();
 
   // handle put: copy to channel
-
+  if (isput) {
+    Value srcval = builder.create<memref::LoadOp>(loc, mref, delinindices).getResult();
+    builder.create<memref::StoreOp>(loc, srcval, buf, bufindex);
+  }
   // handle get: copy from channel
+  else {
+    Value bufval = builder.create<memref::LoadOp>(loc, buf, bufindex).getResult();
+    builder.create<memref::StoreOp>(loc, bufval, mref, delinindices);
+  }
 
   // set semaphore
+  Value setval = builder.create<arith::ConstantIndexOp>(loc, set);
+  builder.create<SemaphoreSetOp>(loc, sem, setval);
 }
 
 
@@ -277,6 +329,7 @@ LogicalResult processUse(SymbolTable::SymbolUse use, SmallVector<int64_t>& sizes
   auto builder = OpBuilder(op);
 
   // check put and get ops
+  ///TODO: check memref type static sizes, ranked
   auto putgetWellFormed = [&]
         (Operation* op, bool isput, ValueRange opoffsets, ValueRange opsizes, ValueRange opstrides, ValueRange opindices) {
     LLVM_DEBUG(
@@ -323,7 +376,7 @@ LogicalResult processUse(SymbolTable::SymbolUse use, SmallVector<int64_t>& sizes
       handleAsync(context, getop.getLoc(), builder, getop.getAsyncToken(), getop.getAsyncDependencies());
     }
 
-    buildCopy(getop.getOperation(), true, getop.getDst(), sizes, bsizes,
+    buildCopy(getop.getOperation(), false, getop.getDst(), sizes, bsizes,
         getop.getIndices(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
   }
 
