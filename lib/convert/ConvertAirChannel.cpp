@@ -62,7 +62,7 @@ void addAirTokenConversion(TypeConverter& tc, MLIRContext* context) {
 // creates new async op, sets builder's insertion point to async body
 ///TODO: can I use more of the existing conversion stuff to do this?
 void handleAsync(MLIRContext* context, Location loc,
-      OpBuilder& builder, Value res, OperandRange deps) {
+      OpBuilder& builder, Value res, ValueRange deps) {
   TypeConverter converter;
   addAirTokenConversion(converter, context);
 
@@ -165,12 +165,18 @@ void buildChannelInit(SmallVector<int64_t>& bsizes) {
 }
 
 
-void buildCopy(Operation* putgetop, bool isput,
+void buildCopy(Operation* putgetop, bool isput, ValueRange asyncDeps,
       TypedValue<MemRefType> mref, SmallVector<int64_t>& ch_sizes, SmallVector<int64_t>& ch_bsizes,
       const ValueRange opindices, const ValueRange opoffsets, const ValueRange opsizes, const ValueRange opstrides) {
   auto loc = putgetop->getLoc();
   auto builder = OpBuilder(putgetop);
   auto mrtype = mref.getType();
+
+  // results -> async channel
+  if (putgetop->getResults().size() > 0) {
+    assert(putgetop->getResults().size() == 1);
+    handleAsync(context, loc, builder, putgetop->getResult(0), asyncDeps);
+  }
 
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
@@ -355,11 +361,7 @@ LogicalResult processUse(SymbolTable::SymbolUse use, SmallVector<int64_t>& sizes
       return failure();
     }
 
-    if (putop.getResults().size() > 0) {
-      handleAsync(context, putop.getLoc(), builder, putop.getAsyncToken(), putop.getAsyncDependencies());
-    }
-
-    buildCopy(putop.getOperation(), true, putop.getSrc(), sizes, bsizes,
+    buildCopy(putop.getOperation(), true, putop.getAsyncDependencies(), putop.getSrc(), sizes, bsizes,
         putop.getIndices(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
   }
 
@@ -372,11 +374,7 @@ LogicalResult processUse(SymbolTable::SymbolUse use, SmallVector<int64_t>& sizes
       return failure();
     }
 
-    if (getop.getResults().size() > 0) {
-      handleAsync(context, getop.getLoc(), builder, getop.getAsyncToken(), getop.getAsyncDependencies());
-    }
-
-    buildCopy(getop.getOperation(), false, getop.getDst(), sizes, bsizes,
+    buildCopy(getop.getOperation(), false, getop.getAsyncDependencies(), getop.getDst(), sizes, bsizes,
         getop.getIndices(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
   }
 

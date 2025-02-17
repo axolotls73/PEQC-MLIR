@@ -17,8 +17,8 @@
 // REQUIRES: air
 // RUN: verif-opt --verif-air-convert-channel %s | FileCheck %s
 
-// CHECK: [[MAP:#.*]] = affine_map<(d0)[s0, s1] -> ((d0 + s0) * s1)>
 
+// CHECK: [[MAP:#.*]] = affine_map<(d0)[s0, s1] -> ((d0 + s0) * s1)>
 // CHECK: module
 module {
 // CHECK-DAG: memref.global "private" @[[BUF_ARR:.*]] : memref<1x1xmemref<?xi32>>

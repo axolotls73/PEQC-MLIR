@@ -17,6 +17,8 @@
 // REQUIRES: air
 // RUN: verif-opt --verif-air-convert-channel %s | FileCheck %s
 
+
+// CHECK: [[MAP:#.*]] = affine_map<(d0)[s0, s1] -> ((d0 + s0) * s1)>
 // CHECK: module
 module {
 // CHECK-DAG: memref.global "private" @[[BUF_ARR:.*]] : memref<1x1xmemref<?xi32>>
@@ -33,21 +35,27 @@ module {
     air.execute_terminator
   }
 
-// CHECK: [[CST_2:%.*]] = arith.constant 2
-// CHECK: [[CST_1:%.*]] = arith.constant 1
-  %2 = arith.constant 2 : index
+// CHECK-DAG: [[CST3:%.*]] = arith.constant 3
+// CHECK-DAG: [[CST1:%.*]] = arith.constant 1
+// CHECK-DAG: [[CST2:%.*]] = arith.constant 2
+  %3 = arith.constant 3 : index
   %1 = arith.constant 1 : index
+  %2 = arith.constant 2 : index
 
+// CHECK: async.execute
 // CHECK-DAG: [[PUT_CST0:%.*]] = arith.constant 0 : index
 // CHECK-DAG: [[PUT_CST1:%.*]] = arith.constant 1 : index
 // CHECK-DAG: [[BUF_ARR_PUT:%.*]] = memref.get_global @[[BUF_ARR]]
-// CHECK: async.execute
-// CHECK: [[SUBVIEW:%.*]] = memref.subview [[A]][2] [2] [1]
-// CHECK: [[PUTBUFFER:%.*]] = memref.load [[BUF_ARR_PUT]][[[PUT_CST0]], [[PUT_CST0]]]
-// CHECK: [[PBUF:%.*]] = {{.*}}cast [[PUTBUFFER]]
-// CHECK: memref.copy [[SUBVIEW]], [[PBUF]]
+
+// CHECK: scf.for [[ITER:%.*]] = [[PUT_CST0]] to [[CST3]] step [[PUT_CST1]]
+// CHECK:   [[LI:%.*]] = affine.apply [[MAP]]([[ITER]])[[[CST1]], [[CST2]]]
+// CHECK:   [[DEL:%.*]] = affine.delinearize_index [[LI]] into (10)
+// CHECK:   [[PUTBUF:%.*]] = memref.load [[BUF_ARR_PUT]][[[PUT_CST0]], [[PUT_CST0]]]
+// CHECK:   [[PUTVAL:%.*]] = memref.load [[A]][[[DEL]]]
+// CHECK:   memref.store [[PUTVAL]], [[PUTBUF]][[[PUT_CST0]]]
+
 // CHECK-NOT: air.channel.put
-  %p = air.channel.put async [%t, %t2] @channel[] (%a[%2] [%2] [%1]) : (memref<10xi32>)
+  %p = air.channel.put async [%t, %t2] @channel[] (%a[%1] [%3] [%2]) : (memref<10xi32>)
 
 }
 
