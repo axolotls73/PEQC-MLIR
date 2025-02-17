@@ -330,49 +330,65 @@ void buildCopy(Operation* putgetop, bool isput, ValueRange asyncDeps,
 }
 
 
+// check put and get ops
+bool putgetWellFormed(Operation* op, MemRefType mrtype, SmallVector<int64_t>& sizes, SmallVector<int64_t>& bsizes,
+      ValueRange opoffsets, ValueRange opsizes, ValueRange opstrides, ValueRange opindices) {
+  LLVM_DEBUG(
+    llvm::errs() << "CHANNEL PUT/GET:\nindices size: " << opindices.size() << "\noffsets size: " << opoffsets.size()
+        << "\nsizes size: " << opsizes.size() << "\nstrides size: " << opstrides.size() << "\n";
+  );
+
+  if (!mrtype.hasRank() || mrtype.getNumDynamicDims() > 0) {
+    op->emitError("expected air.channel.put/get to take a ranked memref of static size as input");
+    return false;
+  }
+
+  if (opsizes.size() != opoffsets.size() || opoffsets.size() != opstrides.size()) {
+    op->emitError("expected air.channel.put/get to have equal numbers of offsets, sizes, and strides");
+    return false;
+  }
+
+  if (auto putop = dyn_cast<xilinx::air::ChannelPutOp>(op)) {
+    // for put: sizes not all 1s -> same # of indices and sizes
+    if (!(llvm::all_of(sizes, [](int64_t n) {return n == 1;}) || putop.getIndices().size() == sizes.size())) {
+      op->emitError("expected air.channel.put to have indices equal to the number of channel sizes");
+      return false;
+    }
+  }
+  else if (auto getop = dyn_cast<xilinx::air::ChannelGetOp>(op)) {
+    // for get: bsizes not all 1s -> same # of indices and bsizes
+    if (!(llvm::all_of(bsizes, [](int64_t n) {return n == 1;}) || getop.getIndices().size() == bsizes.size())) {
+      op->emitError("expected air.channel.get to have indices equal to the number of channel broadcast sizes");
+      return false;
+    }
+  }
+  else {
+    op->emitError("uses of air.channel must be air.channel.put or air.channel.get");
+    return false;
+  }
+  return true;
+}
+
+
 LogicalResult processUse(SymbolTable::SymbolUse use, SmallVector<int64_t>& sizes, SmallVector<int64_t>& bsizes) {
   auto op = use.getUser();
   auto builder = OpBuilder(op);
 
-  // check put and get ops
-  ///TODO: check memref type static sizes, ranked
-  auto putgetWellFormed = [&]
-        (Operation* op, bool isput, ValueRange opoffsets, ValueRange opsizes, ValueRange opstrides, ValueRange opindices) {
-    LLVM_DEBUG(
-      llvm::errs() << "CHANNEL PUT/GET:\nindices size: " << opindices.size() << "\noffsets size: " << opoffsets.size()
-          << "\nsizes size: " << opsizes.size() << "\nstrides size: " << opstrides.size() <<
-          "\nall ones: " << llvm::all_of(bsizes, [](int64_t n) {return n == 1;}) << "\n";
-    );
-    if (opsizes.size() != opoffsets.size() || opoffsets.size() != opstrides.size()) {
-      op->emitError("expected air.channel.put/get to have equal numbers of offsets, sizes, and strides");
-      return false;
-    }
-    return true;
-  };
-
   // handle put and get
 
   if (auto putop = mlir::dyn_cast<xilinx::air::ChannelPutOp>(op)) {
-    if (!putgetWellFormed(putop.getOperation(), true, putop.getOffsets(), putop.getSizes(), putop.getStrides(), putop.getIndices()))
+    if (!putgetWellFormed(op, putop.getSrc().getType(), sizes, bsizes,
+        putop.getOffsets(), putop.getSizes(), putop.getStrides(), putop.getIndices()))
       return failure();
-    // for put: sizes not all 1s -> same # of indices and sizes
-    if (!(llvm::all_of(sizes, [](int64_t n) {return n == 1;}) || putop.getIndices().size() == sizes.size())) {
-      op->emitError("expected air.channel.put to have indices equal to the number of channel sizes");
-      return failure();
-    }
 
     buildCopy(putop.getOperation(), true, putop.getAsyncDependencies(), putop.getSrc(), sizes, bsizes,
         putop.getIndices(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
   }
 
   else if (auto getop = mlir::dyn_cast<xilinx::air::ChannelGetOp>(op)) {
-    if (!putgetWellFormed(getop.getOperation(), false, getop.getOffsets(), getop.getSizes(), getop.getStrides(), getop.getIndices()))
+    if (!putgetWellFormed(getop.getOperation(), getop.getDst().getType(),
+        sizes, bsizes, getop.getOffsets(), getop.getSizes(), getop.getStrides(), getop.getIndices()))
       return failure();
-    // // for get: bsizes not all 1s -> same # of indices and bsizes
-    if (!(llvm::all_of(bsizes, [](int64_t n) {return n == 1;}) || getop.getIndices().size() == bsizes.size())) {
-      op->emitError("expected air.channel.get to have indices equal to the number of channel broadcast sizes");
-      return failure();
-    }
 
     buildCopy(getop.getOperation(), false, getop.getAsyncDependencies(), getop.getDst(), sizes, bsizes,
         getop.getIndices(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
