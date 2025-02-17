@@ -16,7 +16,7 @@ set(VERIF_TEST_DEPENDS
   VerifPlugin
 )
 
-set(LIT_ARGS "--show-xfail --timeout 10 -j 1")
+set(LIT_ARGS "--show-xfail --timeout 10 --param PAST_DIR=${PAST_DIR} -j 1")
 if (COMPILE_WITH_AIR)
   set(LIT_ARGS "${LIT_ARGS} --param AIR")
 endif()
