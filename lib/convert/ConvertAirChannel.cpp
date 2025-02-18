@@ -282,25 +282,39 @@ void buildCopy(Operation* putgetop, bool isput, ValueRange asyncDeps,
       linearindex, mrtype.getShape());
   ValueRange delinindices = delinop.getResults();
 
-  // create inner loop if applicable (parallel for?) that broadcasts, set builder to body
-  SmallVector<Value> ch_indices = indices;
-//   auto getChannelIndices = [&]
-//   (ValueRange op_indices, bool broadcast = false) -> SmallVector<Value>* {
-// auto default_indices = SmallVector<Value>{cst_0, cst_0};
-// if (op_indices.size() == 0) op_indices = default_indices;
-// auto channel_indices = new SmallVector<Value>();
-// for (auto [size, bsize, index] : llvm::zip_equal(sizes, bsizes, op_indices)) {
-// if (size == bsize || !broadcast) {
-//   channel_indices->push_back(index);
-//   continue;
-// }
-// Value bsize_val = builder.create<arith::ConstantIndexOp>(loc, bsize);
-// auto loop = builder.create<scf::ForOp>(loc, cst_0, bsize_val, cst_1);
-// builder.setInsertionPointToStart(loop.getBody());
-// channel_indices->push_back(loop.getInductionVar());
-// }
-// return channel_indices;
-// };
+  // handle broadcast, i.e. when ch_bsize > ch_size
+  ValueRange ch_indices = indices;
+  SmallVector<bool> eqvec = llvm::map_to_vector(llvm::zip_equal(ch_sizes, ch_bsizes),
+    [](std::tuple<int64_t&, int64_t&> t){
+      return std::get<0>(t) == std::get<1>(t);});
+  SmallVector<Value> broadcast_indices;
+  // not all ch_sizes == ch_bsizes pairwise
+  if (isput && !llvm::all_of(eqvec, [](bool b){return b;})) {
+    SmallVector<Value> lbs;
+    SmallVector<Value> ubs;
+    SmallVector<Value> steps;
+    for (auto [bsize, eq] : llvm::zip_equal(ch_bsizes, eqvec)) {
+      if (eq) continue;
+      Value ub = builder.create<arith::ConstantIndexOp>(loc, bsize).getResult();
+      ubs.push_back(ub);
+      lbs.push_back(cst_0);
+      steps.push_back(cst_1);
+    }
+    auto parop = builder.create<scf::ParallelOp>(loc, lbs, ubs, steps, SmallVector<Value>{});
+
+    // interleave parallel iterators w/ existing indices
+    size_t pariter = 0;
+    for (auto [eq, index] : llvm::zip_equal(eqvec, indices)) {
+      if (eq) {
+        broadcast_indices.push_back(index);
+        continue;
+      }
+      broadcast_indices.push_back(parop.getInductionVars()[pariter++]);
+    }
+    assert(pariter == parop.getInductionVars().size());
+    ch_indices = broadcast_indices;
+    builder.setInsertionPointToStart(parop.getBody());
+  }
 
   // wait for semaphore
   Value sem = builder.create<memref::LoadOp>(loc, semarr, ch_indices).getResult();
@@ -372,7 +386,6 @@ bool putgetWellFormed(Operation* op, MemRefType mrtype, SmallVector<int64_t>& si
 
 LogicalResult processUse(SymbolTable::SymbolUse use, SmallVector<int64_t>& sizes, SmallVector<int64_t>& bsizes) {
   auto op = use.getUser();
-  auto builder = OpBuilder(op);
 
   // handle put and get
 

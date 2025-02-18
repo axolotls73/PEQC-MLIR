@@ -18,7 +18,7 @@
 // REQUIRES: air
 // RUN: split-file %s %t && \
 // RUN: air-opt --convert-linalg-to-affine-loops --lower-affine %t/input.mlir > %t/input-lowered.mlir
-// RUN: verif-opt --verif-air-to-scf-par --verif-scf-parallel-to-async --verif-air-dma-to-memref %t/input-lowered.mlir > %t/conversion.mlir && \
+// RUN: verif-opt --verif-air-convert-channel --lower-affine --verif-air-to-scf-par --verif-scf-parallel-to-async --verif-air-execute-to-async --verif-air-dma-to-memref --verif-scf-parallel-to-async %t/input-lowered.mlir > %t/conversion.mlir && \
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
 // RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
