@@ -805,7 +805,6 @@ s_past_node_t* PastTranslator::translate(scf::ForOp op) {
 }
 
 s_past_node_t* PastTranslator::translate(scf::IfOp op) {
-  assert(op.getResults().empty());
   std::vector<s_past_node_t*> nodes;
   for (Value res : op.getResults()) {
     nodes.push_back(past_node_statement_create(
@@ -829,9 +828,7 @@ s_past_node_t* PastTranslator::translate(scf::YieldOp op) {
   // set loop-carried vars equal to yield operands
   if (auto loop = dyn_cast<scf::ForOp>(op.getOperation()->getParentOp())) {
     assert(loop && (loop.getRegionIterArgs().size() == op.getResults().size()));
-    auto resIter = op.getResults().begin();
-    for (auto iv : loop.getRegionIterArgs()) {
-      Value res = *resIter++;
+    for (auto [iv, res] : llvm::zip_equal(loop.getRegionIterArgs(), op.getResults())) {
       stmts.push_back(
         past_node_statement_create(
           past_node_binary_create(past_assign,
@@ -844,7 +841,13 @@ s_past_node_t* PastTranslator::translate(scf::YieldOp op) {
   // if there are results, set result vars
   else if (auto ifop = dyn_cast<scf::IfOp>(op.getOperation()->getParentOp())) {
     if (op.getResults().empty()) return nullptr;
-    assert(0);
+    for (auto [ifres, yieldval] : llvm::zip_equal(ifop.getResults(), op.getResults())) {
+      stmts.push_back(
+        past_node_statement_create(
+          past_node_binary_create(past_assign,
+            past_node_varref_create(getVarSymbol(ifres)),
+            past_node_varref_create(getVarSymbol(yieldval)))));
+    }
   }
   return nodeChain(stmts);
 }
