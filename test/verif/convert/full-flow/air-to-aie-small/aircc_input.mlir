@@ -14,11 +14,13 @@
 //
 //
 
-// XFAIL: *
+//XFAIL: *
 // REQUIRES: air
 // RUN: split-file %s %t && \
 // RUN: air-opt --convert-linalg-to-affine-loops --lower-affine %t/input.mlir > %t/input-lowered.mlir
-// RUN: verif-opt --verif-air-convert-channel --lower-affine --verif-air-to-scf-par --verif-scf-parallel-to-async --verif-air-execute-to-async --verif-air-dma-to-memref --verif-scf-parallel-to-async %t/input-lowered.mlir > %t/conversion.mlir && \
+// RUN: verif-opt --verif-air-convert-channel --lower-affine --verif-air-to-scf-par \
+// RUN:     --verif-scf-parallel-to-async --verif-air-execute-to-async --verif-air-dma-to-memref \
+// RUN:     --verif-scf-parallel-to-async %t/input-lowered.mlir --verif-move-to-main > %t/conversion.mlir && \
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
 // RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
@@ -35,6 +37,20 @@
 #set = affine_set<()[s0, s1] : (s0 == 0, s1 >= 0, -s1 + 1 >= 0)>
 #set1 = affine_set<()[s0, s1] : (s0 >= 0, -s0 + 1 >= 0, s1 == 0)>
 module {
+  memref.global "private" @A : memref<16x16xi32>
+  memref.global "private" @B : memref<16x16xi32>
+  memref.global "private" @C : memref<16x16xi32>
+
+  func.func @main () -> () {
+    %a = memref.get_global @A : memref<16x16xi32>
+    %b = memref.get_global @B : memref<16x16xi32>
+    %c = memref.get_global @C : memref<16x16xi32>
+
+    func.call @forward (%a, %b, %c) : (memref<16x16xi32>, memref<16x16xi32>, memref<16x16xi32>) -> ()
+    return
+  }
+
+
   air.channel @channel_0 [1, 1] {broadcast_shape = [1, 2]}
   air.channel @channel_1 [1, 1] {broadcast_shape = [1, 2]}
   air.channel @channel_2 [1, 1] {broadcast_shape = [2, 1]}
