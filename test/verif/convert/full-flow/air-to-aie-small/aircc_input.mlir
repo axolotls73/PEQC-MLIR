@@ -21,6 +21,8 @@
 // RUN: verif-opt --verif-air-convert-channel --lower-affine --verif-air-to-scf-par \
 // RUN:     --verif-scf-parallel-to-async --verif-air-execute-to-async --verif-air-dma-to-memref \
 // RUN:     --verif-scf-parallel-to-async %t/input-lowered.mlir --verif-move-to-main > %t/conversion.mlir && \
+// RUN: sed -i 's/!air.async.token/!async.token/g' %t/conversion.mlir && \
+//      ^ quick and dirty solution until i make a pass to remove unrealized_conversion_casts
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
 // RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
@@ -49,7 +51,6 @@ module {
     func.call @forward (%a, %b, %c) : (memref<16x16xi32>, memref<16x16xi32>, memref<16x16xi32>) -> ()
     return
   }
-
 
   air.channel @channel_0 [1, 1] {broadcast_shape = [1, 2]}
   air.channel @channel_1 [1, 1] {broadcast_shape = [1, 2]}
