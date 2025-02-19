@@ -943,6 +943,16 @@ s_past_node_t* PastTranslator::translate(memref::GlobalOp op) {
   s_past_node_t* decls = alloc->next;
   alloc->next = nullptr;
   globalDecls.push_back(alloc);
+
+  // if main, prepend any assignments to main body
+  if (mainFunction && decls) {
+    assert(past_node_is_a(mainFunction, past_block));
+    auto block = PAST_NODE_AS(mainFunction, block);
+    auto endassign = getNodeListEnd(decls);
+    endassign->next = block->body;
+    block->body = decls;
+    return nullptr;
+  }
   return decls;
 }
 
@@ -1356,6 +1366,17 @@ s_past_node_t* PastTranslator::translate(Region& region) {
 s_past_node_t* PastTranslator::translate(ModuleOp op) {
   auto regionops = op.getRegion().getOps();
   if (regionops.empty()) return nullptr;
+
+  // find and translate main function first
+  for (auto func : llvm::make_early_inc_range(
+        op.getRegion().getOps<func::FuncOp>())) {
+    if (func.getSymName() != "main") continue;
+    auto res = translate(func);
+    assert(!res && mainFunction); // translate for funcops assigns mainFunction
+    func.erase();
+  }
+
+  op.emitRemark();
 
   auto body = translate(op.getRegion());
 
