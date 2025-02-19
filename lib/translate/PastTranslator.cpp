@@ -176,7 +176,8 @@ std::string PastTranslator::getTypeName(const Type& t) {
 
 e_past_value_type_t PastTranslator::getTypePast(const Type& t) {
   LLVM_DEBUG(
-    llvm::errs() << "getTypePast: " << t << "  " << t.getIntOrFloatBitWidth() << "\n";
+    llvm::errs() << "getTypePast: " << t << "  " <<
+        (isa<IndexType>(t) ? -1 : t.getIntOrFloatBitWidth()) << "\n";
   );
   if (t.isIndex()) return e_past_value_int;
 
@@ -603,6 +604,9 @@ s_past_node_t* PastTranslator::translate(arith::DivSIOp op) {
 }
 s_past_node_t* PastTranslator::translate(arith::DivUIOp op) {
   return translateArithBinop("arith_divi", past_div, op.getResult(), op.getLhs(), op.getRhs());
+}
+s_past_node_t* PastTranslator::translate(arith::FloorDivSIOp op) {
+  return translateArithBinop("arith_floordivsi", past_floord, op.getResult(), op.getLhs(), op.getRhs());
 }
 s_past_node_t* PastTranslator::translate(arith::RemSIOp op) {
   return translateArithBinop("arith_remsi", past_mod, op.getResult(), op.getLhs(), op.getRhs());
@@ -1260,6 +1264,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<arith::MulIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::DivSIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::DivUIOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<arith::FloorDivSIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::RemSIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::AndIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::OrIOp>(op)) res = translate(o);
