@@ -86,7 +86,7 @@ s_past_node_t* PastTranslator::declareVar(s_symbol_t* type, s_symbol_t* var) {
     return s[strlen(s) - 1] == '*';
   };
   if (all_arrays_global && isarray(type->name_str)) {
-    newGlobalDecls.push_back(
+    globalDecls.push_back(
       past_node_statement_create(
         getVarDecl(type, var)
     ));
@@ -867,6 +867,32 @@ s_past_node_t* PastTranslator::translate(cf::BranchOp op) {
 
 // memref
 
+void PastTranslator::generateNestedMemref
+      (unsigned int sizei, SmallVector<int64_t> sizes, SmallVector<int>& indices, std::vector<s_past_node_t*>& nodes,
+       MemRefType submrtype, s_symbol_t* result) {
+  for (int i = 0; i < sizes[sizei]; i++) {
+      indices[sizei] = i;
+    // base case: indices array filled
+    if (sizei >= sizes.size() - 1) {
+      std::vector<s_past_node_t*> past_indices;
+      for (auto index : indices) {
+        past_indices.push_back(past_node_value_create_from_int(index));
+      }
+
+      auto tmpsym = getTempVarSymbol("nested_alloc");
+      nodes.push_back(past_node_statement_create(
+        declareVar(getTypeSymbol(submrtype), tmpsym)));
+      nodes.push_back(past_node_statement_create(
+        past_node_binary_create(past_assign,
+          getArrayAccess(result, past_indices),
+          past_node_varref_create(tmpsym))));
+    }
+    else {
+      generateNestedMemref(sizei + 1, sizes, indices, nodes, submrtype, result);
+    }
+  }
+}
+
 s_past_node_t* PastTranslator::translateAlloc(Operation* op, Type type, s_symbol_t* result) {
   if (!isNestedMemref(type))
     return past_node_statement_create(declareVar(getTypeSymbol(type), result));
@@ -884,31 +910,16 @@ s_past_node_t* PastTranslator::translateAlloc(Operation* op, Type type, s_symbol
     op->emitError("dynamic memref of memrefs not supported");
     exit(1);
   }
-  if (mrtype.getShape().size() != 2) {
-    ///FIXME: implement!!
-    op->emitError("only 2D memref of memrefs supported");
-    exit(1);
-  }
 
-  auto sizes = mrtype.getShape();
   NodeVec nodes;
   // declare outer array as void
   nodes.push_back(past_node_statement_create(
     declareVar(getSymbol("void"), result)));
 
-  // create sub array for each index in outer array
-  for (int i = 0; i < sizes.front(); i++) {
-    for (int j = 0; j < sizes.back(); j++) {
-      auto tmpsym = getTempVarSymbol("nested_alloc");
-      nodes.push_back(past_node_statement_create(
-        declareVar(getTypeSymbol(submrtype), tmpsym)));
-      nodes.push_back(past_node_statement_create(
-        past_node_binary_create(past_assign,
-          getArrayAccess(result, NodeVec{
-            past_node_value_create_from_int(i), past_node_value_create_from_int(j)}),
-          past_node_varref_create(tmpsym))));
-    }
-  }
+  SmallVector<int64_t> sizes = llvm::map_to_vector(mrtype.getShape(), [](int64_t v) {return v;});
+  SmallVector<int> indices;
+  indices.resize(sizes.size());
+  generateNestedMemref(0, sizes, indices, nodes, submrtype, result);
 
   return nodeChain(nodes);
 }
@@ -927,7 +938,12 @@ s_past_node_t* PastTranslator::translate(memref::GlobalOp op) {
   }
   s_symbol_t* var = getSymbol(op.getSymName().str());
 
-  return translateAlloc(op.getOperation(), op.getType(), var);
+  // split global decl from possible sub-decls
+  s_past_node_t* alloc = translateAlloc(op.getOperation(), op.getType(), var);
+  s_past_node_t* decls = alloc->next;
+  alloc->next = nullptr;
+  globalDecls.push_back(alloc);
+  return decls;
 }
 
 ///TODO: check for use-after-free bugs?
@@ -1034,6 +1050,13 @@ s_past_node_t* PastTranslator::translate(memref::SubViewOp op) {
 
   return nodeChain(stmts);
 }
+
+s_past_node_t* PastTranslator::translate(memref::CastOp op) {
+  getAndMapSymbol(op.getSource(), op.getResult());
+  return nullptr;
+}
+
+// async
 
 s_past_node_t* PastTranslator::translate(async::CreateGroupOp op) {
   NodeVec stmts;
@@ -1245,6 +1268,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<memref::StoreOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::CopyOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::SubViewOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<memref::CastOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<async::CreateGroupOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<async::AddToGroupOp>(op)) res = translate(o);
@@ -1292,8 +1316,10 @@ s_past_node_t* PastTranslator::translate(Region& region) {
       s_symbol_t* labelname = getBlockSymbol(&block);
       s_past_node_t* label = past_node_label_create(
         past_node_varref_create(labelname),
-        stmts[firststmt]);
-      stmts[firststmt] = label;
+        // empty statement to be robust to declarations following
+        past_node_statement_create(
+            past_node_varref_create(symbol_get_or_insert(symbolTable, "", nullptr))));
+      stmts.insert(stmts.begin() + firststmt, label);
     }
 
     // if value in blockAddAtEnd is declared in block,
@@ -1331,36 +1357,44 @@ s_past_node_t* PastTranslator::translate(ModuleOp op) {
   auto regionops = op.getRegion().getOps();
   if (regionops.empty()) return nullptr;
 
-  // check for accepted format: only non-func ops, or only
-  // memref.global + func ops
-  bool funcpresent = isa<func::FuncOp>(*regionops.begin());
-  bool onlyfuncorglobal = isa<func::FuncOp>(*regionops.begin()) ||
-      isa<memref::GlobalOp>(*regionops.begin());
-  for (auto& o : regionops) {
-    funcpresent = funcpresent || isa<func::FuncOp>(o);
-    onlyfuncorglobal = onlyfuncorglobal && (isa<func::FuncOp>(*regionops.begin()) ||
-      isa<memref::GlobalOp>(*regionops.begin()));
-    if (funcpresent && !onlyfuncorglobal) {
-      o.emitError("");
-      exit(1);
-    }
-  }
-
   auto body = translate(op.getRegion());
 
-  // main region: entire block if not list of functions,
-  // otherwise main function if present
-  s_past_node_t* main = mainFunction;
-  if (!funcpresent) {
-    main = past_node_block_create(body);
-    body = nullptr;
+  // remove fundecls from body, move to functionDecls
+  s_past_node_t* prev = nullptr;
+  s_past_node_t* current = body;
+  while (current) {
+    s_past_node_t* next = current->next;
+    if (past_node_is_a(current, past_fundecl)) {
+      if (prev) prev->next = next;
+      if (current == body) body = next;
+      current->next = nullptr;
+      functionDecls.push_back(current);
+    }
+    else {
+      prev = current;
+    }
+    current = next;
   }
 
-  // translation: new globals and functions generated, then body and main
-  auto translation = newGlobalDecls;
-  translation.insert(newGlobalDecls.end(), newFunctionDecls.begin(), newFunctionDecls.end());
-  translation.push_back(body);
-  translation.push_back(main);
+  // want the main region to either be implicit via body OR explicit via @main func
+  if (body && mainFunction &&
+      // only funcs and globals with a main function is allowed
+      !llvm::all_of(regionops, [] (Operation& op) {
+          return isa<func::FuncOp, memref::GlobalOp>(op);})) {
+    op.emitError("module has more than one entry point");
+    exit(1);
+  }
+
+  // translation: globals and functions, then main
+  auto translation = globalDecls;
+  translation.insert(translation.end(), functionDecls.begin(), functionDecls.end());
+  if (mainFunction) {
+    translation.push_back(body);
+    translation.push_back(mainFunction);
+  }
+  else if (body) {
+    translation.push_back(past_node_block_create(body));
+  }
 
   s_past_node_t* ret = past_node_root_create(symbolTable, nodeChain(translation));
   return ret;

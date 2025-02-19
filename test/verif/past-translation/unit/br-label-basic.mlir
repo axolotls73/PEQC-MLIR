@@ -30,6 +30,8 @@ module {
       cf.br ^b2
 
 // CHECK: [[BLOCK]]:
+// want an empty statement after block labels
+// CHECK-NEXT: ;
     ^b2:
 // CHECK: return
       return
