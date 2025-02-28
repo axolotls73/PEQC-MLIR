@@ -33,6 +33,8 @@ config.substitutions.append(("%PATH%", config.environment["PATH"]))
 config.substitutions.append(("%shlibext", config.llvm_shlib_ext))
 config.substitutions.append(("%add_epilogue", os.path.join(config.verif_src_root, "script/add_epilogue.py")))
 
+config.substitutions.append(("%pastchecker_path",
+        f"{lit_config.params['PAST_DIR']}/src/pastchecker"))
 # pastchecker with arguments
 config.substitutions.append(("%pastchecker",
         f"{lit_config.params['PAST_DIR']}/src/pastchecker --enable-preprocessor --timing-mode --verbose --enable-subtrees"))

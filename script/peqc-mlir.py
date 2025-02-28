@@ -48,12 +48,17 @@ argparser.add_argument('--temp-dir', type=str, default='.peqc-files',
     help='the directory to store intermediate files in, default .peqc-files')
 argparser.add_argument('--seq-verif-only', action='store_true',
     help='runs PEQC with "--seq-verif-only"')
+argparser.add_argument('--pastchecker-path', type=str,
+    help='how to invoke pastchecker: default is pastchecker (assumes pastchecker is in your path)')
 args = argparser.parse_args()
+
+pastcheckerpath = args.pastchecker_path if args.pastchecker_path else 'pastchecker'
 
 executables = [
   'mlir-opt',
-  'pastchecker'
 ]
+if not args.pastchecker_path:
+  executables += [pastcheckerpath]
 for ex in executables:
   if shutil.which(ex) is None:
     print(f'{ex} must be in PATH', file=sys.stderr)
@@ -90,7 +95,7 @@ if args.debug:
 if args.peqc_options:
   pastoptions = args.peqc_options
 
-PASTCOMMAND = f'pastchecker {" ".join(pastoptions)}'
+PASTCOMMAND = f'{pastcheckerpath} {" ".join(pastoptions)}'
 
 
 # check that files are valid
