@@ -411,6 +411,15 @@ s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName) {
       nodeChain(args)));
 }
 
+s_past_node_t* PastTranslator::wrapInAsyncBlock(s_past_node_t* node) {
+  s_past_node_t* pragmanode = past_node_pragma_create(
+    past_node_varref_create(getSymbol("peqc async_execute")),
+    nullptr);
+  s_past_node_t* blocknode = past_node_block_create(node);
+  pragmanode->next = blocknode;
+  return pragmanode;
+}
+
 
 
 // func
@@ -1130,13 +1139,7 @@ s_past_node_t* PastTranslator::translate(async::ExecuteOp op) {
   body.push_back(translate(op.getBodyRegion()));
   body.push_back(getPastSetSemaphore(getVarSymbol(op.getToken()), getSymbol("PAST_TASK_FINISHED")));
 
-  nodes.push_back(
-    past_node_pragma_create(
-      past_node_varref_create(getSymbol("peqc async_execute")),
-      nullptr));
-  nodes.push_back(
-    past_node_block_create(
-      nodeChain(body)));
+  nodes.push_back(wrapInAsyncBlock(nodeChain(body)));
   return nodeChain(nodes);
 }
 

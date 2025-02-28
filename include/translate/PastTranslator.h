@@ -124,6 +124,8 @@ class PastTranslator {
   s_past_node_t* getPastSetSemaphore(s_symbol_t* semaphore, s_symbol_t* val);
   s_past_node_t* getPastNewSemaphore(s_symbol_t* semaphoreName);
 
+  s_past_node_t* wrapInAsyncBlock(s_past_node_t* node);
+
 
   // builtin
 
