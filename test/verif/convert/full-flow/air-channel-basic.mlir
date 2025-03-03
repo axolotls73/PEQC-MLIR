@@ -14,7 +14,6 @@
 //
 //
 
-//XFAIL:*
 // REQUIRES: air
 // RUN: split-file %s %t && \
 // RUN: air-opt --convert-linalg-to-affine-loops --lower-affine %t/input.mlir > %t/input-lowered.mlir

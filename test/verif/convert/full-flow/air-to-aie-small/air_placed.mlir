@@ -24,7 +24,7 @@
 // RUN: sed -i 's/!air.async.token/!async.token/g' %t/conversion.mlir && \
 //      ^ quick and dirty solution until i make a pass to remove unrealized_conversion_casts
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
-// RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
+// RUN: %add_epilogue %t/result.c %t/translation.c
 
 // RUN: %pastchecker %t/translation.c %t/translation.c A,B,C | grep YES
 
@@ -246,15 +246,6 @@ module {
     }
     return
   }
-}
-
-//--- epilogue.c
-
-{
-  float* A;
-  float* B;
-  float* C;
-  forward(A, B, C);
 }
 
 //--- compare.c

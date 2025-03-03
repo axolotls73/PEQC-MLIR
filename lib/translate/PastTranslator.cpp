@@ -1414,10 +1414,17 @@ s_past_node_t* PastTranslator::translate(ModuleOp op) {
   translation.insert(translation.end(), functionDecls.begin(), functionDecls.end());
   if (mainFunction) {
     translation.push_back(body);
-    translation.push_back(mainFunction);
+
+    // this is a workaround currently: wrap main function in async block
+    assert(past_node_is_a(mainFunction, past_block));
+    auto mainbody = PAST_NODE_AS(mainFunction, block)->body;
+    translation.push_back(past_node_block_create(
+      wrapInAsyncBlock(mainbody)));
   }
   else if (body) {
-    translation.push_back(past_node_block_create(body));
+    // this is a workaround currently: wrap main function in async block
+    translation.push_back(past_node_block_create(
+      wrapInAsyncBlock(body)));
   }
 
   s_past_node_t* ret = past_node_root_create(symbolTable, nodeChain(translation));
