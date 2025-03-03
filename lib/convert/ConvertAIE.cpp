@@ -62,9 +62,6 @@ private:
   uint32_t current_semaphore_id = 0;
   uint32_t mem_id = 0;
 
-public:
-
-  AIEConverter(mlir::MLIRContext* context, ModuleOp module) : context(context), module(module) {};
 
   // assign each tile value a unique id, remove tile ops
   LogicalResult processTiles() {
@@ -554,6 +551,39 @@ public:
     return res.wasInterrupted() ? failure() : success();
   }
 
+public:
+
+  AIEConverter(mlir::MLIRContext* context, ModuleOp module) : context(context), module(module) {};
+
+  LogicalResult convertAIE() {
+
+    LogicalResult res = processTiles();
+    if (res.failed()) return failure();
+
+    res = processMem();
+    if (res.failed()) return failure();
+
+    res = processFlows();
+    if (res.failed()) return failure();
+
+    res = processLocks();
+    if (res.failed()) return failure();
+
+    res = processCores();
+    if (res.failed()) return failure();
+
+    res = processBuffers();
+    if (res.failed()) return failure();
+
+    // remove tile ops
+    module.walk([] (xilinx::AIE::TileOp op) {
+      op.erase();
+      return WalkResult::advance();
+    });
+
+    return success();
+  }
+
 };
 
 class VerifConvertAIE
@@ -566,31 +596,9 @@ public:
     auto context = module.getContext();
 
     auto ac = AIEConverter(context, module);
+    auto res = ac.convertAIE();
 
-    LogicalResult res = ac.processTiles();
     if (res.failed()) return signalPassFailure();
-
-    res = ac.processMem();
-    if (res.failed()) return signalPassFailure();
-
-    res = ac.processFlows();
-    if (res.failed()) return signalPassFailure();
-
-    res = ac.processLocks();
-    if (res.failed()) return signalPassFailure();
-
-    res = ac.processCores();
-    if (res.failed()) return signalPassFailure();
-
-    res = ac.processBuffers();
-    if (res.failed()) return signalPassFailure();
-
-    // remove tile ops
-    module.walk([] (xilinx::AIE::TileOp op) {
-      op.erase();
-      return WalkResult::advance();
-    });
-
   }
 };
 
