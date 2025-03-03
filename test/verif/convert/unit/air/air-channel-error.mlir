@@ -23,6 +23,8 @@
 // RUN: not verif-opt --verif-air-convert-channel %t/indices-mismatch-put.mlir
 // RUN: not verif-opt --verif-air-convert-channel %t/indices-mismatch-get.mlir
 // RUN: not verif-opt --verif-air-convert-channel %t/indices-mismatch-get-2.mlir
+// RUN: not verif-opt --verif-air-convert-channel %t/dynamic-size.mlir
+// RUN: not verif-opt --verif-air-convert-channel %t/unranked.mlir
 
 
 //--- size-not2.mlir
@@ -93,5 +95,25 @@ module {
 
   %a = memref.alloc() : memref<1xi64>
   air.channel.get @channel_7[] (%a[] [] []) : (memref<1xi64>)
+}
+
+//--- dynamic-size.mlir
+
+module {
+  air.channel @channel_7 [1, 1]
+
+  %c = arith.constant 1 : index
+  %a = memref.alloc(%c) : memref<?xi32>
+  air.channel.get @channel_7[] (%a[] [] []) : (memref<?xi32>)
+}
+
+//--- unranked.mlir
+
+module {
+  air.channel @channel_7 [1, 1]
+
+  %a = memref.alloc() : memref<5xi32>
+  %b = memref.cast %a : memref<5xi32> to memref<*xi32>
+  air.channel.put @channel_7[] (%a[] [] []) : (memref<*xi32>)
 }
 

@@ -41,7 +41,7 @@ source utils/env_setup.sh install-xrt/ mlir-aie/install/ llvm/install/
 
 To install
 [PAST 0.7.3-beta](https://sourceforge.net/projects/pocc/),
-run the commands below, and add `past-0.7.3-beta/src` to your `PATH` (this is needed for tests):
+run the commands below:
 
 ```sh
 wget -O past-0.7.3-beta.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/unstable-testing/past-0.7.3-beta.tar.gz/download'
@@ -49,9 +49,6 @@ tar -xf past-0.7.3-beta.tar.gz
 cd past-0.7.3-beta
 ./configure
 make
-
-pastpath=`realpath src`
-export PATH="$pastpath:$PATH"
 cd ..
 ```
 

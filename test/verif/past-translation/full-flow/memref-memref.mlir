@@ -15,7 +15,8 @@
 //
 
 // RUN: split-file %s %t && \
-// RUN: verif-translate --translate-to-past %t/input.mlir > %t/translation.c
+// RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c
+// RUN: %add_epilogue %t/result.c %t/translation.c
 
 // RUN: %pastchecker %t/translation.c %t/translation.c memref_load_12,memref_load_14 \
 // RUN: | grep YES

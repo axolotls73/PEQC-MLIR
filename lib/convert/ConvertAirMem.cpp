@@ -1,5 +1,5 @@
 /*
- * ConvertMem.cpp: This file is part of the PEQC-MLIR project.
+ * ConvertAirMem.cpp: This file is part of the PEQC-MLIR project.
  *
  * Copyright (C) 2024 Colorado State University
  *
@@ -155,7 +155,8 @@ public:
         memref::MemRefDialect,
         async::AsyncDialect,
         xilinx::air::airDialect,
-        mlir::BuiltinDialect
+        mlir::BuiltinDialect,
+        VerifDialect
       >();
 
     target.addIllegalOp<

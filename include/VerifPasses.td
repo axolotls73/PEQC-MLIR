@@ -35,4 +35,13 @@ See tests `test/verif/convert/unit/par-basic.mlir`, `test/verif/convert/unit/par
   ];
 }
 
+def VerifMoveToMain: Pass<"verif-move-to-main", "::mlir::ModuleOp"> {
+  let summary = "Helper pass that moves all non-func.func and non-memref.global ops to the beginning of an (already existing) func.func @main";
+  let description = [{
+  }];
+  let dependentDialects = [
+    "func::FuncDialect"
+  ];
+}
+
 #endif // VERIF_PASS

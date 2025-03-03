@@ -17,6 +17,8 @@
 // REQUIRES: air
 // RUN: verif-opt --verif-air-convert-channel %s | FileCheck %s
 
+
+// CHECK: [[MAP:#.*]] = affine_map<(d0)[s0, s1] -> ((d0 + s0) * s1)>
 // CHECK: module
 module {
 // CHECK-DAG: memref.global "private" @[[BUF_ARR:.*]] memref<1x2xmemref<?xi64>>
@@ -31,31 +33,51 @@ module {
   %0 = arith.constant 0 : index
   %1 = arith.constant 1 : index
 
-// CHECK-DAG: [[PUT_CST0:%.*]] = arith.constant 0 : index
-// CHECK-DAG: [[PUT_CST1:%.*]] = arith.constant 1 : index
-// CHECK-DAG: [[PUT_CST2:%.*]] = arith.constant 2 : index
+
+// CHECK: [[PUT_CST0:%.*]] = arith.constant 0 : index
+// CHECK: [[PUT_CST1:%.*]] = arith.constant 1 : index
+// CHECK: [[PUT_CST1_SIZE:%.*]] = arith.constant 1 : index
+// CHECK: [[PUT_CST1_STRIDE:%.*]] = arith.constant 1 : index
 // CHECK-DAG: [[SEM_ARR_PUT:%.*]] = memref.get_global @[[SEM_ARR]]
 // CHECK-DAG: [[BUF_ARR_PUT:%.*]] = memref.get_global @[[BUF_ARR]]
-// CHECK: scf.for [[PUT_I:%.*]] = [[PUT_CST0]] to [[PUT_CST2]] step [[PUT_CST1]]
-// CHECK:   [[PUTSEM:%.*]] = memref.load [[SEM_ARR_PUT]][[[CH_CST0]], [[PUT_I]]]
-// CHECK:   verif.semaphore.wait [[PUTSEM]], [[PUT_CST0]]
-// CHECK:   [[PUTBUFFER:%.*]] = memref.load [[BUF_ARR_PUT]][[[CH_CST0]], [[PUT_I]]]
-// CHECK:   [[PBUF:%.*]] = {{.*}}cast [[PUTBUFFER]]
-// CHECK:   memref.copy [[A]], [[PBUF]]
-// CHECK:   verif.semaphore.set [[PUTSEM]], [[PUT_CST1]]
+
+// CHECK: scf.for [[ITER:%.*]] = [[PUT_CST0]] to [[PUT_CST1_SIZE]] step [[PUT_CST1]]
+// CHECK:   [[PUT_LI:%.*]] = affine.apply [[MAP]]([[ITER]])[[[PUT_CST0]], [[PUT_CST1_STRIDE]]]
+// CHECK:   [[PUT_DEL:%.*]] = affine.delinearize_index [[PUT_LI]] into (1)
+
+// CHECK:   [[PUT_CST2:%.*]] = arith.constant 2
+// CHECK:   scf.parallel ([[PARITER:%.*]]) = ([[PUT_CST0]]) to ([[PUT_CST2]]) step ([[PUT_CST1]])
+// CHECK:     [[PUTSEM:%.*]] = memref.load [[SEM_ARR_PUT]][[[CH_CST0]], [[PARITER]]]
+// CHECK:     [[PUTWAIT:%.*]] = arith.constant 0
+// CHECK:     verif.semaphore.wait [[PUTSEM]], [[PUTWAIT]]
+// CHECK:     [[PUTBUF:%.*]] = memref.load [[BUF_ARR_PUT]][[[CH_CST0]], [[PARITER]]]
+// CHECK:     [[PUTVAL:%.*]] = memref.load [[A]][[[PUT_DEL]]]
+// CHECK:     memref.store [[PUTVAL]], [[PUTBUF]][[[PUT_CST0]]]
+// CHECK:     [[PUTSET:%.*]] = arith.constant 1
+// CHECK:     verif.semaphore.set [[PUTSEM]], [[PUTSET]]
+
 // CHECK-NOT: air.channel.put
   air.channel.put @channel[%0, %0] (%a[] [] []) : (memref<1xi64>)
 
-// CHECK-DAG: [[GET_CST0:%.*]] = arith.constant 0 : index
-// CHECK-DAG: [[GET_CST1:%.*]] = arith.constant 1 : index
+// CHECK: [[GET_CST0:%.*]] = arith.constant 0 : index
+// CHECK: [[GET_CST1:%.*]] = arith.constant 1 : index
+// CHECK: [[GET_CST1_SIZE:%.*]] = arith.constant 1 : index
+// CHECK: [[GET_CST1_STRIDE:%.*]] = arith.constant 1 : index
 // CHECK-DAG: [[SEM_ARR_GET:%.*]] = memref.get_global @[[SEM_ARR]]
 // CHECK-DAG: [[BUF_ARR_GET:%.*]] = memref.get_global @[[BUF_ARR]]
-// CHECK: [[GETSEM:%.*]] = memref.load [[SEM_ARR_GET]][[[CH_CST0]], [[CH_CST1]]]
-// CHECK: verif.semaphore.wait [[GETSEM]], [[GET_CST1]]
-// CHECK: [[GETBUFFER:%.*]] = memref.load [[BUF_ARR_GET]][[[CH_CST0]], [[CH_CST1]]]
-// CHECK: [[GBUF:%.*]] = {{.*}}cast [[GETBUFFER]]
-// CHECK: memref.copy [[GBUF]], [[A]]
-// CHECK: verif.semaphore.set [[GETSEM]], [[GET_CST0]]
+
+// CHECK: scf.for [[ITER:%.*]] = [[GET_CST0]] to [[GET_CST1_SIZE]] step [[GET_CST1]]
+// CHECK:   [[GET_LI:%.*]] = affine.apply [[MAP]]([[ITER]])[[[GET_CST0]], [[GET_CST1_STRIDE]]]
+// CHECK:   [[GET_DEL:%.*]] = affine.delinearize_index [[GET_LI]] into (1)
+// CHECK:   [[GETSEM:%.*]] = memref.load [[SEM_ARR_GET]][[[CH_CST0]], [[CH_CST1]]]
+// CHECK:   [[GETWAIT:%.*]] = arith.constant 1
+// CHECK:   verif.semaphore.wait [[GETSEM]], [[GETWAIT]]
+// CHECK:   [[GETBUF:%.*]] = memref.load [[BUF_ARR_GET]][[[CH_CST0]], [[CH_CST1]]]
+// CHECK:   [[GETVAL:%.*]] = memref.load [[GETBUF]][[[GET_CST0]]]
+// CHECK:   memref.store [[GETVAL]], [[A]][[[GET_DEL]]]
+// CHECK:   [[GETSET:%.*]] = arith.constant 0
+// CHECK:   verif.semaphore.set [[GETSEM]], [[GETSET]]
+
 // CHECK-NOT: air.channel.get
   air.channel.get @channel[%0, %1] (%a[] [] []) : (memref<1xi64>)
 }

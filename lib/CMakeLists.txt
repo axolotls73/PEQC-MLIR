@@ -3,6 +3,7 @@ set(LIB_SOURCES
   VerifDialect.cpp
   VerifOps.cpp
   convert/ConvertToAsync.cpp
+  convert/ConvertMisc.cpp
   translate/PastTranslator.cpp
 )
 

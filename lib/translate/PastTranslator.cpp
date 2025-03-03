@@ -176,9 +176,8 @@ std::string PastTranslator::getTypeName(const Type& t) {
 
 e_past_value_type_t PastTranslator::getTypePast(const Type& t) {
   LLVM_DEBUG(
-    llvm::errs() << "getTypePast: " << t << "  "
-        // << t.getIntOrFloatBitWidth()
-        << "\n";
+    llvm::errs() << "getTypePast: " << t << "  " <<
+        (isa<IndexType>(t) ? -1 : t.getIntOrFloatBitWidth()) << "\n";
   );
   if (t.isIndex()) return e_past_value_int;
 
@@ -412,6 +411,15 @@ s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName) {
       nodeChain(args)));
 }
 
+s_past_node_t* PastTranslator::wrapInAsyncBlock(s_past_node_t* node) {
+  s_past_node_t* pragmanode = past_node_pragma_create(
+    past_node_varref_create(getSymbol("peqc async_execute")),
+    nullptr);
+  s_past_node_t* blocknode = past_node_block_create(node);
+  pragmanode->next = blocknode;
+  return pragmanode;
+}
+
 
 
 // func
@@ -605,6 +613,9 @@ s_past_node_t* PastTranslator::translate(arith::DivSIOp op) {
 }
 s_past_node_t* PastTranslator::translate(arith::DivUIOp op) {
   return translateArithBinop("arith_divi", past_div, op.getResult(), op.getLhs(), op.getRhs());
+}
+s_past_node_t* PastTranslator::translate(arith::FloorDivSIOp op) {
+  return translateArithBinop("arith_floordivsi", past_floord, op.getResult(), op.getLhs(), op.getRhs());
 }
 s_past_node_t* PastTranslator::translate(arith::RemSIOp op) {
   return translateArithBinop("arith_remsi", past_mod, op.getResult(), op.getLhs(), op.getRhs());
@@ -803,7 +814,6 @@ s_past_node_t* PastTranslator::translate(scf::ForOp op) {
 }
 
 s_past_node_t* PastTranslator::translate(scf::IfOp op) {
-  assert(op.getResults().empty());
   NodeVec nodes;
   for (Value res : op.getResults()) {
     nodes.push_back(past_node_statement_create(
@@ -827,9 +837,7 @@ s_past_node_t* PastTranslator::translate(scf::YieldOp op) {
   // set loop-carried vars equal to yield operands
   if (auto loop = dyn_cast<scf::ForOp>(op.getOperation()->getParentOp())) {
     assert(loop && (loop.getRegionIterArgs().size() == op.getResults().size()));
-    auto resIter = op.getResults().begin();
-    for (auto iv : loop.getRegionIterArgs()) {
-      Value res = *resIter++;
+    for (auto [iv, res] : llvm::zip_equal(loop.getRegionIterArgs(), op.getResults())) {
       stmts.push_back(
         past_node_statement_create(
           past_node_binary_create(past_assign,
@@ -842,7 +850,13 @@ s_past_node_t* PastTranslator::translate(scf::YieldOp op) {
   // if there are results, set result vars
   else if (auto ifop = dyn_cast<scf::IfOp>(op.getOperation()->getParentOp())) {
     if (op.getResults().empty()) return nullptr;
-    assert(0);
+    for (auto [ifres, yieldval] : llvm::zip_equal(ifop.getResults(), op.getResults())) {
+      stmts.push_back(
+        past_node_statement_create(
+          past_node_binary_create(past_assign,
+            past_node_varref_create(getVarSymbol(ifres)),
+            past_node_varref_create(getVarSymbol(yieldval)))));
+    }
   }
   return nodeChain(stmts);
 }
@@ -938,6 +952,16 @@ s_past_node_t* PastTranslator::translate(memref::GlobalOp op) {
   s_past_node_t* decls = alloc->next;
   alloc->next = nullptr;
   globalDecls.push_back(alloc);
+
+  // if main, prepend any assignments to main body
+  if (mainFunction && decls) {
+    assert(past_node_is_a(mainFunction, past_block));
+    auto block = PAST_NODE_AS(mainFunction, block);
+    auto endassign = getNodeListEnd(decls);
+    endassign->next = block->body;
+    block->body = decls;
+    return nullptr;
+  }
   return decls;
 }
 
@@ -1115,13 +1139,7 @@ s_past_node_t* PastTranslator::translate(async::ExecuteOp op) {
   body.push_back(translate(op.getBodyRegion()));
   body.push_back(getPastSetSemaphore(getVarSymbol(op.getToken()), getSymbol("PAST_TASK_FINISHED")));
 
-  nodes.push_back(
-    past_node_pragma_create(
-      past_node_varref_create(getSymbol("peqc async_execute")),
-      nullptr));
-  nodes.push_back(
-    past_node_block_create(
-      nodeChain(body)));
+  nodes.push_back(wrapInAsyncBlock(nodeChain(body)));
   return nodeChain(nodes);
 }
 
@@ -1229,6 +1247,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<arith::MulIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::DivSIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::DivUIOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<arith::FloorDivSIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::RemSIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::AndIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::OrIOp>(op)) res = translate(o);
@@ -1351,6 +1370,17 @@ s_past_node_t* PastTranslator::translate(ModuleOp op) {
   auto regionops = op.getRegion().getOps();
   if (regionops.empty()) return nullptr;
 
+  // find and translate main function first
+  for (auto func : llvm::make_early_inc_range(
+        op.getRegion().getOps<func::FuncOp>())) {
+    if (func.getSymName() != "main") continue;
+    auto res = translate(func);
+    assert(!res && mainFunction); // translate for funcops assigns mainFunction
+    func.erase();
+  }
+
+  op.emitRemark();
+
   auto body = translate(op.getRegion());
 
   // remove fundecls from body, move to functionDecls
@@ -1384,10 +1414,17 @@ s_past_node_t* PastTranslator::translate(ModuleOp op) {
   translation.insert(translation.end(), functionDecls.begin(), functionDecls.end());
   if (mainFunction) {
     translation.push_back(body);
-    translation.push_back(mainFunction);
+
+    // this is a workaround currently: wrap main function in async block
+    assert(past_node_is_a(mainFunction, past_block));
+    auto mainbody = PAST_NODE_AS(mainFunction, block)->body;
+    translation.push_back(past_node_block_create(
+      wrapInAsyncBlock(mainbody)));
   }
   else if (body) {
-    translation.push_back(past_node_block_create(body));
+    // this is a workaround currently: wrap main function in async block
+    translation.push_back(past_node_block_create(
+      wrapInAsyncBlock(body)));
   }
 
   s_past_node_t* ret = past_node_root_create(symbolTable, nodeChain(translation));

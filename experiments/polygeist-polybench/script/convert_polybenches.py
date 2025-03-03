@@ -6,10 +6,10 @@ from glob import glob
 import sys
 import re
 import os
+import shutil
 import argparse
 import json
 import csv
-import itertools as it
 import functools as ft
 
 BASEDIR = os.path.abspath(f'{os.path.dirname(__file__)}/..')
@@ -34,8 +34,21 @@ argparser.add_argument('--die', choices=debugopts, default=[],
     help='stop after first error from this stage')
 args = argparser.parse_args()
 
+executables = [
+  'mlir-opt',
+  'cgeist',
+  'polymer-opt',
+  'mlir-opt',
+  'verif-opt',
+  'verif-translate',
+]
+for ex in executables:
+  if shutil.which(ex) is None:
+    print(f'{ex} must be in PATH', file=sys.stderr)
+    exit(1)
+
 configobj = json.load(open(args.config_file))
-print(configobj)
+# print(configobj)
 configs = configobj['optionsets']
 pbdir = configobj['polybench_dir']
 

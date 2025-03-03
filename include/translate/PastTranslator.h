@@ -124,6 +124,8 @@ class PastTranslator {
   s_past_node_t* getPastSetSemaphore(s_symbol_t* semaphore, s_symbol_t* val);
   s_past_node_t* getPastNewSemaphore(s_symbol_t* semaphoreName);
 
+  s_past_node_t* wrapInAsyncBlock(s_past_node_t* node);
+
 
   // builtin
 
@@ -153,6 +155,7 @@ class PastTranslator {
   s_past_node_t* translate(arith::MulIOp op);
   s_past_node_t* translate(arith::DivSIOp op);
   s_past_node_t* translate(arith::DivUIOp op);
+  s_past_node_t* translate(arith::FloorDivSIOp op);
   s_past_node_t* translate(arith::RemSIOp op);
   s_past_node_t* translate(arith::AndIOp op);
   s_past_node_t* translate(arith::OrIOp op);
