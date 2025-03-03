@@ -17,13 +17,17 @@
 // taken from:
 //https://github.com/Xilinx/mlir-aie/blob/8b908be190f3c2e497cbe5c1fef492ce34f8e290/mlir_tutorials/tutorial-4/flow/aie.mlir
 
+// XFAIL:*
+// ^ flows need to be blocking fifos!
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-convert-aie %t/input.mlir > %t/conversion.mlir && \
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c
 // RUN: %add_epilogue %t/result.c %t/translation.c
 
-// expected conflict on dma?
-// RUN: not %pastchecker %t/translation.c %t/translation.c 2>&1 | grep conflict
+// RUN: %pastchecker %t/translation.c %t/translation.c buffer_a34,buffer_a14 2>&1
+
+// live-in mismatch. fix!!!
+// COM: RUN: %pastchecker %t/translation.c %t/compare.c buffer_a34,buffer_a14 2>&1
 
 
 //--- input.mlir

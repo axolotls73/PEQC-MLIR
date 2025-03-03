@@ -53,7 +53,8 @@ private:
   ModuleOp module;
 
   std::unordered_map<Value, int64_t> tile_id_map;
-  std::unordered_map<Value, std::string> tile_dma_buffer;
+  std::unordered_map<Value, std::string> tile_dma_in_buffer;
+  std::unordered_map<Value, std::string> tile_dma_out_buffer;
   std::unordered_map<Value, MemRefType> tile_dma_type;
 
   uint32_t current_tile_id = 0;
@@ -93,17 +94,22 @@ public:
       // default type if not inferred
       if (!elt_type) elt_type = IndexType::get(context);
 
-      // create dma buffer if used by dma_bd ops
+      // create dma buffers
       auto builder = OpBuilder(op);
       auto loc = op.getLoc();
       auto dynamic_elt_type =
           MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type);
       auto mrtype = MemRefType::get(SmallVector<int64_t>{DEFAULT_NUM_DMA_CHANNELS}, dynamic_elt_type);
-      std::string dma_name = "tile_" + std::to_string(tile_id) + "_dma";
-      builder.create<memref::GlobalOp>(loc, StringAttr::get(context, dma_name),
+      std::string dma_name_in = "tile_" + std::to_string(tile_id) + "_dma_in";
+      std::string dma_name_out = "tile_" + std::to_string(tile_id) + "_dma_out";
+      builder.create<memref::GlobalOp>(loc, StringAttr::get(context, dma_name_in),
           StringAttr::get(context, "private"),TypeAttr::get(mrtype),
           Attribute{}, UnitAttr{}, IntegerAttr{});
-      tile_dma_buffer[op.getResult()] = dma_name;
+      builder.create<memref::GlobalOp>(loc, StringAttr::get(context, dma_name_out),
+          StringAttr::get(context, "private"),TypeAttr::get(mrtype),
+          Attribute{}, UnitAttr{}, IntegerAttr{});
+      tile_dma_in_buffer[op.getResult()] = dma_name_in;
+      tile_dma_out_buffer[op.getResult()] = dma_name_out;
       tile_dma_type[op.getResult()] = mrtype;
 
       return WalkResult::advance();
@@ -125,8 +131,8 @@ public:
       // get dma globals
       Value srctile = op.getSource();
       Value dsttile = op.getDest();
-      assert(tile_dma_buffer.count(srctile) && tile_dma_type.count(srctile));
-      assert(tile_dma_buffer.count(dsttile) && tile_dma_type.count(dsttile));
+      assert(tile_dma_out_buffer.count(srctile) && tile_dma_type.count(srctile));
+      assert(tile_dma_in_buffer.count(dsttile) && tile_dma_type.count(dsttile));
       if (tile_dma_type[srctile] != tile_dma_type[dsttile]) {
         op.emitError("aie.flow: source and dest DMA buffers don't have the same type");
         return WalkResult::interrupt();
@@ -143,10 +149,11 @@ public:
           (loc, MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type), flowarr).getResult();
 
       // store flowarr in dma globals
-      for (auto [tile, channel] : llvm::zip_equal(
-            SmallVector<Value>{srctile, dsttile}, SmallVector<int32_t>{op.getSourceChannel(), op.getDestChannel()})) {
+      for (auto [tile, channel, dma_map] : llvm::zip_equal(
+            SmallVector<Value>{srctile, dsttile}, SmallVector<int32_t>{op.getSourceChannel(), op.getDestChannel()},
+            SmallVector<std::unordered_map<Value, std::string>>{tile_dma_out_buffer, tile_dma_in_buffer})) {
         auto buf = builder.create<memref::GetGlobalOp>(loc,
-            tile_dma_type[tile], tile_dma_buffer[tile]).getResult();
+            tile_dma_type[tile], dma_map[tile]).getResult();
         Value index = builder.create<arith::ConstantIndexOp>(loc, channel);
         builder.create<memref::StoreOp>(loc, cflowarr, buf, SmallVector<Value>{index});
       }
@@ -333,23 +340,27 @@ public:
 
     // get dma buffer for channel
     assert(tileval);
-    assert(tile_dma_buffer.count(tileval));
+    assert(tile_dma_in_buffer.count(tileval));
+    assert(tile_dma_out_buffer.count(tileval));
     assert(tile_dma_type.count(tileval));
-    Value bufferarr = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_buffer[tileval]);
-    Value buffer = builder.create<memref::LoadOp>(loc, bufferarr, SmallVector<Value>{channel});
-    Value casted_buffer = builder.create<memref::CastOp>(loc, op.getBuffer().getType(), buffer);
+    Value buffer_in_global = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_in_buffer[tileval]);
+    Value buffer_out_global = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_out_buffer[tileval]);
+    Value bufferin = builder.create<memref::LoadOp>(loc, buffer_in_global, SmallVector<Value>{channel});
+    Value bufferout = builder.create<memref::LoadOp>(loc, buffer_out_global, SmallVector<Value>{channel});
+    Value casted_buffer_in = builder.create<memref::CastOp>(loc, op.getBuffer().getType(), bufferin);
+    Value casted_buffer_out = builder.create<memref::CastOp>(loc, op.getBuffer().getType(), bufferout);
 
     Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0);
     Value cmpval = builder.create<arith::CmpIOp>(loc, arith::CmpIPredicate::eq, cst_0, inout).getResult();
     builder.create<scf::IfOp>(loc, cmpval,
       // then block: handle copy out
       [&] (OpBuilder b, Location loc) {
-        b.create<memref::CopyOp>(loc, op.getBuffer(), casted_buffer);
+        b.create<memref::CopyOp>(loc, op.getBuffer(), casted_buffer_out);
         b.create<scf::YieldOp>(loc, SmallVector<Value>{});
       },
       // else block: handle copy in
       [&] (OpBuilder b, Location loc) {
-        b.create<memref::CopyOp>(loc, casted_buffer, op.getBuffer());
+        b.create<memref::CopyOp>(loc, casted_buffer_in, op.getBuffer());
         b.create<scf::YieldOp>(loc, SmallVector<Value>{});
       });
 

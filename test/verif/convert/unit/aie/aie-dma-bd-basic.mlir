@@ -18,7 +18,8 @@
 // RUN: verif-opt --verif-convert-aie %s | FileCheck %s
 
 module {
-// CHECK: memref.global "private" @[[DMA_GLOBAL:.*]] :
+// CHECK-DAG: memref.global "private" @[[DMA_GLOBAL_IN:.*_in]] :
+// CHECK-DAG: memref.global "private" @[[DMA_GLOBAL_OUT:.*_out]] :
   %tile14 = aie.tile(1, 4)
 
 // CHECK: memref.global "private" @[[BUF_GLOBAL:.*]] : memref<1xi32>
@@ -27,17 +28,20 @@ module {
 // CHECK: func.func @[[MEM_FUNC:.*]]([[CHANNEL:%.*]]: index, [[ISIN:%.*]]: index)
 // CHECK:   cf.br ^[[BD0:.*]]
 // CHECK: ^[[BD0]]:
-// CHECK:   [[DMA_BUFARR:%.*]] = memref.get_global @[[DMA_GLOBAL]]
-// CHECK:   [[DMA_BUF:%.*]] = memref.load [[DMA_BUFARR]][[[CHANNEL]]]
-// CHECK:   [[DMA_BUF_CASTED:%.*]] = memref.cast
+// CHECK:   [[DMA_BUFARR_IN:%.*]] = memref.get_global @[[DMA_GLOBAL_IN]]
+// CHECK:   [[DMA_BUFARR_OUT:%.*]] = memref.get_global @[[DMA_GLOBAL_OUT]]
+// CHECK:   [[DMA_BUF_IN:%.*]] = memref.load [[DMA_BUFARR_IN]][[[CHANNEL]]]
+// CHECK:   [[DMA_BUF_OUT:%.*]] = memref.load [[DMA_BUFARR_OUT]][[[CHANNEL]]]
+// CHECK:   [[DMA_BUF_CASTED_IN:%.*]] = memref.cast [[DMA_BUF_IN]]
+// CHECK:   [[DMA_BUF_CASTED_OUT:%.*]] = memref.cast [[DMA_BUF_OUT]]
 // CHECK:   [[CST_0:%.*]] = arith.constant 0
 // CHECK:   [[CMPVAL:%.*]] = arith.cmpi eq, [[CST_0]], [[ISIN]]
 // CHECK:   scf.if [[CMPVAL]]
 // CHECK:     [[BUF1:%.*]] = memref.get_global @[[BUF_GLOBAL]]
-// CHECK:     memref.copy [[BUF1]], [[DMA_BUF_CASTED]]
+// CHECK:     memref.copy [[BUF1]], [[DMA_BUF_CASTED_OUT]]
 // CHECK:   else
 // CHECK:     [[BUF2:%.*]] = memref.get_global @[[BUF_GLOBAL]]
-// CHECK:     memref.copy [[DMA_BUF_CASTED]], [[BUF2]]
+// CHECK:     memref.copy [[DMA_BUF_CASTED_IN]], [[BUF2]]
 // CHECK:   cf.br ^[[END:.*]]
 // CHECK: ^[[END]]:
 // CHECK:   cf.br ^[[FUNCEND:.*]]
