@@ -20,6 +20,8 @@
 module {
 // CHECK-DAG: memref.global "private" @[[DMA_GLOBAL_IN:.*_in]] :
 // CHECK-DAG: memref.global "private" @[[DMA_GLOBAL_OUT:.*_out]] :
+// CHECK-DAG: memref.global "private" @[[DMA_GLOBAL_IN_SEM:.*_in_semaphore]] :
+// CHECK-DAG: memref.global "private" @[[DMA_GLOBAL_OUT_SEM:.*]] :
   %tile14 = aie.tile(1, 4)
 
 // CHECK: memref.global "private" @[[BUF_GLOBAL:.*]] : memref<1xi32>

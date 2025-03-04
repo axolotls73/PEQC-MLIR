@@ -18,7 +18,9 @@
 // RUN: verif-opt --verif-convert-aie %s | FileCheck %s
 
 module {
-// just have this one so it's not captured below
+// just have these so they're not captured below
+// CHECK: memref.global
+// CHECK: memref.global
 // CHECK: memref.global
 // CHECK: memref.global
   %tile14 = aie.tile(1, 4)

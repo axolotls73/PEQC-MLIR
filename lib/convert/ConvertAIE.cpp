@@ -43,6 +43,9 @@ namespace mlir::verif::air {
 #define DEFAULT_NUM_DMA_CHANNELS 8
 ///TODO: figure out!!!
 
+#define READY_TO_WRITE 0
+#define READY_TO_READ 1
+
 namespace {
 
 class AIEConverter {
@@ -61,6 +64,11 @@ private:
   uint32_t current_buffer_id = 0;
   uint32_t current_semaphore_id = 0;
   uint32_t mem_id = 0;
+
+
+  std::string getChannelSemaphoreArr(std::string channel_name) {
+    return channel_name + "_semaphore";
+  }
 
 
   // assign each tile value a unique id, remove tile ops
@@ -92,11 +100,13 @@ private:
       if (!elt_type) elt_type = IndexType::get(context);
 
       // create dma buffers
+      ///TODO: do all this in a loop
       auto builder = OpBuilder(op);
       auto loc = op.getLoc();
       auto dynamic_elt_type =
           MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type);
       auto mrtype = MemRefType::get(SmallVector<int64_t>{DEFAULT_NUM_DMA_CHANNELS}, dynamic_elt_type);
+
       std::string dma_name_in = "tile_" + std::to_string(tile_id) + "_dma_in";
       std::string dma_name_out = "tile_" + std::to_string(tile_id) + "_dma_out";
       builder.create<memref::GlobalOp>(loc, StringAttr::get(context, dma_name_in),
@@ -107,6 +117,16 @@ private:
           Attribute{}, UnitAttr{}, IntegerAttr{});
       tile_dma_in_buffer[op.getResult()] = dma_name_in;
       tile_dma_out_buffer[op.getResult()] = dma_name_out;
+
+      // create semaphore arrays for buffers
+      auto sem_mrtype = MemRefType::get(SmallVector<int64_t>{DEFAULT_NUM_DMA_CHANNELS}, SemaphoreType::get(context));
+      builder.create<memref::GlobalOp>(loc, StringAttr::get(context, getChannelSemaphoreArr(dma_name_in)),
+          StringAttr::get(context, "private"),TypeAttr::get(sem_mrtype),
+          Attribute{}, UnitAttr{}, IntegerAttr{});
+      builder.create<memref::GlobalOp>(loc, StringAttr::get(context, getChannelSemaphoreArr(dma_name_out)),
+          StringAttr::get(context, "private"),TypeAttr::get(sem_mrtype),
+          Attribute{}, UnitAttr{}, IntegerAttr{});
+
       tile_dma_type[op.getResult()] = mrtype;
 
       return WalkResult::advance();
@@ -145,14 +165,21 @@ private:
       Value cflowarr = builder.create<memref::CastOp>
           (loc, MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type), flowarr).getResult();
 
-      // store flowarr in dma globals
+      //init flow semaphore
+      Value sem = builder.create<SemaphoreOp>(loc);
+      auto sem_mrtype = MemRefType::get(SmallVector<int64_t>{DEFAULT_NUM_DMA_CHANNELS}, SemaphoreType::get(context));
+
+      // store flowarr and semaphore in dma globals
       for (auto [tile, channel, dma_map] : llvm::zip_equal(
             SmallVector<Value>{srctile, dsttile}, SmallVector<int32_t>{op.getSourceChannel(), op.getDestChannel()},
             SmallVector<std::unordered_map<Value, std::string>>{tile_dma_out_buffer, tile_dma_in_buffer})) {
         auto buf = builder.create<memref::GetGlobalOp>(loc,
             tile_dma_type[tile], dma_map[tile]).getResult();
+        auto semarr = builder.create<memref::GetGlobalOp>(loc,
+            sem_mrtype, getChannelSemaphoreArr(dma_map[tile])).getResult();
         Value index = builder.create<arith::ConstantIndexOp>(loc, channel);
         builder.create<memref::StoreOp>(loc, cflowarr, buf, SmallVector<Value>{index});
+        builder.create<memref::StoreOp>(loc, sem, semarr, SmallVector<Value>{index});
       }
 
       op.erase();
