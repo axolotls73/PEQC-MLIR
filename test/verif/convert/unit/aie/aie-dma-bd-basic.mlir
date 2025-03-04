@@ -36,14 +36,24 @@ module {
 // CHECK:   [[DMA_BUF_OUT:%.*]] = memref.load [[DMA_BUFARR_OUT]][[[CHANNEL]]]
 // CHECK:   [[DMA_BUF_CASTED_IN:%.*]] = memref.cast [[DMA_BUF_IN]]
 // CHECK:   [[DMA_BUF_CASTED_OUT:%.*]] = memref.cast [[DMA_BUF_OUT]]
+// CHECK:   [[SEM_ARR_IN:%.*]] = memref.get_global @[[DMA_GLOBAL_IN_SEM]]
+// CHECK:   [[SEM_ARR_OUT:%.*]] = memref.get_global @[[DMA_GLOBAL_OUT_SEM]]
 // CHECK:   [[CST_0:%.*]] = arith.constant 0
 // CHECK:   [[CMPVAL:%.*]] = arith.cmpi eq, [[CST_0]], [[ISIN]]
+// CHECK:   [[READY_TO_WRITE:%.*]] = arith.constant 0
+// CHECK:   [[READY_TO_READ:%.*]] = arith.constant 1
 // CHECK:   scf.if [[CMPVAL]]
+// CHECK:     [[SEM_OUT:%.*]] = memref.load [[SEM_ARR_OUT]][[[CHANNEL]]]
+// CHECK:     verif.semaphore.wait [[SEM_OUT]], [[READY_TO_WRITE]]
 // CHECK:     [[BUF1:%.*]] = memref.get_global @[[BUF_GLOBAL]]
 // CHECK:     memref.copy [[BUF1]], [[DMA_BUF_CASTED_OUT]]
+// CHECK:     verif.semaphore.set [[SEM_OUT]], [[READY_TO_READ]]
 // CHECK:   else
+// CHECK:     [[SEM_IN:%.*]] = memref.load [[SEM_ARR_IN]][[[CHANNEL]]]
+// CHECK:     verif.semaphore.wait [[SEM_IN]], [[READY_TO_READ]]
 // CHECK:     [[BUF2:%.*]] = memref.get_global @[[BUF_GLOBAL]]
 // CHECK:     memref.copy [[DMA_BUF_CASTED_IN]], [[BUF2]]
+// CHECK:     verif.semaphore.set [[SEM_IN]], [[READY_TO_WRITE]]
 // CHECK:   cf.br ^[[END:.*]]
 // CHECK: ^[[END]]:
 // CHECK:   cf.br ^[[FUNCEND:.*]]

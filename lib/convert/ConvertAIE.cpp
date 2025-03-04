@@ -367,24 +367,36 @@ private:
     assert(tile_dma_in_buffer.count(tileval));
     assert(tile_dma_out_buffer.count(tileval));
     assert(tile_dma_type.count(tileval));
-    Value buffer_in_global = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_in_buffer[tileval]);
-    Value buffer_out_global = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_out_buffer[tileval]);
-    Value bufferin = builder.create<memref::LoadOp>(loc, buffer_in_global, SmallVector<Value>{channel});
-    Value bufferout = builder.create<memref::LoadOp>(loc, buffer_out_global, SmallVector<Value>{channel});
-    Value casted_buffer_in = builder.create<memref::CastOp>(loc, op.getBuffer().getType(), bufferin);
-    Value casted_buffer_out = builder.create<memref::CastOp>(loc, op.getBuffer().getType(), bufferout);
+    Value buffer_in_global = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_in_buffer[tileval]).getResult();
+    Value buffer_out_global = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_out_buffer[tileval]).getResult();
+    Value bufferin = builder.create<memref::LoadOp>(loc, buffer_in_global, SmallVector<Value>{channel}).getResult();
+    Value bufferout = builder.create<memref::LoadOp>(loc, buffer_out_global, SmallVector<Value>{channel}).getResult();
+    Value casted_buffer_in = builder.create<memref::CastOp>(loc, op.getBuffer().getType(), bufferin).getResult();
+    Value casted_buffer_out = builder.create<memref::CastOp>(loc, op.getBuffer().getType(), bufferout).getResult();
 
-    Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0);
+    auto sem_mrtype = MemRefType::get(SmallVector<int64_t>{DEFAULT_NUM_DMA_CHANNELS}, SemaphoreType::get(context));
+    Value sem_arr_in = builder.create<memref::GetGlobalOp>(loc, sem_mrtype, getChannelSemaphoreArr(tile_dma_in_buffer[tileval])).getResult();
+    Value sem_arr_out = builder.create<memref::GetGlobalOp>(loc, sem_mrtype, getChannelSemaphoreArr(tile_dma_out_buffer[tileval])).getResult();
+
+    Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
     Value cmpval = builder.create<arith::CmpIOp>(loc, arith::CmpIPredicate::eq, cst_0, inout).getResult();
+    Value ready_write = builder.create<arith::ConstantIndexOp>(loc, READY_TO_WRITE).getResult();
+    Value ready_read = builder.create<arith::ConstantIndexOp>(loc, READY_TO_READ).getResult();
     builder.create<scf::IfOp>(loc, cmpval,
       // then block: handle copy out
       [&] (OpBuilder b, Location loc) {
+        Value outsem = builder.create<memref::LoadOp>(loc, sem_arr_out, SmallVector<Value>{channel}).getResult();
+        builder.create<SemaphoreWaitOp>(loc, outsem, ready_write);
         b.create<memref::CopyOp>(loc, op.getBuffer(), casted_buffer_out);
+        builder.create<SemaphoreSetOp>(loc, outsem, ready_read);
         b.create<scf::YieldOp>(loc, SmallVector<Value>{});
       },
       // else block: handle copy in
       [&] (OpBuilder b, Location loc) {
+        Value insem = builder.create<memref::LoadOp>(loc, sem_arr_in, SmallVector<Value>{channel}).getResult();
+        builder.create<SemaphoreWaitOp>(loc, insem, ready_read);
         b.create<memref::CopyOp>(loc, casted_buffer_in, op.getBuffer());
+        builder.create<SemaphoreSetOp>(loc, insem, ready_write);
         b.create<scf::YieldOp>(loc, SmallVector<Value>{});
       });
 
