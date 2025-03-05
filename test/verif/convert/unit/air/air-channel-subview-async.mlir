@@ -21,7 +21,7 @@
 // CHECK: [[MAP:#.*]] = affine_map<(d0)[s0, s1] -> ((d0 + s0) * s1)>
 // CHECK: module
 module {
-// CHECK-DAG: memref.global "private" @[[BUF_ARR:.*]] : memref<1x1xmemref<?xi32>>
+// CHECK-DAG: memref.global "private" @[[BUF_ARR:.*]] : memref<1x1x1x1xi32>
 // CHECK-NOT: air.channel
   air.channel @channel [1, 1]
 
@@ -50,9 +50,8 @@ module {
 // CHECK: scf.for [[ITER:%.*]] = [[PUT_CST0]] to [[CST3]] step [[PUT_CST1]]
 // CHECK:   [[LI:%.*]] = affine.apply [[MAP]]([[ITER]])[[[CST1]], [[CST2]]]
 // CHECK:   [[DEL:%.*]] = affine.delinearize_index [[LI]] into (10)
-// CHECK:   [[PUTBUF:%.*]] = memref.load [[BUF_ARR_PUT]][[[PUT_CST0]], [[PUT_CST0]]]
 // CHECK:   [[PUTVAL:%.*]] = memref.load [[A]][[[DEL]]]
-// CHECK:   memref.store [[PUTVAL]], [[PUTBUF]][[[PUT_CST0]]]
+// CHECK:   memref.store [[PUTVAL]], [[BUF_ARR_PUT]][[[PUT_CST0]], [[PUT_CST0]], [[PUT_CST0]], [[PUT_CST0]]]
 
 // CHECK-NOT: air.channel.put
   %p = air.channel.put async [%t, %t2] @channel[] (%a[%1] [%3] [%2]) : (memref<10xi32>)
