@@ -1,6 +1,6 @@
 
 //
-// aie-dma-bd-basic.mlir: This file is part of the PEQC-MLIR project.
+// aie-dma-bd-size-stride.mlir: This file is part of the PEQC-MLIR project.
 //
 // Copyright (C) 2024 Colorado State University
 //
@@ -17,7 +17,7 @@
 // REQUIRES: air
 // RUN: verif-opt --verif-convert-aie %s | FileCheck %s
 
-// CHECK: #[[MAP:.*]] = affine_map<(d0) -> (d0)>
+// CHECK: #[[MAP:.*]] = affine_map<(d0, d1) -> (d0 * 4 + d1)>
 module {
 // CHECK-DAG: memref.global "private" @[[DMA_GLOBAL_IN:.*_in]] :
 // CHECK-DAG: memref.global "private" @[[DMA_GLOBAL_OUT:.*_out]] :
@@ -25,8 +25,8 @@ module {
 // CHECK-DAG: memref.global "private" @[[DMA_GLOBAL_OUT_SEM:.*]] :
   %tile14 = aie.tile(1, 4)
 
-// CHECK: memref.global "private" @[[BUF_GLOBAL:.*]] : memref<1xi32>
-  %buf = aie.buffer(%tile14) : memref<1xi32>
+// CHECK: memref.global "private" @[[BUF_GLOBAL:.*]] : memref<16xi32>
+  %buf = aie.buffer(%tile14) : memref<16xi32>
 
 // CHECK: func.func @[[MEM_FUNC:.*]]([[CHANNEL:%.*]]: index, [[ISIN:%.*]]: index)
 // CHECK:   cf.br ^[[BD0:.*]]
@@ -44,26 +44,30 @@ module {
 // CHECK:   [[CMPVAL:%.*]] = arith.cmpi eq, [[CST_0]], [[ISIN]]
 // CHECK:   scf.if [[CMPVAL]]
 // CHECK:     [[SEM_OUT:%.*]] = memref.load [[SEM_ARR_OUT]][[[CHANNEL]]]
-// CHECK:     [[OUTSIZE:%.*]] = arith.constant 1
-// CHECK:     scf.for [[OUT_I:%.*]] = [[CST_0]] to [[OUTSIZE]] step [[CST_1]]
-// CHECK:       [[OUTLINDEX:%.*]] = affine.apply #[[MAP]]([[OUT_I]])
-// CHECK:       [[OUTINDEX:%.*]] = affine.delinearize_index [[OUTLINDEX]] into (1)
-// CHECK:       verif.semaphore.wait [[SEM_OUT]], [[READY_TO_WRITE]]
-// CHECK:       [[BUF1:%.*]] = memref.get_global @[[BUF_GLOBAL]]
-// CHECK:       [[OUTVAL:%.*]] = memref.load [[BUF1]][[[OUTINDEX]]]
-// CHECK:       memref.store [[OUTVAL]], [[DMA_BUF_OUT]][[[CST_0]]]
-// CHECK:       verif.semaphore.set [[SEM_OUT]], [[READY_TO_READ]]
+// CHECK:     [[OUTSIZE1:%.*]] = arith.constant 4
+// CHECK:     scf.for [[OUT_I1:%.*]] = [[CST_0]] to [[OUTSIZE1]] step [[CST_1]]
+// CHECK:       [[OUTSIZE2:%.*]] = arith.constant 4
+// CHECK:       scf.for [[OUT_I2:%.*]] = [[CST_0]] to [[OUTSIZE2]] step [[CST_1]]
+// CHECK:         [[OUTLINDEX:%.*]] = affine.apply #[[MAP]]([[OUT_I1]], [[OUT_I2]])
+// CHECK:         [[OUTINDEX:%.*]] = affine.delinearize_index [[OUTLINDEX]] into (16)
+// CHECK:         verif.semaphore.wait [[SEM_OUT]], [[READY_TO_WRITE]]
+// CHECK:         [[BUF1:%.*]] = memref.get_global @[[BUF_GLOBAL]]
+// CHECK:         [[OUTVAL:%.*]] = memref.load [[BUF1]][[[OUTINDEX]]]
+// CHECK:         memref.store [[OUTVAL]], [[DMA_BUF_OUT]][[[CST_0]]]
+// CHECK:         verif.semaphore.set [[SEM_OUT]], [[READY_TO_READ]]
 // CHECK:   else
 // CHECK:     [[SEM_IN:%.*]] = memref.load [[SEM_ARR_IN]][[[CHANNEL]]]
-// CHECK:     [[INSIZE:%.*]] = arith.constant 1
-// CHECK:     scf.for [[IN_I:%.*]] = [[CST_0]] to [[INSIZE]] step [[CST_1]]
-// CHECK:       [[INLINDEX:%.*]] = affine.apply #[[MAP]]([[IN_I]])
-// CHECK:       [[ININDEX:%.*]] = affine.delinearize_index [[INLINDEX]] into (1)
-// CHECK:       verif.semaphore.wait [[SEM_IN]], [[READY_TO_READ]]
-// CHECK:       [[INVAL:%.*]] = memref.load [[DMA_BUF_IN]][[[CST_0]]]
-// CHECK:       [[BUF2:%.*]] = memref.get_global @[[BUF_GLOBAL]]
-// CHECK:       memref.store [[INVAL]], [[BUF2]][[[ININDEX]]]
-// CHECK:       verif.semaphore.set [[SEM_IN]], [[READY_TO_WRITE]]
+// CHECK:     [[INSIZE1:%.*]] = arith.constant 4
+// CHECK:     scf.for [[IN_I1:%.*]] = [[CST_0]] to [[INSIZE1]] step [[CST_1]]
+// CHECK:       [[INSIZE2:%.*]] = arith.constant 4
+// CHECK:       scf.for [[IN_I2:%.*]] = [[CST_0]] to [[INSIZE2]] step [[CST_1]]
+// CHECK:         [[INLINDEX:%.*]] = affine.apply #[[MAP]]([[IN_I1]], [[IN_I2]])
+// CHECK:         [[ININDEX:%.*]] = affine.delinearize_index [[INLINDEX]] into (16)
+// CHECK:         verif.semaphore.wait [[SEM_IN]], [[READY_TO_READ]]
+// CHECK:         [[INVAL:%.*]] = memref.load [[DMA_BUF_IN]][[[CST_0]]]
+// CHECK:         [[BUF2:%.*]] = memref.get_global @[[BUF_GLOBAL]]
+// CHECK:         memref.store [[INVAL]], [[BUF2]][[[ININDEX]]]
+// CHECK:         verif.semaphore.set [[SEM_IN]], [[READY_TO_WRITE]]
 // CHECK:   cf.br ^[[END:.*]]
 // CHECK: ^[[END]]:
 // CHECK:   cf.br ^[[FUNCEND:.*]]
@@ -79,11 +83,12 @@ module {
 // CHECK:   call @[[MEM_FUNC]]
     aie.dma_start("MM2S", 0, ^bd0, ^bd0) // only the same so that only one func is generated
     ^bd0:
-        aie.dma_bd(%buf : memref<1xi32>)
+        aie.dma_bd(%buf : memref<16xi32>, 0, 16, [<size = 4, stride = 4>, <size = 4, stride = 1>])
         aie.next_bd ^end
     ^end:
         aie.end
   }
 }
 // CHECK: }
+
 

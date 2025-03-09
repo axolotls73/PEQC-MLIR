@@ -23,6 +23,7 @@
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
+#include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/Async/IR/Async.h"
@@ -105,6 +106,8 @@ private:
       auto loc = op.getLoc();
       auto dynamic_elt_type =
           MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type);
+      // current implementation just uses a single element so a memref of memrefs
+      // isn't necessary, but keeping it in case it's useful in the future
       auto mrtype = MemRefType::get(SmallVector<int64_t>{DEFAULT_NUM_DMA_CHANNELS}, dynamic_elt_type);
 
       std::string dma_name_in = "tile_" + std::to_string(tile_id) + "_dma_in";
@@ -362,6 +365,31 @@ private:
     auto builder = OpBuilder(op);
     auto loc = op.getLoc();
 
+    auto dma_offset = op.getOffset();
+
+    // extract sizes and strides
+    SmallVector<int64_t> dma_sizes;
+    SmallVector<int64_t> dma_strides;
+
+    auto dims = op.getDimensions();
+    if (dims.has_value()) {
+      for (auto dim : dims.value()) {
+        dma_sizes.push_back(dim.getSize());
+        dma_strides.push_back(dim.getStride());
+      }
+    }
+    else {
+      // default size is the number of elements in the memref
+      MemRefType mrtype = op.getBuffer().getType();
+      int64_t size = 1;
+      for (auto d : mrtype.getShape()) {
+        size *= d;
+      }
+      dma_sizes.push_back(size);
+      // default stride is 1
+      dma_strides.push_back(1);
+    }
+
     // get dma buffer for channel
     assert(tileval);
     assert(tile_dma_in_buffer.count(tileval));
@@ -369,35 +397,73 @@ private:
     assert(tile_dma_type.count(tileval));
     Value buffer_in_global = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_in_buffer[tileval]).getResult();
     Value buffer_out_global = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_out_buffer[tileval]).getResult();
-    Value bufferin = builder.create<memref::LoadOp>(loc, buffer_in_global, SmallVector<Value>{channel}).getResult();
-    Value bufferout = builder.create<memref::LoadOp>(loc, buffer_out_global, SmallVector<Value>{channel}).getResult();
-    Value casted_buffer_in = builder.create<memref::CastOp>(loc, op.getBuffer().getType(), bufferin).getResult();
-    Value casted_buffer_out = builder.create<memref::CastOp>(loc, op.getBuffer().getType(), bufferout).getResult();
+    Value dmabufferin = builder.create<memref::LoadOp>(loc, buffer_in_global, SmallVector<Value>{channel}).getResult();
+    Value dmabufferout = builder.create<memref::LoadOp>(loc, buffer_out_global, SmallVector<Value>{channel}).getResult();
 
     auto sem_mrtype = MemRefType::get(SmallVector<int64_t>{DEFAULT_NUM_DMA_CHANNELS}, SemaphoreType::get(context));
     Value sem_arr_in = builder.create<memref::GetGlobalOp>(loc, sem_mrtype, getChannelSemaphoreArr(tile_dma_in_buffer[tileval])).getResult();
     Value sem_arr_out = builder.create<memref::GetGlobalOp>(loc, sem_mrtype, getChannelSemaphoreArr(tile_dma_out_buffer[tileval])).getResult();
 
     Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
-    Value cmpval = builder.create<arith::CmpIOp>(loc, arith::CmpIPredicate::eq, cst_0, inout).getResult();
+    Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
     Value ready_write = builder.create<arith::ConstantIndexOp>(loc, READY_TO_WRITE).getResult();
     Value ready_read = builder.create<arith::ConstantIndexOp>(loc, READY_TO_READ).getResult();
+    Value cmpval = builder.create<arith::CmpIOp>(loc, arith::CmpIPredicate::eq, cst_0, inout).getResult();
+
+    auto buildIfBlocks = [&] (OpBuilder b, Location loc, Value sem_arr, bool isIn) {
+      Value sem = builder.create<memref::LoadOp>(loc, sem_arr, SmallVector<Value>{channel}).getResult();
+      auto waitval = isIn ? ready_read : ready_write;
+      auto setval = isIn ? ready_write : ready_read;
+
+      //loops here
+      // generate for loops, save list of iterators, insertion point to innermost
+      SmallVector<Value> iterators;
+      for (auto size : dma_sizes) {
+        Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
+        auto forop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1);
+        iterators.push_back(forop.getInductionVar());
+        builder.setInsertionPointToStart(forop.getBody());
+      }
+
+      // create affine map w/ iterators to linearize index
+      AffineExpr indexexpr = builder.getAffineConstantExpr(dma_offset);
+      for (size_t i = 0; i < dma_sizes.size(); i++) {
+        auto stride = builder.getAffineConstantExpr(dma_strides[i]);
+        auto iter = builder.getAffineDimExpr(i);
+        indexexpr = indexexpr + (iter * stride);
+      }
+      AffineMap indexmap = AffineMap::get(iterators.size(), 0, indexexpr, context);
+      Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
+
+      // delinearize index
+      // auto getConstantVector
+      auto delinop = builder.create<affine::AffineDelinearizeIndexOp>(loc,
+          linearindex, op.getBuffer().getType().getShape());
+      ValueRange delinindices = delinop.getResults();
+
+      builder.create<SemaphoreWaitOp>(loc, sem, waitval);
+
+      if (isIn) {
+        Value dmaval = builder.create<memref::LoadOp>(loc, dmabufferin, cst_0).getResult();
+        builder.create<memref::StoreOp>(loc, dmaval, op.getBuffer(), delinindices);
+      }
+      else {
+        Value bufval = builder.create<memref::LoadOp>(loc, op.getBuffer(), delinindices);
+        builder.create<memref::StoreOp>(loc, bufval, dmabufferout, cst_0);
+      }
+
+      builder.create<SemaphoreSetOp>(loc, sem, setval);
+      b.create<scf::YieldOp>(loc, SmallVector<Value>{});
+    };
+
     builder.create<scf::IfOp>(loc, cmpval,
       // then block: handle copy out
       [&] (OpBuilder b, Location loc) {
-        Value outsem = builder.create<memref::LoadOp>(loc, sem_arr_out, SmallVector<Value>{channel}).getResult();
-        builder.create<SemaphoreWaitOp>(loc, outsem, ready_write);
-        b.create<memref::CopyOp>(loc, op.getBuffer(), casted_buffer_out);
-        builder.create<SemaphoreSetOp>(loc, outsem, ready_read);
-        b.create<scf::YieldOp>(loc, SmallVector<Value>{});
+        buildIfBlocks(b, loc, sem_arr_out, false);
       },
       // else block: handle copy in
       [&] (OpBuilder b, Location loc) {
-        Value insem = builder.create<memref::LoadOp>(loc, sem_arr_in, SmallVector<Value>{channel}).getResult();
-        builder.create<SemaphoreWaitOp>(loc, insem, ready_read);
-        b.create<memref::CopyOp>(loc, casted_buffer_in, op.getBuffer());
-        builder.create<SemaphoreSetOp>(loc, insem, ready_write);
-        b.create<scf::YieldOp>(loc, SmallVector<Value>{});
+        buildIfBlocks(b, loc, sem_arr_in, true);
       });
 
     op.erase();

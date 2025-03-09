@@ -36,6 +36,8 @@ int main(int argc, char **argv) {
 #endif
   mlir::registerAsyncParallelForPass();
   mlir::registerConvertAffineToStandard();
+  mlir::affine::registerAffineExpandIndexOps();
+
 
   mlir::DialectRegistry registry;
   registry.insert<
@@ -44,6 +46,7 @@ int main(int argc, char **argv) {
       mlir::math::MathDialect,
       mlir::affine::AffineDialect,
       mlir::scf::SCFDialect,
+      mlir::cf::ControlFlowDialect,
       mlir::func::FuncDialect,
       mlir::memref::MemRefDialect,
       mlir::async::AsyncDialect,

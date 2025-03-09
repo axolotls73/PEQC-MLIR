@@ -86,6 +86,9 @@ def VerifConvertChannel: Pass<"verif-air-convert-channel", "::mlir::ModuleOp"> {
 def VerifConvertAIE: Pass<"verif-convert-aie", "::mlir::ModuleOp"> {
   let summary = "Convert aie operations";
   let description = [{
+Converts (a subset of) AIE operations to standard dialects.
+
+To use in `verif-translate`, `--affine-expand-index-ops` and/or `--lower-affine` must be used to lower the introduced `affine` ops.
   }];
   let dependentDialects = [
     "arith::ArithDialect",
@@ -93,6 +96,7 @@ def VerifConvertAIE: Pass<"verif-convert-aie", "::mlir::ModuleOp"> {
     "func::FuncDialect",
     "scf::SCFDialect",
     "cf::ControlFlowDialect",
+    "affine::AffineDialect",
     "async::AsyncDialect",
     "verif::VerifDialect"
   ];

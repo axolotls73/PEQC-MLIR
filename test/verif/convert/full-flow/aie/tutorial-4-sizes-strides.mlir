@@ -14,11 +14,11 @@
 //
 //
 
-// taken from:
+// modified from:
 //https://github.com/Xilinx/mlir-aie/blob/8b908be190f3c2e497cbe5c1fef492ce34f8e290/mlir_tutorials/tutorial-4/flow/aie.mlir
 
 // RUN: split-file %s %t && \
-// RUN: verif-opt --verif-convert-aie --affine-expand-index-ops %t/input.mlir > %t/conversion.mlir && \
+// RUN: verif-opt --verif-convert-aie --affine-expand-index-ops --lower-affine %t/input.mlir > %t/conversion.mlir && \
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c
 // RUN: %add_epilogue %t/result.c %t/translation.c
 
@@ -34,8 +34,8 @@ module @tutorial_4 {
     %tile14 = aie.tile(1, 4)
     %tile34 = aie.tile(3, 4)
 
-    %buf14 = aie.buffer(%tile14) { sym_name = "a14" } : memref<256xi32>
-    %buf34 = aie.buffer(%tile34) { sym_name = "a34" } : memref<256xi32>
+    %buf14 = aie.buffer(%tile14) { sym_name = "a14" } : memref<128xi32>
+    %buf34 = aie.buffer(%tile34) { sym_name = "a34" } : memref<128xi32>
 
     %lock14_6 = aie.lock(%tile14, 6) { sym_name = "lock_a14_6" }
     %lock34_7 = aie.lock(%tile34, 7) { sym_name = "lock_a34_7" }
@@ -49,7 +49,7 @@ module @tutorial_4 {
 
 		%val = arith.constant 14 : i32
 		%idx = arith.constant 3 : index
-		memref.store %val, %buf14[%idx] : memref<256xi32>
+		memref.store %val, %buf14[%idx] : memref<128xi32>
 
         aie.use_lock(%lock14_6, "Release", 1)
         aie.end
@@ -59,7 +59,8 @@ module @tutorial_4 {
         aie.dma_start("MM2S", 0, ^bd0, ^end)
         ^bd0:
             aie.use_lock(%lock14_6, Acquire, 1)
-            aie.dma_bd(%buf14 : memref<256xi32>, 0, 256)
+            // aie.dma_bd(%buf14 : memref<128xi32>, 0, 128)
+            aie.dma_bd(%buf14 : memref<128xi32>, 0, 128, [<size = 16, stride =8>, <size = 4, stride =2>, <size = 2, stride =1>])
             aie.use_lock(%lock14_6, Release, 0)
             aie.next_bd ^end
         ^end:
@@ -72,11 +73,11 @@ module @tutorial_4 {
         aie.use_lock(%lock34_7, "Acquire", 1)
 
         %idx1 = arith.constant 3 : index
-        %d1   = memref.load %buf34[%idx1] : memref<256xi32>
+        %d1   = memref.load %buf34[%idx1] : memref<128xi32>
         %c1   = arith.constant 100 : i32
         %d2   = arith.addi %d1, %c1 : i32
 		%idx2 = arith.constant 5 : index
-		memref.store %d2, %buf34[%idx2] : memref<256xi32>
+		memref.store %d2, %buf34[%idx2] : memref<128xi32>
 
         aie.use_lock(%lock34_7, "Release", 0)
         aie.use_lock(%lock34_8, "Release", 1)
@@ -87,7 +88,7 @@ module @tutorial_4 {
         aie.dma_start("S2MM", 1, ^bd0, ^end)
         ^bd0:
             aie.use_lock(%lock34_7, Acquire, 0)
-            aie.dma_bd(%buf34 : memref<256xi32>, 0, 256)
+            aie.dma_bd(%buf34 : memref<128xi32>, 0, 128, [<size = 2, stride =64>, <size = 16, stride =4>, <size = 4, stride =1>])
             aie.use_lock(%lock34_7, Release, 1)
             aie.next_bd ^end
         ^end:
@@ -103,7 +104,7 @@ int* buffer_a14;
 int* buffer_a34;
 {
     buffer_a14[3] = 14;
-    for (int i = 0; i < 256; i++) {
+    for (int i = 0; i < 128; i++) {
         buffer_a34[i] = buffer_a14[i];
     }
     buffer_a34[5] = buffer_a34[3] + 100;
