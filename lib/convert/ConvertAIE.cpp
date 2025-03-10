@@ -169,7 +169,8 @@ private:
           (loc, MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type), flowarr).getResult();
 
       //init flow semaphore
-      Value sem = builder.create<SemaphoreOp>(loc);
+      Value sem = builder.create<SemaphoreOp>(loc,
+        IntegerAttr::get(IndexType::get(context), READY_TO_WRITE));
       auto sem_mrtype = MemRefType::get(SmallVector<int64_t>{DEFAULT_NUM_DMA_CHANNELS}, SemaphoreType::get(context));
 
       // store flowarr and semaphore in dma globals
@@ -204,18 +205,15 @@ private:
 
     auto builder = OpBuilder(op);
 
-    // create and initialize semaphore
-    auto loc = op.getLoc();
-    Value sem = builder.create<SemaphoreOp>(loc);
-
+    // create and initialize semaphore: default value is 0
+    int seminit = 0;
     auto init = op.getInit();
     if (init.has_value()) {
-      op.emitError("lockop init not supported");
-      return failure();
-      ///FIXME: implement this
-      // Value val = builder.create<arith::ConstantIndexOp>(loc, init.value());
-      // builder.create<SemaphoreSetOp>(loc, sem, val);
+      seminit = init.value();
     }
+    auto loc = op.getLoc();
+    Value sem = builder.create<SemaphoreOp>(loc,
+        IntegerAttr::get(IndexType::get(context), seminit));
 
     // create memref.global, store semaphore
     auto mrtype = MemRefType::get(SmallVector<int64_t>{1}, SemaphoreType::get(context));

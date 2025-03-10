@@ -17,7 +17,6 @@
 // REQUIRES: air
 // RUN: split-file %s %t
 // RUN: not verif-opt --verif-convert-aie %t/module-level.mlir
-// RUN: not verif-opt --verif-convert-aie %t/init.mlir
 
 
 //--- module-level.mlir
@@ -28,11 +27,4 @@ module {
     %lock14_6 = aie.lock(%tile14, 7)
     aie.end
   }
-}
-
-//--- init.mlir
-
-module {
-  %tile14 = aie.tile(1, 4)
-  %lock14_6 = aie.lock(%tile14, 7) { init = 42 : i32 }
 }
