@@ -193,6 +193,7 @@ class PastTranslator {
   // cf
 
   s_past_node_t* translate(cf::BranchOp op);
+  s_past_node_t* translate(cf::CondBranchOp op);
 
   // memref
 

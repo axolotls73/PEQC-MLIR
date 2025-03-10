@@ -875,6 +875,25 @@ s_past_node_t* PastTranslator::translate(cf::BranchOp op) {
       past_node_varref_create(getBlockSymbol(op.getDest()))));
 }
 
+s_past_node_t* PastTranslator::translate(cf::CondBranchOp op) {
+  if (op.getTrueDestOperands().size() > 0 || op.getFalseDestOperands().size() > 0) {
+    op.emitError("cf.cond_br with operands not supported");
+    exit(1);
+  }
+  NodeVec stmts;
+  stmts.push_back(past_node_if_create(
+    past_node_varref_create(getVarSymbol(op.getCondition())),
+    past_node_block_create(
+      past_node_statement_create(
+        past_node_keyword_create(e_past_keyword_goto,
+          past_node_varref_create(getBlockSymbol(op.getTrueDest()))))),
+    past_node_block_create(
+      past_node_statement_create(
+        past_node_keyword_create(e_past_keyword_goto,
+          past_node_varref_create(getBlockSymbol(op.getFalseDest())))))));
+  return nodeChain(stmts);
+}
+
 // memref
 
 void PastTranslator::generateNestedMemref
@@ -1276,6 +1295,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<cf::BranchOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<cf::CondBranchOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::AllocaOp>(op)) res = translate(o);
