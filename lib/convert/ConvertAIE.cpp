@@ -79,17 +79,17 @@ private:
       tile_id_map[op.getResult()] = tile_id;
 
       // infer type of dma buffer
-      auto memop = op.getMemOp();
+      Operation* memop = op.getMemOp().getOperation();
       Type elt_type = nullptr;
-      if (memop) {
-        auto walkres = memop.walk([&] (xilinx::AIE::DMABDOp op) {
+      for (auto user : op.getResult().getUsers()) {
+        auto walkres = user->walk([&] (xilinx::AIE::DMABDOp op) {
           auto buffertype = op.getBuffer().getType();
           if (!elt_type) {
             elt_type = buffertype.getElementType();
             return WalkResult::advance();
           }
-          if (elt_type != buffertype) {
-            memop.emitError("expected all aie.mem ops to only use buffers of a single type");
+          else if (elt_type != buffertype.getElementType()) {
+            memop->emitError("expected all aie.mem ops to only use buffers of a single type");
             return WalkResult::interrupt();
           }
           return WalkResult::advance();
@@ -98,7 +98,8 @@ private:
       }
 
       // default type if not inferred
-      if (!elt_type) elt_type = IndexType::get(context);
+      // if (!elt_type) elt_type = IndexType::get(context);
+      if (!elt_type) elt_type = IntegerType::get(context, 32);
 
       // create dma buffers
       ///TODO: do all this in a loop
@@ -153,7 +154,7 @@ private:
       Value dsttile = op.getDest();
       assert(tile_dma_out_buffer.count(srctile) && tile_dma_type.count(srctile));
       assert(tile_dma_in_buffer.count(dsttile) && tile_dma_type.count(dsttile));
-      if (tile_dma_type[srctile] != tile_dma_type[dsttile]) {
+      if (tile_dma_type[srctile].getElementType() != tile_dma_type[dsttile].getElementType()) {
         op.emitError("aie.flow: source and dest DMA buffers don't have the same type");
         return WalkResult::interrupt();
       }
@@ -197,11 +198,6 @@ private:
       llvm::errs() << "processing lock op: ";
       op.emitRemark();
     );
-
-    if (!dyn_cast<ModuleOp>(op.getOperation()->getParentOp())) {
-      op.emitError("expected aie.lock to have module parent");
-      return failure();
-    }
 
     auto builder = OpBuilder(op);
 

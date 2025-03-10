@@ -37,29 +37,29 @@ module {
     %lock_1_5_22 = aie.lock(%tile_1_5, 2) {init = 0 : i32}
     %lock_1_5_23 = aie.lock(%tile_1_5, 1) {init = 1 : i32}
     %lock_1_5_24 = aie.lock(%tile_1_5, 0) {init = 0 : i32}
-    %buf22 = aie.buffer(%tile_0_1) {sym_name = "buf22"} : memref<8x8xi32, 1> 
-    %buf21 = aie.buffer(%tile_0_1) {sym_name = "buf21"} : memref<8x16xi32, 1> 
-    %buf20 = aie.buffer(%tile_0_1) {sym_name = "buf20"} : memref<16x8xi32, 1> 
-    %buf19 = aie.buffer(%tile_1_5) {sym_name = "buf19"} : memref<4x4xi32, 2> 
-    %buf18 = aie.buffer(%tile_1_5) {sym_name = "buf18"} : memref<4x4xi32, 2> 
-    %buf17 = aie.buffer(%tile_1_5) {sym_name = "buf17"} : memref<4x4xi32, 2> 
-    %buf16 = aie.buffer(%tile_1_5) {sym_name = "buf16"} : memref<4x4xi32, 2> 
-    %buf15 = aie.buffer(%tile_1_5) {sym_name = "buf15"} : memref<4x4xi32, 2> 
-    %buf14 = aie.buffer(%tile_1_4) {sym_name = "buf14"} : memref<4x4xi32, 2> 
-    %buf13 = aie.buffer(%tile_1_4) {sym_name = "buf13"} : memref<4x4xi32, 2> 
-    %buf12 = aie.buffer(%tile_1_4) {sym_name = "buf12"} : memref<4x4xi32, 2> 
-    %buf11 = aie.buffer(%tile_1_4) {sym_name = "buf11"} : memref<4x4xi32, 2> 
-    %buf10 = aie.buffer(%tile_1_4) {sym_name = "buf10"} : memref<4x4xi32, 2> 
-    %buf9 = aie.buffer(%tile_1_3) {sym_name = "buf9"} : memref<4x4xi32, 2> 
-    %buf8 = aie.buffer(%tile_1_3) {sym_name = "buf8"} : memref<4x4xi32, 2> 
-    %buf7 = aie.buffer(%tile_1_3) {sym_name = "buf7"} : memref<4x4xi32, 2> 
-    %buf6 = aie.buffer(%tile_1_3) {sym_name = "buf6"} : memref<4x4xi32, 2> 
-    %buf5 = aie.buffer(%tile_1_3) {sym_name = "buf5"} : memref<4x4xi32, 2> 
-    %buf4 = aie.buffer(%tile_1_2) {sym_name = "buf4"} : memref<4x4xi32, 2> 
-    %buf3 = aie.buffer(%tile_1_2) {sym_name = "buf3"} : memref<4x4xi32, 2> 
-    %buf2 = aie.buffer(%tile_1_2) {sym_name = "buf2"} : memref<4x4xi32, 2> 
-    %buf1 = aie.buffer(%tile_1_2) {sym_name = "buf1"} : memref<4x4xi32, 2> 
-    %buf0 = aie.buffer(%tile_1_2) {sym_name = "buf0"} : memref<4x4xi32, 2> 
+    %buf22 = aie.buffer(%tile_0_1) {sym_name = "buf22"} : memref<8x8xi32, 1>
+    %buf21 = aie.buffer(%tile_0_1) {sym_name = "buf21"} : memref<8x16xi32, 1>
+    %buf20 = aie.buffer(%tile_0_1) {sym_name = "buf20"} : memref<16x8xi32, 1>
+    %buf19 = aie.buffer(%tile_1_5) {sym_name = "buf19"} : memref<4x4xi32, 2>
+    %buf18 = aie.buffer(%tile_1_5) {sym_name = "buf18"} : memref<4x4xi32, 2>
+    %buf17 = aie.buffer(%tile_1_5) {sym_name = "buf17"} : memref<4x4xi32, 2>
+    %buf16 = aie.buffer(%tile_1_5) {sym_name = "buf16"} : memref<4x4xi32, 2>
+    %buf15 = aie.buffer(%tile_1_5) {sym_name = "buf15"} : memref<4x4xi32, 2>
+    %buf14 = aie.buffer(%tile_1_4) {sym_name = "buf14"} : memref<4x4xi32, 2>
+    %buf13 = aie.buffer(%tile_1_4) {sym_name = "buf13"} : memref<4x4xi32, 2>
+    %buf12 = aie.buffer(%tile_1_4) {sym_name = "buf12"} : memref<4x4xi32, 2>
+    %buf11 = aie.buffer(%tile_1_4) {sym_name = "buf11"} : memref<4x4xi32, 2>
+    %buf10 = aie.buffer(%tile_1_4) {sym_name = "buf10"} : memref<4x4xi32, 2>
+    %buf9 = aie.buffer(%tile_1_3) {sym_name = "buf9"} : memref<4x4xi32, 2>
+    %buf8 = aie.buffer(%tile_1_3) {sym_name = "buf8"} : memref<4x4xi32, 2>
+    %buf7 = aie.buffer(%tile_1_3) {sym_name = "buf7"} : memref<4x4xi32, 2>
+    %buf6 = aie.buffer(%tile_1_3) {sym_name = "buf6"} : memref<4x4xi32, 2>
+    %buf5 = aie.buffer(%tile_1_3) {sym_name = "buf5"} : memref<4x4xi32, 2>
+    %buf4 = aie.buffer(%tile_1_2) {sym_name = "buf4"} : memref<4x4xi32, 2>
+    %buf3 = aie.buffer(%tile_1_2) {sym_name = "buf3"} : memref<4x4xi32, 2>
+    %buf2 = aie.buffer(%tile_1_2) {sym_name = "buf2"} : memref<4x4xi32, 2>
+    %buf1 = aie.buffer(%tile_1_2) {sym_name = "buf1"} : memref<4x4xi32, 2>
+    %buf0 = aie.buffer(%tile_1_2) {sym_name = "buf0"} : memref<4x4xi32, 2>
     %mem_1_5 = aie.mem(%tile_1_5) {
       %0 = aie.dma_start(S2MM, 0, ^bb1, ^bb7)
     ^bb1:  // 2 preds: ^bb0, ^bb2
@@ -422,6 +422,7 @@ module {
     %memtile_dma_0_1 = aie.memtile_dma(%tile_0_1) {
       %0 = aie.dma_start(S2MM, 0, ^bb1, ^bb21)
     ^bb1:  // 2 preds: ^bb0, ^bb1
+      //S2MM
       aie.use_lock(%lock_0_1_3, AcquireGreaterEqual, 2)
       aie.dma_bd(%buf21 : memref<8x16xi32, 1>, 0, 128) {task_id = 0 : i32}
       aie.use_lock(%lock_0_1_4, Release, 2)
@@ -439,6 +440,7 @@ module {
       %2 = aie.dma_start(S2MM, 2, ^bb6, ^bb3)
     ^bb6:  // 2 preds: ^bb5, ^bb6
       aie.use_lock(%lock_0_1, AcquireGreaterEqual, 1)
+      //S2MM, channel 2
       aie.dma_bd(%buf22 : memref<8x8xi32, 1>, 0, 16, [<size = 4, stride = 8>, <size = 4, stride = 1>]) {task_id = 0 : i32}
       aie.use_lock(%lock_0_1_0, Release, 1)
       aie.next_bd ^bb6
@@ -446,6 +448,7 @@ module {
       %3 = aie.dma_start(S2MM, 3, ^bb8, ^bb5)
     ^bb8:  // 2 preds: ^bb7, ^bb8
       aie.use_lock(%lock_0_1, AcquireGreaterEqual, 1)
+      //S2MM, channel 3
       aie.dma_bd(%buf22 : memref<8x8xi32, 1>, 32, 16, [<size = 4, stride = 8>, <size = 4, stride = 1>]) {task_id = 0 : i32}
       aie.use_lock(%lock_0_1_0, Release, 1)
       aie.next_bd ^bb8
@@ -453,6 +456,7 @@ module {
       %4 = aie.dma_start(S2MM, 4, ^bb10, ^bb7)
     ^bb10:  // 2 preds: ^bb9, ^bb10
       aie.use_lock(%lock_0_1, AcquireGreaterEqual, 1)
+      //S2MM, channel 4
       aie.dma_bd(%buf22 : memref<8x8xi32, 1>, 4, 16, [<size = 4, stride = 8>, <size = 4, stride = 1>]) {task_id = 0 : i32}
       aie.use_lock(%lock_0_1_0, Release, 1)
       aie.next_bd ^bb10
@@ -460,6 +464,7 @@ module {
       %5 = aie.dma_start(S2MM, 5, ^bb12, ^bb9)
     ^bb12:  // 2 preds: ^bb11, ^bb12
       aie.use_lock(%lock_0_1, AcquireGreaterEqual, 1)
+      //S2MM, channel 5
       aie.dma_bd(%buf22 : memref<8x8xi32, 1>, 36, 16, [<size = 4, stride = 8>, <size = 4, stride = 1>]) {task_id = 0 : i32}
       aie.use_lock(%lock_0_1_0, Release, 1)
       aie.next_bd ^bb12
@@ -467,6 +472,7 @@ module {
       %6 = aie.dma_start(MM2S, 0, ^bb14, ^bb11)
     ^bb14:  // 2 preds: ^bb13, ^bb14
       aie.use_lock(%lock_0_1_0, AcquireGreaterEqual, 4)
+      //MM2S, channel 0
       aie.dma_bd(%buf22 : memref<8x8xi32, 1>, 0, 64) {task_id = 0 : i32}
       aie.use_lock(%lock_0_1, Release, 4)
       aie.next_bd ^bb14
@@ -474,6 +480,7 @@ module {
       %7 = aie.dma_start(MM2S, 1, ^bb16, ^bb13)
     ^bb16:  // 2 preds: ^bb15, ^bb16
       aie.use_lock(%lock_0_1_4, AcquireGreaterEqual, 1)
+      //MM2S, channel 1
       aie.dma_bd(%buf21 : memref<8x16xi32, 1>, 0, 64, [<size = 4, stride = 4>, <size = 4, stride = 16>, <size = 4, stride = 1>]) {task_id = 0 : i32}
       aie.use_lock(%lock_0_1_3, Release, 1)
       aie.next_bd ^bb16
@@ -481,6 +488,7 @@ module {
       %8 = aie.dma_start(MM2S, 2, ^bb18, ^bb15)
     ^bb18:  // 2 preds: ^bb17, ^bb18
       aie.use_lock(%lock_0_1_4, AcquireGreaterEqual, 1)
+      //MM2S, channel 2
       aie.dma_bd(%buf21 : memref<8x16xi32, 1>, 64, 64, [<size = 4, stride = 4>, <size = 4, stride = 16>, <size = 4, stride = 1>]) {task_id = 0 : i32}
       aie.use_lock(%lock_0_1_3, Release, 1)
       aie.next_bd ^bb18
@@ -488,6 +496,7 @@ module {
       %9 = aie.dma_start(MM2S, 3, ^bb20, ^bb17)
     ^bb20:  // 2 preds: ^bb19, ^bb20
       aie.use_lock(%lock_0_1_2, AcquireGreaterEqual, 1)
+      //MM2S, channel 3
       aie.dma_bd(%buf20 : memref<16x8xi32, 1>, 0, 64, [<size = 16, stride = 8>, <size = 4, stride = 1>]) {task_id = 0 : i32}
       aie.use_lock(%lock_0_1_1, Release, 1)
       aie.next_bd ^bb20
@@ -495,6 +504,7 @@ module {
       %10 = aie.dma_start(MM2S, 4, ^bb22, ^bb19)
     ^bb22:  // 2 preds: ^bb21, ^bb22
       aie.use_lock(%lock_0_1_2, AcquireGreaterEqual, 1)
+      //MM2S, channel 4
       aie.dma_bd(%buf20 : memref<16x8xi32, 1>, 4, 64, [<size = 16, stride = 8>, <size = 4, stride = 1>]) {task_id = 0 : i32}
       aie.use_lock(%lock_0_1_1, Release, 1)
       aie.next_bd ^bb22

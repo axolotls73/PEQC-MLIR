@@ -48,10 +48,16 @@ namespace verif {
   LogicalResult translateToPast(Operation* op, llvm::raw_ostream &output, bool textOutput) {
     if (!isa<ModuleOp>(op)) {
       op->emitError("past translation: top-level operation must be a module");
+      return failure();
     }
 
     PastTranslator translator;
     s_past_node_t* res = translator.translate(op);
+
+    if (!res) {
+      op->emitError("past translation: empty module at exit");
+      return failure();
+    }
 
     ///TODO: find a better way to interface btwn FILE and ostream?
     char filename_buffer[L_tmpnam];

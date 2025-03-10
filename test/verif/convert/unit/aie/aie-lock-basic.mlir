@@ -30,6 +30,7 @@ module {
 // CHECK: [[SEMARR1:%.*]] = memref.get_global @[[SEMGLOBAL]]
 // CHECK: [[C01:%.*]] = arith.constant 0
 // CHECK: memref.store [[SEM1]], [[SEMARR1]][[[C01]]]
+// CHECK-NOT: aie.lock
   %lock14_6 = aie.lock(%tile14, 7) { init = 0 : i32 }
 
   aie.core(%tile14) {
