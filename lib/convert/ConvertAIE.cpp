@@ -498,22 +498,11 @@ private:
     return success();
   }
 
-  LogicalResult processDMA(xilinx::AIE::MemOp mem_op, Block* newblock) {
-    for (auto& o : mem_op.getOps()) {
-      if (!isa<
-          xilinx::AIE::DMAStartOp,
-          xilinx::AIE::UseLockOp,
-          xilinx::AIE::DMABDOp,
-          xilinx::AIE::NextBDOp,
-          xilinx::AIE::EndOp
-          >(o)) {
-        o.emitError("unsupported operation type in aie.mem");
-        return failure();
-      }
-    }
+  LogicalResult processDMA(Operation* mem_op, Block* newblock,
+        Region& body, Value tile) {
 
     // create a list of blocks to copy to each new function
-    auto& blocklist = mem_op.getBody().getBlocks();
+    auto& blocklist = body.getBlocks();
     auto blocks = SmallVector<Block*>();
     for (auto& block : blocklist) {
       blocks.push_back(&block);
@@ -524,7 +513,7 @@ private:
     auto& firstblockops = firstblock->getOperations();
     if (blocks.size() < 1 || firstblockops.size() != 1 ||
         !isa<xilinx::AIE::DMAStartOp>(firstblockops.front())) {
-      mem_op.emitError("expected aie.mem to start with aie.dma_start and have >1 block");
+      mem_op->emitError("expected aie.mem to start with aie.dma_start and have >1 block");
       return failure();
     }
     auto firststartop = dyn_cast<xilinx::AIE::DMAStartOp>(firstblockops.front());
@@ -533,15 +522,15 @@ private:
     // remove first block from list, since it doesn't need to be copied
     blocks.erase(&blocks.front());
 
-    auto loc = mem_op.getLoc();
+    auto loc = mem_op->getLoc();
 
     // each block gets its own new function of type (channel : index, channeldir : index) -> ()
     std::unordered_map<Block*, func::FuncOp> block_to_func;
 
     int block_id = 0;
-    assert(tile_id_map.count(mem_op.getTile()));
-    int64_t tile_id = tile_id_map[mem_op.getTile()];
-    mem_op.walk([&] (xilinx::AIE::DMAStartOp op) {
+    assert(tile_id_map.count(tile));
+    int64_t tile_id = tile_id_map[tile];
+    mem_op->walk([&] (xilinx::AIE::DMAStartOp op) {
       auto builder = OpBuilder(mem_op);
 
       for (auto block : {op.getDest(), op.getChain()}) {
@@ -635,7 +624,7 @@ private:
         assert(funcop.getArguments().size() == 2);
         Value channel = funcop.getArgument(0);
         Value inout = funcop.getArgument(1);
-        if (processDMABD(op, mem_op.getTile(), channel, inout).failed()) return WalkResult::interrupt();
+        if (processDMABD(op, tile, channel, inout).failed()) return WalkResult::interrupt();
         else return WalkResult::advance();
       });
       if (walkres.wasInterrupted()) return failure();
@@ -661,27 +650,38 @@ private:
   }
 
   LogicalResult processMem() {
-    auto res = module.walk([&] (xilinx::AIE::MemOp op) {
 
+    auto processMemOp = [&](Operation* op, Region& body, Value tile) {
       auto builder = OpBuilder(op);
       builder.setInsertionPointAfter(op);
-      auto asyncExec = builder.create<async::ExecuteOp>(op.getLoc(),
+      auto asyncExec = builder.create<async::ExecuteOp>(op->getLoc(),
           SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
           [&] (OpBuilder &b, Location loc, ValueRange v) {
-        b.create<async::YieldOp>(op.getLoc(), SmallVector<Value>{});
+        b.create<async::YieldOp>(op->getLoc(), SmallVector<Value>{});
       });
 
-      auto res = processDMA(op, asyncExec.getBody());
+      auto res = processDMA(op, asyncExec.getBody(),
+          body, tile);
       LLVM_DEBUG(
         module.emitRemark("module after dmaStartToAsync");
       );
       if (res.failed()) return WalkResult::interrupt();
 
-      op.erase();
-
+      op->erase();
       return WalkResult::advance();
+    };
+
+    auto res = module.walk([&] (xilinx::AIE::MemOp op) {
+      return processMemOp(op.getOperation(), op.getBody(), op.getTile());
     });
-    return res.wasInterrupted() ? failure() : success();
+    if (res.wasInterrupted()) return failure();
+
+    res = module.walk([&] (xilinx::AIE::MemTileDMAOp op) {
+      return processMemOp(op.getOperation(), op.getBody(), op.getTile());
+    });
+    if (res.wasInterrupted()) return failure();
+
+    return success();
   }
 
 public:
@@ -712,6 +712,12 @@ public:
     module.walk([] (xilinx::AIE::TileOp op) {
       op.erase();
       return WalkResult::advance();
+    });
+    // module.emitRemark();
+
+    module.walk([](xilinx::AIE::MemTileDMAOp op) {
+      op.emitError();
+      return WalkResult::interrupt();
     });
 
     return success();
