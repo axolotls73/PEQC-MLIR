@@ -401,9 +401,10 @@ s_past_node_t* PastTranslator::getPastSetSemaphore(s_symbol_t* semaphore, s_symb
       nodeChain(args)));
 }
 
-s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName) {
+s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName, s_past_node_t* initval) {
   NodeVec args = {
-    past_node_varref_create(semaphoreName)
+    past_node_varref_create(semaphoreName),
+    initval
   };
   return past_node_statement_create(
     past_node_funcall_create(
@@ -1133,7 +1134,9 @@ s_past_node_t* PastTranslator::translate(async::ExecuteOp op) {
   }
 
   // get semaphore value of token
-  nodes.push_back(getPastNewSemaphore(getVarSymbol(op.getToken(), "execute_token")));
+  nodes.push_back(getPastNewSemaphore(
+    getVarSymbol(op.getToken(), "execute_token"),
+    past_node_varref_create(getSymbol("PAST_TASK_INIT"))));
 
   // translate body, set semaphore to finished after
   body.push_back(translate(op.getBodyRegion()));
@@ -1214,7 +1217,9 @@ s_past_node_t* PastTranslator::translate(verif::SemaphoreOp op) {
   NodeVec nodes;
   nodes.push_back(past_node_statement_create(
     getVarDecl(op.getSem(), "verif_semaphore")));
-  nodes.push_back(getPastNewSemaphore(getVarSymbol(op.getSem())));
+  nodes.push_back(getPastNewSemaphore(
+    getVarSymbol(op.getSem()),
+    past_node_value_create_from_int(op.getInit().getInt())));
   return nodeChain(nodes);
 }
 
@@ -1378,8 +1383,6 @@ s_past_node_t* PastTranslator::translate(ModuleOp op) {
     assert(!res && mainFunction); // translate for funcops assigns mainFunction
     func.erase();
   }
-
-  op.emitRemark();
 
   auto body = translate(op.getRegion());
 

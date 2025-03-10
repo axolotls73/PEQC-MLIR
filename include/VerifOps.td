@@ -19,6 +19,7 @@
 include "VerifTypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
+include "mlir/IR/BuiltinAttributes.td"
 include "mlir/IR/CommonAttrConstraints.td"
 include "mlir/IR/OpBase.td"
 
@@ -34,8 +35,12 @@ Declares a new semaphore.
         Verif_SemaphoreType:$sem
     );
 
+    let arguments = (ins
+        Builtin_IntegerAttr:$init
+    );
+
     let assemblyFormat = [{
-        attr-dict
+        `(` $init `)` attr-dict
     }];
 }
 

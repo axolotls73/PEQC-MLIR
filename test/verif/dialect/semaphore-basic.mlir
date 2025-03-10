@@ -23,7 +23,7 @@
 //--- set.mlir
 
 module {
-    %1 = verif.semaphore
+    %1 = verif.semaphore(0 : index)
     %2 = arith.constant 2 : index
     verif.semaphore.set %1, %2
 }
@@ -31,7 +31,7 @@ module {
 //--- wait.mlir
 
 module {
-    %1 = verif.semaphore
+    %1 = verif.semaphore(0 : index)
     %2 = arith.constant 1 : index
     verif.semaphore.wait %1, %2
 }
@@ -40,7 +40,7 @@ module {
 
 module {
     %mr = memref.alloc() : memref<1x!verif.semaphore>
-    %1 = verif.semaphore
+    %1 = verif.semaphore(0 : index)
     %i = arith.constant 0 : index
     memref.store %1, %mr[%i] : memref<1x!verif.semaphore>
 }

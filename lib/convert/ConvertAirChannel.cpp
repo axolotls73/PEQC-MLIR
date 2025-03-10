@@ -156,8 +156,8 @@ void buildChannelInit(SmallVector<int64_t>& bsizes) {
     loop_iters.push_back(loop.getInductionVar());
     builder.setInsertionPointToStart(loop.getBody());
   }
-  Value semarr_init_sem = builder.create<SemaphoreOp>(loc).getResult();
-  builder.create<SemaphoreSetOp>(loc, semarr_init_sem, cst_0);
+  Value semarr_init_sem = builder.create<SemaphoreOp>(loc,
+      IntegerAttr::get(IndexType::get(context), READY_TO_PUT)).getResult();
   builder.create<memref::StoreOp>(loc, semarr_init_sem, channel_semarr, loop_iters);
   ///TODO: doesn't work bc we don't know the memref size
   // Value bufarr_init_mr = builder.create<memref::AllocOp>(loc, dynamic_elt_type);
