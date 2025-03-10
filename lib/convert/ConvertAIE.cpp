@@ -281,7 +281,7 @@ private:
   }
 
   LogicalResult processCores() {
-    auto res = module.walk([] (xilinx::AIE::CoreOp op) {
+    auto res = module.walk([&] (xilinx::AIE::CoreOp op) {
       LLVM_DEBUG(
         llvm::errs() << "processing core op: ";
         op.emitRemark();
@@ -291,18 +291,52 @@ private:
         return WalkResult::interrupt();
       }
 
+      // create func, copy ops
+
+      assert(tile_id_map.count(op.getTile()));
+      auto funcname = new std::string("tile_core_" + std::to_string(tile_id_map[op.getTile()]));
       auto builder = OpBuilder(op);
+      auto loc = op.getLoc();
+      auto functype = FunctionType::get(context, SmallVector<Type>{}, SmallVector<Type>{});
+      auto funcop = builder.create<func::FuncOp>(loc, StringRef(funcname->c_str()), functype);
+
+      IRMapping map;
+      for (auto& b : op.getBody().getBlocks()) {
+        Block* newblock;
+        if (!funcop.getBlocks().size()) {
+          newblock = funcop.addEntryBlock();
+        }
+        else {
+          newblock = funcop.addBlock();
+        }
+        map.map(&b, newblock);
+      }
+
+      for (auto [coreblock, funcblock] : llvm::zip_equal(op.getBody().getBlocks(), funcop.getBlocks())) {
+        builder.setInsertionPointToStart(&funcblock);
+        for (auto& o : coreblock.getOperations()) {
+          if (isa<xilinx::AIE::EndOp>(o)) {
+            builder.create<func::ReturnOp>(loc);
+            continue;
+          }
+          builder.clone(o, map);
+        }
+      }
+      auto& lastop = funcop.getBlocks().back().getOperations().back();
+      assert(lastop.hasTrait<OpTrait::IsTerminator>());
+      if (!isa<func::ReturnOp>(lastop)) {
+        builder.setInsertionPointToStart(funcop.addBlock());
+        builder.create<func::ReturnOp>(loc);
+      }
+
+      // create async, call func
+      builder.setInsertionPoint(op);
       builder.create<async::ExecuteOp>(op.getLoc(),
           SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
           [&] (OpBuilder &b, Location loc, ValueRange v) {
             IRMapping map;
-        for (auto& o : op.getBody().getOps()) {
-          if (isa<xilinx::AIE::EndOp>(o)) {
-            b.create<async::YieldOp>(loc, SmallVector<Value>{});
-            continue;
-          }
-          b.clone(o, map);
-        }
+        b.create<func::CallOp>(loc, funcop, SmallVector<Value>{});
+        b.create<async::YieldOp>(loc, SmallVector<Value>{});
       });
       op.erase();
 

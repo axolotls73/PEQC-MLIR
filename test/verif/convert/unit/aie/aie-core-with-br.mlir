@@ -1,6 +1,6 @@
 
 //
-// aie-core-basic.mlir: This file is part of the PEQC-MLIR project.
+// aie-core-with-br.mlir: This file is part of the PEQC-MLIR project.
 //
 // Copyright (C) 2024 Colorado State University
 //
@@ -21,20 +21,25 @@ module {
   %tile14 = aie.tile(1, 4)
 
 // CHECK: func.func
-// CHECK:   memref.alloc
+// CHECK:   arith.constant
+// CHECK:   cf.br ^[[BB:.*]]
+// CHECK: ^[[BB]]:
 // CHECK:   arith.constant
 // CHECK:   memref.store
+// CHECK:   cf.br ^[[BB]]
 // CHECK:   return
 
 // CHECK: async.execute
 // CHECK:   func.call
   aie.core(%tile14) {
-
+    %6 =  arith.constant 3 : index
+    cf.br ^bb
+  ^bb:
     %a = memref.alloc() : memref<1xindex>
     %i = arith.constant 0 : index
     memref.store %i, %a[%i] : memref<1xindex>
 
-    aie.end
+    cf.br ^bb
   }
 }
 
