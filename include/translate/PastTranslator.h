@@ -122,7 +122,7 @@ class PastTranslator {
   s_past_node_t* getPastWaitSemaphore(s_symbol_t* semaphore, s_symbol_t* val);
   s_past_node_t* getPastWaitSemaphoreAll(s_symbol_t* semaphore_arr, s_symbol_t* size, s_symbol_t* val);
   s_past_node_t* getPastSetSemaphore(s_symbol_t* semaphore, s_symbol_t* val);
-  s_past_node_t* getPastNewSemaphore(s_symbol_t* semaphoreName);
+  s_past_node_t* getPastNewSemaphore(s_symbol_t* semaphoreName, s_past_node_t* initval);
 
   s_past_node_t* wrapInAsyncBlock(s_past_node_t* node);
 
