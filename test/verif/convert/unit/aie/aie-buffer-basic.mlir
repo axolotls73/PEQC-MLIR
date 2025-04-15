@@ -32,7 +32,7 @@ module {
   memref.store %val, %buf[%0] : memref<5xi32>
 
 // use sym_name
-// CHECK: memref.global "private" @buffer_tile14_buf :
+// CHECK: memref.global "private" @aie_buffer_tile14_buf :
   %buf2 = aie.buffer(%tile14) { sym_name = "tile14_buf" } : memref<5xi32>
 }
 

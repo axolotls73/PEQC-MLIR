@@ -142,10 +142,14 @@ private:
       // declare global for flow buffer: flows are fifos of depth 1
       Type elt_type = tile_dma_elt_type[srctile];
       auto mrtype = MemRefType::get(SmallVector<int64_t>{1}, elt_type);
-      auto flowarr_name = new std::string("flow_" + std::to_string(tile_id_map[srctile]) + "_to_" + std::to_string(tile_id_map[dsttile]));
+      auto flowarr_name = new std::string("aie_flow_" + std::to_string(tile_id_map[srctile]) + "_to_" + std::to_string(tile_id_map[dsttile]));
       builder.create<memref::GlobalOp>(loc, StringAttr::get(context, flowarr_name->c_str()),
           StringAttr::get(context, "private"),TypeAttr::get(mrtype),
           Attribute{}, UnitAttr{}, IntegerAttr{});
+      LLVM_DEBUG(
+        llvm::errs() << "IN BUFFER ADD: channel " << dstchannel << " tile " << dsttile << "\n";
+        llvm::errs() << "OUT BUFFER ADD: channel " << srcchannel << " tile " << srctile << "\n";
+      );
       tile_dma_in_buffer_names[{dsttile, dstchannel}] = flowarr_name;
       tile_dma_out_buffer_names.insert({std::pair(srctile, srcchannel), flowarr_name});
 
@@ -153,6 +157,10 @@ private:
       Value sem = builder.create<SemaphoreOp>(loc,
         IntegerAttr::get(IndexType::get(context), READY_TO_WRITE));
       int semindex = current_global_sem_index++;
+      if (semindex >= DEFAULT_NUM_LOCKS_TOTAL) {
+        op.emitError("too many flow locks: increase DEFAULT_NUM_LOCKS_TOTAL in ConvertAIE.cpp");
+        return WalkResult::interrupt();
+      }
       auto semarr = builder.create<memref::GetGlobalOp>(loc, global_semaphore_array_type, *global_semaphore_array_name).getResult();
       Value semindexval = builder.create<arith::ConstantIndexOp>(loc, semindex).getResult();
       builder.create<memref::StoreOp>(loc, sem, semarr, SmallVector<Value>{semindexval});
@@ -185,7 +193,7 @@ private:
 
     // create memref.global, store semaphore
     auto mrtype = MemRefType::get(SmallVector<int64_t>{1}, SemaphoreType::get(context));
-    std::string semarr_name = "semaphore_arr_" + std::to_string(current_semaphore_id++);
+    std::string semarr_name = "aie_lock_semaphore_arr_" + std::to_string(current_semaphore_id++);
     builder.create<memref::GlobalOp>(loc, StringAttr::get(context, semarr_name),
         StringAttr::get(context, "private"),TypeAttr::get(mrtype),
         Attribute{}, UnitAttr{}, IntegerAttr{});
@@ -330,7 +338,7 @@ private:
       Value res = op.getResult();
       std::string bufferid = op.getSymName().has_value() ? op.getSymName().value().str()
           : std::to_string(current_buffer_id++);
-      std::string bufname = "buffer_" + bufferid;
+      std::string bufname = "aie_buffer_" + bufferid;
       builder.create<memref::GlobalOp>(op.getLoc(), StringAttr::get(context, bufname),
           StringAttr::get(context, "private"), TypeAttr::get(res.getType()),
           Attribute{}, UnitAttr{}, IntegerAttr{});
@@ -358,268 +366,141 @@ private:
     return res.wasInterrupted() ? failure() : success();
   }
 
-  // LogicalResult processDMABD_old(xilinx::AIE::DMABDOp op, Value tileval, Value channel, Value inout) {
-  //   auto builder = OpBuilder(op);
-  //   auto loc = op.getLoc();
-
-  //   auto dma_offset = op.getOffset();
-
-  //   // extract sizes and strides
-  //   SmallVector<int64_t> dma_sizes;
-  //   SmallVector<int64_t> dma_strides;
-
-  //   auto dims = op.getDimensions();
-  //   if (dims.has_value()) {
-  //     for (auto dim : dims.value()) {
-  //       dma_sizes.push_back(dim.getSize());
-  //       dma_strides.push_back(dim.getStride());
-  //     }
-  //   }
-  //   else {
-  //     // default size is the number of elements in the memref
-  //     MemRefType mrtype = op.getBuffer().getType();
-  //     int64_t size = 1;
-  //     for (auto d : mrtype.getShape()) {
-  //       size *= d;
-  //     }
-  //     dma_sizes.push_back(size);
-  //     // default stride is 1
-  //     dma_strides.push_back(1);
-  //   }
-
-  //   // get dma buffer for channel
-  //   assert(tileval);
-  //   assert(tile_dma_in_buffer_name.count(tileval));
-  //   assert(tile_dma_out_buffer_name.count(tileval));
-  //   assert(tile_dma_type.count(tileval));
-  //   Value buffer_in_global = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_in_buffer_name[tileval]).getResult();
-  //   Value buffer_out_global = builder.create<memref::GetGlobalOp>(loc, tile_dma_type[tileval], tile_dma_out_buffer_name[tileval]).getResult();
-  //   Value dmabufferin = builder.create<memref::LoadOp>(loc, buffer_in_global, SmallVector<Value>{channel}).getResult();
-  //   Value dmabufferout = builder.create<memref::LoadOp>(loc, buffer_out_global, SmallVector<Value>{channel}).getResult();
-
-  //   auto sem_mrtype = MemRefType::get(SmallVector<int64_t>{DEFAULT_NUM_DMA_CHANNELS}, SemaphoreType::get(context));
-  //   Value sem_arr_in = builder.create<memref::GetGlobalOp>(loc, sem_mrtype, getChannelSemaphoreArr(tile_dma_in_buffer_name[tileval])).getResult();
-  //   Value sem_arr_out = builder.create<memref::GetGlobalOp>(loc, sem_mrtype, getChannelSemaphoreArr(tile_dma_out_buffer_name[tileval])).getResult();
-
-  //   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
-  //   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
-  //   Value ready_write = builder.create<arith::ConstantIndexOp>(loc, READY_TO_WRITE).getResult();
-  //   Value ready_read = builder.create<arith::ConstantIndexOp>(loc, READY_TO_READ).getResult();
-  //   Value cmpval = builder.create<arith::CmpIOp>(loc, arith::CmpIPredicate::eq, cst_0, inout).getResult();
-
-  //   auto buildIfBlocks = [&] (OpBuilder b, Location loc, Value sem_arr, bool isIn) {
-  //     Value sem = builder.create<memref::LoadOp>(loc, sem_arr, SmallVector<Value>{channel}).getResult();
-  //     auto waitval = isIn ? ready_read : ready_write;
-  //     auto setval = isIn ? ready_write : ready_read;
-
-  //     //loops here
-  //     // generate for loops, save list of iterators, insertion point to innermost
-  //     SmallVector<Value> iterators;
-  //     for (auto size : dma_sizes) {
-  //       Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
-  //       auto forop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1);
-  //       iterators.push_back(forop.getInductionVar());
-  //       builder.setInsertionPointToStart(forop.getBody());
-  //     }
-
-  //     // create affine map w/ iterators to linearize index
-  //     AffineExpr indexexpr = builder.getAffineConstantExpr(dma_offset);
-  //     for (size_t i = 0; i < dma_sizes.size(); i++) {
-  //       auto stride = builder.getAffineConstantExpr(dma_strides[i]);
-  //       auto iter = builder.getAffineDimExpr(i);
-  //       indexexpr = indexexpr + (iter * stride);
-  //     }
-  //     AffineMap indexmap = AffineMap::get(iterators.size(), 0, indexexpr, context);
-  //     Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
-
-  //     // delinearize index
-  //     // auto getConstantVector
-  //     auto delinop = builder.create<affine::AffineDelinearizeIndexOp>(loc,
-  //         linearindex, op.getBuffer().getType().getShape());
-  //     ValueRange delinindices = delinop.getResults();
-
-  //     builder.create<SemaphoreWaitOp>(loc, sem, waitval);
-
-  //     if (isIn) {
-  //       Value dmaval = builder.create<memref::LoadOp>(loc, dmabufferin, cst_0).getResult();
-  //       builder.create<memref::StoreOp>(loc, dmaval, op.getBuffer(), delinindices);
-  //     }
-  //     else {
-  //       Value bufval = builder.create<memref::LoadOp>(loc, op.getBuffer(), delinindices);
-  //       builder.create<memref::StoreOp>(loc, bufval, dmabufferout, cst_0);
-  //     }
-
-  //     builder.create<SemaphoreSetOp>(loc, sem, setval);
-  //     b.create<scf::YieldOp>(loc, SmallVector<Value>{});
-  //   };
-
-  //   builder.create<scf::IfOp>(loc, cmpval,
-  //     // then block: handle copy out
-  //     [&] (OpBuilder b, Location loc) {
-  //       buildIfBlocks(b, loc, sem_arr_out, false);
-  //     },
-  //     // else block: handle copy in
-  //     [&] (OpBuilder b, Location loc) {
-  //       buildIfBlocks(b, loc, sem_arr_in, true);
-  //     });
-
-  //   op.erase();
-  //   return success();
-  // }
-
-  // LogicalResult processDMA_old(Operation* mem_op, Block* newblock,
-  //       Region& body, Value tile) {
-
-  //   // create a list of blocks to copy to each new function
-  //   auto& blocklist = body.getBlocks();
-  //   auto blocks = SmallVector<Block*>();
-  //   for (auto& block : blocklist) {
-  //     blocks.push_back(&block);
-  //   }
-
-  //   // want first block to only have aie.dma_start, and > 1 block total
-  //   auto& firstblock = blocks.front();
-  //   auto& firstblockops = firstblock->getOperations();
-  //   if (blocks.size() < 1 || firstblockops.size() != 1 ||
-  //       !isa<xilinx::AIE::DMAStartOp>(firstblockops.front())) {
-  //     mem_op->emitError("expected aie.mem to start with aie.dma_start and have >1 block");
-  //     return failure();
-  //   }
-  //   auto firststartop = dyn_cast<xilinx::AIE::DMAStartOp>(firstblockops.front());
-  //   assert(firststartop);
-
-  //   // remove first block from list, since it doesn't need to be copied
-  //   blocks.erase(&blocks.front());
-
-  //   auto loc = mem_op->getLoc();
-
-  //   // each block gets its own new function of type (channel : index, channeldir : index) -> ()
-  //   std::unordered_map<Block*, func::FuncOp> block_to_func;
-
-  //   int block_id = 0;
-  //   assert(tile_id_map.count(tile));
-  //   int64_t tile_id = tile_id_map[tile];
-  //   mem_op->walk([&] (xilinx::AIE::DMAStartOp op) {
-  //     auto builder = OpBuilder(mem_op);
-
-  //     for (auto block : {op.getDest(), op.getChain()}) {
-
-  //       //get or build func for block
-  //       func::FuncOp func = nullptr;
-  //       auto mapres = block_to_func.find(block);
-  //       if (mapres != block_to_func.end()) {
-  //         func = mapres->second;
-  //       }
-  //       else {
-  //         auto funcname = new std::string("tile_mem_" + std::to_string(tile_id) + "_" + std::to_string(block_id++));
-  //         // ^ leaked
-  //         auto functype = FunctionType::get(context,
-  //             SmallVector<Type>{IndexType::get(context), IndexType::get(context)}, SmallVector<Type>{});
-  //         builder.setInsertionPoint(mem_op);
-  //         auto funcop = builder.create<func::FuncOp>(loc, StringRef(funcname->c_str()), functype);
-  //         block_to_func[block] = funcop;
-  //         func = funcop;
-  //       }
-
-  //       // add calls to funcs
-  //       auto loc = op.getLoc();
-  //       builder.setInsertionPoint(op);
-  //       // first start op is the entry point: put inside new async
-  //       if (op == firststartop) {
-  //         builder.setInsertionPointToStart(newblock);
-  //       }
-
-  //       if (block == op.getChain()) {
-  //         auto asyncExec = builder.create<async::ExecuteOp>(loc,
-  //             SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
-  //           [&](OpBuilder &b, Location loc, ValueRange v) {
-  //             b.create<async::YieldOp>(loc, SmallVector<Value>{});
-  //           });
-  //         builder.setInsertionPointToStart(asyncExec.getBody());
-  //       }
-  //       // channeldir is 1 if copy in, 0 if copy out
-  //       int channeldir = op.getChannelDir() == xilinx::AIE::DMAChannelDir::S2MM;
-  //       Value channelval = builder.create<arith::ConstantIndexOp>(loc, op.getChannelIndex()).getResult();
-  //       Value dirval = builder.create<arith::ConstantIndexOp>(loc, channeldir).getResult();
-  //       builder.create<func::CallOp>(loc, func, SmallVector<Value>{channelval, dirval});
-  //     }
-
-  //     op.erase();
-  //     return WalkResult::advance();
-  //   });
-
-  //   for (auto [dstblock, funcop] : block_to_func) {
-  //     Block* entryblock = funcop.addEntryBlock();
-  //     auto builder = OpBuilder(funcop);
-  //     auto loc = funcop.getLoc();
-
-  //     // map corresponding blocks, clone all ops
-  //     IRMapping map;
-  //     auto funcblocks = SmallVector<Block*>();
-  //     for (Block* block : blocks) {
-  //       auto newblock = funcop.addBlock();
-  //       map.map(block, newblock);
-  //       funcblocks.push_back(newblock);
-  //     }
-  //     for (auto [memblock, funcblock] : llvm::zip_equal(blocks, funcblocks)) {
-  //       builder.setInsertionPointToStart(funcblock);
-  //       for (auto& o : memblock->getOperations()) {
-  //         builder.clone(o, map);
-  //       }
-  //     }
-
-  //     // add branch to block
-  //     builder.setInsertionPointToStart(entryblock);
-  //     builder.create<cf::BranchOp>(loc, map.lookupOrNull(dstblock));
-
-  //     // add return to the last block in funcop
-  //     Block* endblock = funcop.addBlock();
-  //     builder.setInsertionPointToStart(endblock);
-  //     builder.create<func::ReturnOp>(loc);
-
-  //     // newly replaced dma_start blocks have no terminators, replace
-  //     // with a branch to endblock
-  //     for (auto& b : funcop.getBlocks()) {
-  //       assert(b.getOperations().size() > 0);
-  //       auto lastop = b.getOperations().end();
-  //       lastop--;
-  //       if (lastop->hasTrait<OpTrait::IsTerminator>()) continue;
-  //       builder.setInsertionPointToEnd(&b);
-  //       builder.create<cf::BranchOp>(funcop.getLoc(), endblock);
-  //     }
-
-  //     // handle dma_bd ops
-  //     auto walkres = funcop.walk([&] (xilinx::AIE::DMABDOp op) {
-  //       assert(funcop.getArguments().size() == 2);
-  //       Value channel = funcop.getArgument(0);
-  //       Value inout = funcop.getArgument(1);
-  //       if (processDMABD_old(op, tile, channel, inout).failed()) return WalkResult::interrupt();
-  //       else return WalkResult::advance();
-  //     });
-  //     if (walkres.wasInterrupted()) return failure();
-
-  //     // replace all aie.end ops with a branch to return
-  //     funcop.walk([&] (xilinx::AIE::EndOp op) {
-  //       builder.setInsertionPoint(op);
-  //       builder.create<cf::BranchOp>(op.getLoc(), endblock);
-  //       op.erase();
-
-  //       return WalkResult::advance();
-  //     });
-
-  //     // replace aie.next_bd with cf.br
-  //     funcop.walk([&] (xilinx::AIE::NextBDOp op) {
-  //       builder.setInsertionPoint(op);
-  //       builder.create<cf::BranchOp>(op.getLoc(), op.getDest());
-  //       op.erase();
-  //     });
-  //   }
-
-  //   return success();
-  // }
-
-
   LogicalResult processDMABD(xilinx::AIE::DMABDOp op, Value tile, int32_t channel, xilinx::AIE::DMAChannelDir dir) {
+    auto builder = OpBuilder(op);
+    auto loc = op.getLoc();
+
+    auto dma_offset = op.getOffset();
+
+    // extract sizes and strides
+    SmallVector<int64_t> dma_sizes;
+    SmallVector<int64_t> dma_strides;
+
+    auto dims = op.getDimensions();
+    if (dims.has_value()) {
+      for (auto dim : dims.value()) {
+        dma_sizes.push_back(dim.getSize());
+        dma_strides.push_back(dim.getStride());
+      }
+    }
+    else {
+      // default size is the number of elements in the memref
+      MemRefType mrtype = op.getBuffer().getType();
+      int64_t size = 1;
+      for (auto d : mrtype.getShape()) {
+        size *= d;
+      }
+      dma_sizes.push_back(size);
+      // default stride is 1
+      dma_strides.push_back(1);
+    }
+
+    // get buffers and sems to store or load
+    Value sem_arr;
+    SmallVector<Value> dma_buffers;
+    SmallVector<Value> sems;
+    auto buftype = MemRefType::get(SmallVector<int64_t>{1}, tile_dma_elt_type[tile]);
+    auto semarr = builder.create<memref::GetGlobalOp>(loc, global_semaphore_array_type, *global_semaphore_array_name).getResult();
+    switch (dir) {
+      case xilinx::AIE::DMAChannelDir::MM2S: {
+        assert(tile_dma_out_buffer_names.count({tile, channel}) && tile_dma_out_semaphore_indices.count({tile, channel}));
+
+        for (auto [iter, end] = tile_dma_out_buffer_names.equal_range({tile, channel}); iter != end; ++iter) {
+          Value outbuf = builder.create<memref::GetGlobalOp>(loc, buftype, *(iter->second)).getResult();
+          dma_buffers.push_back(outbuf);
+        }
+        for (auto [iter, end] = tile_dma_out_semaphore_indices.equal_range({tile, channel}); iter != end; ++iter) {
+          Value outsemindex = builder.create<arith::ConstantIndexOp>(loc, iter->second);
+          Value outsem = builder.create<memref::LoadOp>(loc, semarr, outsemindex);
+          sems.push_back(outsem);
+        }
+        break;
+      }
+
+      case xilinx::AIE::DMAChannelDir::S2MM: {
+        assert(tile_dma_in_buffer_names.count({tile, channel}) && tile_dma_in_semaphore_indices.count({tile, channel}));
+
+        Value inbuf = builder.create<memref::GetGlobalOp>(loc,
+              buftype, *tile_dma_in_buffer_names[{tile, channel}]).getResult();
+        dma_buffers.push_back(inbuf);
+
+        Value insemindex = builder.create<arith::ConstantIndexOp>(loc, tile_dma_in_semaphore_indices[{tile, channel}]);
+        Value insem = builder.create<memref::LoadOp>(loc, semarr, insemindex);
+        sems.push_back(insem);
+        break;
+      }
+    }
+
+    Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
+    Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
+    Value ready_write = builder.create<arith::ConstantIndexOp>(loc, READY_TO_WRITE).getResult();
+    Value ready_read = builder.create<arith::ConstantIndexOp>(loc, READY_TO_READ).getResult();
+
+    auto waitval = dir == xilinx::AIE::DMAChannelDir::S2MM ? ready_read : ready_write;
+    auto setval = dir == xilinx::AIE::DMAChannelDir::S2MM ? ready_write : ready_read;
+
+    for (auto [dma_buffer, sem] : llvm::zip_equal(dma_buffers, sems)) {
+
+      // if more than one: wrap all in async
+      async::ExecuteOp asyncExec = nullptr;
+      if (dma_buffers.size() > 1) {
+        asyncExec = builder.create<async::ExecuteOp>(op.getLoc(),
+            SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
+            [&] (OpBuilder &b, Location loc, ValueRange v) {
+              IRMapping map;
+          b.create<async::YieldOp>(loc, SmallVector<Value>{});
+        });
+        builder.setInsertionPointToStart(asyncExec.getBody());
+      }
+
+      // generate for loops, save list of iterators, insertion point to innermost
+      SmallVector<Value> iterators;
+      for (auto size : dma_sizes) {
+        Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
+        auto forop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1);
+        iterators.push_back(forop.getInductionVar());
+        builder.setInsertionPointToStart(forop.getBody());
+      }
+
+      // create affine map w/ iterators to linearize index
+      AffineExpr indexexpr = builder.getAffineConstantExpr(dma_offset);
+      for (size_t i = 0; i < dma_sizes.size(); i++) {
+        auto stride = builder.getAffineConstantExpr(dma_strides[i]);
+        auto iter = builder.getAffineDimExpr(i);
+        indexexpr = indexexpr + (iter * stride);
+      }
+      AffineMap indexmap = AffineMap::get(iterators.size(), 0, indexexpr, context);
+      Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
+
+      // delinearize index
+      // auto getConstantVector
+      auto delinop = builder.create<affine::AffineDelinearizeIndexOp>(loc,
+          linearindex, op.getBuffer().getType().getShape());
+      ValueRange delinindices = delinop.getResults();
+
+      // store or load
+      builder.create<SemaphoreWaitOp>(loc, sem, waitval);
+      switch (dir) {
+        case xilinx::AIE::DMAChannelDir::MM2S: {
+          Value bufval = builder.create<memref::LoadOp>(loc, op.getBuffer(), delinindices);
+          builder.create<memref::StoreOp>(loc, bufval, dma_buffer, cst_0);
+          break;
+        }
+        case xilinx::AIE::DMAChannelDir::S2MM: {
+          Value dmaval = builder.create<memref::LoadOp>(loc, dma_buffer, cst_0).getResult();
+          builder.create<memref::StoreOp>(loc, dmaval, op.getBuffer(), delinindices);
+          break;
+        }
+      }
+      builder.create<SemaphoreSetOp>(loc, sem, setval);
+
+      // move insertion point after async if exists
+      if (asyncExec) {
+        builder.setInsertionPointAfter(asyncExec);
+      }
+    }
+
+    op.erase();
     return success();
   }
 
@@ -682,11 +563,12 @@ private:
     }
 
     // handle dma_bd
-    funcop.walk([&] (xilinx::AIE::DMABDOp dmaop) {
+    auto dmares = funcop.walk([&] (xilinx::AIE::DMABDOp dmaop) {
       if (processDMABD(dmaop, tile, op.getChannelIndex(), op.getChannelDir()).failed())
         return WalkResult::interrupt();
       return WalkResult::advance();
     });
+    if (dmares.wasInterrupted()) return failure();
 
     return success();
   }
@@ -745,10 +627,10 @@ public:
     LogicalResult res = processTiles();
     if (res.failed()) return failure();
 
-    res = processMem();
+    res = processFlows();
     if (res.failed()) return failure();
 
-    res = processFlows();
+    res = processMem();
     if (res.failed()) return failure();
 
     res = processLocks();

@@ -14,7 +14,6 @@
 //
 //
 
-//XFAIL:*
 // taken from:
 //https://github.com/Xilinx/mlir-aie/blob/8b908be190f3c2e497cbe5c1fef492ce34f8e290/mlir_tutorials/tutorial-4/flow/aie.mlir
 
