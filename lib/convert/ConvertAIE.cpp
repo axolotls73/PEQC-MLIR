@@ -650,9 +650,11 @@ private:
   }
 
 
+  LogicalResult processDMABD(xilinx::AIE::DMABDOp op, Value tile) {
+    return success();
+  }
 
-
-  LogicalResult processDMAStartOp(xilinx::AIE::DMAStartOp op, Operation* memop, int dmaindex, Region& membody, Value tile) {
+  LogicalResult processDMAStartOp(xilinx::AIE::DMAStartOp op, Operation* memop, int dmaindex, Value tile) {
     auto loc = op.getLoc();
 
     // create function: async.execute can only have one block so have to put the blocks in a function then call it
@@ -710,11 +712,18 @@ private:
       }
     }
 
+    // handle dma_bd
+    funcop.walk([&] (xilinx::AIE::DMABDOp op) {
+      if (processDMABD(op, tile).failed())
+        return WalkResult::interrupt();
+      return WalkResult::advance();
+    });
+
     return success();
   }
 
   LogicalResult processMem() {
-    auto processMemOp = [&](Operation* op, Region& body, Value tile) {
+    auto processMemOp = [&](Operation* op, Value tile) {
       assert(tile_id_map.count(tile));
 
       // this assumes that dma_start ops are sane, i.e. that all of them will be visited
@@ -722,7 +731,7 @@ private:
       ///TODO: check for this/traverse them in chain order
       int dmaindex = 0;
       auto res = op->walk([&] (xilinx::AIE::DMAStartOp dmaop) {
-        if (processDMAStartOp(dmaop, op, dmaindex++, body, tile).failed())
+        if (processDMAStartOp(dmaop, op, dmaindex++, tile).failed())
           return WalkResult::interrupt();
         return WalkResult::advance();
       });
@@ -736,12 +745,12 @@ private:
     };
 
     auto res = module.walk([&] (xilinx::AIE::MemOp op) {
-      return processMemOp(op.getOperation(), op.getBody(), op.getTile());
+      return processMemOp(op.getOperation(), op.getTile());
     });
     if (res.wasInterrupted()) return failure();
 
     res = module.walk([&] (xilinx::AIE::MemTileDMAOp op) {
-      return processMemOp(op.getOperation(), op.getBody(), op.getTile());
+      return processMemOp(op.getOperation(), op.getTile());
     });
     if (res.wasInterrupted()) return failure();
 
@@ -776,12 +785,6 @@ public:
     module.walk([] (xilinx::AIE::TileOp op) {
       op.erase();
       return WalkResult::advance();
-    });
-    // module.emitRemark();
-
-    module.walk([](xilinx::AIE::MemTileDMAOp op) {
-      op.emitError();
-      return WalkResult::interrupt();
     });
 
     return success();

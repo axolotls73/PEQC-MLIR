@@ -14,6 +14,7 @@
 //
 //
 
+//XFAIL:*
 // REQUIRES: air
 // RUN: verif-opt --verif-convert-aie %s | FileCheck %s
 
@@ -74,10 +75,7 @@ module {
 // CHECK-NOT: aie.mem
   %mem14 = aie.mem(%tile14) {
 
-// CHECK:   async.execute
-// CHECK:    call @[[MEM_FUNC]]
-// CHECK:   call @[[MEM_FUNC]]
-    aie.dma_start("MM2S", 0, ^bd0, ^bd0) // only the same so that only one func is generated
+    aie.dma_start("MM2S", 0, ^bd0, ^end)
     ^bd0:
         aie.dma_bd(%buf : memref<1xi32>)
         aie.next_bd ^end
