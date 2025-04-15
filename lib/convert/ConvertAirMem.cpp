@@ -56,10 +56,10 @@ public:
     SmallVector<Value> src_strides, dst_strides;
     ///FIXME: verify correct strides
     auto cst1 = rewriter.create<arith::ConstantIndexOp>(loc, 1).getResult();
-    for (int i = 0; i < op.getSrcOffsets().size(); i++) {
+    for (size_t i = 0; i < op.getSrcOffsets().size(); i++) {
       src_strides.push_back(cst1);
     }
-    for (int i = 0; i < op.getDstOffsets().size(); i++) {
+    for (size_t i = 0; i < op.getDstOffsets().size(); i++) {
       dst_strides.push_back(cst1);
     }
 

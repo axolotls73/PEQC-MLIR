@@ -1,6 +1,6 @@
 
 //
-// aie-flow-basic.mlir: This file is part of the PEQC-MLIR project.
+// aie-flow-broadcast.mlir: This file is part of the PEQC-MLIR project.
 //
 // Copyright (C) 2024 Colorado State University
 //
@@ -22,16 +22,31 @@ module {
 
 // CHECK-NOT: aie.tile
   %tile14 = aie.tile(1, 4)
+
 // CHECK-NOT: aie.tile
   %tile34 = aie.tile(3, 4)
 
-// CHECK: memref.global "private" @[[FLOW_ARRAY:.*]] :
-// CHECK: [[SEM:%.*]] = verif.semaphore
-// CHECK: [[SEM_GLOBAL:%.*]] = memref.get_global @[[GLOBAL_SEM_ARRAY:.*]]
+// CHECK-NOT: aie.tile
+  %tile24 = aie.tile(2, 4)
+
+
+// CHECK: memref.global "private" @[[FLOW_ARRAY_1:.*]] :
+// CHECK: [[SEM_1:%.*]] = verif.semaphore
+// CHECK: [[SEM_GLOBAL_1:%.*]] = memref.get_global @[[GLOBAL_SEM_ARRAY:.*]]
 // CHECK: [[C0:%.*]] = arith.constant 0
-// CHECK: memref.store [[SEM]], [[SEM_GLOBAL]][[[C0]]]
+// CHECK: memref.store [[SEM_1]], [[SEM_GLOBAL_1]][[[C0]]]
 
 // CHECK-NOT: aie.flow
   aie.flow(%tile14, DMA: 0, %tile34, DMA:1)
+
+
+// CHECK: memref.global "private" @[[FLOW_ARRAY_2:.*]] :
+// CHECK: [[SEM_2:%.*]] = verif.semaphore
+// CHECK: [[SEM_GLOBAL_2:%.*]] = memref.get_global @[[GLOBAL_SEM_ARRAY:.*]]
+// CHECK: [[C1:%.*]] = arith.constant 1
+// CHECK: memref.store [[SEM_2]], [[SEM_GLOBAL_2]][[[C1]]]
+
+// CHECK-NOT: aie.flow
+  aie.flow(%tile14, DMA: 0, %tile24, DMA:1)
 }
 
