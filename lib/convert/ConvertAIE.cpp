@@ -512,6 +512,7 @@ private:
     auto builder = OpBuilder(memop);
     auto functype = FunctionType::get(context, SmallVector<Type>{}, SmallVector<Type>{});
     auto funcop = builder.create<func::FuncOp>(loc, StringRef(funcname->c_str()), functype);
+    Block* entryblock = funcop.addEntryBlock();
 
     // create async and function call
     auto asyncExec = builder.create<async::ExecuteOp>(loc,
@@ -542,6 +543,9 @@ private:
       }
       currentblock = currentblock->getSuccessor(0);
     }
+    assert(funcblocks.size() > 0);
+    builder.setInsertionPointToStart(entryblock);
+    builder.create<cf::BranchOp>(loc, funcblocks[0]);
     Block* endblock = funcop.addBlock();
     builder.setInsertionPointToStart(endblock);
     builder.create<func::ReturnOp>(loc);
