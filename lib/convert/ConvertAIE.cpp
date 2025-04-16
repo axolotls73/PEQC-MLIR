@@ -654,6 +654,21 @@ public:
       return WalkResult::advance();
     });
 
+    // remove aie.device -- assuming there's only one
+    ///TODO: can I just move these somehow instead of copying...
+    auto dbuilder = OpBuilder(module);
+    dbuilder.setInsertionPointToStart(module.getBody());
+    IRMapping map;
+    module.walk([&] (xilinx::AIE::DeviceOp device) {
+      for (auto& op : device.getBody()->getOperations()) {
+        if (isa<xilinx::AIE::EndOp>(op)) // these get added sometimes?
+          continue;
+        dbuilder.clone(op, map);
+      }
+      device.erase();
+      return WalkResult::interrupt();
+    });
+
     return success();
   }
 
