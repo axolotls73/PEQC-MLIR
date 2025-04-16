@@ -142,7 +142,9 @@ private:
       // declare global for flow buffer: flows are fifos of depth 1
       Type elt_type = tile_dma_elt_type[srctile];
       auto mrtype = MemRefType::get(SmallVector<int64_t>{1}, elt_type);
-      auto flowarr_name = new std::string("aie_flow_" + std::to_string(tile_id_map[srctile]) + "_to_" + std::to_string(tile_id_map[dsttile]));
+      auto flowarr_name = new std::string("aie_flow_" +
+          std::to_string(tile_id_map[srctile]) + "ch" + std::to_string(srcchannel) + "_to_" +
+          std::to_string(tile_id_map[dsttile]) + "ch" + std::to_string(dstchannel));
       builder.create<memref::GlobalOp>(loc, StringAttr::get(context, flowarr_name->c_str()),
           StringAttr::get(context, "private"),TypeAttr::get(mrtype),
           Attribute{}, UnitAttr{}, IntegerAttr{});
