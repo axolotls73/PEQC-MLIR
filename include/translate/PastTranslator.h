@@ -239,7 +239,7 @@ class PastTranslator {
   s_past_node_t* translate(verif::SemaphoreOp op);
   s_past_node_t* translate(verif::SemaphoreSetOp op);
   s_past_node_t* translate(verif::SemaphoreWaitOp op);
-
+  s_past_node_t* translate(verif::UndefOp op);
   // returns a linked list of the translation of the contained blocks'
   // operations, chained
   s_past_node_t* translate(Region& region);

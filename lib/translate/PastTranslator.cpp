@@ -1256,6 +1256,20 @@ s_past_node_t* PastTranslator::translate(verif::SemaphoreWaitOp op) {
   return nodeChain(nodes);
 }
 
+s_past_node_t* PastTranslator::translate(verif::UndefOp op) {
+  if (op.getNumResults() > 0) {
+    llvm::errs() << "warning: verif.undef results unused\n";
+  }
+  NodeVec args;
+  for (auto a : op.getArgs()) {
+    args.push_back(past_node_varref_create(getVarSymbol(a)));
+  }
+  return past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol(op.getName().str().c_str())),
+      nodeChain(args)));
+}
+
 s_past_node_t* PastTranslator::translate(Operation* op) {
   s_past_node_t* res;
   if (auto o = dyn_cast<ModuleOp>(op)) res = translate(o);
@@ -1320,6 +1334,8 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<verif::SemaphoreOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<verif::SemaphoreSetOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<verif::SemaphoreWaitOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<verif::UndefOp>(op)) res = translate(o);
+
   else {
     if (!allow_unsupported_ops) {
       op->emitError("verif-translate: unknown operation");
