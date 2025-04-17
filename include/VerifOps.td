@@ -78,6 +78,22 @@ Blocking wait on semaphore `sem` until it is assigned the value `val`.
     }];
 }
 
+def Verif_UndefOp : Verif_Op<"undef", [
+        ]> {
+    let summary = "";
+    let description = [{
+    }];
+
+    let arguments = (ins
+        StrAttr:$name,
+        Variadic<AnyType>:$args
+    );
+
+    let results = (outs
+        Variadic<AnyType>:$results
+    );
+}
+
 
 // from llvm/mlir/include/mlir/Dialect/MemRef/IR/MemRefOps.td
 /// A TypeAttr for memref types.
