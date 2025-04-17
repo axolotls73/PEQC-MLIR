@@ -47,14 +47,20 @@ class PastTranslator {
 
   public:
 
+  PastTranslator(bool allow_unsupported_ops, bool declare_variables, bool all_arrays_global):
+      allow_unsupported_ops(allow_unsupported_ops),
+      declare_variables(declare_variables),
+      all_arrays_global(all_arrays_global)
+      {};
+
   s_past_node_t* translate(Operation* op);
 
   private:
 
   //options
-  bool declare_variables = true;
-  bool all_arrays_global = false;
-  bool allow_unsupported_ops = false;
+  bool allow_unsupported_ops;
+  bool declare_variables;
+  bool all_arrays_global;
 
   symbol_table_t* symbolTable = symbol_table_malloc();
   std::unordered_map<Value, s_symbol_t*> valueNames;

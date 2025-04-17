@@ -45,13 +45,15 @@ namespace mlir {
 namespace verif {
 
 
-  LogicalResult translateToPast(Operation* op, llvm::raw_ostream &output, bool textOutput) {
+  LogicalResult translateToPast(Operation* op, llvm::raw_ostream &output,
+      bool allow_unsupported_ops, bool declare_variables, bool all_arrays_global) {
+
     if (!isa<ModuleOp>(op)) {
       op->emitError("past translation: top-level operation must be a module");
       return failure();
     }
 
-    PastTranslator translator;
+    PastTranslator translator(allow_unsupported_ops, declare_variables, all_arrays_global);
     s_past_node_t* res = translator.translate(op);
 
     if (!res) {
@@ -83,10 +85,27 @@ namespace verif {
 
 int main(int argc, char **argv) {
 
+  static llvm::cl::opt<bool> allow_unsupported_ops(
+      "verif-allow-unsupported-ops",
+      llvm::cl::desc(""),
+      llvm::cl::init(false));
+
+  static llvm::cl::opt<bool> declare_variables(
+      "verif-declare-variables",
+      llvm::cl::desc(""),
+      llvm::cl::init(true));
+
+  static llvm::cl::opt<bool> all_arrays_global(
+      "verif-all-arrays-global",
+      llvm::cl::desc(""),
+      llvm::cl::init(false));
+
+
   mlir::TranslateFromMLIRRegistration withdescription(
       "translate-to-past", "Translate supported operations to interpretable C",
       [](mlir::Operation *op, llvm::raw_ostream &output) {
-        return mlir::verif::translateToPast(op, output, true);
+        return mlir::verif::translateToPast(op, output,
+            allow_unsupported_ops, declare_variables, all_arrays_global);
       },
       [](mlir::DialectRegistry &registry) {
           registry.insert<
