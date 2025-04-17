@@ -1187,48 +1187,23 @@ s_past_node_t* PastTranslator::translate(LLVM::UndefOp op) {
 s_past_node_t* PastTranslator::translate_unsupported(Operation* op) {
   assert(op);
 
-  // print op: use generic form to make it easy to find region
-  std::string s;
-  llvm::raw_string_ostream stream(s);
-  op->print(stream, OpPrintingFlags().printGenericOpForm());
-  LLVM_DEBUG (
-    llvm::errs() << "unsupported op: " << s << "\n";
-  );
-
-  // remove op's region, which will be translated separately
-  auto first = s.find("({");
-  if (first != std::string::npos) {
-    auto last = s.rfind("})");
-    assert(last != std::string::npos);
-    s.erase(first, last);
-  }
-  // overflows, thank you c++
-  // std::regex region(R"(\(\{(.|\n)*\}\))", std::regex::multiline);
-  // s = std::regex_replace(s, region, "");
-  std::regex quote(R"(")");
-  s = std::regex_replace(s, quote, "");
-
-  ///TODO: figure out how strings work...
-  s = "\"" + s + "\"";
-  char* str = (char*)malloc((s.size() + 1) * sizeof(char));
-  strcpy(str, s.c_str());
+  std::regex rep("[. ]");
+  std::string opname = std::regex_replace(op->getName().getIdentifier().str(), rep, "_");
 
   NodeVec nodes;
-  // declare results of operation so future uses are ok
-  for (auto res : op->getResults()) {
-    nodes.push_back(past_node_statement_create(
-      past_node_varref_create(getVarSymbol(res))));
+  NodeVec args;
+  for (auto a : op->getOperands()) {
+    args.push_back(past_node_varref_create(getVarSymbol(a)));
   }
-
   nodes.push_back(past_node_statement_create(
-    past_node_varref_create(getSymbol(str))));
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol(opname)),
+      nodeChain(args))));
+
   for (auto &r : op->getRegions()) {
     nodes.push_back(past_node_block_create(
       translate(r)));
   }
-  LLVM_DEBUG (
-    llvm::errs() << "unsupported op done\n";
-  );
   return nodeChain(nodes);
 }
 
