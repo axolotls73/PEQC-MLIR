@@ -206,43 +206,112 @@ private:
     // convert use_lock ops to semaphore wait and set
     for (auto& use : op.getResult().getUses()) {
       auto uop = use.getOwner();
-      if (auto useop = dyn_cast<xilinx::AIE::UseLockOp>(uop)) {
-        LLVM_DEBUG(
-          llvm::errs() << "processing use_lock op: ";
-          useop.emitRemark();
-        );
-        if (useop.getBlocking() == xilinx::AIE::LockBlocking::NonBlocking) {
-          useop.emitError("non-blocking locks not supported");
-          return failure();
-        }
-        auto useval = useop.getValue();
-        if (!useval.has_value()) {
-          useop.emitError("use_lock must have value");
-          return failure();
-        }
+      auto useop = dyn_cast<xilinx::AIE::UseLockOp>(uop);
+      assert(useop);
+      LLVM_DEBUG(
+        llvm::errs() << "processing use_lock op: ";
+        useop.emitRemark();
+      );
 
-        builder.setInsertionPoint(useop);
-        Value semarr = builder.create<memref::GetGlobalOp>(loc, mrtype, semarr_name).getResult();
-        Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0);
-        Value sem = builder.create<memref::LoadOp>(loc, semarr, SmallVector<Value>{cst_0}).getResult();
-        auto loc = useop.getLoc();
-        Value val = builder.create<arith::ConstantIndexOp>(loc, useval.value());
-        switch (useop.getAction()) {
-          case xilinx::AIE::LockAction::Acquire:
-            builder.create<SemaphoreWaitOp>(loc, sem, val);
-            break;
-          case xilinx::AIE::LockAction::Release:
-            builder.create<SemaphoreSetOp>(loc, sem, val);
-            break;
-          case xilinx::AIE::LockAction::AcquireGreaterEqual:
-            useop.emitError("aie.use_lock must use Acquire or Release");
-            return failure();
-        }
-        useop.erase();
+      builder.setInsertionPoint(useop);
+      Value semarr = builder.create<memref::GetGlobalOp>(loc, mrtype, semarr_name).getResult();
+      Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0);
+      Value sem = builder.create<memref::LoadOp>(loc, semarr, SmallVector<Value>{cst_0}).getResult();
+      auto loc = useop.getLoc();
+      Value val = builder.create<arith::ConstantIndexOp>(loc, useop.getValue().value());
+      switch (useop.getAction()) {
+        case xilinx::AIE::LockAction::Acquire:
+          builder.create<SemaphoreWaitOp>(loc, sem, val);
+          break;
+        case xilinx::AIE::LockAction::Release:
+          builder.create<SemaphoreSetOp>(loc, sem, val);
+          break;
+        case xilinx::AIE::LockAction::AcquireGreaterEqual:
+          useop.emitError("aie.use_lock must use Acquire or Release");
+          return failure();
       }
+      useop.erase();
     }
     op.erase();
     return success();
+  }
+
+  // MOSTLY JUST COPIED FROM ABOVE FOR NOW
+  LogicalResult processCountingLock(xilinx::AIE::LockOp op) {
+    auto builder = OpBuilder(op);
+
+    // create and initialize semaphore: default value is 0
+    int seminit = 0;
+    auto init = op.getInit();
+    if (init.has_value()) {
+      seminit = init.value();
+    }
+    auto loc = op.getLoc();
+    Value sem = builder.create<SemaphoreOp>(loc,
+        IntegerAttr::get(IndexType::get(context), seminit));
+
+    // create memref.global, store semaphore
+    auto mrtype = MemRefType::get(SmallVector<int64_t>{1}, SemaphoreType::get(context));
+    std::string semarr_name = "aie_lock_semaphore_arr_" + std::to_string(current_semaphore_id++);
+    builder.create<memref::GlobalOp>(loc, StringAttr::get(context, semarr_name),
+        StringAttr::get(context, "private"),TypeAttr::get(mrtype),
+        Attribute{}, UnitAttr{}, IntegerAttr{});
+    Value semarr = builder.create<memref::GetGlobalOp>(loc, mrtype, semarr_name).getResult();
+    Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0);
+    builder.create<memref::StoreOp>(loc, sem, semarr, SmallVector<Value>{cst_0});
+
+    // convert use_lock ops to semaphore wait and set
+    for (auto& use : op.getResult().getUses()) {
+      auto uop = use.getOwner();
+      auto useop = dyn_cast<xilinx::AIE::UseLockOp>(uop);
+      assert(useop);
+      LLVM_DEBUG(
+        llvm::errs() << "processing use_lock op: ";
+        useop.emitRemark();
+      );
+
+      builder.setInsertionPoint(useop);
+      Value semarr = builder.create<memref::GetGlobalOp>(loc, mrtype, semarr_name).getResult();
+      Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0);
+      Value sem = builder.create<memref::LoadOp>(loc, semarr, SmallVector<Value>{cst_0}).getResult();
+      auto loc = useop.getLoc();
+      Value val = builder.create<arith::ConstantIndexOp>(loc, useop.getValue().value());
+      switch (useop.getAction()) {
+        case xilinx::AIE::LockAction::Release:
+          builder.create<UndefOp>(loc, SmallVector<Type>{}, "COUNTING_SEMAPHORE_RELEASE", SmallVector<Value>{sem, val});
+          break;
+        case xilinx::AIE::LockAction::AcquireGreaterEqual:
+          builder.create<UndefOp>(loc, SmallVector<Type>{}, "COUNTING_SEMAPHORE_ACQUIRE", SmallVector<Value>{sem, val});
+          break;
+        case xilinx::AIE::LockAction::Acquire:
+          assert(0);
+      }
+      useop.erase();
+    }
+    op.erase();
+    return success();
+    // SmallVector<xilinx::AIE::UseLockOp> acquires;
+    // SmallVector<xilinx::AIE::UseLockOp> releases;
+    // for (auto& use : op.getResult().getUses()) {
+    //   auto useop = dyn_cast<xilinx::AIE::UseLockOp>(use.getOwner());
+    //   assert(useop);
+    //   switch(useop.getAction()) {
+    //     case xilinx::AIE::LockAction::AcquireGreaterEqual:
+    //       acquires.push_back(useop);
+    //       break;
+    //     case xilinx::AIE::LockAction::Release:
+    //       releases.push_back(useop);
+    //       break;
+    //     case xilinx::AIE::LockAction::Acquire:
+    //       useop.emitError("all acquires of counting semaphores must be AcquireGreaterEqual");
+    //       return failure();
+    //   }
+    // }
+    // if (releases.size() == 1 && acquires.size() > 1) {
+
+    // }
+    // else if (releases.size() >= 1 && acquires.size() >= 1)
+    // return failure();
   }
 
   LogicalResult processLocks() {
@@ -254,7 +323,51 @@ private:
     });
 
     for (auto & op : lockops) {
-      if (processLock(op).failed()) return failure();
+
+      for (auto& use : op.getResult().getUses()) {
+        auto uop = use.getOwner();
+        auto useop = dyn_cast<xilinx::AIE::UseLockOp>(uop);
+        if (!useop) {
+          uop->emitError("only use_lock ops supported as users of locks");
+          return failure();
+        }
+        if (useop.getBlocking() == xilinx::AIE::LockBlocking::NonBlocking) {
+          useop.emitError("non-blocking locks not supported");
+          return failure();
+        }
+        auto useval = useop.getValue();
+        if (!useval.has_value()) {
+          useop.emitError("use_lock must have value");
+          return failure();
+        }
+      }
+
+      // figure out whether semaphores are counting or not,
+      // assumes only one aie.device op
+      bool counting = false;
+      module.walk([&] (xilinx::AIE::DeviceOp op) {
+        switch (op.getTargetModel().getTargetArch()) {
+          case xilinx::AIE::AIEArch::AIE1:
+            counting = false;
+            break;
+          case xilinx::AIE::AIEArch::AIE2:
+            counting = true;
+            break;
+          case xilinx::AIE::AIEArch::AIE2p:
+            counting = true;
+            break;
+        }
+        return WalkResult::interrupt();
+      });
+
+      LogicalResult res = failure();
+      if (!counting) {
+        res = processLock(op);
+      }
+      else {
+        res = processCountingLock(op);
+      }
+      if (res.failed()) return failure();
     }
     return success();
   }
