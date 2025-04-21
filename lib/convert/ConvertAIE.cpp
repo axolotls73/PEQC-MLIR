@@ -619,7 +619,7 @@ private:
     return success();
   }
 
-  LogicalResult processDMAStartOp(xilinx::AIE::DMAStartOp op, Operation* memop, int dmaindex, Value tile) {
+  std::optional<func::FuncOp> getDMAStartOpFunc(xilinx::AIE::DMAStartOp op, Operation* memop, int dmaindex, Value tile) {
     auto loc = op.getLoc();
 
     // create function: async.execute can only have one block so have to put the blocks in a function then call it
@@ -628,15 +628,6 @@ private:
     auto functype = FunctionType::get(context, SmallVector<Type>{}, SmallVector<Type>{});
     auto funcop = builder.create<func::FuncOp>(loc, StringRef(funcname->c_str()), functype);
     Block* entryblock = funcop.addEntryBlock();
-
-    // create async and function call
-    auto asyncExec = builder.create<async::ExecuteOp>(loc,
-        SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
-        [&] (OpBuilder &b, Location loc, ValueRange v) {
-      b.create<func::CallOp>(loc, funcop, SmallVector<Value>{});
-      b.create<async::YieldOp>(loc, SmallVector<Value>{});
-    });
-    builder.setInsertionPointToStart(asyncExec.getBody());
 
     // get blocks to copy
     IRMapping map;
@@ -654,7 +645,7 @@ private:
       if (currentblock->getNumSuccessors() == 0) break;
       if (currentblock->getNumSuccessors() > 1) {
         op.emitError("dma block with more than one successor");
-        return failure();
+        return {};
       }
       currentblock = currentblock->getSuccessor(0);
     }
@@ -687,24 +678,43 @@ private:
         return WalkResult::interrupt();
       return WalkResult::advance();
     });
-    if (dmares.wasInterrupted()) return failure();
+    if (dmares.wasInterrupted()) return {};
 
-    return success();
+    return funcop;
   }
 
   LogicalResult processMem() {
     auto processMemOp = [&](Operation* op, Value tile) {
       assert(tile_id_map.count(tile));
 
+      SmallVector<func::FuncOp> memfuncs;
+
       // this assumes that dma_start ops are sane, i.e. that all of them will be visited
       // and that the chain eventually terminates in aie.end
       ///TODO: check for this/traverse them in chain order
       int dmaindex = 0;
       auto res = op->walk([&] (xilinx::AIE::DMAStartOp dmaop) {
-        if (processDMAStartOp(dmaop, op, dmaindex++, tile).failed())
+        std::optional<func::FuncOp> funcres = getDMAStartOpFunc(dmaop, op, dmaindex++, tile);
+        if (!funcres.has_value())
           return WalkResult::interrupt();
+        memfuncs.push_back(funcres.value());
         return WalkResult::advance();
       });
+
+      for (auto func : memfuncs) {
+        OpBuilder builder(func);
+        builder.setInsertionPointAfter(func);
+
+        // create async and function call
+        builder.create<async::ExecuteOp>(func.getLoc(),
+            SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
+            [&] (OpBuilder &b, Location loc, ValueRange v) {
+          b.create<func::CallOp>(loc, func, SmallVector<Value>{});
+          b.create<async::YieldOp>(loc, SmallVector<Value>{});
+        });
+      }
+
+
       LLVM_DEBUG(
         module.emitRemark("module after dmaStartToAsync");
       );
