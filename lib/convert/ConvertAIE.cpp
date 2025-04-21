@@ -518,7 +518,10 @@ private:
     auto semarr = builder.create<memref::GetGlobalOp>(loc, global_semaphore_array_type, *global_semaphore_array_name).getResult();
     switch (dir) {
       case xilinx::AIE::DMAChannelDir::MM2S: {
-        assert(tile_dma_out_buffer_names.count({tile, channel}) && tile_dma_out_semaphore_indices.count({tile, channel}));
+        if (!tile_dma_out_buffer_names.count({tile, channel}) ||
+            !tile_dma_out_semaphore_indices.count({tile, channel})) {
+          op.emitError("no flow operation corresponding to channel");
+        }
 
         for (auto [iter, end] = tile_dma_out_buffer_names.equal_range({tile, channel}); iter != end; ++iter) {
           Value outbuf = builder.create<memref::GetGlobalOp>(loc, buftype, *(iter->second)).getResult();
@@ -533,7 +536,10 @@ private:
       }
 
       case xilinx::AIE::DMAChannelDir::S2MM: {
-        assert(tile_dma_in_buffer_names.count({tile, channel}) && tile_dma_in_semaphore_indices.count({tile, channel}));
+        if (!tile_dma_in_buffer_names.count({tile, channel}) ||
+            !tile_dma_in_semaphore_indices.count({tile, channel})) {
+          op.emitError("no flow operation corresponding to channel");
+        }
 
         Value inbuf = builder.create<memref::GetGlobalOp>(loc,
               buftype, *tile_dma_in_buffer_names[{tile, channel}]).getResult();
