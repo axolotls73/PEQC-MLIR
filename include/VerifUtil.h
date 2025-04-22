@@ -36,4 +36,19 @@ struct pair_hash {
   }
 };
 
+struct pair_value_comparator {
+  bool operator()(const std::pair<mlir::Value, mlir::Value>& lhs,
+                  const std::pair<mlir::Value, mlir::Value>& rhs) const {
+      void* lhs_ptr = lhs.first.getAsOpaquePointer();
+      void* rhs_ptr = rhs.first.getAsOpaquePointer();
+      if (lhs_ptr != rhs_ptr) {
+          return lhs_ptr < rhs_ptr;
+      }
+
+      lhs_ptr = lhs.second.getAsOpaquePointer();
+      rhs_ptr = rhs.second.getAsOpaquePointer();
+      return lhs_ptr < rhs_ptr;
+  }
+};
+
 #endif // VERIF_VERIFUTIL_H

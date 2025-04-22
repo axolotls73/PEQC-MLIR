@@ -697,6 +697,178 @@ private:
     return funcop;
   }
 
+  LogicalResult processCountSemProducerConsumers(func::FuncOp producer, SmallVector<func::FuncOp>& consumers, Value lock_pr_begin, Value lock_pr_end) {
+    // continue to check producer/consumers for validity
+
+    auto checkUseUnique = [] (xilinx::AIE::UseLockOp op,
+        Value beginlock, Value endlock,
+        xilinx::AIE::UseLockOp& beginop, xilinx::AIE::UseLockOp& endop) {
+      if (op.getLock() == beginlock) {
+        if (!beginop) {
+          beginop = op;
+        }
+        else return WalkResult::interrupt();
+      }
+      else if (op.getLock() == endlock) {
+        if (!endop) {
+          endop = op;
+        }
+        else return WalkResult::interrupt();
+      }
+      return WalkResult::advance();
+    };
+
+    xilinx::AIE::UseLockOp pr_beginop = nullptr;
+    xilinx::AIE::UseLockOp pr_endop = nullptr;
+    int32_t prval;
+
+    auto prodres = producer.walk([&] (xilinx::AIE::UseLockOp op) {
+      prval = op.getValue().value();
+      return checkUseUnique(op, lock_pr_begin, lock_pr_end, pr_beginop, pr_endop);
+    });
+    if (!pr_beginop || !pr_endop) return failure();
+    if (prodres.wasInterrupted()) return failure();
+    if (prval != (int32_t)consumers.size()) return failure();
+
+    SmallVector<xilinx::AIE::UseLockOp> c_uselocks;
+    for (auto c : consumers) {
+      xilinx::AIE::UseLockOp c_beginop = nullptr;
+      xilinx::AIE::UseLockOp c_endop = nullptr;
+      auto res = c.walk([&] (xilinx::AIE::UseLockOp op) {
+        return checkUseUnique(op, lock_pr_end, lock_pr_begin, c_beginop, c_endop);
+      });
+      if (!c_beginop || !c_endop) return failure();
+      if (res.wasInterrupted()) return failure();
+      c_uselocks.push_back(c_beginop);
+      c_uselocks.push_back(c_endop);
+    }
+
+    // producers and consumers are valid, rewrite
+
+    LLVM_DEBUG(
+      llvm::errs() << "PRODUCER/CONSUMER MATCH: \n  producer: " << producer.getName() << "\n  consumers: ";
+      for (auto c : consumers) {
+        llvm::errs() << c.getName() << " ";
+      }
+      llvm::errs() << "\n";
+    );
+
+
+    auto prbuilder = OpBuilder(pr_endop);
+    auto& pr_mainblock = *std::next(producer.getBlocks().begin());
+    prbuilder.setInsertionPoint(&pr_mainblock.getOperations().back());
+    pr_beginop.erase();
+    pr_endop.erase();
+
+    for (auto o : c_uselocks) {
+      o.erase();
+    }
+
+    // remove consumers' loops, add async call to producer, remove consumer from
+    for (auto c : consumers) {
+      auto& c_mainblock = *std::next(c.getBlocks().begin());
+      auto cbuilder = OpBuilder(&c_mainblock.getOperations().back());
+      cbuilder.create<cf::BranchOp>(c.getLoc(), &c.getBlocks().back()); // last block in function returns
+      c.emitWarning();
+      c_mainblock.getOperations().back().erase(); // cf.br, checked before
+
+      auto asyncExec = prbuilder.create<async::ExecuteOp>(c.getLoc(),
+          SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
+          [&] (OpBuilder &b, Location loc, ValueRange v) {
+        b.create<func::CallOp>(loc, c, SmallVector<Value>{});
+        b.create<async::YieldOp>(loc, SmallVector<Value>{});
+      });
+      prbuilder.setInsertionPointAfter(asyncExec);
+    }
+
+    return success();
+  }
+
+  void convertCountingSemaphorePatternToSpawn(SmallVector<func::FuncOp>& memfuncs) {
+    std::multimap<std::pair<Value, Value>, func::FuncOp, pair_value_comparator> candidate_producers;
+    std::multimap<std::pair<Value, Value>, func::FuncOp, pair_value_comparator> candidate_consumers;
+
+    // add funcs to respective maps if they match pattern
+    for (auto func : memfuncs) {
+      if (func.getBlocks().size() < 3) continue;
+      // entry block branches to block 1
+      ///TODO: check again?
+      auto& mainblock = *std::next(func.getBlocks().begin());
+
+      Value lock_begin = nullptr;
+      int32_t lockval_begin;
+      Value lock_end = nullptr;
+      int32_t lockval_end;
+      size_t opi = 0;
+      for (auto& op : mainblock.getOperations()) {
+        if (opi == 0) {
+          auto lockop = dyn_cast<xilinx::AIE::UseLockOp>(op);
+          if (!lockop || !lockop.getValue().has_value()) continue;
+          lock_begin = lockop.getLock();
+          lockval_begin = lockop.getValue().value();
+        }
+        // second to last op: release(lock_end)
+        if (opi == mainblock.getOperations().size() - 2) {
+          auto lockop = dyn_cast<xilinx::AIE::UseLockOp>(op);
+          if (!lockop || !lockop.getValue().has_value()) continue;
+          lock_end = lockop.getLock();
+          lockval_end = lockop.getValue().value();
+        }
+        // last op: br to block
+        if (opi == mainblock.getOperations().size() - 1) {
+          auto brop = dyn_cast<cf::BranchOp>(op);
+          if (!brop || brop.getDest() != &mainblock) continue;
+        }
+        opi++;
+      }
+
+      if (opi < 3) continue;
+      if (!lock_begin || !lock_end) continue;
+      if (lock_begin == lock_end || lockval_begin != lockval_end) continue;
+
+      if (lockval_begin == 1) {
+        candidate_consumers.insert({std::pair<Value, Value>{lock_begin, lock_end}, func});
+      }
+      else {
+        candidate_producers.insert({std::pair<Value, Value>{lock_begin, lock_end}, func});
+      }
+    }
+    if (candidate_producers.size() == 0) return;
+
+    auto it = candidate_producers.begin();
+    while (it != candidate_producers.end()) {
+      auto [lock_begin, lock_end] = it->first;
+      LLVM_DEBUG(
+        llvm::errs() << "== PRODUCER ==\n  begin: " << lock_begin << "\n  end: " << lock_end << "\n";
+      );
+
+      auto range = candidate_producers.equal_range({lock_begin, lock_end});
+
+      auto [locks, prodfunc] = *(range.first);
+      // unique producer: only process these
+      if (++range.first == range.second) {
+        auto crange = candidate_consumers.equal_range({lock_end, lock_begin});
+        SmallVector<func::FuncOp> consumers;
+        for (auto i = crange.first; i != crange.second; ++i) {
+          consumers.push_back(i->second);
+        }
+        if (!consumers.empty()) {
+          auto res = processCountSemProducerConsumers(prodfunc, consumers, lock_begin, lock_end);
+          if (res.succeeded()) {
+            // remove consumers from list so they don't have async execute ops added
+            for (auto c : consumers) {
+              auto it = llvm::find(memfuncs, c);
+              assert(it);
+              memfuncs.erase(it);
+            }
+          }
+        }
+      }
+
+      it = range.second;
+    }
+  }
+
   LogicalResult processMemOp(Operation* op, Value tile) {
     assert(tile_id_map.count(tile));
 
@@ -717,6 +889,8 @@ private:
     });
     if (res.wasInterrupted()) return failure();
 
+    convertCountingSemaphorePatternToSpawn(memfuncs);
+
     // convert dma_bd ops
     for (auto& [funcname, dmaop] : functostart) {
       auto funcop = lookupSymbol<func::FuncOp>(funcname);
@@ -728,10 +902,6 @@ private:
         return WalkResult::advance();
       });
       if (dmares.wasInterrupted()) return failure();
-    }
-
-    for (auto func: memfuncs) {
-      func.emitRemark();
     }
 
     for (auto func : memfuncs) {
@@ -747,9 +917,6 @@ private:
       });
     }
 
-    LLVM_DEBUG(
-      module.emitRemark("module after dmaStartToAsync");
-    );
     if (res.wasInterrupted()) return failure();
 
     op->erase();
