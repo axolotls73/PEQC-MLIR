@@ -88,6 +88,12 @@ private:
     return module.lookupSymbol<T>(name);
   }
 
+  std::string getTileStr(Value tile) {
+    auto tileop = dyn_cast<xilinx::AIE::TileOp>(tile.getDefiningOp());
+    assert(tileop);
+    return std::to_string(tileop.getCol()) + "_" + std::to_string(tileop.getRow());
+  }
+
 
   // assign each tile value a unique id, remove tile ops
   LogicalResult processTiles() {
@@ -155,8 +161,8 @@ private:
       Type elt_type = tile_dma_elt_type[srctile];
       auto mrtype = MemRefType::get(SmallVector<int64_t>{1}, elt_type);
       auto flowarr_name = new std::string("aie_flow_" +
-          std::to_string(tile_id_map[srctile]) + "ch" + std::to_string(srcchannel) + "_to_" +
-          std::to_string(tile_id_map[dsttile]) + "ch" + std::to_string(dstchannel));
+          getTileStr(srctile) + "ch" + std::to_string(srcchannel) + "_to_" +
+          getTileStr(dsttile) + "ch" + std::to_string(dstchannel));
       builder.create<memref::GlobalOp>(loc, StringAttr::get(context, flowarr_name->c_str()),
           StringAttr::get(context, "private"),TypeAttr::get(mrtype),
           Attribute{}, UnitAttr{}, IntegerAttr{});
@@ -396,7 +402,7 @@ private:
       // create func, copy ops
 
       assert(tile_id_map.count(op.getTile()));
-      auto funcname = new std::string("tile_core_" + std::to_string(tile_id_map[op.getTile()]));
+      auto funcname = new std::string("tile_core_" + getTileStr(op.getTile()));
       auto builder = OpBuilder(op);
       auto loc = op.getLoc();
       auto functype = FunctionType::get(context, SmallVector<Type>{}, SmallVector<Type>{});
@@ -639,7 +645,7 @@ private:
     auto loc = op.getLoc();
 
     // create function: async.execute can only have one block so have to put the blocks in a function then call it
-    auto funcname = new std::string("tile_mem_" + std::to_string(tile_id_map[tile]) + "_block_" + std::to_string(dmaindex));
+    auto funcname = new std::string("tile_mem_" + getTileStr(tile) + "_block_" + std::to_string(dmaindex));
     auto builder = OpBuilder(memop);
     auto functype = FunctionType::get(context, SmallVector<Type>{}, SmallVector<Type>{});
     auto funcop = builder.create<func::FuncOp>(loc, StringRef(funcname->c_str()), functype);
