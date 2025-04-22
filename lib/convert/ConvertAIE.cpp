@@ -55,6 +55,8 @@ private:
 
   MLIRContext* context;
   ModuleOp module;
+  xilinx::AIE::DeviceOp device = nullptr;
+  OpBuilder::InsertPoint module_insertion_point;
 
   std::unordered_map<Value, int64_t> tile_id_map;
   std::string* global_semaphore_array_name;
@@ -74,6 +76,16 @@ private:
 
   std::string getChannelSemaphoreArr(std::string channel_name) {
     return channel_name + "_semaphore";
+  }
+
+  // lookup in device (if exists) first, then in module
+  template <typename T>
+  T lookupSymbol(llvm::StringRef name) {
+    if (device) {
+      auto sym = device.lookupSymbol<T>(name);
+      if (sym) return sym;
+    }
+    return module.lookupSymbol<T>(name);
   }
 
 
@@ -342,11 +354,10 @@ private:
         }
       }
 
-      // figure out whether semaphores are counting or not,
-      // assumes only one aie.device op
+      // figure out whether semaphores are counting or not
       bool counting = false;
-      module.walk([&] (xilinx::AIE::DeviceOp op) {
-        switch (op.getTargetModel().getTargetArch()) {
+      if (device) {
+        switch (device.getTargetModel().getTargetArch()) {
           case xilinx::AIE::AIEArch::AIE1:
             counting = false;
             break;
@@ -357,8 +368,7 @@ private:
             counting = true;
             break;
         }
-        return WalkResult::interrupt();
-      });
+      }
 
       LogicalResult res = failure();
       if (!counting) {
@@ -678,65 +688,77 @@ private:
       }
     }
 
-    // handle dma_bd
-    auto dmares = funcop.walk([&] (xilinx::AIE::DMABDOp dmaop) {
-      if (processDMABD(dmaop, tile, op.getChannelIndex(), op.getChannelDir()).failed())
-        return WalkResult::interrupt();
-      return WalkResult::advance();
-    });
-    if (dmares.wasInterrupted()) return {};
-
     return funcop;
   }
 
-  LogicalResult processMem() {
-    auto processMemOp = [&](Operation* op, Value tile) {
-      assert(tile_id_map.count(tile));
+  LogicalResult processMemOp(Operation* op, Value tile) {
+    assert(tile_id_map.count(tile));
 
-      SmallVector<func::FuncOp> memfuncs;
+    SmallVector<func::FuncOp> memfuncs;
+    std::unordered_map<std::string, xilinx::AIE::DMAStartOp> functostart;
 
-      // this assumes that dma_start ops are sane, i.e. that all of them will be visited
-      // and that the chain eventually terminates in aie.end
-      ///TODO: check for this/traverse them in chain order
-      int dmaindex = 0;
-      auto res = op->walk([&] (xilinx::AIE::DMAStartOp dmaop) {
-        std::optional<func::FuncOp> funcres = getDMAStartOpFunc(dmaop, op, dmaindex++, tile);
-        if (!funcres.has_value())
+    // this assumes that dma_start ops are sane, i.e. that all of them will be visited
+    // and that the chain eventually terminates in aie.end
+    ///TODO: check for this/traverse them in chain order
+    int dmaindex = 0;
+    auto res = op->walk([&] (xilinx::AIE::DMAStartOp dmaop) {
+      std::optional<func::FuncOp> funcres = getDMAStartOpFunc(dmaop, op, dmaindex++, tile);
+      if (!funcres.has_value())
+        return WalkResult::interrupt();
+      memfuncs.push_back(funcres.value());
+      functostart[funcres.value().getName().str()] = dmaop;
+      return WalkResult::advance();
+    });
+    if (res.wasInterrupted()) return failure();
+
+    // convert dma_bd ops
+    for (auto& [funcname, dmaop] : functostart) {
+      auto funcop = lookupSymbol<func::FuncOp>(funcname);
+      assert(funcop);
+
+      auto dmares = funcop.walk([&] (xilinx::AIE::DMABDOp dmabdop) {
+        if (processDMABD(dmabdop, tile, dmaop.getChannelIndex(), dmaop.getChannelDir()).failed())
           return WalkResult::interrupt();
-        memfuncs.push_back(funcres.value());
         return WalkResult::advance();
       });
+      if (dmares.wasInterrupted()) return failure();
+    }
 
-      for (auto func : memfuncs) {
-        OpBuilder builder(func);
-        builder.setInsertionPointAfter(func);
+    for (auto func: memfuncs) {
+      func.emitRemark();
+    }
 
-        // create async and function call
-        builder.create<async::ExecuteOp>(func.getLoc(),
-            SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
-            [&] (OpBuilder &b, Location loc, ValueRange v) {
-          b.create<func::CallOp>(loc, func, SmallVector<Value>{});
-          b.create<async::YieldOp>(loc, SmallVector<Value>{});
-        });
-      }
+    for (auto func : memfuncs) {
+      OpBuilder builder(func);
+      builder.setInsertionPointAfter(func);
 
+      // create async and function call
+      builder.create<async::ExecuteOp>(func.getLoc(),
+          SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
+          [&] (OpBuilder &b, Location loc, ValueRange v) {
+        b.create<func::CallOp>(loc, func, SmallVector<Value>{});
+        b.create<async::YieldOp>(loc, SmallVector<Value>{});
+      });
+    }
 
-      LLVM_DEBUG(
-        module.emitRemark("module after dmaStartToAsync");
-      );
-      if (res.wasInterrupted()) return WalkResult::interrupt();
+    LLVM_DEBUG(
+      module.emitRemark("module after dmaStartToAsync");
+    );
+    if (res.wasInterrupted()) return failure();
 
-      op->erase();
-      return WalkResult::advance();
-    };
+    op->erase();
+    return success();
+  }
+
+  LogicalResult processMem() {
 
     auto res = module.walk([&] (xilinx::AIE::MemOp op) {
-      return processMemOp(op.getOperation(), op.getTile());
+      return processMemOp(op.getOperation(), op.getTile()).succeeded() ? WalkResult::advance() : WalkResult::interrupt();
     });
     if (res.wasInterrupted()) return failure();
 
     res = module.walk([&] (xilinx::AIE::MemTileDMAOp op) {
-      return processMemOp(op.getOperation(), op.getTile());
+      return processMemOp(op.getOperation(), op.getTile()).succeeded() ? WalkResult::advance() : WalkResult::interrupt();
     });
     if (res.wasInterrupted()) return failure();
 
@@ -745,13 +767,22 @@ private:
 
 public:
 
-  AIEConverter(mlir::MLIRContext* context, ModuleOp module) : context(context), module(module) {};
+  AIEConverter(mlir::MLIRContext* context, ModuleOp module) : context(context), module(module) {
+    OpBuilder b = OpBuilder(context);
+    b.setInsertionPointToStart(module.getBody());
+    module_insertion_point = b.saveInsertionPoint();
+
+    module.walk([&] (xilinx::AIE::DeviceOp deviceop) {
+      device = deviceop;
+      return WalkResult::interrupt();
+    });
+  };
 
   LogicalResult convertAIE() {
 
     // global semaphore array: put at beginning of module
     auto sembuilder = OpBuilder(module);
-    sembuilder.setInsertionPointToStart(module.getBody());
+    sembuilder.restoreInsertionPoint(module_insertion_point);
     global_semaphore_array_type = MemRefType::get(
         SmallVector<int64_t>{DEFAULT_NUM_LOCKS_TOTAL}, SemaphoreType::get(context));
     global_semaphore_array_name = new std::string("aie_global_semaphore_array");
@@ -786,17 +817,16 @@ public:
     // remove aie.device -- assuming there's only one
     ///TODO: can I just move these somehow instead of copying...
     auto dbuilder = OpBuilder(module);
-    dbuilder.setInsertionPointToStart(module.getBody());
+    dbuilder.restoreInsertionPoint(module_insertion_point);
     IRMapping map;
-    module.walk([&] (xilinx::AIE::DeviceOp device) {
+    if (device) {
       for (auto& op : device.getBody()->getOperations()) {
         if (isa<xilinx::AIE::EndOp>(op)) // these get added sometimes?
           continue;
         dbuilder.clone(op, map);
       }
       device.erase();
-      return WalkResult::interrupt();
-    });
+    }
 
     return success();
   }
