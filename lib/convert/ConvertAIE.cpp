@@ -953,11 +953,14 @@ private:
     return success();
   }
 
-  LogicalResult processNPUDMA(xilinx::AIEX::NpuDmaMemcpyNdOp dmaop) {
-    auto loc = dmaop.getLoc();
+  LogicalResult processShimOp(xilinx::AIE::ShimDMAAllocationOp shimop) {
 
-    xilinx::AIE::ShimDMAAllocationOp shimop = xilinx::AIE::ShimDMAAllocationOp::getForSymbol(device, dmaop.getMetadataAttr().getAttr());
-    if (!shimop) return failure();
+    SmallVector<xilinx::AIEX::NpuDmaMemcpyNdOp> dmaops;
+    module.walk([&] (xilinx::AIEX::NpuDmaMemcpyNdOp op) {
+      if (op.getMetadataAttr().getAttr() == shimop.getSymName())
+        dmaops.push_back(op);
+      return WalkResult::advance();
+    });
 
     // get tile: shim tiles are always row 0
     Value tile = nullptr;
@@ -973,43 +976,49 @@ private:
       return failure();
     }
 
-    // get dma memref.global name
-    auto dmamemref = dmaop.getMemref();
-    auto globalop = dyn_cast<memref::GetGlobalOp>(dmamemref.getDefiningOp());
-    if (!globalop) {
-      dmaop.emitError("only memref.globals supported");
-      return failure();
-    }
-    auto globalname = globalop.getName();
-
-    // get dma offsets/sizes/strides
-    if (dmaop.getOffsets().size() > 0 || dmaop.getSizes().size() > 0 || dmaop.getStrides().size() > 0) {
-      dmaop.emitError("dynamic offsets/sizes/strides not supported");
-      return failure();
-    }
-    SmallVector<int64_t> dma_offsets = llvm::map_to_vector(dmaop.getStaticOffsets(), [](auto i) {return i;});
-    SmallVector<int64_t> dma_sizes = llvm::map_to_vector(dmaop.getStaticSizes(), [](auto i) {return i;});
-    SmallVector<int64_t> dma_strides = llvm::map_to_vector(dmaop.getStaticStrides(), [](auto i) {return i;});
-
     auto builder = OpBuilder(shimop);
-    auto asyncExec = builder.create<async::ExecuteOp>(loc,
+    auto asyncExec = builder.create<async::ExecuteOp>(shimop.getLoc(),
         SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
         [&] (OpBuilder &b, Location loc, ValueRange v) {
       b.create<async::YieldOp>(loc, SmallVector<Value>{});
     });
     builder.setInsertionPointToStart(asyncExec.getBody());
-    auto mr = builder.create<memref::GetGlobalOp>(loc, dmamemref.getType(), globalname).getResult();
-    auto res = createDMABDCopy(dmaop, tile, shimop.getChannelIndex(), mr, shimop.getChannelDir(), builder,
-        0, dma_offsets, dma_sizes, dma_strides);
-    if (res.failed()) return failure();
+
+    // handle dma copies
+    for (auto dmaop : dmaops) {
+      // get dma memref.global name
+      auto dmamemref = dmaop.getMemref();
+      auto globalop = dyn_cast<memref::GetGlobalOp>(dmamemref.getDefiningOp());
+      if (!globalop) {
+        dmaop.emitError("only memref.globals supported");
+        return failure();
+      }
+      auto globalname = globalop.getName();
+
+      // get dma offsets/sizes/strides
+      if (dmaop.getOffsets().size() > 0 || dmaop.getSizes().size() > 0 || dmaop.getStrides().size() > 0) {
+        dmaop.emitError("dynamic offsets/sizes/strides not supported");
+        return failure();
+      }
+      SmallVector<int64_t> dma_offsets = llvm::map_to_vector(dmaop.getStaticOffsets(), [](auto i) {return i;});
+      SmallVector<int64_t> dma_sizes = llvm::map_to_vector(dmaop.getStaticSizes(), [](auto i) {return i;});
+      SmallVector<int64_t> dma_strides = llvm::map_to_vector(dmaop.getStaticStrides(), [](auto i) {return i;});
+
+      auto mr = builder.create<memref::GetGlobalOp>(dmaop.getLoc(), dmamemref.getType(), globalname).getResult();
+      auto res = createDMABDCopy(dmaop, tile, shimop.getChannelIndex(), mr, shimop.getChannelDir(), builder,
+          0, dma_offsets, dma_sizes, dma_strides);
+      if (res.failed()) return failure();
+
+      dmaop.erase();
+    }
 
     return success();
   }
 
   // only support shim_dma_allocation via aiex.npu.dma_memcpy_nd
   LogicalResult processShim() {
-    auto res = module.walk([&] (xilinx::AIEX::NpuDmaMemcpyNdOp op) {
-      if (processNPUDMA(op).failed()) return WalkResult::interrupt();
+    auto res = module.walk([&] (xilinx::AIE::ShimDMAAllocationOp op) {
+      if (processShimOp(op).failed()) return WalkResult::interrupt();
       op.erase();
       return WalkResult::advance();
     });
