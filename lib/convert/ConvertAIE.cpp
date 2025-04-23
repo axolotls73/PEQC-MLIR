@@ -497,34 +497,9 @@ private:
     return res.wasInterrupted() ? failure() : success();
   }
 
-  LogicalResult processDMABD(xilinx::AIE::DMABDOp op, Value tile, int32_t channel, xilinx::AIE::DMAChannelDir dir) {
-    auto builder = OpBuilder(op);
-    auto loc = op.getLoc();
-
-    auto dma_offset = op.getOffset();
-
-    // extract sizes and strides
-    SmallVector<int64_t> dma_sizes;
-    SmallVector<int64_t> dma_strides;
-
-    auto dims = op.getDimensions();
-    if (dims.has_value()) {
-      for (auto dim : dims.value()) {
-        dma_sizes.push_back(dim.getSize());
-        dma_strides.push_back(dim.getStride());
-      }
-    }
-    else {
-      // default size is the number of elements in the memref
-      MemRefType mrtype = op.getBuffer().getType();
-      int64_t size = 1;
-      for (auto d : mrtype.getShape()) {
-        size *= d;
-      }
-      dma_sizes.push_back(size);
-      // default stride is 1
-      dma_strides.push_back(1);
-    }
+  LogicalResult createDMABDCopy(Operation* op, Value tile, int32_t channel, TypedValue<MemRefType> memref, xilinx::AIE::DMAChannelDir dir, OpBuilder builder,
+        std::optional<int64_t> dma_offset, SmallVector<int64_t>& dma_offsets, SmallVector<int64_t>& dma_sizes, SmallVector<int64_t>& dma_strides) {
+    auto loc = op->getLoc();
 
     // get buffers and sems to store or load
     Value sem_arr;
@@ -536,7 +511,8 @@ private:
       case xilinx::AIE::DMAChannelDir::MM2S: {
         if (!tile_dma_out_buffer_names.count({tile, channel}) ||
             !tile_dma_out_semaphore_indices.count({tile, channel})) {
-          op.emitError("no flow operation corresponding to channel");
+          op->emitError("no flow operation corresponding to channel");
+          return failure();
         }
 
         for (auto [iter, end] = tile_dma_out_buffer_names.equal_range({tile, channel}); iter != end; ++iter) {
@@ -554,7 +530,8 @@ private:
       case xilinx::AIE::DMAChannelDir::S2MM: {
         if (!tile_dma_in_buffer_names.count({tile, channel}) ||
             !tile_dma_in_semaphore_indices.count({tile, channel})) {
-          op.emitError("no flow operation corresponding to channel");
+          op->emitError("no flow operation corresponding to channel");
+          return failure();
         }
 
         Value inbuf = builder.create<memref::GetGlobalOp>(loc,
@@ -581,7 +558,7 @@ private:
       // if more than one: wrap all in async
       async::ExecuteOp asyncExec = nullptr;
       if (dma_buffers.size() > 1) {
-        asyncExec = builder.create<async::ExecuteOp>(op.getLoc(),
+        asyncExec = builder.create<async::ExecuteOp>(loc,
             SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
             [&] (OpBuilder &b, Location loc, ValueRange v) {
               IRMapping map;
@@ -600,11 +577,12 @@ private:
       }
 
       // create affine map w/ iterators to linearize index
-      AffineExpr indexexpr = builder.getAffineConstantExpr(dma_offset);
+      AffineExpr indexexpr = builder.getAffineConstantExpr(dma_offset.value_or(0));
       for (size_t i = 0; i < dma_sizes.size(); i++) {
+        auto offset = builder.getAffineConstantExpr(dma_offsets[i]);
         auto stride = builder.getAffineConstantExpr(dma_strides[i]);
         auto iter = builder.getAffineDimExpr(i);
-        indexexpr = indexexpr + (iter * stride);
+        indexexpr = indexexpr + ((iter + offset) * stride);
       }
       AffineMap indexmap = AffineMap::get(iterators.size(), 0, indexexpr, context);
       Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
@@ -612,20 +590,20 @@ private:
       // delinearize index
       // auto getConstantVector
       auto delinop = builder.create<affine::AffineDelinearizeIndexOp>(loc,
-          linearindex, op.getBuffer().getType().getShape());
+          linearindex, memref.getType().getShape());
       ValueRange delinindices = delinop.getResults();
 
       // store or load
       builder.create<SemaphoreWaitOp>(loc, sem, waitval);
       switch (dir) {
         case xilinx::AIE::DMAChannelDir::MM2S: {
-          Value bufval = builder.create<memref::LoadOp>(loc, op.getBuffer(), delinindices);
+          Value bufval = builder.create<memref::LoadOp>(loc, memref, delinindices);
           builder.create<memref::StoreOp>(loc, bufval, dma_buffer, cst_0);
           break;
         }
         case xilinx::AIE::DMAChannelDir::S2MM: {
           Value dmaval = builder.create<memref::LoadOp>(loc, dma_buffer, cst_0).getResult();
-          builder.create<memref::StoreOp>(loc, dmaval, op.getBuffer(), delinindices);
+          builder.create<memref::StoreOp>(loc, dmaval, memref, delinindices);
           break;
         }
       }
@@ -636,6 +614,43 @@ private:
         builder.setInsertionPointAfter(asyncExec);
       }
     }
+    return success();
+  }
+
+  LogicalResult processDMABD(xilinx::AIE::DMABDOp op, Value tile, int32_t channel, xilinx::AIE::DMAChannelDir dir) {
+
+    auto dma_offset = op.getOffset();
+
+    // extract sizes and strides
+    SmallVector<int64_t> dma_offsets;
+    SmallVector<int64_t> dma_sizes;
+    SmallVector<int64_t> dma_strides;
+
+    auto dims = op.getDimensions();
+    if (dims.has_value()) {
+      for (auto dim : dims.value()) {
+        dma_offsets.push_back(0); // don't exist in this op, just the total offset
+        dma_sizes.push_back(dim.getSize());
+        dma_strides.push_back(dim.getStride());
+      }
+    }
+    else {
+      // default size is the number of elements in the memref
+      MemRefType mrtype = op.getBuffer().getType();
+      int64_t size = 1;
+      for (auto d : mrtype.getShape()) {
+        size *= d;
+      }
+      dma_offsets.push_back(0);
+      dma_sizes.push_back(size);
+      // default stride is 1
+      dma_strides.push_back(1);
+    }
+
+    auto builder = OpBuilder(op);
+    auto res = createDMABDCopy(op.getOperation(), tile, channel, op.getBuffer(), dir, builder,
+        dma_offset, dma_offsets, dma_sizes, dma_strides);
+    if (res.failed()) return failure();
 
     op.erase();
     return success();
@@ -769,7 +784,6 @@ private:
       auto& c_mainblock = *std::next(c.getBlocks().begin());
       auto cbuilder = OpBuilder(&c_mainblock.getOperations().back());
       cbuilder.create<cf::BranchOp>(c.getLoc(), &c.getBlocks().back()); // last block in function returns
-      c.emitWarning();
       c_mainblock.getOperations().back().erase(); // cf.br, checked before
 
       auto asyncExec = prbuilder.create<async::ExecuteOp>(c.getLoc(),
