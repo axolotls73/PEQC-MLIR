@@ -780,7 +780,10 @@ private:
       o.erase();
     }
 
-    // remove consumers' loops, add async call to producer, remove consumer from
+    // remove consumers' loops, add async call to producer
+    auto loc = producer.getLoc();
+    auto groupsize = prbuilder.create<arith::ConstantIndexOp>(loc, consumers.size()).getResult();
+    auto group = prbuilder.create<async::CreateGroupOp>(loc, groupsize).getResult();
     for (auto c : consumers) {
       auto& c_mainblock = *std::next(c.getBlocks().begin());
       auto cbuilder = OpBuilder(&c_mainblock.getOperations().back());
@@ -794,7 +797,9 @@ private:
         b.create<async::YieldOp>(loc, SmallVector<Value>{});
       });
       prbuilder.setInsertionPointAfter(asyncExec);
+      prbuilder.create<async::AddToGroupOp>(loc, asyncExec.getResult(0), group);
     }
+    prbuilder.create<async::AwaitAllOp>(loc, group);
 
     return success();
   }

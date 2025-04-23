@@ -38,8 +38,11 @@ module {
 
 // CHECK:   async.execute
 // CHECK:   func.call @[[BB20FUNC:.*]]() : () -> ()
+// CHECK:   async.add_to_group
 // CHECK:   async.execute
 // CHECK:   func.call @[[BB22FUNC:.*]]() : () -> ()
+// CHECK:   async.add_to_group
+// CHECK:   async.await_all
 
 // this is still a loop
 // CHECK:   cf.br ^[[BB4BB1]]
