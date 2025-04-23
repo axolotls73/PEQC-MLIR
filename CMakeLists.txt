@@ -61,8 +61,10 @@ if (COMPILE_WITH_AIR)
   link_directories(${AIR_DIR}/build-xrt/lib)
   link_directories(${AIR_DIR}/build-xrt/mlir/lib)
   link_directories(${AIR_DIR}/mlir-aie/build/lib)
+
   link_libraries(${AIR_DIR}/mlir-aie/build/lib/libAIE.a)
-  # ^ this one needs to be specified separately, no idea why
+  link_libraries(${AIR_DIR}/mlir-aie/build/lib/libAIEX.a)
+  # ^ these two need to be specified separately, no idea why
 endif()
 
 set(libpast ${PAST_DIR}/past/.libs/libpast.so)

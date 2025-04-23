@@ -26,6 +26,7 @@
   #include "VerifAirPasses.h"
   #include "air/Dialect/AIR/AIRDialect.h"
   #include "aie/Dialect/AIE/IR/AIEDialect.h"
+  #include "aie/Dialect/AIEX/IR/AIEXDialect.h"
 #endif
 
 int main(int argc, char **argv) {
@@ -58,6 +59,7 @@ int main(int argc, char **argv) {
 #ifdef COMPILE_WITH_AIR
   registry.insert<xilinx::air::airDialect>();
   registry.insert<xilinx::AIE::AIEDialect>();
+  registry.insert<xilinx::AIEX::AIEXDialect>();
 #endif
 
   // Add the following to include *all* MLIR Core dialects, or selectively

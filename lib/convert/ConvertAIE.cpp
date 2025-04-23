@@ -27,8 +27,9 @@
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/Async/IR/Async.h"
-#include "aie/Dialect/AIE/IR/AIEDialect.h"
 
+#include "aie/Dialect/AIE/IR/AIEDialect.h"
+#include "aie/Dialect/AIEX/IR/AIEXDialect.h"
 #include "aie/Dialect/AIE/IR/AIETargetModel.h"
 
 #include "VerifAirPasses.h"
@@ -952,6 +953,75 @@ private:
     return success();
   }
 
+  LogicalResult processNPUDMA(xilinx::AIEX::NpuDmaMemcpyNdOp dmaop) {
+    auto loc = dmaop.getLoc();
+
+    xilinx::AIE::ShimDMAAllocationOp shimop = xilinx::AIE::ShimDMAAllocationOp::getForSymbol(device, dmaop.getMetadataAttr().getAttr());
+    if (!shimop) return failure();
+
+    // get tile: shim tiles are always row 0
+    Value tile = nullptr;
+    module.walk([&] (xilinx::AIE::TileOp op) {
+      if (op.getRow() == 0 && op.getCol() == shimop.getCol()) {
+        tile = op.getResult();
+        return WalkResult::interrupt();
+      }
+      return WalkResult::advance();
+    });
+    if (!tile) {
+      shimop.emitError("can't find corresponding tile operation");
+      return failure();
+    }
+
+    // get dma memref.global name
+    auto dmamemref = dmaop.getMemref();
+    auto globalop = dyn_cast<memref::GetGlobalOp>(dmamemref.getDefiningOp());
+    if (!globalop) {
+      dmaop.emitError("only memref.globals supported");
+      return failure();
+    }
+    auto globalname = globalop.getName();
+
+    // get dma offsets/sizes/strides
+    if (dmaop.getOffsets().size() > 0 || dmaop.getSizes().size() > 0 || dmaop.getStrides().size() > 0) {
+      dmaop.emitError("dynamic offsets/sizes/strides not supported");
+      return failure();
+    }
+    SmallVector<int64_t> dma_offsets = llvm::map_to_vector(dmaop.getStaticOffsets(), [](auto i) {return i;});
+    SmallVector<int64_t> dma_sizes = llvm::map_to_vector(dmaop.getStaticSizes(), [](auto i) {return i;});
+    SmallVector<int64_t> dma_strides = llvm::map_to_vector(dmaop.getStaticStrides(), [](auto i) {return i;});
+
+    auto builder = OpBuilder(shimop);
+    auto asyncExec = builder.create<async::ExecuteOp>(loc,
+        SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
+        [&] (OpBuilder &b, Location loc, ValueRange v) {
+      b.create<async::YieldOp>(loc, SmallVector<Value>{});
+    });
+    builder.setInsertionPointToStart(asyncExec.getBody());
+    auto mr = builder.create<memref::GetGlobalOp>(loc, dmamemref.getType(), globalname).getResult();
+    auto res = createDMABDCopy(dmaop, tile, shimop.getChannelIndex(), mr, shimop.getChannelDir(), builder,
+        0, dma_offsets, dma_sizes, dma_strides);
+    if (res.failed()) return failure();
+
+    return success();
+  }
+
+  // only support shim_dma_allocation via aiex.npu.dma_memcpy_nd
+  LogicalResult processShim() {
+    auto res = module.walk([&] (xilinx::AIEX::NpuDmaMemcpyNdOp op) {
+      if (processNPUDMA(op).failed()) return WalkResult::interrupt();
+      op.erase();
+      return WalkResult::advance();
+    });
+    if (res.wasInterrupted()) return failure();
+
+    module.walk([&] (xilinx::AIE::ShimDMAAllocationOp op) {
+      op.erase();
+      return WalkResult::advance();
+    });
+    return success();
+  }
+
 public:
 
   AIEConverter(mlir::MLIRContext* context, ModuleOp module) : context(context), module(module) {
@@ -993,6 +1063,9 @@ public:
     if (res.failed()) return failure();
 
     res = processBuffers();
+    if (res.failed()) return failure();
+
+    res = processShim();
     if (res.failed()) return failure();
 
     // remove tile ops
