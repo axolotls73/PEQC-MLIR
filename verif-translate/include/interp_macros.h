@@ -39,6 +39,12 @@ void __internal_initialize_semaphores() {
 #define PAST_WAIT_SEMAPHORE(sem, val) \
   _past_ai_api_concurrent_wait_until_semaphore(sem, val)
 
+#define COUNTING_SEMAPHORE_ACQUIRE(sem, val) \
+  PAST_WAIT_SEMAPHORE(sem, val) \
+
+#define COUNTING_SEMAPHORE_RELEASE(sem, val) \
+  PAST_SET_SEMAPHORE(sem, val)
+
 #define PAST_WAIT_SEMAPHORE_ALL(sem, arr_size, val) \
   for (int __past_ai_global_nocheck_sem_index = 0; __past_ai_global_nocheck_sem_index < arr_size; __past_ai_global_nocheck_sem_index++) \
     _past_ai_api_concurrent_wait_until_semaphore(sem[__past_ai_global_nocheck_sem_index], val)
