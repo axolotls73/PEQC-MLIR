@@ -1,6 +1,6 @@
 
 //
-// matmul-l2-dependency.mlir: This file is part of the PEQC-MLIR project.
+// scf-par-token-iter-matmul.mlir: This file is part of the PEQC-MLIR project.
 //
 // Copyright (C) 2024 Colorado State University
 //

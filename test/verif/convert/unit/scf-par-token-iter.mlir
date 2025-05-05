@@ -1,6 +1,6 @@
 
 //
-// par-token-iter.mlir: This file is part of the PEQC-MLIR project.
+// scf-par-token-iter.mlir: This file is part of the PEQC-MLIR project.
 //
 // Copyright (C) 2024 Colorado State University
 //

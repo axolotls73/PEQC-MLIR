@@ -1,6 +1,6 @@
 
 //
-// air-channel-basic.mlir: This file is part of the PEQC-MLIR project.
+// air-channel-basic-async.mlir: This file is part of the PEQC-MLIR project.
 //
 // Copyright (C) 2024 Colorado State University
 //
@@ -14,8 +14,6 @@
 //
 //
 
-// XFAIL: *
-// FIX!!! semaphore conflict
 
 // REQUIRES: air
 // RUN: split-file %s %t && \
@@ -36,11 +34,17 @@ module {
 
   air.channel @channel [1, 1]
 
-  %a = memref.get_global @A : memref<1xi32>
-  air.channel.put @channel[] (%a[] [] []) : (memref<1xi32>)
+  %token = async.execute {
+    %a = memref.get_global @A : memref<1xi32>
+    air.channel.put @channel[] (%a[] [] []) : (memref<1xi32>)
+    async.yield
+  }
 
-  %b = memref.get_global @B : memref<1xi32>
-  air.channel.get @channel[] (%b[] [] []) : (memref<1xi32>)
+  %token2 = async.execute {
+    %b = memref.get_global @B : memref<1xi32>
+    air.channel.get @channel[] (%b[] [] []) : (memref<1xi32>)
+    async.yield
+  }
 }
 
 //--- compare.c

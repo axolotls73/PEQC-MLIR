@@ -1,6 +1,6 @@
 
 //
-// async-basic.mlir: This file is part of the PEQC-MLIR project.
+// async-basic-conflict.mlir: This file is part of the PEQC-MLIR project.
 //
 // Copyright (C) 2024 Colorado State University
 //
@@ -16,13 +16,12 @@
 
 // RUN: split-file %s %t && \
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
-// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
+// RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
 // RUN: cat %t/result.c | FileCheck %t/input.mlir
 
-// RUN: not %pastchecker %t/translation.c %t/translation.c res | grep conflict
+// RUN: not %pastchecker %t/translation.c %t/translation.c res 2>&1 | grep conflict
 
-//XFAIL:*
 
 //--- input.mlir
 

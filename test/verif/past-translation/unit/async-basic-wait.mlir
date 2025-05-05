@@ -14,12 +14,11 @@
 //
 //
 
-//XFAIL:*
 // COM: interpreter issue -- catching false conflict
 
 // RUN: split-file %s %t && \
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
-// RUN: %testroot/add_epilogue.sh %t/result.c %t/epilogue.c %t/translation.c %testroot/..
+// RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
 // RUN: cat %t/result.c | FileCheck %t/input.mlir
 
@@ -44,6 +43,7 @@ module {
             async.yield
         }
         %group = async.create_group %1 : !async.group
+        async.add_to_group %token, %group : !async.token
         async.await_all %group
         %ret = memref.load %a[%0] : memref<1xi32>
         return %ret : i32

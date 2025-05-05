@@ -22,6 +22,10 @@
 // RUN: verif-translate --translate-to-past %t/lowered.mlir > %t/result.c
 // RUN: %add_epilogue %t/result.c %t/translation.c
 
+// multi-consumer semaphore pattern doesn't work in the interpreter
+// %pastchecker %t/translation.c %t/translation.c A,B,C | grep YES
+// %pastchecker %t/translation.c %t/compare.c A,B,C 2>&1 | grep YES
+
 //--- input.mlir
 
 module {
@@ -643,3 +647,22 @@ module {
     // }
   } {sym_name = "forward_0"}
 }
+
+//--- compare.c
+
+#pragma pocc-region-start
+void forward(int** A, int** B, int** C, int N) {
+  for (int i = 0; i < N; i++)
+    for (int j = 0; j < N; j++){
+      C[i][j] = 0;
+      for (int k = 0; k < N; k++)
+        C[i][j] += A[i][k] * B[k][j];
+    }
+}
+{
+  float* A;
+  float* B;
+  float* C;
+  forward(A, B, C, 16);
+}
+#pragma pocc-region-end

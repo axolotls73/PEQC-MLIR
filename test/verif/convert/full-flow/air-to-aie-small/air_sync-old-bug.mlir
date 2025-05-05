@@ -1,6 +1,6 @@
 
 //
-// air_sync_old.mlir: This file is part of the PEQC-MLIR project.
+// air_sync-old-bug.mlir: This file is part of the PEQC-MLIR project.
 //
 // Copyright (C) 2024 Colorado State University
 //
