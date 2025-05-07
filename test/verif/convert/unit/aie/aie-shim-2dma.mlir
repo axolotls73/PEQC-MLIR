@@ -25,9 +25,9 @@ module {
       %a = memref.get_global @A : memref<16x16xi32>
 
 // CHECK-NOT: aiex.npu.dma_memcpy_nd
-      aiex.npu.dma_memcpy_nd(0, 0, %a[0, 0, 0, 0][2, 1, 8, 16][0, 1, 16, 1]) {id = 0 : i64, metadata = @airMemcpyId4} : memref<16x16xi32>
+      aiex.npu.dma_memcpy_nd(%a[0, 0, 0, 0][2, 1, 8, 16][0, 1, 16, 1]) {id = 0 : i64, metadata = @airMemcpyId4} : memref<16x16xi32>
 // CHECK-NOT: aiex.npu.dma_memcpy_nd
-      aiex.npu.dma_memcpy_nd(0, 0, %a[0, 0, 0, 0][2, 1, 8, 16][0, 1, 16, 1]) {id = 0 : i64, metadata = @airMemcpyId4} : memref<16x16xi32>
+      aiex.npu.dma_memcpy_nd(%a[0, 0, 0, 0][2, 1, 8, 16][0, 1, 16, 1]) {id = 0 : i64, metadata = @airMemcpyId4} : memref<16x16xi32>
       return
     }
 

@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   mlir::verif::air::registerPasses();
 #endif
   mlir::registerAsyncParallelForPass();
-  mlir::registerConvertAffineToStandard();
+  mlir::registerLowerAffinePass();
   mlir::affine::registerAffineExpandIndexOps();
 
 

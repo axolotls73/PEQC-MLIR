@@ -345,14 +345,14 @@ void buildCopy(Operation* putgetop, bool isput, ValueRange asyncDeps,
 
 
 // check put and get ops
-bool putgetWellFormed(Operation* op, MemRefType mrtype, SmallVector<int64_t>& sizes, SmallVector<int64_t>& bsizes,
+bool putgetWellFormed(Operation* op, BaseMemRefType mrtype, SmallVector<int64_t>& sizes, SmallVector<int64_t>& bsizes,
       ValueRange opoffsets, ValueRange opsizes, ValueRange opstrides, ValueRange opindices) {
   LLVM_DEBUG(
     llvm::errs() << "CHANNEL PUT/GET:\nindices size: " << opindices.size() << "\noffsets size: " << opoffsets.size()
         << "\nsizes size: " << opsizes.size() << "\nstrides size: " << opstrides.size() << "\n";
   );
 
-  if (!mrtype.hasRank() || mrtype.getNumDynamicDims() > 0) {
+  if (!isa<MemRefType>(mrtype) || !mrtype.hasRank() || mrtype.getNumDynamicDims() > 0) {
     op->emitError("expected air.channel.put/get to take a ranked memref of static size as input");
     return false;
   }
@@ -394,8 +394,8 @@ LogicalResult processUse(SymbolTable::SymbolUse use, SmallVector<int64_t>& sizes
         putop.getOffsets(), putop.getSizes(), putop.getStrides(), putop.getIndices()))
       return failure();
 
-    buildCopy(putop.getOperation(), true, putop.getAsyncDependencies(), putop.getSrc(), sizes, bsizes,
-        putop.getIndices(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
+    buildCopy(putop.getOperation(), true, putop.getAsyncDependencies(), dyn_cast<TypedValue<MemRefType>>(putop.getSrc()),
+        sizes, bsizes, putop.getIndices(), putop.getOffsets(), putop.getSizes(), putop.getStrides());
   }
 
   else if (auto getop = mlir::dyn_cast<xilinx::air::ChannelGetOp>(op)) {
@@ -403,8 +403,8 @@ LogicalResult processUse(SymbolTable::SymbolUse use, SmallVector<int64_t>& sizes
         sizes, bsizes, getop.getOffsets(), getop.getSizes(), getop.getStrides(), getop.getIndices()))
       return failure();
 
-    buildCopy(getop.getOperation(), false, getop.getAsyncDependencies(), getop.getDst(), sizes, bsizes,
-        getop.getIndices(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
+    buildCopy(getop.getOperation(), false, getop.getAsyncDependencies(), dyn_cast<TypedValue<MemRefType>>(getop.getDst()),
+        sizes, bsizes, getop.getIndices(), getop.getOffsets(), getop.getSizes(), getop.getStrides());
   }
 
   op->erase();

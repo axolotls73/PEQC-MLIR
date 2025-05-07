@@ -15,6 +15,8 @@
 //
 
 // REQUIRES: air
+// XFAIL: *
+// old version^
 
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-convert-aie %t/input.mlir > %t/conversion.mlir

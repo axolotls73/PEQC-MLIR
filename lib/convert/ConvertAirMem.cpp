@@ -46,10 +46,16 @@ public:
                                 ConversionPatternRewriter &rewriter) const final {
     auto loc = op.getLoc();
 
-    auto dst = op.getDst();
-    auto src = op.getSrc();
+    auto dst = dyn_cast<TypedValue<MemRefType>>(op.getDst());
+    auto src = dyn_cast<TypedValue<MemRefType>>(op.getSrc());
+
+    if (!dst || !src) {
+      op.emitError("dma_memcpy_nd operands must be ranked");
+      return failure();
+    }
+
     if (src.getType().getRank() != dst.getType().getRank()) {
-      op.emitWarning("verif-convert: dma_memcpy_nd src and dst need same rank");
+      op.emitError("dma_memcpy_nd src and dst need same rank");
       return failure();
     }
 
