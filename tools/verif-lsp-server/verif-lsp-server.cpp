@@ -15,6 +15,7 @@
 
 #include "mlir/InitAllDialects.h"
 #include "mlir/Tools/mlir-lsp-server/MlirLspServerMain.h"
+#include "VerifDialect.h"
 
 #ifdef COMPILE_WITH_AIR
   #include "air/Dialect/AIR/AIRDialect.h"
@@ -25,7 +26,7 @@
 int main(int argc, char **argv) {
   mlir::DialectRegistry registry;
   mlir::registerAllDialects(registry);
-
+  registry.insert<mlir::verif::VerifDialect>();
 #ifdef COMPILE_WITH_AIR
   registry.insert<xilinx::air::airDialect>();
   registry.insert<xilinx::AIE::AIEDialect>();
