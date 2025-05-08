@@ -31,4 +31,5 @@ cmake -G Ninja .. \
   -DPAST_DIR=$PAST_DIR
 
 cmake --build . --target mlir-doc
+cmake --build . --target verif-lsp-server
 cmake --build . --target check-verif
