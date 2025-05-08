@@ -24,8 +24,8 @@ import argparse
 
 def addincludes(instr):
   REGIONSTART = '#pragma pocc-region-start'
-  macrospath = os.path.abspath(f'{VERIFDIR}/verif-translate/include/interp_macros.h')
-  prologuepath = os.path.abspath(f'{VERIFDIR}/verif-translate/include/prologue.h')
+  macrospath = os.path.abspath(f'{VERIFDIR}/tools/verif-translate/include/interp_macros.h')
+  prologuepath = os.path.abspath(f'{VERIFDIR}/tools/verif-translate/include/prologue.h')
   if not os.path.exists(macrospath) or not os.path.exists(prologuepath):
     print(f'error: interp_macros.h or prologue.h not found')
     exit(1)
