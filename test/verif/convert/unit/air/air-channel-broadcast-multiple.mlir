@@ -20,8 +20,8 @@
 // CHECK: [[MAP:#.*]] = affine_map<(d0)[s0, s1] -> ((d0 + s0) * s1)>
 // CHECK: module
 module {
-// CHECK-DAG: memref.global "private" @[[BUF_ARR:.*]] memref<4x5xmemref<?xi64>>
-// CHECK-DAG: memref.global "private" @[[SEM_ARR:.*]] memref<4x5x!verif.semaphore>
+// CHECK-DAG: memref.global "private" @[[BUF_ARR:.*]] memref<1x1x4x5xi64>
+// CHECK-DAG: memref.global "private" @[[SEM_ARR:.*]] memref<1x1x4x5x!verif.semaphore>
 // CHECK-NOT: air.channel
   air.channel @channel [1, 1] {broadcast_shape = [4, 5]}
 
@@ -46,12 +46,11 @@ module {
 // CHECK-DAG:   [[PUT_CST4:%.*]] = arith.constant 4
 // CHECK-DAG:   [[PUT_CST5:%.*]] = arith.constant 5
 // CHECK:   scf.parallel ([[PARITER1:%.*]], [[PARITER2:%.*]]) = ([[PUT_CST0]], [[PUT_CST0]]) to ([[PUT_CST4]], [[PUT_CST5]]) step ([[PUT_CST1]], [[PUT_CST1]])
-// CHECK:     [[PUTSEM:%.*]] = memref.load [[SEM_ARR_PUT]][[[PARITER1]], [[PARITER2]]]
+// CHECK:     [[PUTSEM:%.*]] = memref.load [[SEM_ARR_PUT]][[[PUT_CST0]], [[PUT_CST0]], [[PARITER1]], [[PARITER2]]]
 // CHECK:     [[PUTWAIT:%.*]] = arith.constant 0
 // CHECK:     verif.semaphore.wait [[PUTSEM]], [[PUTWAIT]]
-// CHECK:     [[PUTBUF:%.*]] = memref.load [[BUF_ARR_PUT]][[[PARITER1]], [[PARITER2]]]
 // CHECK:     [[PUTVAL:%.*]] = memref.load [[A]][[[PUT_DEL]]]
-// CHECK:     memref.store [[PUTVAL]], [[PUTBUF]][[[PUT_CST0]]]
+// CHECK:     memref.store [[PUTVAL]], [[BUF_ARR_PUT]][[[PUT_CST0]], [[PUT_CST0]], [[PARITER1]], [[PARITER2]]]
 // CHECK:     [[PUTSET:%.*]] = arith.constant 1
 // CHECK:     verif.semaphore.set [[PUTSEM]], [[PUTSET]]
 

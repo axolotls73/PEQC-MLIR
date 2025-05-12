@@ -97,12 +97,14 @@ MLIRContext* context;
 ModuleOp module;
 
 xilinx::air::ChannelOp chop;
+xilinx::air::LaunchOp launchop = nullptr;
 
 Type elt_type = nullptr;
 std::string bufarr_name;
 MemRefType bufarr_type = nullptr;
 std::string semarr_name;
 MemRefType semarr_type = nullptr;
+SmallVector<int64_t> launchsizes;
 
 
 std::optional<Type> getChannelEltType() {
@@ -133,7 +135,46 @@ std::optional<Type> getChannelEltType() {
 }
 
 
-void buildChannelInit(SmallVector<int64_t>& bsizes) {
+LogicalResult getLaunchSizes() {
+  auto usesopt = chop.getSymbolUses(module);
+  if (!usesopt.has_value()) {
+    launchsizes.append({1, 1});
+    return success();
+  }
+  auto uses = usesopt.value();
+  std::optional<xilinx::air::LaunchOp> launchopt = {};
+  for (auto [i, use] : llvm::enumerate(uses)) {
+  auto currentlaunch = use.getUser()->getParentOfType<xilinx::air::LaunchOp>();
+    if (i != 0 && (launchopt.has_value() != (currentlaunch != nullptr)
+          || (currentlaunch && launchopt.has_value() && currentlaunch != launchopt.value()))) {
+      use.getUser()->emitError("expected channel uses to share the same launch");
+      return failure();
+    }
+    if (currentlaunch) {
+      launchopt = currentlaunch;
+    }
+  }
+  if (!launchopt.has_value()) {
+    launchsizes.append({1, 1});
+    return success();
+  }
+  launchop = launchopt.value();
+  if (launchop.getSizes().size() != 2) {
+    launchop.emitError("expected launch to have 2 sizes");
+    return failure();
+  }
+  for (auto size : launchop.getSizes()) {
+    std::optional<int64_t> csize = getConstantIntValue(size);
+    if (!csize.has_value()) {
+      launchop.emitError("expected launch to have constant sizes");
+    }
+    launchsizes.push_back(csize.value());
+  }
+  return success();
+}
+
+
+void buildChannelInit(SmallVector<int64_t>& sizes) {
   auto loc = chop.getLoc();
   auto builder = OpBuilder(chop.getOperation());
 
@@ -150,7 +191,7 @@ void buildChannelInit(SmallVector<int64_t>& bsizes) {
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
   Value channel_semarr = builder.create<memref::GetGlobalOp>(loc, semarr_type, semarr_name);
-  for (int64_t size : bsizes) {
+  for (int64_t size : sizes) {
     Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
     auto loop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1);
     loop_iters.push_back(loop.getInductionVar());
@@ -162,6 +203,33 @@ void buildChannelInit(SmallVector<int64_t>& bsizes) {
   ///TODO: doesn't work bc we don't know the memref size
   // Value bufarr_init_mr = builder.create<memref::AllocOp>(loc, dynamic_elt_type);
   // builder.create<memref::StoreOp>(loc, bufarr_init_mr, channel_bufarr, loop_iters);
+}
+
+// also passes down launches through segments and herds
+///TODO: keep a map so these aren't replicated for each channel put/get
+std::pair<Value, Value> getLaunchIndices(Operation* op) {
+  assert(op);
+  // base case launch, go back down the tree
+  if (auto launchop = dyn_cast<xilinx::air::LaunchOp>(op)) {
+    auto iters = launchop.getIds();
+    assert(iters.size() == 2);
+    return {iters[0], iters[1]};
+  }
+
+  auto iters = getLaunchIndices(op->getParentOp());
+  if (auto segmentop = mlir::dyn_cast<xilinx::air::SegmentOp>(op)) {
+    segmentop.getSegmentOperandsMutable().append({iters.first, iters.second});
+    auto  &segmentblock = segmentop.getBody().getBlocks().front();
+    return {segmentblock.addArgument(iters.first.getType(), launchop.getLoc()),
+        segmentblock.addArgument(iters.second.getType(), launchop.getLoc())};
+  }
+  else if (auto herdop = mlir::dyn_cast<xilinx::air::HerdOp>(op)) {
+    herdop.getHerdOperandsMutable().append({iters.first, iters.second});
+    auto  &herdblock = herdop.getBody().getBlocks().front();
+    return {herdblock.addArgument(iters.first.getType(), launchop.getLoc()),
+        herdblock.addArgument(iters.second.getType(), launchop.getLoc())};
+  }
+  return iters;
 }
 
 
@@ -185,9 +253,7 @@ void buildCopy(Operation* putgetop, bool isput, ValueRange asyncDeps,
   ValueRange indices = opindices;
   SmallVector<Value> indvec;
   if (opindices.size() == 0) {
-    for (int i = 0; i < 2; i++) {
-      indvec.push_back(cst_0);
-    }
+    indvec.append({cst_0, cst_0});
     indices = indvec;
   }
 
@@ -223,6 +289,16 @@ void buildCopy(Operation* putgetop, bool isput, ValueRange asyncDeps,
       prev = size;
     }
     strides = stridevec;
+  }
+
+  // get launch indices: if not present, use 0
+  SmallVector<Value> launchindices;
+  if (launchop) {
+    auto indices = getLaunchIndices(putgetop);
+    launchindices.append({indices.first, indices.second});
+  }
+  else {
+    launchindices.append({cst_0, cst_0});
   }
 
   assert(offsets.size() == sizes.size() && sizes.size() == strides.size());
@@ -316,25 +392,27 @@ void buildCopy(Operation* putgetop, bool isput, ValueRange asyncDeps,
     builder.setInsertionPointToStart(parop.getBody());
   }
 
+  SmallVector<Value> allindices;
+  allindices.append(launchindices);
+  for (auto i : ch_indices) {
+    allindices.push_back(i);
+  }
+
   // wait for semaphore
-  Value sem = builder.create<memref::LoadOp>(loc, semarr, ch_indices).getResult();
+  Value sem = builder.create<memref::LoadOp>(loc, semarr, allindices).getResult();
   int wait = isput ? READY_TO_PUT : READY_TO_GET;
   int set = isput ? READY_TO_GET : READY_TO_PUT;
   Value waitval = builder.create<arith::ConstantIndexOp>(loc, wait);
   builder.create<SemaphoreWaitOp>(loc, sem, waitval);
 
-  // right now the channel is size 1, so the index into the buffer is 0
-  Value bufindex = cst_0;
-  Value buf = builder.create<memref::LoadOp>(loc, bufarr, ch_indices).getResult();
-
   // handle put: copy to channel
   if (isput) {
     Value srcval = builder.create<memref::LoadOp>(loc, mref, delinindices).getResult();
-    builder.create<memref::StoreOp>(loc, srcval, buf, bufindex);
+    builder.create<memref::StoreOp>(loc, srcval, bufarr, allindices);
   }
   // handle get: copy from channel
   else {
-    Value bufval = builder.create<memref::LoadOp>(loc, buf, bufindex).getResult();
+    Value bufval = builder.create<memref::LoadOp>(loc, bufarr, allindices).getResult();
     builder.create<memref::StoreOp>(loc, bufval, mref, delinindices);
   }
 
@@ -427,6 +505,9 @@ LogicalResult processChannel() {
   if (!elt_type_opt.has_value()) return failure();
   elt_type = elt_type_opt.value();
 
+  // get launch sizes
+  if (getLaunchSizes().failed()) return failure();
+
   // get channel sizes
   ArrayAttr sizes_attr = chop.getSize();
   auto bsizes_attr = chop.getBroadcastShape();
@@ -445,13 +526,15 @@ LogicalResult processChannel() {
     bsizes.push_back(bsize.getInt());
   }
 
-  auto dynamic_elt_type = MemRefType::get(SmallVector<int64_t>{ShapedType::kDynamic}, elt_type);
-  bufarr_type = MemRefType::get(bsizes, dynamic_elt_type);
-  semarr_type = MemRefType::get(bsizes, SemaphoreType::get(context));
+  SmallVector<int64_t> allsizes;
+  allsizes.append(launchsizes);
+  allsizes.append(bsizes);
+  bufarr_type = MemRefType::get(allsizes, elt_type);
+  semarr_type = MemRefType::get(allsizes, SemaphoreType::get(context));
   bufarr_name = chop.getSymName().str() + "_buffer";
   semarr_name = chop.getSymName().str() + "_sem";
 
-  buildChannelInit(bsizes);
+  buildChannelInit(allsizes);
 
   auto uses = chop.getSymbolUses(module);
   if (!uses.has_value()) return success();
