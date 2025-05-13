@@ -14,9 +14,6 @@
 //
 //
 
-// XFAIL: *
-// FIX!!! semaphore conflict
-
 // REQUIRES: air
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-air-convert-channel --lower-affine %t/input.mlir > %t/conversion.mlir && \

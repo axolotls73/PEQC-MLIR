@@ -34,8 +34,7 @@ module {
 // CHECK: scf.for [[I3:%.*]] = [[CST0]] to [[SIZE3]] step [[CST1]]
 // CHECK: [[SIZE4:%.*]] = arith.constant 1 : index
 // CHECK: scf.for [[I4:%.*]] = [[CST0]] to [[SIZE4]] step [[CST1]]
-// CHECK:   [[SEMINIT:%.*]] = verif.semaphore
-// CHECK:   verif.semaphore.set [[SEMINIT]], [[CST0]]
+// CHECK:   [[SEMINIT:%.*]] = verif.semaphore(0
 // CHECK:   memref.store [[SEMINIT]], [[SEM_ARR_CH]][[[I1]], [[I2]], [[I3]], [[I4]]]
 // CHECK-NOT: air.channel
   air.channel @channel [1, 1]

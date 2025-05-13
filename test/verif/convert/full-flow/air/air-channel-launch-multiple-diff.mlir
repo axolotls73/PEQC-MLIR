@@ -46,14 +46,14 @@ module {
       scf.for %chj = %c0 to %c2_1 step %c1_1 {
 
         %a = memref.get_global @A : memref<1xi32>
-        air.channel.put @channel[%chi, %chj] (%a[] [] []) : (memref<1xi32>)
+        %t = air.channel.put async @channel[%chi, %chj] (%a[] [] []) : (memref<1xi32>)
 
         %b = memref.get_global @B : memref<2x2x2xi32>
         %o3 = arith.muli %arg4, %c4 : index
         %o1 = arith.muli %chi, %c2_1 : index
         %o2 = arith.addi %o1, %chj : index
         %o4 = arith.addi %o3, %o2 : index
-        air.channel.get @channel[%chi, %chj] (%b[%o4] [%c1_1] [%c1_1]) : (memref<2x2x2xi32>)
+        %t2 = air.channel.get async @channel[%chi, %chj] (%b[%o4] [%c1_1] [%c1_1]) : (memref<2x2x2xi32>)
 
       }
     }

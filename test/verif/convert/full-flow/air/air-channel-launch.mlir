@@ -41,10 +41,10 @@ module {
     %c0 = arith.constant 0 : index
     %c1_1 = arith.constant 1 : index
     %a = memref.get_global @A : memref<1xi32>
-    air.channel.put @channel[] (%a[] [] []) : (memref<1xi32>)
+    %t = air.channel.put async @channel[] (%a[] [] []) : (memref<1xi32>)
 
     %b = memref.get_global @B : memref<2xi32>
-    air.channel.get @channel[] (%b[%arg4] [%c1_1] [%c1_1]) : (memref<2xi32>)
+    %t2 = air.channel.get async @channel[] (%b[%arg4] [%c1_1] [%c1_1]) : (memref<2xi32>)
   }
 }
 
