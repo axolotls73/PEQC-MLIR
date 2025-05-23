@@ -101,7 +101,7 @@ public:
     builder.setInsertionPoint(mainfunc);
 
     SmallVector<memref::GlobalOp> globals;
-    int argi = 0;
+    std::size_t argi = 0;
     SmallVector<Value> args;
     for (auto arg : funcop.getArguments()) {
       auto argtype = dyn_cast<MemRefType>(arg.getType());
@@ -109,7 +109,16 @@ public:
         funcop.emitError("non-memref argument");
         return signalPassFailure();
       }
-      auto argname = "argi" + std::to_string(argi++);
+
+      std::string argname;
+      if (argumentNames.size() > argi) {
+        argname = argumentNames[argi];
+      }
+      else {
+        argname = "arg" + std::to_string(argi);
+      }
+      argi++;
+
       globals.push_back(builder.create<memref::GlobalOp>(loc, StringAttr::get(context, argname),
           StringAttr::get(context, "private"), TypeAttr::get(argtype),
           Attribute{}, UnitAttr{}, IntegerAttr{}));
@@ -118,7 +127,32 @@ public:
           funcbuilder.create<memref::GetGlobalOp>(loc, argtype, argname).getResult());
     }
 
-    funcbuilder.create<func::CallOp>(loc, funcop, args);
+    auto callop = funcbuilder.create<func::CallOp>(loc, funcop, args);
+
+    for (auto res : callop.getResults()) {
+      auto restype = dyn_cast<MemRefType>(res.getType());
+      if (!restype) {
+        funcop.emitError("non-memref result");
+        return signalPassFailure();
+      }
+
+      std::string argname;
+      if (argumentNames.size() > argi) {
+        argname = argumentNames[argi];
+      }
+      else {
+        argname = "arg" + std::to_string(argi);
+      }
+      argi++;
+
+      globals.push_back(builder.create<memref::GlobalOp>(loc, StringAttr::get(context, argname),
+          StringAttr::get(context, "private"), TypeAttr::get(restype),
+          Attribute{}, UnitAttr{}, IntegerAttr{}));
+
+      auto globalres = funcbuilder.create<memref::GetGlobalOp>(loc, restype, argname).getResult();
+      funcbuilder.create<memref::CopyOp>(loc, res, globalres);
+    }
+
     funcbuilder.create<func::ReturnOp>(loc);
   }
 };

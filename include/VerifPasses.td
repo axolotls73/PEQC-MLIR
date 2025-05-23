@@ -52,6 +52,10 @@ def VerifCreateMain: Pass<"verif-create-main", "::mlir::ModuleOp"> {
     "func::FuncDialect",
     "memref::MemRefDialect",
   ];
+  let options = [
+    ListOption<"argumentNames", "argument-names", "std::string",
+        "names of memref.global arguments">
+  ];
 }
 
 #endif // VERIF_PASS
