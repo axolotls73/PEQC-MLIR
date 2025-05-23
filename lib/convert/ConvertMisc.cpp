@@ -23,6 +23,7 @@
 
 namespace mlir::verif {
 #define GEN_PASS_DEF_VERIFMOVETOMAIN
+#define GEN_PASS_DEF_VERIFCREATEMAIN
 #include "VerifPasses.h.inc"
 
 #define DEBUG_TYPE "verif-convert"
@@ -38,11 +39,7 @@ public:
     auto module = getOperation();
 
     // get main function
-    func::FuncOp mainfunc = nullptr;
-    for (auto func : module.getBody()->getOps<func::FuncOp>()) {
-      if (func.getSymName() != "main") continue;
-      mainfunc = func;
-    }
+    auto mainfunc = module.lookupSymbol<func::FuncOp>("main");
     if (!mainfunc) {
       module.emitError("module must contain an @main function");
       return signalPassFailure();
@@ -65,6 +62,64 @@ public:
       if (isa<func::FuncOp, memref::GlobalOp>(op)) continue;
       op.erase();
     }
+  }
+};
+
+
+class VerifCreateMain
+    : public impl::VerifCreateMainBase<VerifCreateMain> {
+public:
+  using impl::VerifCreateMainBase<VerifCreateMain>::VerifCreateMainBase;
+
+  void runOnOperation() final {
+    auto module = getOperation();
+    auto context = module.getContext();
+
+    func::FuncOp funcop = nullptr;
+    int numfuncs = 0;
+    for (auto f : module.getBody()->getOps<func::FuncOp>()) {
+      funcop = f;
+      numfuncs++;
+    }
+    if (numfuncs != 1) {
+      module.emitError("module must contain exactly one function");
+      return signalPassFailure();
+    }
+    if (funcop.getSymName() == "main") {
+      module.emitError("function already called @main");
+      return signalPassFailure();
+    }
+
+    auto loc = funcop.getLoc();
+    auto builder = OpBuilder(module);
+    builder.setInsertionPointToStart(module.getBody());
+
+    auto functype = FunctionType::get(context, SmallVector<Type>{}, SmallVector<Type>{});
+    auto mainfunc = builder.create<func::FuncOp>(loc, StringRef("main"), functype);
+    auto funcbuilder = OpBuilder(mainfunc);
+    funcbuilder.setInsertionPointToStart(mainfunc.addEntryBlock());
+    builder.setInsertionPoint(mainfunc);
+
+    SmallVector<memref::GlobalOp> globals;
+    int argi = 0;
+    SmallVector<Value> args;
+    for (auto arg : funcop.getArguments()) {
+      auto argtype = dyn_cast<MemRefType>(arg.getType());
+      if (!argtype) {
+        funcop.emitError("non-memref argument");
+        return signalPassFailure();
+      }
+      auto argname = "argi" + std::to_string(argi++);
+      globals.push_back(builder.create<memref::GlobalOp>(loc, StringAttr::get(context, argname),
+          StringAttr::get(context, "private"), TypeAttr::get(argtype),
+          Attribute{}, UnitAttr{}, IntegerAttr{}));
+
+      args.push_back(
+          funcbuilder.create<memref::GetGlobalOp>(loc, argtype, argname).getResult());
+    }
+
+    funcbuilder.create<func::CallOp>(loc, funcop, args);
+    funcbuilder.create<func::ReturnOp>(loc);
   }
 };
 
