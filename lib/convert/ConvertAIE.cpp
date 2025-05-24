@@ -864,7 +864,9 @@ LogicalResult AIEConverter::processMemOp(Operation* op, Value tile) {
   });
   if (res.wasInterrupted()) return failure();
 
-  convertCountingSemaphorePatternToSpawn(memfuncs);
+  if (option_counting_semaphore_to_spawn) {
+    convertCountingSemaphorePatternToSpawn(memfuncs);
+  }
 
   // convert dma_bd ops
   for (auto& [funcname, dmaop] : functostart) {
@@ -1057,7 +1059,7 @@ public:
     auto module = getOperation();
     auto context = module.getContext();
 
-    auto ac = AIEConverter(context, module);
+    auto ac = AIEConverter(context, module, countingSemToSpawn);
     auto res = ac.convertAIE();
 
     if (res.failed()) return signalPassFailure();

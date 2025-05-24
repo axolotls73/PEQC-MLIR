@@ -62,6 +62,8 @@ private:
   uint32_t current_semaphore_id = 0;
   uint32_t mem_id = 0;
 
+  bool option_counting_semaphore_to_spawn;
+
 
   std::string getChannelSemaphoreArr(std::string channel_name) {
     return channel_name + "_semaphore";
@@ -113,7 +115,10 @@ private:
 
 public:
 
-  AIEConverter(mlir::MLIRContext* context, ModuleOp module) : context(context), module(module) {
+  AIEConverter(mlir::MLIRContext* context, ModuleOp module,
+        bool option_counting_semaphore_to_spawn)
+        : context(context), module(module),
+        option_counting_semaphore_to_spawn(option_counting_semaphore_to_spawn) {
     OpBuilder b = OpBuilder(context);
     b.setInsertionPointToStart(module.getBody());
     module_insertion_point = b.saveInsertionPoint();

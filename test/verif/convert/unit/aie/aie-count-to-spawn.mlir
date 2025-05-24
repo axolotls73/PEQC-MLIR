@@ -15,7 +15,7 @@
 //
 
 // REQUIRES: air
-// RUN: verif-opt --verif-convert-aie %s | FileCheck %s
+// RUN: verif-opt --verif-convert-aie=counting-semaphore-to-spawn %s | FileCheck %s
 
 module {
   aie.device(npu1_4col) {

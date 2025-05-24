@@ -100,6 +100,10 @@ To use in `verif-translate`, `--affine-expand-index-ops` and/or `--lower-affine`
     "async::AsyncDialect",
     "verif::VerifDialect"
   ];
+  let options = [
+    Option<"countingSemToSpawn", "counting-semaphore-to-spawn", "bool", /*default=*/"false",
+        "convert multi-producer counting semaphore pattern to async spawn">
+  ];
 }
 
 
