@@ -148,7 +148,7 @@ class PastTranslator {
   // arith
 
   s_past_node_t* translateConstant(arith::ConstantOp op,
-      const Type& type, u_past_value_data_t val);
+      const Type& type, u_past_value_data_t val, int displayval);
   s_past_node_t* translate(arith::ConstantIntOp op);
   s_past_node_t* translate(arith::ConstantIndexOp op);
   s_past_node_t* translate(arith::ConstantFloatOp op);

@@ -548,9 +548,17 @@ s_past_node_t* PastTranslator::translate(func::CallOp op) {
 
 // arith
 
-s_past_node_t* PastTranslator::translateConstant(arith::ConstantOp op, const Type& type, u_past_value_data_t val) {
+s_past_node_t* PastTranslator::translateConstant(arith::ConstantOp op, const Type& type, u_past_value_data_t val, int displayval) {
   OpResult res = op->getResult(0);
-  return getDeclareAndAssign(type, "arith_const", res, past_node_value_create(getTypePast(type), val));
+  ///FIXME: quick hack
+  auto name = new std::string("arith_const_" + std::to_string(displayval));
+  // replace hyphen if negative
+  size_t pos = name->find("-");
+  if (pos != std::string::npos) {
+      name->replace(pos, 1, "neg_");
+  }
+  return getDeclareAndAssign(type, name->c_str(),
+      res, past_node_value_create(getTypePast(type), val));
 }
 
 s_past_node_t* PastTranslator::translate(arith::ConstantIntOp op) {
@@ -569,12 +577,12 @@ s_past_node_t* PastTranslator::translate(arith::ConstantIntOp op) {
   //     break;
   //   default: assert(0);
   // }
-  return translateConstant(op, op.getResult().getType(), val);
+  return translateConstant(op, op.getResult().getType(), val, op.value());
 }
 
 s_past_node_t* PastTranslator::translate(arith::ConstantIndexOp op) {
   u_past_value_data_t val = { .intval = (int)op.value() };
-  return translateConstant(op, op.getResult().getType(), val);
+  return translateConstant(op, op.getResult().getType(), val, op.value());
 }
 
 s_past_node_t* PastTranslator::translate(arith::ConstantFloatOp op) {
@@ -588,7 +596,8 @@ s_past_node_t* PastTranslator::translate(arith::ConstantFloatOp op) {
       break;
     default: assert(0);
   }
-  return translateConstant(op, op.getResult().getType(), val);
+  return translateConstant(op, op.getResult().getType(), val,
+      op.value().roundToIntegral(APFloat::APFloatBase::roundingMode::TowardZero));
 }
 
 s_past_node_t* PastTranslator::translateArithBinop
