@@ -159,6 +159,10 @@ LogicalResult getLaunchSizes() {
     return success();
   }
   launchop = launchopt.value();
+  if (launchop.getSizes().size() == 0) {
+    launchsizes.append({1, 1});
+    return success();
+  }
   if (launchop.getSizes().size() != 2) {
     launchop.emitError("expected launch to have 2 sizes");
     return failure();
@@ -293,7 +297,8 @@ void buildCopy(Operation* putgetop, bool isput, ValueRange asyncDeps,
 
   // get launch indices: if not present, use 0
   SmallVector<Value> launchindices;
-  if (launchop) {
+  assert(launchsizes.size() == 2);
+  if (launchop && !(launchsizes[0] == 1 && launchsizes[1] == 1)) {
     auto indices = getLaunchIndices(putgetop);
     launchindices.append({indices.first, indices.second});
   }
@@ -512,18 +517,24 @@ LogicalResult processChannel() {
   ArrayAttr sizes_attr = chop.getSize();
   auto bsizes_attr = chop.getBroadcastShape();
   if (!bsizes_attr) bsizes_attr = chop.getSize();
-  // only allow channel ops that have 2 sizes
-  if (sizes_attr.size() != 2 || bsizes_attr.size() != 2) {
-    chop.emitError("expected air.channel to have two sizes");
-    return failure();
-  }
+
   auto sizes = SmallVector<int64_t>();
   auto bsizes = SmallVector<int64_t>();
-  for (auto [size, bsize] :
-        llvm::zip_equal(sizes_attr.getAsRange<IntegerAttr>(), bsizes_attr.getAsRange<IntegerAttr>())) {
-    ///FIXME: assert (bsize != size) -> (size == 1)
-    sizes.push_back(size.getInt());
-    bsizes.push_back(bsize.getInt());
+  if (sizes_attr.size() == 0 || bsizes_attr.size() == 0) {
+    sizes.append({1, 1});
+    bsizes.append({1, 1});
+  }
+  else if (sizes_attr.size() == 2 && bsizes_attr.size() == 2) {
+    for (auto [size, bsize] :
+          llvm::zip_equal(sizes_attr.getAsRange<IntegerAttr>(), bsizes_attr.getAsRange<IntegerAttr>())) {
+      ///FIXME: assert (bsize != size) -> (size == 1)
+      sizes.push_back(size.getInt());
+      bsizes.push_back(bsize.getInt());
+    }
+  }
+  else {
+    chop.emitError("expected air.channel to have two sizes");
+    return failure();
   }
 
   SmallVector<int64_t> allsizes;
