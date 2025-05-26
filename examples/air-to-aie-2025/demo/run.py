@@ -12,6 +12,10 @@ BOLD = '\033[1m'
 END_BOLD = '\033[0m'
 
 PASTCHECKER_DIR = '/data-host-share/pocc-devel/ir/past-clean/src'
+PASTCHECKER_COMMAND = 'pastchecker --enable-preprocessor --enable-subtrees'
+PASTCHECKER_COMMAND_VERBOSE = 'pastchecker --enable-preprocessor --enable-subtrees --verbose'
+
+INPUT_DIR = 'input-small'
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ADD_EPILOGUE = f'{SCRIPT_DIR}/../../../script/add_epilogue.py'
@@ -69,10 +73,10 @@ def main():
 
   # INPUT
 
-  fprint('input/air_input.mlir', print_name=True)
+  fprint(f'{INPUT_DIR}/air_input.mlir', print_name=True)
   wait()
 
-  single_pass('mlir-opt --convert-linalg-to-affine-loops --lower-affine input/air_input.mlir',
+  single_pass(f'mlir-opt --convert-linalg-to-affine-loops --lower-affine {INPUT_DIR}/air_input.mlir',
       'generated/air_input-lowered.mlir')
 
   single_pass('verif-opt --verif-create-main=argument-names="A,B,C" generated/air_input-lowered.mlir',
@@ -86,19 +90,19 @@ def main():
   fprint('generated/air_input-translated.c')
   wait()
 
-  fprint('input/compare.c', print_name=True)
+  fprint(f'{INPUT_DIR}/compare.c', print_name=True)
   wait()
 
-  run('pastchecker --enable-preprocessor --enable-subtrees generated/air_input-translated.c input/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND} generated/air_input-translated.c {INPUT_DIR}/compare.c "A,B,C"',
       wait_before_run=True)
   wait()
 
   # TILED
 
-  fprint('input/air_tiled.mlir', print_name=True)
+  fprint(f'{INPUT_DIR}/air_tiled.mlir', print_name=True)
   wait()
 
-  single_pass('mlir-opt --convert-linalg-to-affine-loops --lower-affine input/air_tiled.mlir',
+  single_pass(f'mlir-opt --convert-linalg-to-affine-loops --lower-affine {INPUT_DIR}/air_tiled.mlir',
       'generated/air_tiled-lowered.mlir')
 
   single_pass('verif-opt --verif-scf-parallel-to-async --verif-create-main=argument-names="A,B,C" generated/air_tiled-lowered.mlir',
@@ -113,19 +117,19 @@ def main():
   wait()
 
   # maybe don't need to print this again
-  # fprint('input/compare.c', print_name=True)
+  # fprint(f'{INPUT_DIR}/compare.c', print_name=True)
   # wait()
 
-  run('pastchecker --enable-preprocessor --enable-subtrees generated/air_tiled-translated.c input/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND} generated/air_tiled-translated.c {INPUT_DIR}/compare.c "A,B,C"',
       wait_before_run=True)
   wait()
 
   # SYNC
 
-  fprint('input/air_sync.mlir', print_name=True)
+  fprint(f'{INPUT_DIR}/air_sync.mlir', print_name=True)
   wait()
 
-  single_pass('air-opt --convert-linalg-to-affine-loops --lower-affine input/air_sync.mlir',
+  single_pass(f'air-opt --convert-linalg-to-affine-loops --lower-affine {INPUT_DIR}/air_sync.mlir',
       'generated/air_sync-lowered.mlir')
 
   single_pass('verif-opt --verif-air-to-scf-par --verif-scf-parallel-to-async --verif-air-dma-to-memref --verif-create-main=argument-names="A,B,C" generated/air_sync-lowered.mlir',
@@ -139,16 +143,16 @@ def main():
   fprint('generated/air_sync-translated.c')
   wait()
 
-  run('pastchecker --enable-preprocessor --enable-subtrees generated/air_sync-translated.c input/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND} generated/air_sync-translated.c {INPUT_DIR}/compare.c "A,B,C"',
       wait_before_run=True)
   wait()
 
   # PLACED
 
-  fprint('input/placed.air.mlir', print_name=True)
+  fprint(f'{INPUT_DIR}/placed.air.mlir', print_name=True)
   wait()
 
-  single_pass('air-opt --convert-linalg-to-affine-loops --lower-affine input/placed.air.mlir',
+  single_pass(f'air-opt --convert-linalg-to-affine-loops --lower-affine {INPUT_DIR}/placed.air.mlir',
       'generated/placed-lowered.mlir')
 
   single_pass('verif-opt --verif-air-convert-channel --verif-create-main=argument-names="A,B,C" generated/placed-lowered.mlir',
@@ -171,19 +175,19 @@ def main():
   fprint('generated/placed-translated.c')
   wait()
 
-  run('pastchecker --enable-preprocessor --enable-subtrees generated/placed-translated.c input/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND_VERBOSE} generated/placed-translated.c {INPUT_DIR}/compare.c "A,B,C"',
       wait_before_run=True)
   wait()
 
   # AIE
 
-  fprint('input/npu.air.mlir', print_name=True)
+  fprint(f'{INPUT_DIR}/npu.air.mlir', print_name=True)
   wait()
 
-  fprint('input/modified-npu.air.mlir', print_name=True)
+  fprint(f'{INPUT_DIR}/modified-npu.air.mlir', print_name=True)
   wait()
 
-  single_pass('verif-opt --verif-convert-aie --lower-affine input/modified-npu.air.mlir',
+  single_pass(f'verif-opt --verif-convert-aie --lower-affine {INPUT_DIR}/modified-npu.air.mlir',
       'generated/npu-converted.mlir')
 
   run('verif-translate --translate-to-past generated/npu-converted.mlir',
@@ -194,7 +198,30 @@ def main():
   fprint('generated/npu-translated.c')
   wait()
 
-  run('pastchecker --enable-preprocessor --enable-subtrees generated/npu-translated.c input/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND_VERBOSE} generated/npu-translated.c {INPUT_DIR}/compare.c "A,B,C"',
+      wait_before_run=True)
+  wait()
+
+  # AIE with lock->spawn conversion
+
+  # fprint(f'{INPUT_DIR}/npu.air.mlir', print_name=True)
+  # wait()
+
+  # fprint(f'{INPUT_DIR}/modified-npu.air.mlir', print_name=True)
+  # wait()
+
+  single_pass(f'verif-opt --verif-convert-aie=counting-semaphore-to-spawn --lower-affine {INPUT_DIR}/modified-npu.air.mlir',
+      'generated/npu-locks-converted.mlir')
+
+  run('verif-translate --translate-to-past generated/npu-locks-converted.mlir',
+      output_file='generated/npu-locks-result.c')
+  run(f'{ADD_EPILOGUE} generated/npu-locks-result.c generated/npu-locks-translated.c > /dev/null',
+      print_command=False)
+  wait()
+  fprint('generated/npu-locks-translated.c')
+  wait()
+
+  run(f'{PASTCHECKER_COMMAND_VERBOSE} generated/npu-locks-translated.c {INPUT_DIR}/compare.c "A,B,C"',
       wait_before_run=True)
   wait()
 

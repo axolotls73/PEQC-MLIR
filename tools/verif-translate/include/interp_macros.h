@@ -30,7 +30,7 @@ void __internal_initialize_semaphores() {
 
 #define PAST_NEW_SEMAPHORE(sem, val) \
   sem = __past_ai_global_nocheck_global_semaphore_counter++; \
-  // _past_ai_api_concurrent_set_semaphore_value(sem, val)
+  _past_ai_api_concurrent_set_semaphore_value(sem, val)
   // _past_ai_api_concurrent_initialize_semaphore_value(sem, val)
 
 #define PAST_SET_SEMAPHORE(sem, val) \
