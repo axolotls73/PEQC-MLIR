@@ -93,7 +93,7 @@ def main():
   fprint(f'{INPUT_DIR}/compare.c', print_name=True)
   wait()
 
-  run(f'{PASTCHECKER_COMMAND} generated/air_input-translated.c {INPUT_DIR}/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND} {INPUT_DIR}/compare.c generated/air_input-translated.c "A,B,C"',
       wait_before_run=True)
   wait()
 
@@ -120,7 +120,7 @@ def main():
   # fprint(f'{INPUT_DIR}/compare.c', print_name=True)
   # wait()
 
-  run(f'{PASTCHECKER_COMMAND} generated/air_tiled-translated.c {INPUT_DIR}/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND} generated/air_input-translated.c generated/air_tiled-translated.c "A,B,C"',
       wait_before_run=True)
   wait()
 
@@ -143,7 +143,7 @@ def main():
   fprint('generated/air_sync-translated.c')
   wait()
 
-  run(f'{PASTCHECKER_COMMAND} generated/air_sync-translated.c {INPUT_DIR}/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND} generated/air_input-translated.c generated/air_sync-translated.c "A,B,C"',
       wait_before_run=True)
   wait()
 
@@ -175,7 +175,7 @@ def main():
   fprint('generated/placed-translated.c')
   wait()
 
-  run(f'{PASTCHECKER_COMMAND_VERBOSE} generated/placed-translated.c {INPUT_DIR}/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND_VERBOSE} generated/air_input-translated.c generated/placed-translated.c "A,B,C"',
       wait_before_run=True)
   wait()
 
@@ -198,7 +198,7 @@ def main():
   fprint('generated/npu-translated.c')
   wait()
 
-  run(f'{PASTCHECKER_COMMAND_VERBOSE} generated/npu-translated.c {INPUT_DIR}/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND_VERBOSE} generated/air_input-translated.c generated/npu-translated.c "A,B,C"',
       wait_before_run=True)
   wait()
 
@@ -221,7 +221,7 @@ def main():
   fprint('generated/npu-locks-translated.c')
   wait()
 
-  run(f'{PASTCHECKER_COMMAND_VERBOSE} generated/npu-locks-translated.c {INPUT_DIR}/compare.c "A,B,C"',
+  run(f'{PASTCHECKER_COMMAND_VERBOSE} generated/air_input-translated.c generated/npu-locks-translated.c "A,B,C"',
       wait_before_run=True)
   wait()
 
