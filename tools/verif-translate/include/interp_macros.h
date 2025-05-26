@@ -26,6 +26,7 @@ void __internal_initialize_semaphores() {
   for (int i = 0; i < max_nb_threads; ++i) {
     _past_ai_api_concurrent_initialize_semaphore_value(i, 0);
   }
+  _past_ai_api_print(sem_init_done, max_nb_threads);
 }
 
 #define PAST_NEW_SEMAPHORE(sem, val) \
