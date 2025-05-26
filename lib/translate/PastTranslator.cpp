@@ -780,6 +780,11 @@ s_past_node_t* PastTranslator::translate(arith::SelectOp op) {
         past_node_varref_create(getVarSymbol(op.getFalseValue())))));
 }
 
+s_past_node_t* PastTranslator::translate(arith::IndexCastOp op) {
+  getAndMapSymbol(op.getOperand(), op.getResult());
+  return nullptr;
+}
+
 // scf
 
 s_past_node_t* PastTranslator::translate(scf::ForOp op) {
@@ -1287,6 +1292,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::CmpFOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::SelectOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<arith::IndexCastOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<scf::IfOp>(op)) res = translate(o);

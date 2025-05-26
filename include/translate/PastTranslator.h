@@ -187,6 +187,8 @@ class PastTranslator {
 
   s_past_node_t* translate(arith::SelectOp op);
 
+  s_past_node_t* translate(arith::IndexCastOp op);
+
 
   // scf
 
