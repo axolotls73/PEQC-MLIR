@@ -18,9 +18,9 @@
 // RUN: verif-translate --translate-to-past %t/input.mlir > %t/result.c && \
 // RUN: %add_epilogue %t/result.c %t/epilogue.c %t/translation.c
 
-// RUN: %pastchecker %t/translation.c %t/translation.c
+// RUN: %pastchecker %t/translation.c %t/translation.c res | grep YES
 
-// RUN: %pastchecker %t/translation.c %t/compare.c
+// RUN: %pastchecker %t/translation.c %t/compare.c res | grep YES
 
 //--- input.mlir
 
