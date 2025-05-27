@@ -13,4 +13,10 @@
  *
  */
 
+max_nb_threads = 500;
+
 __internal_initialize_semaphores();
+
+__past_ai_global_nocheck_global_semaphore_counter = 1;
+PAST_TASK_INIT = 0;
+PAST_TASK_FINISHED = 1;

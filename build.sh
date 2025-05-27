@@ -18,9 +18,9 @@
 
 
 AIR_REPO=/opt/mlir-air
-# PAST_DIR=/data-host-share/pocc-devel/ir/past
+PAST_DIR=/data-host-share/pocc-devel/ir/past
 # PAST_DIR=/data-host-share/past-0.7.3-beta
-PAST_DIR=/data-host-share/pocc-devel/ir/past-clean
+# PAST_DIR=/data-host-share/pocc-devel/ir/past-clean
 LLVM_REPO=$AIR_REPO/llvm
 
 # rm -r build CMakeFiles
