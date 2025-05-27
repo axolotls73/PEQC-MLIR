@@ -22,9 +22,9 @@
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c
 // RUN: %add_epilogue %t/result.c %t/translation.c
 
-// RUN: %pastchecker %t/translation.c %t/translation.c buffer_a34,buffer_a14 2>&1
+// RUN: %pastchecker %t/translation.c %t/translation.c aie_buffer_a34,aie_buffer_a14 | grep YES
 
-// RUN: %pastchecker %t/translation.c %t/compare.c buffer_a34,buffer_a14 2>&1
+// RUN: %pastchecker %t/translation.c %t/compare.c aie_buffer_a34,aie_buffer_a14 | grep YES
 
 
 //--- input.mlir
@@ -100,13 +100,13 @@ module @tutorial_4 {
 //--- compare.c
 
 #pragma pocc-region-start
-int* buffer_a14;
-int* buffer_a34;
+int* aie_buffer_a14;
+int* aie_buffer_a34;
 {
-    buffer_a14[3] = 14;
+    aie_buffer_a14[3] = 14;
     for (int i = 0; i < 128; i++) {
-        buffer_a34[i] = buffer_a14[i];
+        aie_buffer_a34[i] = aie_buffer_a14[i];
     }
-    buffer_a34[5] = buffer_a34[3] + 100;
+    aie_buffer_a34[5] = aie_buffer_a34[3] + 100;
 }
 #pragma pocc-region-end

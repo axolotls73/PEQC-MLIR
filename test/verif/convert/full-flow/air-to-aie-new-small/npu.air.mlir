@@ -16,15 +16,21 @@
 
 // REQUIRES: air
 
-//XFAIL: *
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-convert-aie %t/input.mlir > %t/conversion.mlir
 // RUN: verif-opt --lower-affine %t/conversion.mlir > %t/lowered.mlir
 // RUN: verif-translate --translate-to-past %t/lowered.mlir > %t/result.c
 // RUN: %add_epilogue %t/result.c %t/translation.c
 
-// multi-consumer semaphore pattern doesn't work in the interpreter
+// RUN: verif-opt --verif-convert-aie=counting-semaphore-to-spawn %t/input.mlir > %t/conversion-locks.mlir
+// RUN: verif-opt --lower-affine %t/conversion-locks.mlir > %t/lowered-locks.mlir
+// RUN: verif-translate --translate-to-past %t/lowered-locks.mlir > %t/result-locks.c
+// RUN: %add_epilogue %t/result-locks.c %t/translation-locks.c
+
 // RUN: %pastchecker %t/translation.c %t/translation.c A,B,C | grep YES
+// RUN: %pastchecker %t/translation.c %t/compare.c A,B,C 2>&1 | grep YES
+
+// RUN: %pastchecker %t/translation.c %t/translation-locks.c A,B,C | grep YES
 // RUN: %pastchecker %t/translation.c %t/compare.c A,B,C 2>&1 | grep YES
 
 //--- input.mlir
