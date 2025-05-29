@@ -1067,11 +1067,11 @@ s_past_node_t* PastTranslator::translate(memref::SubViewOp op) {
   NodeVec stmts;
 
   auto getFoldResultNode = [&](OpFoldResult res) {
-    if (res.is<Value>()) {
-      return past_node_varref_create(getVarSymbol(res.get<Value>()));
+    if (isa<Value>(res)) {
+      return past_node_varref_create(getVarSymbol(cast<Value>(res)));
     }
-    else if (res.is<Attribute>()) {
-      auto attr = cast_or_null<IntegerAttr>(res.get<Attribute>());
+    else if (cast<Attribute>(res)) {
+      auto attr = cast_or_null<IntegerAttr>(cast<Attribute>(res));
       if (!attr) {
         op.emitError("expected IntegerAttr in memref.subview");
         exit(1);

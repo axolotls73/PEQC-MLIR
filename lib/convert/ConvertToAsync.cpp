@@ -212,7 +212,7 @@ public:
       >();
     ///TODO: apply ^ to greedy rewriter somehow? target w/ no passes?
 
-    auto res = applyPatternsAndFoldGreedily(module, std::move(patterns));
+    auto res = applyPatternsGreedily(module, std::move(patterns));
     if (res.failed()) return signalPassFailure();
   }
 };
