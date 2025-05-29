@@ -24,6 +24,7 @@
 // RUN: %add_epilogue %t/result.c %t/translation.c
 
 // RUN: %pastchecker %t/translation.c %t/translation.c arg0,arg1 | grep YES
+// RUN: %pastchecker %t/translation.c %S/../compare.c arg0,arg1 | grep YES
 
 //--- input.mlir
 
