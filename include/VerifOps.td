@@ -28,15 +28,35 @@ def Verif_SemaphoreOp : Verif_Op<"semaphore", [
         ]> {
     let summary = "";
     let description = [{
-Declares a new semaphore.
+Declares a new semaphore initialized to `init`.
     }];
+
+    let arguments = (ins
+        Builtin_IntegerAttr:$init
+    );
 
     let results = (outs
         Verif_SemaphoreType:$sem
     );
 
+    let assemblyFormat = [{
+        `(` $init `)` attr-dict
+    }];
+}
+
+def Verif_CountingSemaphoreOp : Verif_Op<"counting_semaphore", [
+        ]> {
+    let summary = "";
+    let description = [{
+Declares a new counting semaphore initialized to `init`.
+    }];
+
     let arguments = (ins
         Builtin_IntegerAttr:$init
+    );
+
+    let results = (outs
+        Verif_CountingSemaphoreType:$sem
     );
 
     let assemblyFormat = [{
@@ -70,6 +90,40 @@ Blocking wait on semaphore `sem` until it is assigned the value `val`.
 
     let arguments = (ins
         Verif_SemaphoreType:$sem,
+        Index:$val
+    );
+
+    let assemblyFormat = [{
+        $sem attr-dict `,` $val
+    }];
+}
+
+def Verif_SemaphoreReleaseOp : Verif_Op<"semaphore.release", [
+        ]> {
+    let summary = "";
+    let description = [{
+Increments counting semaphore `sem` by `val`.
+    }];
+
+    let arguments = (ins
+        Verif_CountingSemaphoreType:$sem,
+        Index:$val
+    );
+
+    let assemblyFormat = [{
+        $sem attr-dict `,` $val
+    }];
+}
+
+def Verif_SemaphoreAcquireOp : Verif_Op<"semaphore.acquire", [
+        ]> {
+    let summary = "";
+    let description = [{
+Blocking wait on counting semaphore `sem` until its value is >= `val`, then decrement `sem` by `val`.
+    }];
+
+    let arguments = (ins
+        Verif_CountingSemaphoreType:$sem,
         Index:$val
     );
 

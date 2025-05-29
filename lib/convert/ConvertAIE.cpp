@@ -210,7 +210,6 @@ LogicalResult AIEConverter::processLock(xilinx::AIE::LockOp op) {
   return success();
 }
 
-// MOSTLY JUST COPIED FROM ABOVE FOR NOW
 LogicalResult AIEConverter::processCountingLock(xilinx::AIE::LockOp op) {
   auto builder = OpBuilder(op);
 
@@ -221,11 +220,11 @@ LogicalResult AIEConverter::processCountingLock(xilinx::AIE::LockOp op) {
     seminit = init.value();
   }
   auto loc = op.getLoc();
-  Value sem = builder.create<SemaphoreOp>(loc,
+  Value sem = builder.create<CountingSemaphoreOp>(loc,
       IntegerAttr::get(IndexType::get(context), seminit));
 
   // create memref.global, store semaphore
-  auto mrtype = MemRefType::get(SmallVector<int64_t>{1}, SemaphoreType::get(context));
+  auto mrtype = MemRefType::get(SmallVector<int64_t>{1}, CountingSemaphoreType::get(context));
   std::string semarr_name = "aie_lock_semaphore_arr_" + std::to_string(current_semaphore_id++);
   builder.create<memref::GlobalOp>(loc, StringAttr::get(context, semarr_name),
       StringAttr::get(context, "private"),TypeAttr::get(mrtype),
@@ -234,7 +233,7 @@ LogicalResult AIEConverter::processCountingLock(xilinx::AIE::LockOp op) {
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0);
   builder.create<memref::StoreOp>(loc, sem, semarr, SmallVector<Value>{cst_0});
 
-  // convert use_lock ops to semaphore wait and set
+  // convert use_lock ops to semaphore acquire and release
   for (auto& use : op.getResult().getUses()) {
     auto uop = use.getOwner();
     auto useop = dyn_cast<xilinx::AIE::UseLockOp>(uop);
@@ -252,10 +251,10 @@ LogicalResult AIEConverter::processCountingLock(xilinx::AIE::LockOp op) {
     Value val = builder.create<arith::ConstantIndexOp>(loc, useop.getValue().value());
     switch (useop.getAction()) {
       case xilinx::AIE::LockAction::Release:
-        builder.create<UndefOp>(loc, SmallVector<Type>{}, "COUNTING_SEMAPHORE_RELEASE", SmallVector<Value>{sem, val});
+        builder.create<SemaphoreReleaseOp>(loc, sem, val);
         break;
       case xilinx::AIE::LockAction::AcquireGreaterEqual:
-        builder.create<UndefOp>(loc, SmallVector<Type>{}, "COUNTING_SEMAPHORE_ACQUIRE", SmallVector<Value>{sem, val});
+        builder.create<SemaphoreAcquireOp>(loc, sem, val);
         break;
       case xilinx::AIE::LockAction::Acquire:
         assert(0);
@@ -264,28 +263,6 @@ LogicalResult AIEConverter::processCountingLock(xilinx::AIE::LockOp op) {
   }
   op.erase();
   return success();
-  // SmallVector<xilinx::AIE::UseLockOp> acquires;
-  // SmallVector<xilinx::AIE::UseLockOp> releases;
-  // for (auto& use : op.getResult().getUses()) {
-  //   auto useop = dyn_cast<xilinx::AIE::UseLockOp>(use.getOwner());
-  //   assert(useop);
-  //   switch(useop.getAction()) {
-  //     case xilinx::AIE::LockAction::AcquireGreaterEqual:
-  //       acquires.push_back(useop);
-  //       break;
-  //     case xilinx::AIE::LockAction::Release:
-  //       releases.push_back(useop);
-  //       break;
-  //     case xilinx::AIE::LockAction::Acquire:
-  //       useop.emitError("all acquires of counting semaphores must be AcquireGreaterEqual");
-  //       return failure();
-  //   }
-  // }
-  // if (releases.size() == 1 && acquires.size() > 1) {
-
-  // }
-  // else if (releases.size() >= 1 && acquires.size() >= 1)
-  // return failure();
 }
 
 LogicalResult AIEConverter::processLocks() {

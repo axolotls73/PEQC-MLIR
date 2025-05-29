@@ -29,4 +29,14 @@ module {
 
 // CHECK: PAST_SET_SEMAPHORE([[SEM]], [[C1]])
   verif.semaphore.set %sem, %1
+
+
+// CHECK: PAST_NEW_COUNTING_SEMAPHORE([[CSEM:.*]], 1)
+  %csem = verif.counting_semaphore(1 : index)
+
+// CHECK: PAST_ACQUIRE_SEMAPHORE([[CSEM]], [[C0]])
+  verif.semaphore.acquire %csem, %0
+
+// CHECK: PAST_RELEASE_SEMAPHORE([[CSEM]], [[C1]])
+  verif.semaphore.release %csem, %1
 }

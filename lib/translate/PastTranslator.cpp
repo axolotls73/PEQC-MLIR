@@ -115,6 +115,7 @@ std::string PastTranslator::getTypeName(const Type& t) {
   );
 
   if (mlir::dyn_cast<verif::SemaphoreType>(t)) return "int";
+  if (mlir::dyn_cast<verif::CountingSemaphoreType>(t)) return "int";
   if (t.isIndex()) return "int";
 
   else if (t.isInteger()) {
@@ -401,6 +402,28 @@ s_past_node_t* PastTranslator::getPastSetSemaphore(s_symbol_t* semaphore, s_symb
       nodeChain(args)));
 }
 
+s_past_node_t* PastTranslator::getPastReleaseSemaphore(s_symbol_t* semaphore, s_symbol_t* val) {
+  NodeVec args = {
+    past_node_varref_create(semaphore),
+    past_node_varref_create(val)
+  };
+  return past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol("PAST_RELEASE_SEMAPHORE")),
+      nodeChain(args)));
+}
+
+s_past_node_t* PastTranslator::getPastAcquireSemaphore(s_symbol_t* semaphore, s_symbol_t* val) {
+  NodeVec args = {
+    past_node_varref_create(semaphore),
+    past_node_varref_create(val)
+  };
+  return past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol("PAST_ACQUIRE_SEMAPHORE")),
+      nodeChain(args)));
+}
+
 s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName, s_past_node_t* initval) {
   NodeVec args = {
     past_node_varref_create(semaphoreName),
@@ -409,6 +432,17 @@ s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName, s_
   return past_node_statement_create(
     past_node_funcall_create(
       past_node_varref_create(getSymbol("PAST_NEW_SEMAPHORE")),
+      nodeChain(args)));
+}
+
+s_past_node_t* PastTranslator::getPastNewCountingSemaphore(s_symbol_t* semaphoreName, s_past_node_t* initval) {
+  NodeVec args = {
+    past_node_varref_create(semaphoreName),
+    initval
+  };
+  return past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol("PAST_NEW_COUNTING_SEMAPHORE")),
       nodeChain(args)));
 }
 
@@ -1231,6 +1265,16 @@ s_past_node_t* PastTranslator::translate(verif::SemaphoreOp op) {
   return nodeChain(nodes);
 }
 
+s_past_node_t* PastTranslator::translate(verif::CountingSemaphoreOp op) {
+  NodeVec nodes;
+  nodes.push_back(past_node_statement_create(
+    getVarDecl(op.getSem(), "verif_semaphore")));
+  nodes.push_back(getPastNewCountingSemaphore(
+    getVarSymbol(op.getSem()),
+    past_node_value_create_from_int(op.getInit().getInt())));
+  return nodeChain(nodes);
+}
+
 s_past_node_t* PastTranslator::translate(verif::SemaphoreSetOp op) {
   NodeVec nodes;
   nodes.push_back(getPastSetSemaphore
@@ -1241,6 +1285,20 @@ s_past_node_t* PastTranslator::translate(verif::SemaphoreSetOp op) {
 s_past_node_t* PastTranslator::translate(verif::SemaphoreWaitOp op) {
   NodeVec nodes;
   nodes.push_back(getPastWaitSemaphore
+      (getVarSymbol(op.getSem(), "verif_semaphore"), getVarSymbol(op.getVal())));
+  return nodeChain(nodes);
+}
+
+s_past_node_t* PastTranslator::translate(verif::SemaphoreReleaseOp op) {
+  NodeVec nodes;
+  nodes.push_back(getPastReleaseSemaphore
+      (getVarSymbol(op.getSem(), "verif_semaphore"), getVarSymbol(op.getVal())));
+  return nodeChain(nodes);
+}
+
+s_past_node_t* PastTranslator::translate(verif::SemaphoreAcquireOp op) {
+  NodeVec nodes;
+  nodes.push_back(getPastAcquireSemaphore
       (getVarSymbol(op.getSem(), "verif_semaphore"), getVarSymbol(op.getVal())));
   return nodeChain(nodes);
 }
@@ -1322,8 +1380,11 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<LLVM::UndefOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<verif::SemaphoreOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<verif::CountingSemaphoreOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<verif::SemaphoreSetOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<verif::SemaphoreWaitOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<verif::SemaphoreReleaseOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<verif::SemaphoreAcquireOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<verif::UndefOp>(op)) res = translate(o);
 
   else {

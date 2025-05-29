@@ -17,8 +17,9 @@
 #define VERIF_TYPES
 
 include "mlir/IR/AttrTypeBase.td"
-include "VerifDialect.td"
 include "mlir/IR/BuiltinTypeInterfaces.td"
+
+include "VerifDialect.td"
 
 class Verif_Type<string name, string typeMnemonic, list<Trait> traits = []>
     : TypeDef<Verif_Dialect, name, traits> {
@@ -28,6 +29,12 @@ class Verif_Type<string name, string typeMnemonic, list<Trait> traits = []>
 def Verif_SemaphoreType : Verif_Type<"Semaphore", "semaphore",
       [MemRefElementTypeInterface]> {
   let summary = "semaphore";
+  let description = "";
+}
+
+def Verif_CountingSemaphoreType : Verif_Type<"CountingSemaphore", "counting_semaphore",
+      [MemRefElementTypeInterface]> {
+  let summary = "counting semaphore";
   let description = "";
 }
 
