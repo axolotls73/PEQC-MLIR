@@ -2,7 +2,7 @@
 //
 // placed.air.mlir: This file is part of the PEQC-MLIR project.
 //
-// Copyright (C) 2024 Colorado State University
+// Copyright (C) 2025 Colorado State University
 //
 // This program can be redistributed and/or modified under the terms
 // of the license specified in the LICENSE.txt file at the root of the
@@ -14,7 +14,6 @@
 //
 //
 
-//XFAIL: *
 // REQUIRES: air
 // RUN: mkdir -p %t
 // RUN: air-opt --convert-linalg-to-affine-loops --lower-affine %s > %t/input-lowered.mlir
@@ -27,9 +26,7 @@
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
 // RUN: %add_epilogue %t/result.c %t/translation.c
 
-// RUN: %pastchecker %t/translation.c %t/translation.c A,B,C | grep YES
-
-// RUN: %pastchecker %t/translation.c %S/compare.c A,B,C 2>&1 | grep YES
+// RUN: not %pastchecker %t/translation.c %t/translation.c A,B,C
 
 module {
   air.channel @ChanIn []

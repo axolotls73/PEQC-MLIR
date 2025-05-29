@@ -1,3 +1,36 @@
+
+//
+// placed.air.mlir: This file is part of the PEQC-MLIR project.
+//
+// Copyright (C) 2025 Colorado State University
+//
+// This program can be redistributed and/or modified under the terms
+// of the license specified in the LICENSE.txt file at the root of the
+// project.
+//
+// Contact: Louis-Noel Pouchet <pouchet@colostate.edu>
+//          Emily Tucker <emily.tucker@colostate.edu>
+// Author: Emily Tucker <emily.tucker@colostate.edu>
+//
+//
+
+// too many tasks? investigate
+// XFAIL: *
+
+// REQUIRES: air
+// RUN: mkdir -p %t
+// RUN: air-opt --convert-linalg-to-affine-loops --lower-affine %s > %t/input-lowered.mlir
+// RUN: verif-opt --verif-create-main=argument-names="arg0,arg1" --verif-air-convert-channel %t/input-lowered.mlir > %t/conversion-channel.mlir
+// RUN: verif-opt --lower-affine --verif-air-to-scf-par \
+// RUN:     --verif-scf-parallel-to-async --verif-air-execute-to-async --verif-air-dma-to-memref \
+// RUN:     --verif-scf-parallel-to-async %t/conversion-channel.mlir --verif-move-to-main > %t/conversion.mlir && \
+// RUN: sed -i 's/!air.async.token/!async.token/g' %t/conversion.mlir && \
+//      ^ quick and dirty solution until i make a pass to remove unrealized_conversion_casts
+// RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
+// RUN: %add_epilogue %t/result.c %t/translation.c
+
+// RUN: %pastchecker %t/translation.c %t/translation.c arg0,arg1 | grep YES
+
 #map = affine_map<()[s0] -> (s0 * 2)>
 #map1 = affine_map<()[s0, s1] -> (s0 + s1)>
 module {
@@ -44,7 +77,7 @@ module {
             air.execute_terminator %alloc : memref<16x8xi32, 2 : i32>
           }
           %13 = air.channel.get async [%async_token_6]  @channel_0[%12, %11] (%results_7[] [] []) {id = 9 : i32} : (memref<16x8xi32, 2 : i32>)
-          %14 = air.wait_all async [%async_token_4, %async_token_8, %13] 
+          %14 = air.wait_all async [%async_token_4, %async_token_8, %13]
           %15 = scf.for %arg10 = %c0_3 to %c16_0 step %c1_2 iter_args(%arg11 = %14) -> (!air.async.token) {
             %17 = scf.for %arg12 = %c0_3 to %c8_1 step %c1_2 iter_args(%arg13 = %arg11) -> (!air.async.token) {
               %async_token_12, %results_13 = air.execute [%arg13] -> (i32) {
@@ -62,7 +95,7 @@ module {
               %async_token_18 = air.execute [%arg13] {
                 memref.store %results_17, %results_9[%arg10, %arg12] : memref<16x8xi32, 2 : i32>
               }
-              %18 = air.wait_all async [%async_token_12, %async_token_14, %async_token_16, %async_token_18] 
+              %18 = air.wait_all async [%async_token_12, %async_token_14, %async_token_16, %async_token_18]
               scf.yield %18 : !air.async.token
             }
             scf.yield %17 : !air.async.token
@@ -75,7 +108,7 @@ module {
             memref.dealloc %results_9 : memref<16x8xi32, 2 : i32>
           }
         }
-        air.wait_all [%2, %3, %4, %5, %6, %7, %8, %9, %10] 
+        air.wait_all [%2, %3, %4, %5, %6, %7, %8, %9, %10]
       }
     }
     return

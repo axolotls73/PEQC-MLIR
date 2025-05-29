@@ -14,7 +14,6 @@
 //
 //
 
-// XFAIL: *
 // REQUIRES: air
 // RUN: split-file %s %t && \
 // RUN: air-opt --convert-linalg-to-affine-loops --lower-affine %t/input.mlir > %t/input-lowered.mlir
@@ -27,9 +26,9 @@
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \
 // RUN: %add_epilogue %t/result.c %t/translation.c
 
-// RUN: %pastchecker %t/translation.c %t/translation.c A,B,C | grep YES
-
-// RUN: %pastchecker %t/translation.c %t/compare.c A,B,C 2>&1 | grep YES
+// this is an out of bounds error: access to channel_3[0, 1]
+// OR the gets from channel_0 that can happen in parallel
+// RUN: not %pastchecker %t/translation.c %t/translation.c A,B,C
 
 //--- input.mlir
 
