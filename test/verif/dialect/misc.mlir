@@ -1,6 +1,6 @@
 
 //
-// undef.mlir: This file is part of the PEQC-MLIR project.
+// misc.mlir: This file is part of the PEQC-MLIR project.
 //
 // Copyright (C) 2024 Colorado State University
 //
@@ -24,3 +24,5 @@
 
 "verif.undef"(%0, %2) <{name = "beep boop"}> : (index, i32) -> ()
 %4 = "verif.undef"() <{name = "beep boop"}> : () -> (index)
+
+verif.error "error message"

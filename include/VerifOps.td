@@ -26,7 +26,7 @@ include "mlir/IR/OpBase.td"
 
 def Verif_SemaphoreOp : Verif_Op<"semaphore", [
         ]> {
-    let summary = "";
+    let summary = "semaphore declaration";
     let description = [{
 Declares a new semaphore initialized to `init`.
     }];
@@ -46,7 +46,7 @@ Declares a new semaphore initialized to `init`.
 
 def Verif_CountingSemaphoreOp : Verif_Op<"counting_semaphore", [
         ]> {
-    let summary = "";
+    let summary = "counting semaphore declaration";
     let description = [{
 Declares a new counting semaphore initialized to `init`.
     }];
@@ -66,7 +66,7 @@ Declares a new counting semaphore initialized to `init`.
 
 def Verif_SemaphoreSetOp : Verif_Op<"semaphore.set", [
         ]> {
-    let summary = "";
+    let summary = "semaphore set";
     let description = [{
 Set semaphore `sem` to value `val`.
     }];
@@ -83,7 +83,7 @@ Set semaphore `sem` to value `val`.
 
 def Verif_SemaphoreWaitOp : Verif_Op<"semaphore.wait", [
         ]> {
-    let summary = "";
+    let summary = "semaphore wait";
     let description = [{
 Blocking wait on semaphore `sem` until it is assigned the value `val`.
     }];
@@ -100,7 +100,7 @@ Blocking wait on semaphore `sem` until it is assigned the value `val`.
 
 def Verif_SemaphoreReleaseOp : Verif_Op<"semaphore.release", [
         ]> {
-    let summary = "";
+    let summary = "counting semaphore release";
     let description = [{
 Increments counting semaphore `sem` by `val`.
     }];
@@ -117,7 +117,7 @@ Increments counting semaphore `sem` by `val`.
 
 def Verif_SemaphoreAcquireOp : Verif_Op<"semaphore.acquire", [
         ]> {
-    let summary = "";
+    let summary = "counting semaphore acquire";
     let description = [{
 Blocking wait on counting semaphore `sem` until its value is >= `val`, then decrement `sem` by `val`.
     }];
@@ -129,6 +129,22 @@ Blocking wait on counting semaphore `sem` until its value is >= `val`, then decr
 
     let assemblyFormat = [{
         $sem attr-dict `,` $val
+    }];
+}
+
+def Verif_ErrorOp : Verif_Op<"error", [
+        ]> {
+    let summary = "runtime error";
+    let description = [{
+Throw a runtime error during interpretation in PEQC.
+    }];
+
+    let arguments = (ins
+        StrAttr:$message
+    );
+
+    let assemblyFormat = [{
+        $message attr-dict
     }];
 }
 
@@ -148,6 +164,9 @@ def Verif_UndefOp : Verif_Op<"undef", [
     );
 }
 
+
+
+// BELOW UNUSED
 
 // from llvm/mlir/include/mlir/Dialect/MemRef/IR/MemRefOps.td
 /// A TypeAttr for memref types.

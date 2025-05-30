@@ -1303,6 +1303,19 @@ s_past_node_t* PastTranslator::translate(verif::SemaphoreAcquireOp op) {
   return nodeChain(nodes);
 }
 
+s_past_node_t* PastTranslator::translate(verif::ErrorOp op) {
+  NodeVec nodes;
+  auto message = op.getMessage().str();
+  message = std::regex_replace(message, std::regex("[^a-zA-Z0-9_]"), "_");
+  message = std::regex_replace(message, std::regex("_+"), "_");
+  message = std::regex_replace(message, std::regex("^(.*)"), "_$1");
+  nodes.push_back(past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol("_past_ai_api_error")),
+      past_node_varref_create(symbol_get_or_insert(symbolTable, message.c_str(), NULL)))));
+  return nodeChain(nodes);
+}
+
 s_past_node_t* PastTranslator::translate(verif::UndefOp op) {
   if (op.getNumResults() > 0) {
     llvm::errs() << "warning: verif.undef results unused\n";
@@ -1385,6 +1398,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<verif::SemaphoreWaitOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<verif::SemaphoreReleaseOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<verif::SemaphoreAcquireOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<verif::ErrorOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<verif::UndefOp>(op)) res = translate(o);
 
   else {
