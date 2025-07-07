@@ -70,7 +70,21 @@ See tests `test/verif/convert/unit/air-dma-nd-basic.mlir`, `test/verif/convert/u
 }
 
 def VerifConvertChannel: Pass<"verif-air-convert-channel", "::mlir::ModuleOp"> {
-  let summary = "Convert air.channel to memref operations and async.execute";
+  let summary = "Convert air.channel to memref, async, and verif operations";
+  let description = [{
+  }];
+  let dependentDialects = [
+    "arith::ArithDialect",
+    "memref::MemRefDialect",
+    "scf::SCFDialect",
+    "affine::AffineDialect",
+    "async::AsyncDialect",
+    "verif::VerifDialect"
+  ];
+}
+
+def VerifConvertObjfifo: Pass<"verif-aie-convert-objfifo", "::mlir::ModuleOp"> {
+  let summary = "Convert aie.objectfifo to memref and verif operations";
   let description = [{
   }];
   let dependentDialects = [
