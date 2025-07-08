@@ -57,7 +57,7 @@ if __name__ == '__main__':
   argparser.add_argument('output_file', type=str,
       help='Output file')
   args = argparser.parse_args()
-  print(args)
+  # print(args)
 
   with open(args.input_file) as f:
     instr = f.read()
