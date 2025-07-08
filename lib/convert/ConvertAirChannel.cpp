@@ -194,7 +194,7 @@ void buildChannelInit(SmallVector<int64_t>& sizes) {
   auto loop_iters = SmallVector<Value, 2>();
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
-  Value channel_semarr = builder.create<memref::GetGlobalOp>(loc, semarr_type, semarr_name);
+  Value channel_semarr = builder.create<memref::GetGlobalOp>(loc, semarr_type, semarr_name).getResult();
   for (int64_t size : sizes) {
     Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
     auto loop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1);

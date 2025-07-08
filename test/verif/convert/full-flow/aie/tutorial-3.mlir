@@ -17,6 +17,7 @@
 // taken from:
 //https://github.com/Xilinx/mlir-aie/blob/a60888210c76266cc932d5a0cc922fceef0322f0/mlir_tutorials/tutorial-3/aie.mlir
 
+// REQUIRES: air
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-convert-aie %t/input.mlir > %t/conversion.mlir && \
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c && \

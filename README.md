@@ -8,15 +8,15 @@ PEQC-MLIR is in active development and subject to arbitrary changes without noti
 
 ### Prerequisites
 
-To build PEQC-MLIR, first install its dependencies: LLVM version 20.0.0git with MLIR,
-and optionally MLIR-AIR commit 07174f8a and MLIR-AIE commit c8dafd9. A Docker image is available in the docker/ directory that contains all required packages to successfully install all the tools below, including mlir-air and llvm.
+To build PEQC-MLIR, first install its dependencies: LLVM version 21.0.0git with MLIR,
+and optionally MLIR-AIR commit 28004ae8 and MLIR-AIE commit 9f977440. A Docker image is available in the docker/ directory that contains all required packages to successfully install all the tools below, including mlir-air and llvm.
 
 #### MLIR-AIR
 
 MLIR_AIR is an optional dependency: if installed, PEQC-MLIR will support a subset of operations in the AIR dialect.
 
 Instructions for building MLIR-AIR can be found
-[here](https://xilinx.github.io/mlir-air/buildingRyzenLin.html), copied below and fixing the install directory for aienginev2:
+[here](https://xilinx.github.io/mlir-air/buildingRyzenLin.html), copied below with the install directory for aienginev2 fixed:
 
 ```sh
 # clone repo
@@ -40,13 +40,13 @@ source utils/env_setup.sh install-xrt/ mlir-aie/install/ llvm/install/
 #### PAST/PEQC
 
 To install
-[PAST 0.7.3-beta](https://sourceforge.net/projects/pocc/),
+[PAST 0.7.3-peqc-mlir](https://sourceforge.net/projects/pocc/),
 run the commands below:
 
 ```sh
-wget -O past-0.7.3-beta.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/unstable-testing/past-0.7.3-beta.tar.gz/download'
-tar -xf past-0.7.3-beta.tar.gz
-cd past-0.7.3-beta
+wget -O past-0.7.3-peqc-mlir.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/unstable-testing/past-0.7.3-peqc-mlir.tar.gz/download'
+tar -xf past-0.7.3-peqc-mlir.tar.gz
+cd past-0.7.3-peqc-mlir
 ./configure
 make
 cd ..
@@ -71,7 +71,7 @@ source install-and-build.sh [path to llvm build/lib/cmake directory] [optional: 
 After installing the prerequisites, run the commands below to build PEQC-MLIR with the following substitutions:
 
 * `[llvm-cmake]` replaced with LLVM's CMake configuration directory, e.g. `/opt/mlir-air/llvm/build/lib/cmake`.
-* `[air-repo]` replaced with the MLIR-AIR project root, e.g. `/opt/mlir-air`. This line should be omitted if compiling without air.
+* `[air-repo]` replaced with the MLIR-AIR project root, e.g. `/opt/mlir-air`. This line should be omitted if compiling without AIR.
 * `[past]` replaced with the location of PAST/PEQC, e.g. `./past-0.7.3-beta`.
 
 ```sh
@@ -87,8 +87,6 @@ cmake --build . --target check-verif
 ```
 
 If `AIR_DIR` isn't passed to CMake as a definition, PEQC-MLIR will be built without MLIR-AIR passes.
-
-Currently, around 16 tests will fail after building, but the executables `build/bin/verif-opt` and `build/bin/verif-translate` should exist after running these commands.
 
 ### Troubleshooting
 
@@ -131,8 +129,7 @@ Check two MLIR files for equivalence: each file must define 'func.func @main' as
 positional arguments:
   file1                 MLIR file to check for equivalence
   file2                 MLIR file to check for equivalence
-  liveoutvars           comma-separated list of variable names to check for equivalence: each must
-                        be declared as memref.global
+  liveoutvars           comma-separated list of variable names to check for equivalence: each must be declared as memref.global
 
 options:
   -h, --help            show this help message and exit
@@ -143,6 +140,8 @@ options:
   --keep                keep intermediate translation/conversion files
   --temp-dir TEMP_DIR   the directory to store intermediate files in, default .peqc-files
   --seq-verif-only      runs PEQC with "--seq-verif-only"
+  --pastchecker-path PASTCHECKER_PATH
+                        how to invoke pastchecker: default is pastchecker (assumes pastchecker is in your path)
 ```
 
 The files taken as input have the following restrictions:
@@ -204,7 +203,7 @@ verif-translate --translate-to-past [input file]
 ### Supported operations
 
 * operations in the `verif` dialect, listed [here](#operations-in-the-verif-dialect)
-* basic `arith` ops: constant, add, mul, div
+* basic `arith` ops: constant, add, mul, div, etc.
 * `scf.for`, `scf.yield`
 * `scf.if`
 * `func.func`, `func.call`, `func.return`
@@ -224,18 +223,41 @@ The `verif-opt` tool converts operations not supported by the translator to a co
 
 ### Supported operations
 
+* `scf.parallel` restriction: `init` types have to implement `MemRefElementTypeInterface`
+
+AIR
 * `air.execute`
 * `air.herd`, `air.segment`, `air.launch`
 * `air.dma_memcpy_nd` restriction: src and dst same rank
 * `air.channel`
-* `scf.parallel` restriction: `init` types have to implement `MemRefElementTypeInterface`
+
+AIE
+* `aie.core`, `aie.buffer`
+* `aie.mem/memtile` with `aie.dma_start/dma_bd/end` blocks: pass assumes that all dma_start ops execute exactly once
+* `aie.flow`: dma bundle only
+* `aie.lock`, `aie.use_lock`
 
 
 
 ## Conversion passes (`verif-opt`)
 
-This documentation is automatically generated from `include/VerifPasses.td` and is found at
-`build/docs/Dialect/VerifPasses.md` after building PEQC-MLIR.
+This documentation is automatically generated from `include/VerifPasses.td` and `include/VerifAirPasses.td` and is found at
+`build/docs/Dialect/VerifPasses.md` and `build/docs/Dialect/VerifAirPasses.md` after building PEQC-MLIR.
+
+### `-verif-scf-parallel-to-async`
+
+_Convert scf.parallel to scf.for and async.execute_
+
+Convert 'scf.parallel' to nested `scf.for` loops with an `async.execute` body.
+Requires the `scf.parallel` `init` argument types to implement `MemRefElementTypeInterface`,
+i.e. be storable in a memref.
+
+See tests `test/verif/convert/unit/par-basic.mlir`, `test/verif/convert/unit/par-docs-example.mlir`.
+
+
+### `-verif-air-convert-channel`
+
+_Convert air.channel to memref operations and async.execute_
 
 
 ### `-verif-air-dma-to-memref`
@@ -245,7 +267,8 @@ _Convert air.dma_memcpy_nd to memref operations_
 Convert `air.dma_memcpy_nd` to a combination of `memref.subview` and `memref.copy` operations,
 wrapping in `async.execute` if `async` is specified.
 
-See tests `test/verif/convert/unit/air-dma-nd-basic.mlir`, `test/verif/convert/unit/air-dma-nd-basic-async.mlir`.
+See tests `test/verif/convert/unit/air/air-dma-nd-basic.mlir`, `test/verif/convert/unit/air/air-dma-nd-basic-async.mlir`.
+
 ### `-verif-air-execute-to-async`
 
 _Convert air.execute to async.execute_
@@ -258,7 +281,8 @@ If declared inside the `air.execute` region,
 scalar return values are stored in a memref declared outside the region,
 and the `memref.alloc` ops are moved outside of the region.
 
-See tests `test/verif/convert/unit/air-exec-scalar.mlir`, `test/verif/convert/unit/air-exec-alloc.mlir`.
+See tests `test/verif/convert/unit/air/air-exec-scalar.mlir`, `test/verif/convert/unit/air/air-exec-alloc.mlir`.
+
 ### `-verif-air-to-scf-par`
 
 _Convert air.launch, air.segment, and air.herd to scf.parallel_
@@ -267,16 +291,21 @@ Convert `air.launch`, `air.segment`, and `air.herd` to an `scf.parallel` operati
 loop iterators starting at 0.
 If air ops are `async`, the `scf.parallel` operation is wrapped in `async.execute`.
 
-See tests `test/verif/convert/unit/air-herd-basic.mlir`, `test/verif/convert/unit/air-launch-basic-async.mlir`.
-### `-verif-scf-parallel-to-async`
+See tests `test/verif/convert/unit/air/air-herd-basic.mlir`, `test/verif/convert/unit/air/air-launch-basic.mlir`.
 
-_Convert scf.parallel to scf.for and async.execute_
+### `-verif-convert-aie`
 
-Convert 'scf.parallel' to nested `scf.for` loops with an `async.execute` body.
-Requires the `scf.parallel` `init` argument types to implement `MemRefElementTypeInterface`,
-i.e. be storable in a memref.
+_Convert aie operations_
 
-See tests `test/verif/convert/unit/par-basic.mlir`, `test/verif/convert/unit/par-docs-example.mlir`.
+Converts (a subset of) AIE operations to standard dialects.
+
+To use in `verif-translate`, `--affine-expand-index-ops` and/or `--lower-affine` must be used to lower the introduced `affine` ops.
+
+#### Options
+
+```
+-counting-semaphore-to-spawn : convert multi-producer counting semaphore pattern to async spawn
+```
 
 
 ## Operations in the `verif` dialect
@@ -287,29 +316,56 @@ This documentation is automatically generated from `include/VerifOps.td` and is 
 
 ### `verif.semaphore` (verif::SemaphoreOp)
 
+_Semaphore declaration_
+
 Syntax:
 
 ```
-operation ::= `verif.semaphore` attr-dict `init` $init
+operation ::= `verif.semaphore` `(` $init `)` attr-dict
 ```
 
-Declares a new semaphore.
+Declares a new semaphore initialized to `init`.
 
 Interfaces: `InferTypeOpInterface`
 
-#### Operands:
+#### Attributes:
 
-| Operand | Description |
-| :-----: | ----------- |
-| `init` | index
+<table>
+<tr><th>Attribute</th><th>MLIR Type</th><th>Description</th></tr>
+<tr><td><code>init</code></td><td>::mlir::IntegerAttr</td><td><details><summary>An Attribute containing a integer value</summary>{{% markdown %}}
+    Syntax:
+
+    ```
+    integer-attribute ::= (integer-literal ( `:` (index-type | integer-type) )?)
+                          | `true` | `false`
+    ```
+
+    An integer attribute is a literal attribute that represents an integral
+    value of the specified integer or index type. `i1` integer attributes are
+    treated as `boolean` attributes, and use a unique assembly format of either
+    `true` or `false` depending on the value. The default type for non-boolean
+    integer attributes, if a type is not specified, is signless 64-bit integer.
+
+    Examples:
+
+    ```mlir
+    10 : i32
+    10    // : i64 is implied here.
+    true  // A bool, i.e. i1, value.
+    false // A bool, i.e. i1, value.
+    ```
+  {{% /markdown %}}</details></td></tr>
+</table>
 
 #### Results:
 
 | Result | Description |
 | :----: | ----------- |
-| `sem` | semaphore
+| `sem` | semaphore |
 
 ### `verif.semaphore.set` (verif::SemaphoreSetOp)
+
+_Semaphore set_
 
 Syntax:
 
@@ -323,10 +379,13 @@ Set semaphore `sem` to value `val`.
 
 | Operand | Description |
 | :-----: | ----------- |
-| `sem` | semaphore
-| `val` | index
+| `sem` | semaphore |
+| `val` | index |
+
 
 ### `verif.semaphore.wait` (verif::SemaphoreWaitOp)
+
+_Semaphore wait_
 
 Syntax:
 
@@ -340,8 +399,116 @@ Blocking wait on semaphore `sem` until it is assigned the value `val`.
 
 | Operand | Description |
 | :-----: | ----------- |
-| `sem` | semaphore
-| `val` | index
+| `sem` | semaphore |
+| `val` | index |
+
+### `verif.counting_semaphore` (verif::CountingSemaphoreOp)
+
+_Counting semaphore declaration_
+
+Syntax:
+
+```
+operation ::= `verif.counting_semaphore` `(` $init `)` attr-dict
+```
+
+Declares a new counting semaphore initialized to `init`.
+
+Interfaces: `InferTypeOpInterface`
+
+#### Attributes:
+
+<table>
+<tr><th>Attribute</th><th>MLIR Type</th><th>Description</th></tr>
+<tr><td><code>init</code></td><td>::mlir::IntegerAttr</td><td><details><summary>An Attribute containing a integer value</summary>{{% markdown %}}
+    Syntax:
+
+    ```
+    integer-attribute ::= (integer-literal ( `:` (index-type | integer-type) )?)
+                          | `true` | `false`
+    ```
+
+    An integer attribute is a literal attribute that represents an integral
+    value of the specified integer or index type. `i1` integer attributes are
+    treated as `boolean` attributes, and use a unique assembly format of either
+    `true` or `false` depending on the value. The default type for non-boolean
+    integer attributes, if a type is not specified, is signless 64-bit integer.
+
+    Examples:
+
+    ```mlir
+    10 : i32
+    10    // : i64 is implied here.
+    true  // A bool, i.e. i1, value.
+    false // A bool, i.e. i1, value.
+    ```
+  {{% /markdown %}}</details></td></tr>
+</table>
+
+#### Results:
+
+| Result | Description |
+| :----: | ----------- |
+| `sem` | counting semaphore |
+
+### `verif.semaphore.release` (verif::SemaphoreReleaseOp)
+
+_Counting semaphore release_
+
+Syntax:
+
+```
+operation ::= `verif.semaphore.release` $sem attr-dict `,` $val
+```
+
+Increments counting semaphore `sem` by `val`.
+
+#### Operands:
+
+| Operand | Description |
+| :-----: | ----------- |
+| `sem` | counting semaphore |
+| `val` | index |
+
+### `verif.semaphore.acquire` (verif::SemaphoreAcquireOp)
+
+_Counting semaphore acquire_
+
+Syntax:
+
+```
+operation ::= `verif.semaphore.acquire` $sem attr-dict `,` $val
+```
+
+Blocking wait on counting semaphore `sem` until its value is >= `val`, then decrement `sem` by `val`.
+
+#### Operands:
+
+| Operand | Description |
+| :-----: | ----------- |
+| `sem` | counting semaphore |
+| `val` | index |
+
+### `verif.error` (verif::ErrorOp)
+
+_Runtime error_
+
+Syntax:
+
+```
+operation ::= `verif.error` $message attr-dict
+```
+
+Throw a runtime error during interpretation in PEQC.
+
+#### Attributes:
+
+<table>
+<tr><th>Attribute</th><th>MLIR Type</th><th>Description</th></tr>
+<tr><td><code>message</code></td><td>::mlir::StringAttr</td><td>string attribute</td></tr>
+</table>
+
+
 
 ## Polybench experiments
 
