@@ -83,7 +83,7 @@ block_0:
   int arith_const_0_90 = 0; 
   int memref_load_91 = aie_lock_semaphore_arr_26[arith_const_0_90]; 
   int arith_const_1_92 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_91, arith_const_1_92); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_91, arith_const_1_92); 
   int arith_const_6_93 = 6; 
   int memref_load_94 = aie_global_semaphore_array[arith_const_6_93]; 
   int arith_const_0_95 = 0; 
@@ -107,14 +107,14 @@ block_0:
   int arith_const_0_109 = 0; 
   int memref_load_110 = aie_lock_semaphore_arr_27[arith_const_0_109]; 
   int arith_const_1_111 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_110, arith_const_1_111); 
+  PAST_RELEASE_SEMAPHORE(memref_load_110, arith_const_1_111); 
   goto block_1; 
 block_1:
   ; 
   int arith_const_0_112 = 0; 
   int memref_load_113 = aie_lock_semaphore_arr_26[arith_const_0_112]; 
   int arith_const_1_114 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_113, arith_const_1_114); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_113, arith_const_1_114); 
   int arith_const_6_115 = 6; 
   int memref_load_116 = aie_global_semaphore_array[arith_const_6_115]; 
   int arith_const_0_117 = 0; 
@@ -138,7 +138,7 @@ block_1:
   int arith_const_0_131 = 0; 
   int memref_load_132 = aie_lock_semaphore_arr_27[arith_const_0_131]; 
   int arith_const_1_133 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_132, arith_const_1_133); 
+  PAST_RELEASE_SEMAPHORE(memref_load_132, arith_const_1_133); 
   goto block_0; 
   return; 
 
@@ -151,7 +151,7 @@ block_2:
   int arith_const_0_135 = 0; 
   int memref_load_136 = aie_lock_semaphore_arr_24[arith_const_0_135]; 
   int arith_const_1_137 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_136, arith_const_1_137); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_136, arith_const_1_137); 
   int arith_const_10_138 = 10; 
   int memref_load_139 = aie_global_semaphore_array[arith_const_10_138]; 
   int arith_const_0_140 = 0; 
@@ -175,14 +175,14 @@ block_2:
   int arith_const_0_154 = 0; 
   int memref_load_155 = aie_lock_semaphore_arr_25[arith_const_0_154]; 
   int arith_const_1_156 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_155, arith_const_1_156); 
+  PAST_RELEASE_SEMAPHORE(memref_load_155, arith_const_1_156); 
   goto block_3; 
 block_3:
   ; 
   int arith_const_0_157 = 0; 
   int memref_load_158 = aie_lock_semaphore_arr_24[arith_const_0_157]; 
   int arith_const_1_159 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_158, arith_const_1_159); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_158, arith_const_1_159); 
   int arith_const_10_160 = 10; 
   int memref_load_161 = aie_global_semaphore_array[arith_const_10_160]; 
   int arith_const_0_162 = 0; 
@@ -206,7 +206,7 @@ block_3:
   int arith_const_0_176 = 0; 
   int memref_load_177 = aie_lock_semaphore_arr_25[arith_const_0_176]; 
   int arith_const_1_178 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_177, arith_const_1_178); 
+  PAST_RELEASE_SEMAPHORE(memref_load_177, arith_const_1_178); 
   goto block_2; 
   return; 
 
@@ -219,7 +219,7 @@ block_4:
   int arith_const_0_180 = 0; 
   int memref_load_181 = aie_lock_semaphore_arr_29[arith_const_0_180]; 
   int arith_const_1_182 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_181, arith_const_1_182); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_181, arith_const_1_182); 
   int arith_const_14_183 = 14; 
   int memref_load_184 = aie_global_semaphore_array[arith_const_14_183]; 
   int arith_const_0_185 = 0; 
@@ -243,7 +243,7 @@ block_4:
   int arith_const_0_199 = 0; 
   int memref_load_200 = aie_lock_semaphore_arr_28[arith_const_0_199]; 
   int arith_const_1_201 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_200, arith_const_1_201); 
+  PAST_RELEASE_SEMAPHORE(memref_load_200, arith_const_1_201); 
   goto block_4; 
   return; 
 
@@ -262,7 +262,7 @@ block_5:
   int arith_const_0_209 = 0; 
   int memref_load_210 = aie_lock_semaphore_arr_28[arith_const_0_209]; 
   int arith_const_1_211 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_210, arith_const_1_211); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_210, arith_const_1_211); 
   for (int for_iter_212 = arith_const_0_208; for_iter_212 < arith_const_4_206; for_iter_212 += arith_const_1_207) {
     for (int for_iter_213 = arith_const_0_208; for_iter_213 < arith_const_4_206; for_iter_213 += arith_const_1_207) {
       aie_buffer_buf19[for_iter_212][for_iter_213] = arith_const_0_204; 
@@ -272,11 +272,11 @@ block_5:
     int arith_const_0_215 = 0; 
     int memref_load_216 = aie_lock_semaphore_arr_27[arith_const_0_215]; 
     int arith_const_1_217 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_216, arith_const_1_217); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_216, arith_const_1_217); 
     int arith_const_0_218 = 0; 
     int memref_load_219 = aie_lock_semaphore_arr_25[arith_const_0_218]; 
     int arith_const_1_220 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_219, arith_const_1_220); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_219, arith_const_1_220); 
     for (int for_iter_221 = arith_const_0_208; for_iter_221 < arith_const_4_206; for_iter_221 += arith_const_1_207) {
       for (int for_iter_222 = arith_const_0_208; for_iter_222 < arith_const_4_206; for_iter_222 += arith_const_1_207) {
         for (int for_iter_223 = arith_const_0_208; for_iter_223 < arith_const_4_206; for_iter_223 += arith_const_1_207) {
@@ -292,19 +292,19 @@ block_5:
     int arith_const_0_229 = 0; 
     int memref_load_230 = aie_lock_semaphore_arr_24[arith_const_0_229]; 
     int arith_const_1_231 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_230, arith_const_1_231); 
+    PAST_RELEASE_SEMAPHORE(memref_load_230, arith_const_1_231); 
     int arith_const_0_232 = 0; 
     int memref_load_233 = aie_lock_semaphore_arr_26[arith_const_0_232]; 
     int arith_const_1_234 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_233, arith_const_1_234); 
+    PAST_RELEASE_SEMAPHORE(memref_load_233, arith_const_1_234); 
     int arith_const_0_235 = 0; 
     int memref_load_236 = aie_lock_semaphore_arr_27[arith_const_0_235]; 
     int arith_const_1_237 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_236, arith_const_1_237); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_236, arith_const_1_237); 
     int arith_const_0_238 = 0; 
     int memref_load_239 = aie_lock_semaphore_arr_25[arith_const_0_238]; 
     int arith_const_1_240 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_239, arith_const_1_240); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_239, arith_const_1_240); 
     for (int for_iter_241 = arith_const_0_208; for_iter_241 < arith_const_4_206; for_iter_241 += arith_const_1_207) {
       for (int for_iter_242 = arith_const_0_208; for_iter_242 < arith_const_4_206; for_iter_242 += arith_const_1_207) {
         for (int for_iter_243 = arith_const_0_208; for_iter_243 < arith_const_4_206; for_iter_243 += arith_const_1_207) {
@@ -320,16 +320,16 @@ block_5:
     int arith_const_0_249 = 0; 
     int memref_load_250 = aie_lock_semaphore_arr_24[arith_const_0_249]; 
     int arith_const_1_251 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_250, arith_const_1_251); 
+    PAST_RELEASE_SEMAPHORE(memref_load_250, arith_const_1_251); 
     int arith_const_0_252 = 0; 
     int memref_load_253 = aie_lock_semaphore_arr_26[arith_const_0_252]; 
     int arith_const_1_254 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_253, arith_const_1_254); 
+    PAST_RELEASE_SEMAPHORE(memref_load_253, arith_const_1_254); 
   }
   int arith_const_0_255 = 0; 
   int memref_load_256 = aie_lock_semaphore_arr_29[arith_const_0_255]; 
   int arith_const_1_257 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_256, arith_const_1_257); 
+  PAST_RELEASE_SEMAPHORE(memref_load_256, arith_const_1_257); 
   goto block_5; 
   return; 
 
@@ -342,7 +342,7 @@ block_6:
   int arith_const_0_259 = 0; 
   int memref_load_260 = aie_lock_semaphore_arr_20[arith_const_0_259]; 
   int arith_const_1_261 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_260, arith_const_1_261); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_260, arith_const_1_261); 
   int arith_const_5_262 = 5; 
   int memref_load_263 = aie_global_semaphore_array[arith_const_5_262]; 
   int arith_const_0_264 = 0; 
@@ -366,14 +366,14 @@ block_6:
   int arith_const_0_278 = 0; 
   int memref_load_279 = aie_lock_semaphore_arr_21[arith_const_0_278]; 
   int arith_const_1_280 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_279, arith_const_1_280); 
+  PAST_RELEASE_SEMAPHORE(memref_load_279, arith_const_1_280); 
   goto block_7; 
 block_7:
   ; 
   int arith_const_0_281 = 0; 
   int memref_load_282 = aie_lock_semaphore_arr_20[arith_const_0_281]; 
   int arith_const_1_283 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_282, arith_const_1_283); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_282, arith_const_1_283); 
   int arith_const_5_284 = 5; 
   int memref_load_285 = aie_global_semaphore_array[arith_const_5_284]; 
   int arith_const_0_286 = 0; 
@@ -397,7 +397,7 @@ block_7:
   int arith_const_0_300 = 0; 
   int memref_load_301 = aie_lock_semaphore_arr_21[arith_const_0_300]; 
   int arith_const_1_302 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_301, arith_const_1_302); 
+  PAST_RELEASE_SEMAPHORE(memref_load_301, arith_const_1_302); 
   goto block_6; 
   return; 
 
@@ -410,7 +410,7 @@ block_8:
   int arith_const_0_304 = 0; 
   int memref_load_305 = aie_lock_semaphore_arr_18[arith_const_0_304]; 
   int arith_const_1_306 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_305, arith_const_1_306); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_305, arith_const_1_306); 
   int arith_const_8_307 = 8; 
   int memref_load_308 = aie_global_semaphore_array[arith_const_8_307]; 
   int arith_const_0_309 = 0; 
@@ -434,14 +434,14 @@ block_8:
   int arith_const_0_323 = 0; 
   int memref_load_324 = aie_lock_semaphore_arr_19[arith_const_0_323]; 
   int arith_const_1_325 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_324, arith_const_1_325); 
+  PAST_RELEASE_SEMAPHORE(memref_load_324, arith_const_1_325); 
   goto block_9; 
 block_9:
   ; 
   int arith_const_0_326 = 0; 
   int memref_load_327 = aie_lock_semaphore_arr_18[arith_const_0_326]; 
   int arith_const_1_328 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_327, arith_const_1_328); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_327, arith_const_1_328); 
   int arith_const_8_329 = 8; 
   int memref_load_330 = aie_global_semaphore_array[arith_const_8_329]; 
   int arith_const_0_331 = 0; 
@@ -465,7 +465,7 @@ block_9:
   int arith_const_0_345 = 0; 
   int memref_load_346 = aie_lock_semaphore_arr_19[arith_const_0_345]; 
   int arith_const_1_347 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_346, arith_const_1_347); 
+  PAST_RELEASE_SEMAPHORE(memref_load_346, arith_const_1_347); 
   goto block_8; 
   return; 
 
@@ -478,7 +478,7 @@ block_10:
   int arith_const_0_349 = 0; 
   int memref_load_350 = aie_lock_semaphore_arr_23[arith_const_0_349]; 
   int arith_const_1_351 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_350, arith_const_1_351); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_350, arith_const_1_351); 
   int arith_const_12_352 = 12; 
   int memref_load_353 = aie_global_semaphore_array[arith_const_12_352]; 
   int arith_const_0_354 = 0; 
@@ -502,7 +502,7 @@ block_10:
   int arith_const_0_368 = 0; 
   int memref_load_369 = aie_lock_semaphore_arr_22[arith_const_0_368]; 
   int arith_const_1_370 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_369, arith_const_1_370); 
+  PAST_RELEASE_SEMAPHORE(memref_load_369, arith_const_1_370); 
   goto block_10; 
   return; 
 
@@ -521,7 +521,7 @@ block_11:
   int arith_const_0_378 = 0; 
   int memref_load_379 = aie_lock_semaphore_arr_22[arith_const_0_378]; 
   int arith_const_1_380 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_379, arith_const_1_380); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_379, arith_const_1_380); 
   for (int for_iter_381 = arith_const_0_377; for_iter_381 < arith_const_4_375; for_iter_381 += arith_const_1_376) {
     for (int for_iter_382 = arith_const_0_377; for_iter_382 < arith_const_4_375; for_iter_382 += arith_const_1_376) {
       aie_buffer_buf14[for_iter_381][for_iter_382] = arith_const_0_373; 
@@ -531,11 +531,11 @@ block_11:
     int arith_const_0_384 = 0; 
     int memref_load_385 = aie_lock_semaphore_arr_21[arith_const_0_384]; 
     int arith_const_1_386 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_385, arith_const_1_386); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_385, arith_const_1_386); 
     int arith_const_0_387 = 0; 
     int memref_load_388 = aie_lock_semaphore_arr_19[arith_const_0_387]; 
     int arith_const_1_389 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_388, arith_const_1_389); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_388, arith_const_1_389); 
     for (int for_iter_390 = arith_const_0_377; for_iter_390 < arith_const_4_375; for_iter_390 += arith_const_1_376) {
       for (int for_iter_391 = arith_const_0_377; for_iter_391 < arith_const_4_375; for_iter_391 += arith_const_1_376) {
         for (int for_iter_392 = arith_const_0_377; for_iter_392 < arith_const_4_375; for_iter_392 += arith_const_1_376) {
@@ -551,19 +551,19 @@ block_11:
     int arith_const_0_398 = 0; 
     int memref_load_399 = aie_lock_semaphore_arr_18[arith_const_0_398]; 
     int arith_const_1_400 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_399, arith_const_1_400); 
+    PAST_RELEASE_SEMAPHORE(memref_load_399, arith_const_1_400); 
     int arith_const_0_401 = 0; 
     int memref_load_402 = aie_lock_semaphore_arr_20[arith_const_0_401]; 
     int arith_const_1_403 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_402, arith_const_1_403); 
+    PAST_RELEASE_SEMAPHORE(memref_load_402, arith_const_1_403); 
     int arith_const_0_404 = 0; 
     int memref_load_405 = aie_lock_semaphore_arr_21[arith_const_0_404]; 
     int arith_const_1_406 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_405, arith_const_1_406); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_405, arith_const_1_406); 
     int arith_const_0_407 = 0; 
     int memref_load_408 = aie_lock_semaphore_arr_19[arith_const_0_407]; 
     int arith_const_1_409 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_408, arith_const_1_409); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_408, arith_const_1_409); 
     for (int for_iter_410 = arith_const_0_377; for_iter_410 < arith_const_4_375; for_iter_410 += arith_const_1_376) {
       for (int for_iter_411 = arith_const_0_377; for_iter_411 < arith_const_4_375; for_iter_411 += arith_const_1_376) {
         for (int for_iter_412 = arith_const_0_377; for_iter_412 < arith_const_4_375; for_iter_412 += arith_const_1_376) {
@@ -579,16 +579,16 @@ block_11:
     int arith_const_0_418 = 0; 
     int memref_load_419 = aie_lock_semaphore_arr_18[arith_const_0_418]; 
     int arith_const_1_420 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_419, arith_const_1_420); 
+    PAST_RELEASE_SEMAPHORE(memref_load_419, arith_const_1_420); 
     int arith_const_0_421 = 0; 
     int memref_load_422 = aie_lock_semaphore_arr_20[arith_const_0_421]; 
     int arith_const_1_423 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_422, arith_const_1_423); 
+    PAST_RELEASE_SEMAPHORE(memref_load_422, arith_const_1_423); 
   }
   int arith_const_0_424 = 0; 
   int memref_load_425 = aie_lock_semaphore_arr_23[arith_const_0_424]; 
   int arith_const_1_426 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_425, arith_const_1_426); 
+  PAST_RELEASE_SEMAPHORE(memref_load_425, arith_const_1_426); 
   goto block_11; 
   return; 
 
@@ -601,7 +601,7 @@ block_12:
   int arith_const_0_428 = 0; 
   int memref_load_429 = aie_lock_semaphore_arr_14[arith_const_0_428]; 
   int arith_const_1_430 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_429, arith_const_1_430); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_429, arith_const_1_430); 
   int arith_const_4_431 = 4; 
   int memref_load_432 = aie_global_semaphore_array[arith_const_4_431]; 
   int arith_const_0_433 = 0; 
@@ -625,14 +625,14 @@ block_12:
   int arith_const_0_447 = 0; 
   int memref_load_448 = aie_lock_semaphore_arr_15[arith_const_0_447]; 
   int arith_const_1_449 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_448, arith_const_1_449); 
+  PAST_RELEASE_SEMAPHORE(memref_load_448, arith_const_1_449); 
   goto block_13; 
 block_13:
   ; 
   int arith_const_0_450 = 0; 
   int memref_load_451 = aie_lock_semaphore_arr_14[arith_const_0_450]; 
   int arith_const_1_452 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_451, arith_const_1_452); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_451, arith_const_1_452); 
   int arith_const_4_453 = 4; 
   int memref_load_454 = aie_global_semaphore_array[arith_const_4_453]; 
   int arith_const_0_455 = 0; 
@@ -656,7 +656,7 @@ block_13:
   int arith_const_0_469 = 0; 
   int memref_load_470 = aie_lock_semaphore_arr_15[arith_const_0_469]; 
   int arith_const_1_471 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_470, arith_const_1_471); 
+  PAST_RELEASE_SEMAPHORE(memref_load_470, arith_const_1_471); 
   goto block_12; 
   return; 
 
@@ -669,7 +669,7 @@ block_14:
   int arith_const_0_473 = 0; 
   int memref_load_474 = aie_lock_semaphore_arr_12[arith_const_0_473]; 
   int arith_const_1_475 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_474, arith_const_1_475); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_474, arith_const_1_475); 
   int arith_const_9_476 = 9; 
   int memref_load_477 = aie_global_semaphore_array[arith_const_9_476]; 
   int arith_const_0_478 = 0; 
@@ -693,14 +693,14 @@ block_14:
   int arith_const_0_492 = 0; 
   int memref_load_493 = aie_lock_semaphore_arr_13[arith_const_0_492]; 
   int arith_const_1_494 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_493, arith_const_1_494); 
+  PAST_RELEASE_SEMAPHORE(memref_load_493, arith_const_1_494); 
   goto block_15; 
 block_15:
   ; 
   int arith_const_0_495 = 0; 
   int memref_load_496 = aie_lock_semaphore_arr_12[arith_const_0_495]; 
   int arith_const_1_497 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_496, arith_const_1_497); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_496, arith_const_1_497); 
   int arith_const_9_498 = 9; 
   int memref_load_499 = aie_global_semaphore_array[arith_const_9_498]; 
   int arith_const_0_500 = 0; 
@@ -724,7 +724,7 @@ block_15:
   int arith_const_0_514 = 0; 
   int memref_load_515 = aie_lock_semaphore_arr_13[arith_const_0_514]; 
   int arith_const_1_516 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_515, arith_const_1_516); 
+  PAST_RELEASE_SEMAPHORE(memref_load_515, arith_const_1_516); 
   goto block_14; 
   return; 
 
@@ -737,7 +737,7 @@ block_16:
   int arith_const_0_518 = 0; 
   int memref_load_519 = aie_lock_semaphore_arr_17[arith_const_0_518]; 
   int arith_const_1_520 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_519, arith_const_1_520); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_519, arith_const_1_520); 
   int arith_const_13_521 = 13; 
   int memref_load_522 = aie_global_semaphore_array[arith_const_13_521]; 
   int arith_const_0_523 = 0; 
@@ -761,7 +761,7 @@ block_16:
   int arith_const_0_537 = 0; 
   int memref_load_538 = aie_lock_semaphore_arr_16[arith_const_0_537]; 
   int arith_const_1_539 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_538, arith_const_1_539); 
+  PAST_RELEASE_SEMAPHORE(memref_load_538, arith_const_1_539); 
   goto block_16; 
   return; 
 
@@ -780,7 +780,7 @@ block_17:
   int arith_const_0_547 = 0; 
   int memref_load_548 = aie_lock_semaphore_arr_16[arith_const_0_547]; 
   int arith_const_1_549 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_548, arith_const_1_549); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_548, arith_const_1_549); 
   for (int for_iter_550 = arith_const_0_546; for_iter_550 < arith_const_4_544; for_iter_550 += arith_const_1_545) {
     for (int for_iter_551 = arith_const_0_546; for_iter_551 < arith_const_4_544; for_iter_551 += arith_const_1_545) {
       aie_buffer_buf9[for_iter_550][for_iter_551] = arith_const_0_542; 
@@ -790,11 +790,11 @@ block_17:
     int arith_const_0_553 = 0; 
     int memref_load_554 = aie_lock_semaphore_arr_15[arith_const_0_553]; 
     int arith_const_1_555 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_554, arith_const_1_555); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_554, arith_const_1_555); 
     int arith_const_0_556 = 0; 
     int memref_load_557 = aie_lock_semaphore_arr_13[arith_const_0_556]; 
     int arith_const_1_558 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_557, arith_const_1_558); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_557, arith_const_1_558); 
     for (int for_iter_559 = arith_const_0_546; for_iter_559 < arith_const_4_544; for_iter_559 += arith_const_1_545) {
       for (int for_iter_560 = arith_const_0_546; for_iter_560 < arith_const_4_544; for_iter_560 += arith_const_1_545) {
         for (int for_iter_561 = arith_const_0_546; for_iter_561 < arith_const_4_544; for_iter_561 += arith_const_1_545) {
@@ -810,19 +810,19 @@ block_17:
     int arith_const_0_567 = 0; 
     int memref_load_568 = aie_lock_semaphore_arr_12[arith_const_0_567]; 
     int arith_const_1_569 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_568, arith_const_1_569); 
+    PAST_RELEASE_SEMAPHORE(memref_load_568, arith_const_1_569); 
     int arith_const_0_570 = 0; 
     int memref_load_571 = aie_lock_semaphore_arr_14[arith_const_0_570]; 
     int arith_const_1_572 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_571, arith_const_1_572); 
+    PAST_RELEASE_SEMAPHORE(memref_load_571, arith_const_1_572); 
     int arith_const_0_573 = 0; 
     int memref_load_574 = aie_lock_semaphore_arr_15[arith_const_0_573]; 
     int arith_const_1_575 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_574, arith_const_1_575); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_574, arith_const_1_575); 
     int arith_const_0_576 = 0; 
     int memref_load_577 = aie_lock_semaphore_arr_13[arith_const_0_576]; 
     int arith_const_1_578 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_577, arith_const_1_578); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_577, arith_const_1_578); 
     for (int for_iter_579 = arith_const_0_546; for_iter_579 < arith_const_4_544; for_iter_579 += arith_const_1_545) {
       for (int for_iter_580 = arith_const_0_546; for_iter_580 < arith_const_4_544; for_iter_580 += arith_const_1_545) {
         for (int for_iter_581 = arith_const_0_546; for_iter_581 < arith_const_4_544; for_iter_581 += arith_const_1_545) {
@@ -838,16 +838,16 @@ block_17:
     int arith_const_0_587 = 0; 
     int memref_load_588 = aie_lock_semaphore_arr_12[arith_const_0_587]; 
     int arith_const_1_589 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_588, arith_const_1_589); 
+    PAST_RELEASE_SEMAPHORE(memref_load_588, arith_const_1_589); 
     int arith_const_0_590 = 0; 
     int memref_load_591 = aie_lock_semaphore_arr_14[arith_const_0_590]; 
     int arith_const_1_592 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_591, arith_const_1_592); 
+    PAST_RELEASE_SEMAPHORE(memref_load_591, arith_const_1_592); 
   }
   int arith_const_0_593 = 0; 
   int memref_load_594 = aie_lock_semaphore_arr_17[arith_const_0_593]; 
   int arith_const_1_595 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_594, arith_const_1_595); 
+  PAST_RELEASE_SEMAPHORE(memref_load_594, arith_const_1_595); 
   goto block_17; 
   return; 
 
@@ -860,7 +860,7 @@ block_18:
   int arith_const_0_597 = 0; 
   int memref_load_598 = aie_lock_semaphore_arr_8[arith_const_0_597]; 
   int arith_const_1_599 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_598, arith_const_1_599); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_598, arith_const_1_599); 
   int arith_const_3_600 = 3; 
   int memref_load_601 = aie_global_semaphore_array[arith_const_3_600]; 
   int arith_const_0_602 = 0; 
@@ -884,14 +884,14 @@ block_18:
   int arith_const_0_616 = 0; 
   int memref_load_617 = aie_lock_semaphore_arr_9[arith_const_0_616]; 
   int arith_const_1_618 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_617, arith_const_1_618); 
+  PAST_RELEASE_SEMAPHORE(memref_load_617, arith_const_1_618); 
   goto block_19; 
 block_19:
   ; 
   int arith_const_0_619 = 0; 
   int memref_load_620 = aie_lock_semaphore_arr_8[arith_const_0_619]; 
   int arith_const_1_621 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_620, arith_const_1_621); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_620, arith_const_1_621); 
   int arith_const_3_622 = 3; 
   int memref_load_623 = aie_global_semaphore_array[arith_const_3_622]; 
   int arith_const_0_624 = 0; 
@@ -915,7 +915,7 @@ block_19:
   int arith_const_0_638 = 0; 
   int memref_load_639 = aie_lock_semaphore_arr_9[arith_const_0_638]; 
   int arith_const_1_640 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_639, arith_const_1_640); 
+  PAST_RELEASE_SEMAPHORE(memref_load_639, arith_const_1_640); 
   goto block_18; 
   return; 
 
@@ -928,7 +928,7 @@ block_20:
   int arith_const_0_642 = 0; 
   int memref_load_643 = aie_lock_semaphore_arr_6[arith_const_0_642]; 
   int arith_const_1_644 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_643, arith_const_1_644); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_643, arith_const_1_644); 
   int arith_const_7_645 = 7; 
   int memref_load_646 = aie_global_semaphore_array[arith_const_7_645]; 
   int arith_const_0_647 = 0; 
@@ -952,14 +952,14 @@ block_20:
   int arith_const_0_661 = 0; 
   int memref_load_662 = aie_lock_semaphore_arr_7[arith_const_0_661]; 
   int arith_const_1_663 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_662, arith_const_1_663); 
+  PAST_RELEASE_SEMAPHORE(memref_load_662, arith_const_1_663); 
   goto block_21; 
 block_21:
   ; 
   int arith_const_0_664 = 0; 
   int memref_load_665 = aie_lock_semaphore_arr_6[arith_const_0_664]; 
   int arith_const_1_666 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_665, arith_const_1_666); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_665, arith_const_1_666); 
   int arith_const_7_667 = 7; 
   int memref_load_668 = aie_global_semaphore_array[arith_const_7_667]; 
   int arith_const_0_669 = 0; 
@@ -983,7 +983,7 @@ block_21:
   int arith_const_0_683 = 0; 
   int memref_load_684 = aie_lock_semaphore_arr_7[arith_const_0_683]; 
   int arith_const_1_685 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_684, arith_const_1_685); 
+  PAST_RELEASE_SEMAPHORE(memref_load_684, arith_const_1_685); 
   goto block_20; 
   return; 
 
@@ -996,7 +996,7 @@ block_22:
   int arith_const_0_687 = 0; 
   int memref_load_688 = aie_lock_semaphore_arr_11[arith_const_0_687]; 
   int arith_const_1_689 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_688, arith_const_1_689); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_688, arith_const_1_689); 
   int arith_const_11_690 = 11; 
   int memref_load_691 = aie_global_semaphore_array[arith_const_11_690]; 
   int arith_const_0_692 = 0; 
@@ -1020,7 +1020,7 @@ block_22:
   int arith_const_0_706 = 0; 
   int memref_load_707 = aie_lock_semaphore_arr_10[arith_const_0_706]; 
   int arith_const_1_708 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_707, arith_const_1_708); 
+  PAST_RELEASE_SEMAPHORE(memref_load_707, arith_const_1_708); 
   goto block_22; 
   return; 
 
@@ -1039,7 +1039,7 @@ block_23:
   int arith_const_0_716 = 0; 
   int memref_load_717 = aie_lock_semaphore_arr_10[arith_const_0_716]; 
   int arith_const_1_718 = 1; 
-  COUNTING_SEMAPHORE_ACQUIRE(memref_load_717, arith_const_1_718); 
+  PAST_ACQUIRE_SEMAPHORE(memref_load_717, arith_const_1_718); 
   for (int for_iter_719 = arith_const_0_715; for_iter_719 < arith_const_4_713; for_iter_719 += arith_const_1_714) {
     for (int for_iter_720 = arith_const_0_715; for_iter_720 < arith_const_4_713; for_iter_720 += arith_const_1_714) {
       aie_buffer_buf4[for_iter_719][for_iter_720] = arith_const_0_711; 
@@ -1049,11 +1049,11 @@ block_23:
     int arith_const_0_722 = 0; 
     int memref_load_723 = aie_lock_semaphore_arr_9[arith_const_0_722]; 
     int arith_const_1_724 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_723, arith_const_1_724); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_723, arith_const_1_724); 
     int arith_const_0_725 = 0; 
     int memref_load_726 = aie_lock_semaphore_arr_7[arith_const_0_725]; 
     int arith_const_1_727 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_726, arith_const_1_727); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_726, arith_const_1_727); 
     for (int for_iter_728 = arith_const_0_715; for_iter_728 < arith_const_4_713; for_iter_728 += arith_const_1_714) {
       for (int for_iter_729 = arith_const_0_715; for_iter_729 < arith_const_4_713; for_iter_729 += arith_const_1_714) {
         for (int for_iter_730 = arith_const_0_715; for_iter_730 < arith_const_4_713; for_iter_730 += arith_const_1_714) {
@@ -1069,19 +1069,19 @@ block_23:
     int arith_const_0_736 = 0; 
     int memref_load_737 = aie_lock_semaphore_arr_6[arith_const_0_736]; 
     int arith_const_1_738 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_737, arith_const_1_738); 
+    PAST_RELEASE_SEMAPHORE(memref_load_737, arith_const_1_738); 
     int arith_const_0_739 = 0; 
     int memref_load_740 = aie_lock_semaphore_arr_8[arith_const_0_739]; 
     int arith_const_1_741 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_740, arith_const_1_741); 
+    PAST_RELEASE_SEMAPHORE(memref_load_740, arith_const_1_741); 
     int arith_const_0_742 = 0; 
     int memref_load_743 = aie_lock_semaphore_arr_9[arith_const_0_742]; 
     int arith_const_1_744 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_743, arith_const_1_744); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_743, arith_const_1_744); 
     int arith_const_0_745 = 0; 
     int memref_load_746 = aie_lock_semaphore_arr_7[arith_const_0_745]; 
     int arith_const_1_747 = 1; 
-    COUNTING_SEMAPHORE_ACQUIRE(memref_load_746, arith_const_1_747); 
+    PAST_ACQUIRE_SEMAPHORE(memref_load_746, arith_const_1_747); 
     for (int for_iter_748 = arith_const_0_715; for_iter_748 < arith_const_4_713; for_iter_748 += arith_const_1_714) {
       for (int for_iter_749 = arith_const_0_715; for_iter_749 < arith_const_4_713; for_iter_749 += arith_const_1_714) {
         for (int for_iter_750 = arith_const_0_715; for_iter_750 < arith_const_4_713; for_iter_750 += arith_const_1_714) {
@@ -1097,16 +1097,16 @@ block_23:
     int arith_const_0_756 = 0; 
     int memref_load_757 = aie_lock_semaphore_arr_6[arith_const_0_756]; 
     int arith_const_1_758 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_757, arith_const_1_758); 
+    PAST_RELEASE_SEMAPHORE(memref_load_757, arith_const_1_758); 
     int arith_const_0_759 = 0; 
     int memref_load_760 = aie_lock_semaphore_arr_8[arith_const_0_759]; 
     int arith_const_1_761 = 1; 
-    COUNTING_SEMAPHORE_RELEASE(memref_load_760, arith_const_1_761); 
+    PAST_RELEASE_SEMAPHORE(memref_load_760, arith_const_1_761); 
   }
   int arith_const_0_762 = 0; 
   int memref_load_763 = aie_lock_semaphore_arr_11[arith_const_0_762]; 
   int arith_const_1_764 = 1; 
-  COUNTING_SEMAPHORE_RELEASE(memref_load_763, arith_const_1_764); 
+  PAST_RELEASE_SEMAPHORE(memref_load_763, arith_const_1_764); 
   goto block_23; 
   return; 
 
@@ -1802,123 +1802,123 @@ block_42:
     int arith_const_14_29 = 14; 
     aie_global_semaphore_array[arith_const_14_29] = verif_semaphore_28; 
     int verif_semaphore_30; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_30, 2); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_30, 2); 
     int arith_const_0_31 = 0; 
     aie_lock_semaphore_arr_0[arith_const_0_31] = verif_semaphore_30; 
     int verif_semaphore_32; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_32, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_32, 0); 
     int arith_const_0_33 = 0; 
     aie_lock_semaphore_arr_1[arith_const_0_33] = verif_semaphore_32; 
     int verif_semaphore_34; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_34, 2); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_34, 2); 
     int arith_const_0_35 = 0; 
     aie_lock_semaphore_arr_2[arith_const_0_35] = verif_semaphore_34; 
     int verif_semaphore_36; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_36, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_36, 0); 
     int arith_const_0_37 = 0; 
     aie_lock_semaphore_arr_3[arith_const_0_37] = verif_semaphore_36; 
     int verif_semaphore_38; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_38, 4); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_38, 4); 
     int arith_const_0_39 = 0; 
     aie_lock_semaphore_arr_4[arith_const_0_39] = verif_semaphore_38; 
     int verif_semaphore_40; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_40, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_40, 0); 
     int arith_const_0_41 = 0; 
     aie_lock_semaphore_arr_5[arith_const_0_41] = verif_semaphore_40; 
     int verif_semaphore_42; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_42, 2); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_42, 2); 
     int arith_const_0_43 = 0; 
     aie_lock_semaphore_arr_6[arith_const_0_43] = verif_semaphore_42; 
     int verif_semaphore_44; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_44, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_44, 0); 
     int arith_const_0_45 = 0; 
     aie_lock_semaphore_arr_7[arith_const_0_45] = verif_semaphore_44; 
     int verif_semaphore_46; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_46, 2); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_46, 2); 
     int arith_const_0_47 = 0; 
     aie_lock_semaphore_arr_8[arith_const_0_47] = verif_semaphore_46; 
     int verif_semaphore_48; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_48, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_48, 0); 
     int arith_const_0_49 = 0; 
     aie_lock_semaphore_arr_9[arith_const_0_49] = verif_semaphore_48; 
     int verif_semaphore_50; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_50, 1); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_50, 1); 
     int arith_const_0_51 = 0; 
     aie_lock_semaphore_arr_10[arith_const_0_51] = verif_semaphore_50; 
     int verif_semaphore_52; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_52, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_52, 0); 
     int arith_const_0_53 = 0; 
     aie_lock_semaphore_arr_11[arith_const_0_53] = verif_semaphore_52; 
     int verif_semaphore_54; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_54, 2); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_54, 2); 
     int arith_const_0_55 = 0; 
     aie_lock_semaphore_arr_12[arith_const_0_55] = verif_semaphore_54; 
     int verif_semaphore_56; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_56, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_56, 0); 
     int arith_const_0_57 = 0; 
     aie_lock_semaphore_arr_13[arith_const_0_57] = verif_semaphore_56; 
     int verif_semaphore_58; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_58, 2); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_58, 2); 
     int arith_const_0_59 = 0; 
     aie_lock_semaphore_arr_14[arith_const_0_59] = verif_semaphore_58; 
     int verif_semaphore_60; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_60, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_60, 0); 
     int arith_const_0_61 = 0; 
     aie_lock_semaphore_arr_15[arith_const_0_61] = verif_semaphore_60; 
     int verif_semaphore_62; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_62, 1); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_62, 1); 
     int arith_const_0_63 = 0; 
     aie_lock_semaphore_arr_16[arith_const_0_63] = verif_semaphore_62; 
     int verif_semaphore_64; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_64, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_64, 0); 
     int arith_const_0_65 = 0; 
     aie_lock_semaphore_arr_17[arith_const_0_65] = verif_semaphore_64; 
     int verif_semaphore_66; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_66, 2); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_66, 2); 
     int arith_const_0_67 = 0; 
     aie_lock_semaphore_arr_18[arith_const_0_67] = verif_semaphore_66; 
     int verif_semaphore_68; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_68, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_68, 0); 
     int arith_const_0_69 = 0; 
     aie_lock_semaphore_arr_19[arith_const_0_69] = verif_semaphore_68; 
     int verif_semaphore_70; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_70, 2); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_70, 2); 
     int arith_const_0_71 = 0; 
     aie_lock_semaphore_arr_20[arith_const_0_71] = verif_semaphore_70; 
     int verif_semaphore_72; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_72, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_72, 0); 
     int arith_const_0_73 = 0; 
     aie_lock_semaphore_arr_21[arith_const_0_73] = verif_semaphore_72; 
     int verif_semaphore_74; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_74, 1); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_74, 1); 
     int arith_const_0_75 = 0; 
     aie_lock_semaphore_arr_22[arith_const_0_75] = verif_semaphore_74; 
     int verif_semaphore_76; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_76, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_76, 0); 
     int arith_const_0_77 = 0; 
     aie_lock_semaphore_arr_23[arith_const_0_77] = verif_semaphore_76; 
     int verif_semaphore_78; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_78, 2); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_78, 2); 
     int arith_const_0_79 = 0; 
     aie_lock_semaphore_arr_24[arith_const_0_79] = verif_semaphore_78; 
     int verif_semaphore_80; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_80, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_80, 0); 
     int arith_const_0_81 = 0; 
     aie_lock_semaphore_arr_25[arith_const_0_81] = verif_semaphore_80; 
     int verif_semaphore_82; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_82, 2); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_82, 2); 
     int arith_const_0_83 = 0; 
     aie_lock_semaphore_arr_26[arith_const_0_83] = verif_semaphore_82; 
     int verif_semaphore_84; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_84, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_84, 0); 
     int arith_const_0_85 = 0; 
     aie_lock_semaphore_arr_27[arith_const_0_85] = verif_semaphore_84; 
     int verif_semaphore_86; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_86, 1); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_86, 1); 
     int arith_const_0_87 = 0; 
     aie_lock_semaphore_arr_28[arith_const_0_87] = verif_semaphore_86; 
     int verif_semaphore_88; 
-    PAST_NEW_SEMAPHORE(verif_semaphore_88, 0); 
+    PAST_NEW_COUNTING_SEMAPHORE(verif_semaphore_88, 0); 
     int arith_const_0_89 = 0; 
     aie_lock_semaphore_arr_29[arith_const_0_89] = verif_semaphore_88; 
     PAST_NEW_SEMAPHORE(execute_token_134, PAST_TASK_INIT); 

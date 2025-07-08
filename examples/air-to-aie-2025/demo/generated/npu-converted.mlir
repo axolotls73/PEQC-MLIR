@@ -75,156 +75,156 @@ module {
   %29 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
   %c14 = arith.constant 14 : index
   memref.store %28, %29[%c14] : memref<128x!verif.semaphore>
-  %30 = verif.semaphore(2 : index)
-  memref.global "private" @aie_lock_semaphore_arr_0 : memref<1x!verif.semaphore>
-  %31 = memref.get_global @aie_lock_semaphore_arr_0 : memref<1x!verif.semaphore>
+  %30 = verif.counting_semaphore(2 : index)
+  memref.global "private" @aie_lock_semaphore_arr_0 : memref<1x!verif.counting_semaphore>
+  %31 = memref.get_global @aie_lock_semaphore_arr_0 : memref<1x!verif.counting_semaphore>
   %c0_0 = arith.constant 0 : index
-  memref.store %30, %31[%c0_0] : memref<1x!verif.semaphore>
-  %32 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_1 : memref<1x!verif.semaphore>
-  %33 = memref.get_global @aie_lock_semaphore_arr_1 : memref<1x!verif.semaphore>
+  memref.store %30, %31[%c0_0] : memref<1x!verif.counting_semaphore>
+  %32 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_1 : memref<1x!verif.counting_semaphore>
+  %33 = memref.get_global @aie_lock_semaphore_arr_1 : memref<1x!verif.counting_semaphore>
   %c0_1 = arith.constant 0 : index
-  memref.store %32, %33[%c0_1] : memref<1x!verif.semaphore>
-  %34 = verif.semaphore(2 : index)
-  memref.global "private" @aie_lock_semaphore_arr_2 : memref<1x!verif.semaphore>
-  %35 = memref.get_global @aie_lock_semaphore_arr_2 : memref<1x!verif.semaphore>
+  memref.store %32, %33[%c0_1] : memref<1x!verif.counting_semaphore>
+  %34 = verif.counting_semaphore(2 : index)
+  memref.global "private" @aie_lock_semaphore_arr_2 : memref<1x!verif.counting_semaphore>
+  %35 = memref.get_global @aie_lock_semaphore_arr_2 : memref<1x!verif.counting_semaphore>
   %c0_2 = arith.constant 0 : index
-  memref.store %34, %35[%c0_2] : memref<1x!verif.semaphore>
-  %36 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_3 : memref<1x!verif.semaphore>
-  %37 = memref.get_global @aie_lock_semaphore_arr_3 : memref<1x!verif.semaphore>
+  memref.store %34, %35[%c0_2] : memref<1x!verif.counting_semaphore>
+  %36 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_3 : memref<1x!verif.counting_semaphore>
+  %37 = memref.get_global @aie_lock_semaphore_arr_3 : memref<1x!verif.counting_semaphore>
   %c0_3 = arith.constant 0 : index
-  memref.store %36, %37[%c0_3] : memref<1x!verif.semaphore>
-  %38 = verif.semaphore(4 : index)
-  memref.global "private" @aie_lock_semaphore_arr_4 : memref<1x!verif.semaphore>
-  %39 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.semaphore>
+  memref.store %36, %37[%c0_3] : memref<1x!verif.counting_semaphore>
+  %38 = verif.counting_semaphore(4 : index)
+  memref.global "private" @aie_lock_semaphore_arr_4 : memref<1x!verif.counting_semaphore>
+  %39 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.counting_semaphore>
   %c0_4 = arith.constant 0 : index
-  memref.store %38, %39[%c0_4] : memref<1x!verif.semaphore>
-  %40 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_5 : memref<1x!verif.semaphore>
-  %41 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.semaphore>
+  memref.store %38, %39[%c0_4] : memref<1x!verif.counting_semaphore>
+  %40 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_5 : memref<1x!verif.counting_semaphore>
+  %41 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.counting_semaphore>
   %c0_5 = arith.constant 0 : index
-  memref.store %40, %41[%c0_5] : memref<1x!verif.semaphore>
-  %42 = verif.semaphore(2 : index)
-  memref.global "private" @aie_lock_semaphore_arr_6 : memref<1x!verif.semaphore>
-  %43 = memref.get_global @aie_lock_semaphore_arr_6 : memref<1x!verif.semaphore>
+  memref.store %40, %41[%c0_5] : memref<1x!verif.counting_semaphore>
+  %42 = verif.counting_semaphore(2 : index)
+  memref.global "private" @aie_lock_semaphore_arr_6 : memref<1x!verif.counting_semaphore>
+  %43 = memref.get_global @aie_lock_semaphore_arr_6 : memref<1x!verif.counting_semaphore>
   %c0_6 = arith.constant 0 : index
-  memref.store %42, %43[%c0_6] : memref<1x!verif.semaphore>
-  %44 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_7 : memref<1x!verif.semaphore>
-  %45 = memref.get_global @aie_lock_semaphore_arr_7 : memref<1x!verif.semaphore>
+  memref.store %42, %43[%c0_6] : memref<1x!verif.counting_semaphore>
+  %44 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_7 : memref<1x!verif.counting_semaphore>
+  %45 = memref.get_global @aie_lock_semaphore_arr_7 : memref<1x!verif.counting_semaphore>
   %c0_7 = arith.constant 0 : index
-  memref.store %44, %45[%c0_7] : memref<1x!verif.semaphore>
-  %46 = verif.semaphore(2 : index)
-  memref.global "private" @aie_lock_semaphore_arr_8 : memref<1x!verif.semaphore>
-  %47 = memref.get_global @aie_lock_semaphore_arr_8 : memref<1x!verif.semaphore>
+  memref.store %44, %45[%c0_7] : memref<1x!verif.counting_semaphore>
+  %46 = verif.counting_semaphore(2 : index)
+  memref.global "private" @aie_lock_semaphore_arr_8 : memref<1x!verif.counting_semaphore>
+  %47 = memref.get_global @aie_lock_semaphore_arr_8 : memref<1x!verif.counting_semaphore>
   %c0_8 = arith.constant 0 : index
-  memref.store %46, %47[%c0_8] : memref<1x!verif.semaphore>
-  %48 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_9 : memref<1x!verif.semaphore>
-  %49 = memref.get_global @aie_lock_semaphore_arr_9 : memref<1x!verif.semaphore>
+  memref.store %46, %47[%c0_8] : memref<1x!verif.counting_semaphore>
+  %48 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_9 : memref<1x!verif.counting_semaphore>
+  %49 = memref.get_global @aie_lock_semaphore_arr_9 : memref<1x!verif.counting_semaphore>
   %c0_9 = arith.constant 0 : index
-  memref.store %48, %49[%c0_9] : memref<1x!verif.semaphore>
-  %50 = verif.semaphore(1 : index)
-  memref.global "private" @aie_lock_semaphore_arr_10 : memref<1x!verif.semaphore>
-  %51 = memref.get_global @aie_lock_semaphore_arr_10 : memref<1x!verif.semaphore>
+  memref.store %48, %49[%c0_9] : memref<1x!verif.counting_semaphore>
+  %50 = verif.counting_semaphore(1 : index)
+  memref.global "private" @aie_lock_semaphore_arr_10 : memref<1x!verif.counting_semaphore>
+  %51 = memref.get_global @aie_lock_semaphore_arr_10 : memref<1x!verif.counting_semaphore>
   %c0_10 = arith.constant 0 : index
-  memref.store %50, %51[%c0_10] : memref<1x!verif.semaphore>
-  %52 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_11 : memref<1x!verif.semaphore>
-  %53 = memref.get_global @aie_lock_semaphore_arr_11 : memref<1x!verif.semaphore>
+  memref.store %50, %51[%c0_10] : memref<1x!verif.counting_semaphore>
+  %52 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_11 : memref<1x!verif.counting_semaphore>
+  %53 = memref.get_global @aie_lock_semaphore_arr_11 : memref<1x!verif.counting_semaphore>
   %c0_11 = arith.constant 0 : index
-  memref.store %52, %53[%c0_11] : memref<1x!verif.semaphore>
-  %54 = verif.semaphore(2 : index)
-  memref.global "private" @aie_lock_semaphore_arr_12 : memref<1x!verif.semaphore>
-  %55 = memref.get_global @aie_lock_semaphore_arr_12 : memref<1x!verif.semaphore>
+  memref.store %52, %53[%c0_11] : memref<1x!verif.counting_semaphore>
+  %54 = verif.counting_semaphore(2 : index)
+  memref.global "private" @aie_lock_semaphore_arr_12 : memref<1x!verif.counting_semaphore>
+  %55 = memref.get_global @aie_lock_semaphore_arr_12 : memref<1x!verif.counting_semaphore>
   %c0_12 = arith.constant 0 : index
-  memref.store %54, %55[%c0_12] : memref<1x!verif.semaphore>
-  %56 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_13 : memref<1x!verif.semaphore>
-  %57 = memref.get_global @aie_lock_semaphore_arr_13 : memref<1x!verif.semaphore>
+  memref.store %54, %55[%c0_12] : memref<1x!verif.counting_semaphore>
+  %56 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_13 : memref<1x!verif.counting_semaphore>
+  %57 = memref.get_global @aie_lock_semaphore_arr_13 : memref<1x!verif.counting_semaphore>
   %c0_13 = arith.constant 0 : index
-  memref.store %56, %57[%c0_13] : memref<1x!verif.semaphore>
-  %58 = verif.semaphore(2 : index)
-  memref.global "private" @aie_lock_semaphore_arr_14 : memref<1x!verif.semaphore>
-  %59 = memref.get_global @aie_lock_semaphore_arr_14 : memref<1x!verif.semaphore>
+  memref.store %56, %57[%c0_13] : memref<1x!verif.counting_semaphore>
+  %58 = verif.counting_semaphore(2 : index)
+  memref.global "private" @aie_lock_semaphore_arr_14 : memref<1x!verif.counting_semaphore>
+  %59 = memref.get_global @aie_lock_semaphore_arr_14 : memref<1x!verif.counting_semaphore>
   %c0_14 = arith.constant 0 : index
-  memref.store %58, %59[%c0_14] : memref<1x!verif.semaphore>
-  %60 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_15 : memref<1x!verif.semaphore>
-  %61 = memref.get_global @aie_lock_semaphore_arr_15 : memref<1x!verif.semaphore>
+  memref.store %58, %59[%c0_14] : memref<1x!verif.counting_semaphore>
+  %60 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_15 : memref<1x!verif.counting_semaphore>
+  %61 = memref.get_global @aie_lock_semaphore_arr_15 : memref<1x!verif.counting_semaphore>
   %c0_15 = arith.constant 0 : index
-  memref.store %60, %61[%c0_15] : memref<1x!verif.semaphore>
-  %62 = verif.semaphore(1 : index)
-  memref.global "private" @aie_lock_semaphore_arr_16 : memref<1x!verif.semaphore>
-  %63 = memref.get_global @aie_lock_semaphore_arr_16 : memref<1x!verif.semaphore>
+  memref.store %60, %61[%c0_15] : memref<1x!verif.counting_semaphore>
+  %62 = verif.counting_semaphore(1 : index)
+  memref.global "private" @aie_lock_semaphore_arr_16 : memref<1x!verif.counting_semaphore>
+  %63 = memref.get_global @aie_lock_semaphore_arr_16 : memref<1x!verif.counting_semaphore>
   %c0_16 = arith.constant 0 : index
-  memref.store %62, %63[%c0_16] : memref<1x!verif.semaphore>
-  %64 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_17 : memref<1x!verif.semaphore>
-  %65 = memref.get_global @aie_lock_semaphore_arr_17 : memref<1x!verif.semaphore>
+  memref.store %62, %63[%c0_16] : memref<1x!verif.counting_semaphore>
+  %64 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_17 : memref<1x!verif.counting_semaphore>
+  %65 = memref.get_global @aie_lock_semaphore_arr_17 : memref<1x!verif.counting_semaphore>
   %c0_17 = arith.constant 0 : index
-  memref.store %64, %65[%c0_17] : memref<1x!verif.semaphore>
-  %66 = verif.semaphore(2 : index)
-  memref.global "private" @aie_lock_semaphore_arr_18 : memref<1x!verif.semaphore>
-  %67 = memref.get_global @aie_lock_semaphore_arr_18 : memref<1x!verif.semaphore>
+  memref.store %64, %65[%c0_17] : memref<1x!verif.counting_semaphore>
+  %66 = verif.counting_semaphore(2 : index)
+  memref.global "private" @aie_lock_semaphore_arr_18 : memref<1x!verif.counting_semaphore>
+  %67 = memref.get_global @aie_lock_semaphore_arr_18 : memref<1x!verif.counting_semaphore>
   %c0_18 = arith.constant 0 : index
-  memref.store %66, %67[%c0_18] : memref<1x!verif.semaphore>
-  %68 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_19 : memref<1x!verif.semaphore>
-  %69 = memref.get_global @aie_lock_semaphore_arr_19 : memref<1x!verif.semaphore>
+  memref.store %66, %67[%c0_18] : memref<1x!verif.counting_semaphore>
+  %68 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_19 : memref<1x!verif.counting_semaphore>
+  %69 = memref.get_global @aie_lock_semaphore_arr_19 : memref<1x!verif.counting_semaphore>
   %c0_19 = arith.constant 0 : index
-  memref.store %68, %69[%c0_19] : memref<1x!verif.semaphore>
-  %70 = verif.semaphore(2 : index)
-  memref.global "private" @aie_lock_semaphore_arr_20 : memref<1x!verif.semaphore>
-  %71 = memref.get_global @aie_lock_semaphore_arr_20 : memref<1x!verif.semaphore>
+  memref.store %68, %69[%c0_19] : memref<1x!verif.counting_semaphore>
+  %70 = verif.counting_semaphore(2 : index)
+  memref.global "private" @aie_lock_semaphore_arr_20 : memref<1x!verif.counting_semaphore>
+  %71 = memref.get_global @aie_lock_semaphore_arr_20 : memref<1x!verif.counting_semaphore>
   %c0_20 = arith.constant 0 : index
-  memref.store %70, %71[%c0_20] : memref<1x!verif.semaphore>
-  %72 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_21 : memref<1x!verif.semaphore>
-  %73 = memref.get_global @aie_lock_semaphore_arr_21 : memref<1x!verif.semaphore>
+  memref.store %70, %71[%c0_20] : memref<1x!verif.counting_semaphore>
+  %72 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_21 : memref<1x!verif.counting_semaphore>
+  %73 = memref.get_global @aie_lock_semaphore_arr_21 : memref<1x!verif.counting_semaphore>
   %c0_21 = arith.constant 0 : index
-  memref.store %72, %73[%c0_21] : memref<1x!verif.semaphore>
-  %74 = verif.semaphore(1 : index)
-  memref.global "private" @aie_lock_semaphore_arr_22 : memref<1x!verif.semaphore>
-  %75 = memref.get_global @aie_lock_semaphore_arr_22 : memref<1x!verif.semaphore>
+  memref.store %72, %73[%c0_21] : memref<1x!verif.counting_semaphore>
+  %74 = verif.counting_semaphore(1 : index)
+  memref.global "private" @aie_lock_semaphore_arr_22 : memref<1x!verif.counting_semaphore>
+  %75 = memref.get_global @aie_lock_semaphore_arr_22 : memref<1x!verif.counting_semaphore>
   %c0_22 = arith.constant 0 : index
-  memref.store %74, %75[%c0_22] : memref<1x!verif.semaphore>
-  %76 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_23 : memref<1x!verif.semaphore>
-  %77 = memref.get_global @aie_lock_semaphore_arr_23 : memref<1x!verif.semaphore>
+  memref.store %74, %75[%c0_22] : memref<1x!verif.counting_semaphore>
+  %76 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_23 : memref<1x!verif.counting_semaphore>
+  %77 = memref.get_global @aie_lock_semaphore_arr_23 : memref<1x!verif.counting_semaphore>
   %c0_23 = arith.constant 0 : index
-  memref.store %76, %77[%c0_23] : memref<1x!verif.semaphore>
-  %78 = verif.semaphore(2 : index)
-  memref.global "private" @aie_lock_semaphore_arr_24 : memref<1x!verif.semaphore>
-  %79 = memref.get_global @aie_lock_semaphore_arr_24 : memref<1x!verif.semaphore>
+  memref.store %76, %77[%c0_23] : memref<1x!verif.counting_semaphore>
+  %78 = verif.counting_semaphore(2 : index)
+  memref.global "private" @aie_lock_semaphore_arr_24 : memref<1x!verif.counting_semaphore>
+  %79 = memref.get_global @aie_lock_semaphore_arr_24 : memref<1x!verif.counting_semaphore>
   %c0_24 = arith.constant 0 : index
-  memref.store %78, %79[%c0_24] : memref<1x!verif.semaphore>
-  %80 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_25 : memref<1x!verif.semaphore>
-  %81 = memref.get_global @aie_lock_semaphore_arr_25 : memref<1x!verif.semaphore>
+  memref.store %78, %79[%c0_24] : memref<1x!verif.counting_semaphore>
+  %80 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_25 : memref<1x!verif.counting_semaphore>
+  %81 = memref.get_global @aie_lock_semaphore_arr_25 : memref<1x!verif.counting_semaphore>
   %c0_25 = arith.constant 0 : index
-  memref.store %80, %81[%c0_25] : memref<1x!verif.semaphore>
-  %82 = verif.semaphore(2 : index)
-  memref.global "private" @aie_lock_semaphore_arr_26 : memref<1x!verif.semaphore>
-  %83 = memref.get_global @aie_lock_semaphore_arr_26 : memref<1x!verif.semaphore>
+  memref.store %80, %81[%c0_25] : memref<1x!verif.counting_semaphore>
+  %82 = verif.counting_semaphore(2 : index)
+  memref.global "private" @aie_lock_semaphore_arr_26 : memref<1x!verif.counting_semaphore>
+  %83 = memref.get_global @aie_lock_semaphore_arr_26 : memref<1x!verif.counting_semaphore>
   %c0_26 = arith.constant 0 : index
-  memref.store %82, %83[%c0_26] : memref<1x!verif.semaphore>
-  %84 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_27 : memref<1x!verif.semaphore>
-  %85 = memref.get_global @aie_lock_semaphore_arr_27 : memref<1x!verif.semaphore>
+  memref.store %82, %83[%c0_26] : memref<1x!verif.counting_semaphore>
+  %84 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_27 : memref<1x!verif.counting_semaphore>
+  %85 = memref.get_global @aie_lock_semaphore_arr_27 : memref<1x!verif.counting_semaphore>
   %c0_27 = arith.constant 0 : index
-  memref.store %84, %85[%c0_27] : memref<1x!verif.semaphore>
-  %86 = verif.semaphore(1 : index)
-  memref.global "private" @aie_lock_semaphore_arr_28 : memref<1x!verif.semaphore>
-  %87 = memref.get_global @aie_lock_semaphore_arr_28 : memref<1x!verif.semaphore>
+  memref.store %84, %85[%c0_27] : memref<1x!verif.counting_semaphore>
+  %86 = verif.counting_semaphore(1 : index)
+  memref.global "private" @aie_lock_semaphore_arr_28 : memref<1x!verif.counting_semaphore>
+  %87 = memref.get_global @aie_lock_semaphore_arr_28 : memref<1x!verif.counting_semaphore>
   %c0_28 = arith.constant 0 : index
-  memref.store %86, %87[%c0_28] : memref<1x!verif.semaphore>
-  %88 = verif.semaphore(0 : index)
-  memref.global "private" @aie_lock_semaphore_arr_29 : memref<1x!verif.semaphore>
-  %89 = memref.get_global @aie_lock_semaphore_arr_29 : memref<1x!verif.semaphore>
+  memref.store %86, %87[%c0_28] : memref<1x!verif.counting_semaphore>
+  %88 = verif.counting_semaphore(0 : index)
+  memref.global "private" @aie_lock_semaphore_arr_29 : memref<1x!verif.counting_semaphore>
+  %89 = memref.get_global @aie_lock_semaphore_arr_29 : memref<1x!verif.counting_semaphore>
   %c0_29 = arith.constant 0 : index
-  memref.store %88, %89[%c0_29] : memref<1x!verif.semaphore>
+  memref.store %88, %89[%c0_29] : memref<1x!verif.counting_semaphore>
   memref.global "private" @aie_buffer_buf22 : memref<8x8xi32, 1>
   memref.global "private" @aie_buffer_buf21 : memref<8x16xi32, 1>
   memref.global "private" @aie_buffer_buf20 : memref<16x8xi32, 1>
@@ -251,11 +251,11 @@ module {
   func.func @tile_mem_1_5_block_0() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb2
-    %93 = memref.get_global @aie_lock_semaphore_arr_26 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_26 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_1ch1_to_1_5ch0 : memref<1xi32>
     %c6_61 = arith.constant 6 : index
@@ -279,18 +279,18 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %97, %c0_64
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_27 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_27 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb2
   ^bb2:  // pred: ^bb1
-    %100 = memref.get_global @aie_lock_semaphore_arr_26 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_26 : memref<1x!verif.counting_semaphore>
     %c0_68 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_68] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_68] : memref<1x!verif.counting_semaphore>
     %c1_69 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_69) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %101, %c1_69
     %102 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %103 = memref.get_global @aie_flow_1_1ch1_to_1_5ch0 : memref<1xi32>
     %c6_70 = arith.constant 6 : index
@@ -314,11 +314,11 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %104, %c0_73
     }
-    %105 = memref.get_global @aie_lock_semaphore_arr_27 : memref<1x!verif.semaphore>
+    %105 = memref.get_global @aie_lock_semaphore_arr_27 : memref<1x!verif.counting_semaphore>
     %c0_76 = arith.constant 0 : index
-    %106 = memref.load %105[%c0_76] : memref<1x!verif.semaphore>
+    %106 = memref.load %105[%c0_76] : memref<1x!verif.counting_semaphore>
     %c1_77 = arith.constant 1 : index
-    "verif.undef"(%106, %c1_77) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %106, %c1_77
     cf.br ^bb1
   ^bb3:  // no predecessors
     return
@@ -330,11 +330,11 @@ module {
   func.func @tile_mem_1_5_block_1() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb2
-    %93 = memref.get_global @aie_lock_semaphore_arr_24 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_24 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_2_1ch1_to_1_5ch1 : memref<1xi32>
     %c10_61 = arith.constant 10 : index
@@ -358,18 +358,18 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %97, %c0_64
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_25 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_25 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb2
   ^bb2:  // pred: ^bb1
-    %100 = memref.get_global @aie_lock_semaphore_arr_24 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_24 : memref<1x!verif.counting_semaphore>
     %c0_68 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_68] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_68] : memref<1x!verif.counting_semaphore>
     %c1_69 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_69) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %101, %c1_69
     %102 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %103 = memref.get_global @aie_flow_2_1ch1_to_1_5ch1 : memref<1xi32>
     %c10_70 = arith.constant 10 : index
@@ -393,11 +393,11 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %104, %c0_73
     }
-    %105 = memref.get_global @aie_lock_semaphore_arr_25 : memref<1x!verif.semaphore>
+    %105 = memref.get_global @aie_lock_semaphore_arr_25 : memref<1x!verif.counting_semaphore>
     %c0_76 = arith.constant 0 : index
-    %106 = memref.load %105[%c0_76] : memref<1x!verif.semaphore>
+    %106 = memref.load %105[%c0_76] : memref<1x!verif.counting_semaphore>
     %c1_77 = arith.constant 1 : index
-    "verif.undef"(%106, %c1_77) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %106, %c1_77
     cf.br ^bb1
   ^bb3:  // no predecessors
     return
@@ -409,11 +409,11 @@ module {
   func.func @tile_mem_1_5_block_2() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_29 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_29 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_5ch0_to_0_1ch3 : memref<1xi32>
     %c14_61 = arith.constant 14 : index
@@ -437,11 +437,11 @@ module {
       memref.store %106, %96[%c0_62] : memref<1xi32>
       verif.semaphore.set %97, %c1_65
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_28 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_28 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -459,11 +459,11 @@ module {
     %c0_62 = arith.constant 0 : index
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_28 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_28 : memref<1x!verif.counting_semaphore>
     %c0_63 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_63] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_63] : memref<1x!verif.counting_semaphore>
     %c1_64 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_64) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_64
     scf.for %arg0 = %c0_62 to %c4_60 step %c1_61 {
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         %97 = memref.get_global @aie_buffer_buf19 : memref<4x4xi32, 2>
@@ -471,16 +471,16 @@ module {
       }
     }
     scf.for %arg0 = %c0_62 to %c16 step %c8_59 {
-      %97 = memref.get_global @aie_lock_semaphore_arr_27 : memref<1x!verif.semaphore>
+      %97 = memref.get_global @aie_lock_semaphore_arr_27 : memref<1x!verif.counting_semaphore>
       %c0_67 = arith.constant 0 : index
-      %98 = memref.load %97[%c0_67] : memref<1x!verif.semaphore>
+      %98 = memref.load %97[%c0_67] : memref<1x!verif.counting_semaphore>
       %c1_68 = arith.constant 1 : index
-      "verif.undef"(%98, %c1_68) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
-      %99 = memref.get_global @aie_lock_semaphore_arr_25 : memref<1x!verif.semaphore>
+      verif.semaphore.acquire %98, %c1_68
+      %99 = memref.get_global @aie_lock_semaphore_arr_25 : memref<1x!verif.counting_semaphore>
       %c0_69 = arith.constant 0 : index
-      %100 = memref.load %99[%c0_69] : memref<1x!verif.semaphore>
+      %100 = memref.load %99[%c0_69] : memref<1x!verif.counting_semaphore>
       %c1_70 = arith.constant 1 : index
-      "verif.undef"(%100, %c1_70) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.acquire %100, %c1_70
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         scf.for %arg2 = %c0_62 to %c4_60 step %c1_61 {
           scf.for %arg3 = %c0_62 to %c4_60 step %c1_61 {
@@ -497,26 +497,26 @@ module {
           }
         }
       }
-      %101 = memref.get_global @aie_lock_semaphore_arr_24 : memref<1x!verif.semaphore>
+      %101 = memref.get_global @aie_lock_semaphore_arr_24 : memref<1x!verif.counting_semaphore>
       %c0_71 = arith.constant 0 : index
-      %102 = memref.load %101[%c0_71] : memref<1x!verif.semaphore>
+      %102 = memref.load %101[%c0_71] : memref<1x!verif.counting_semaphore>
       %c1_72 = arith.constant 1 : index
-      "verif.undef"(%102, %c1_72) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %103 = memref.get_global @aie_lock_semaphore_arr_26 : memref<1x!verif.semaphore>
+      verif.semaphore.release %102, %c1_72
+      %103 = memref.get_global @aie_lock_semaphore_arr_26 : memref<1x!verif.counting_semaphore>
       %c0_73 = arith.constant 0 : index
-      %104 = memref.load %103[%c0_73] : memref<1x!verif.semaphore>
+      %104 = memref.load %103[%c0_73] : memref<1x!verif.counting_semaphore>
       %c1_74 = arith.constant 1 : index
-      "verif.undef"(%104, %c1_74) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %105 = memref.get_global @aie_lock_semaphore_arr_27 : memref<1x!verif.semaphore>
+      verif.semaphore.release %104, %c1_74
+      %105 = memref.get_global @aie_lock_semaphore_arr_27 : memref<1x!verif.counting_semaphore>
       %c0_75 = arith.constant 0 : index
-      %106 = memref.load %105[%c0_75] : memref<1x!verif.semaphore>
+      %106 = memref.load %105[%c0_75] : memref<1x!verif.counting_semaphore>
       %c1_76 = arith.constant 1 : index
-      "verif.undef"(%106, %c1_76) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
-      %107 = memref.get_global @aie_lock_semaphore_arr_25 : memref<1x!verif.semaphore>
+      verif.semaphore.acquire %106, %c1_76
+      %107 = memref.get_global @aie_lock_semaphore_arr_25 : memref<1x!verif.counting_semaphore>
       %c0_77 = arith.constant 0 : index
-      %108 = memref.load %107[%c0_77] : memref<1x!verif.semaphore>
+      %108 = memref.load %107[%c0_77] : memref<1x!verif.counting_semaphore>
       %c1_78 = arith.constant 1 : index
-      "verif.undef"(%108, %c1_78) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.acquire %108, %c1_78
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         scf.for %arg2 = %c0_62 to %c4_60 step %c1_61 {
           scf.for %arg3 = %c0_62 to %c4_60 step %c1_61 {
@@ -533,22 +533,22 @@ module {
           }
         }
       }
-      %109 = memref.get_global @aie_lock_semaphore_arr_24 : memref<1x!verif.semaphore>
+      %109 = memref.get_global @aie_lock_semaphore_arr_24 : memref<1x!verif.counting_semaphore>
       %c0_79 = arith.constant 0 : index
-      %110 = memref.load %109[%c0_79] : memref<1x!verif.semaphore>
+      %110 = memref.load %109[%c0_79] : memref<1x!verif.counting_semaphore>
       %c1_80 = arith.constant 1 : index
-      "verif.undef"(%110, %c1_80) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %111 = memref.get_global @aie_lock_semaphore_arr_26 : memref<1x!verif.semaphore>
+      verif.semaphore.release %110, %c1_80
+      %111 = memref.get_global @aie_lock_semaphore_arr_26 : memref<1x!verif.counting_semaphore>
       %c0_81 = arith.constant 0 : index
-      %112 = memref.load %111[%c0_81] : memref<1x!verif.semaphore>
+      %112 = memref.load %111[%c0_81] : memref<1x!verif.counting_semaphore>
       %c1_82 = arith.constant 1 : index
-      "verif.undef"(%112, %c1_82) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.release %112, %c1_82
     }
-    %95 = memref.get_global @aie_lock_semaphore_arr_29 : memref<1x!verif.semaphore>
+    %95 = memref.get_global @aie_lock_semaphore_arr_29 : memref<1x!verif.counting_semaphore>
     %c0_65 = arith.constant 0 : index
-    %96 = memref.load %95[%c0_65] : memref<1x!verif.semaphore>
+    %96 = memref.load %95[%c0_65] : memref<1x!verif.counting_semaphore>
     %c1_66 = arith.constant 1 : index
-    "verif.undef"(%96, %c1_66) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %96, %c1_66
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -560,11 +560,11 @@ module {
   func.func @tile_mem_1_4_block_0() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb2
-    %93 = memref.get_global @aie_lock_semaphore_arr_20 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_20 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_1ch1_to_1_4ch0 : memref<1xi32>
     %c5_61 = arith.constant 5 : index
@@ -588,18 +588,18 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %97, %c0_64
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_21 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_21 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb2
   ^bb2:  // pred: ^bb1
-    %100 = memref.get_global @aie_lock_semaphore_arr_20 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_20 : memref<1x!verif.counting_semaphore>
     %c0_68 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_68] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_68] : memref<1x!verif.counting_semaphore>
     %c1_69 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_69) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %101, %c1_69
     %102 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %103 = memref.get_global @aie_flow_1_1ch1_to_1_4ch0 : memref<1xi32>
     %c5_70 = arith.constant 5 : index
@@ -623,11 +623,11 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %104, %c0_73
     }
-    %105 = memref.get_global @aie_lock_semaphore_arr_21 : memref<1x!verif.semaphore>
+    %105 = memref.get_global @aie_lock_semaphore_arr_21 : memref<1x!verif.counting_semaphore>
     %c0_76 = arith.constant 0 : index
-    %106 = memref.load %105[%c0_76] : memref<1x!verif.semaphore>
+    %106 = memref.load %105[%c0_76] : memref<1x!verif.counting_semaphore>
     %c1_77 = arith.constant 1 : index
-    "verif.undef"(%106, %c1_77) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %106, %c1_77
     cf.br ^bb1
   ^bb3:  // no predecessors
     return
@@ -639,11 +639,11 @@ module {
   func.func @tile_mem_1_4_block_1() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb2
-    %93 = memref.get_global @aie_lock_semaphore_arr_18 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_18 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_2_1ch0_to_1_4ch1 : memref<1xi32>
     %c8_61 = arith.constant 8 : index
@@ -667,18 +667,18 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %97, %c0_64
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_19 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_19 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb2
   ^bb2:  // pred: ^bb1
-    %100 = memref.get_global @aie_lock_semaphore_arr_18 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_18 : memref<1x!verif.counting_semaphore>
     %c0_68 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_68] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_68] : memref<1x!verif.counting_semaphore>
     %c1_69 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_69) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %101, %c1_69
     %102 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %103 = memref.get_global @aie_flow_2_1ch0_to_1_4ch1 : memref<1xi32>
     %c8_70 = arith.constant 8 : index
@@ -702,11 +702,11 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %104, %c0_73
     }
-    %105 = memref.get_global @aie_lock_semaphore_arr_19 : memref<1x!verif.semaphore>
+    %105 = memref.get_global @aie_lock_semaphore_arr_19 : memref<1x!verif.counting_semaphore>
     %c0_76 = arith.constant 0 : index
-    %106 = memref.load %105[%c0_76] : memref<1x!verif.semaphore>
+    %106 = memref.load %105[%c0_76] : memref<1x!verif.counting_semaphore>
     %c1_77 = arith.constant 1 : index
-    "verif.undef"(%106, %c1_77) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %106, %c1_77
     cf.br ^bb1
   ^bb3:  // no predecessors
     return
@@ -718,11 +718,11 @@ module {
   func.func @tile_mem_1_4_block_2() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_23 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_23 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_4ch0_to_0_1ch1 : memref<1xi32>
     %c12_61 = arith.constant 12 : index
@@ -746,11 +746,11 @@ module {
       memref.store %106, %96[%c0_62] : memref<1xi32>
       verif.semaphore.set %97, %c1_65
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_22 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_22 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -768,11 +768,11 @@ module {
     %c0_62 = arith.constant 0 : index
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_22 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_22 : memref<1x!verif.counting_semaphore>
     %c0_63 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_63] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_63] : memref<1x!verif.counting_semaphore>
     %c1_64 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_64) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_64
     scf.for %arg0 = %c0_62 to %c4_60 step %c1_61 {
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         %97 = memref.get_global @aie_buffer_buf14 : memref<4x4xi32, 2>
@@ -780,16 +780,16 @@ module {
       }
     }
     scf.for %arg0 = %c0_62 to %c16 step %c8_59 {
-      %97 = memref.get_global @aie_lock_semaphore_arr_21 : memref<1x!verif.semaphore>
+      %97 = memref.get_global @aie_lock_semaphore_arr_21 : memref<1x!verif.counting_semaphore>
       %c0_67 = arith.constant 0 : index
-      %98 = memref.load %97[%c0_67] : memref<1x!verif.semaphore>
+      %98 = memref.load %97[%c0_67] : memref<1x!verif.counting_semaphore>
       %c1_68 = arith.constant 1 : index
-      "verif.undef"(%98, %c1_68) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
-      %99 = memref.get_global @aie_lock_semaphore_arr_19 : memref<1x!verif.semaphore>
+      verif.semaphore.acquire %98, %c1_68
+      %99 = memref.get_global @aie_lock_semaphore_arr_19 : memref<1x!verif.counting_semaphore>
       %c0_69 = arith.constant 0 : index
-      %100 = memref.load %99[%c0_69] : memref<1x!verif.semaphore>
+      %100 = memref.load %99[%c0_69] : memref<1x!verif.counting_semaphore>
       %c1_70 = arith.constant 1 : index
-      "verif.undef"(%100, %c1_70) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.acquire %100, %c1_70
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         scf.for %arg2 = %c0_62 to %c4_60 step %c1_61 {
           scf.for %arg3 = %c0_62 to %c4_60 step %c1_61 {
@@ -806,26 +806,26 @@ module {
           }
         }
       }
-      %101 = memref.get_global @aie_lock_semaphore_arr_18 : memref<1x!verif.semaphore>
+      %101 = memref.get_global @aie_lock_semaphore_arr_18 : memref<1x!verif.counting_semaphore>
       %c0_71 = arith.constant 0 : index
-      %102 = memref.load %101[%c0_71] : memref<1x!verif.semaphore>
+      %102 = memref.load %101[%c0_71] : memref<1x!verif.counting_semaphore>
       %c1_72 = arith.constant 1 : index
-      "verif.undef"(%102, %c1_72) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %103 = memref.get_global @aie_lock_semaphore_arr_20 : memref<1x!verif.semaphore>
+      verif.semaphore.release %102, %c1_72
+      %103 = memref.get_global @aie_lock_semaphore_arr_20 : memref<1x!verif.counting_semaphore>
       %c0_73 = arith.constant 0 : index
-      %104 = memref.load %103[%c0_73] : memref<1x!verif.semaphore>
+      %104 = memref.load %103[%c0_73] : memref<1x!verif.counting_semaphore>
       %c1_74 = arith.constant 1 : index
-      "verif.undef"(%104, %c1_74) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %105 = memref.get_global @aie_lock_semaphore_arr_21 : memref<1x!verif.semaphore>
+      verif.semaphore.release %104, %c1_74
+      %105 = memref.get_global @aie_lock_semaphore_arr_21 : memref<1x!verif.counting_semaphore>
       %c0_75 = arith.constant 0 : index
-      %106 = memref.load %105[%c0_75] : memref<1x!verif.semaphore>
+      %106 = memref.load %105[%c0_75] : memref<1x!verif.counting_semaphore>
       %c1_76 = arith.constant 1 : index
-      "verif.undef"(%106, %c1_76) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
-      %107 = memref.get_global @aie_lock_semaphore_arr_19 : memref<1x!verif.semaphore>
+      verif.semaphore.acquire %106, %c1_76
+      %107 = memref.get_global @aie_lock_semaphore_arr_19 : memref<1x!verif.counting_semaphore>
       %c0_77 = arith.constant 0 : index
-      %108 = memref.load %107[%c0_77] : memref<1x!verif.semaphore>
+      %108 = memref.load %107[%c0_77] : memref<1x!verif.counting_semaphore>
       %c1_78 = arith.constant 1 : index
-      "verif.undef"(%108, %c1_78) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.acquire %108, %c1_78
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         scf.for %arg2 = %c0_62 to %c4_60 step %c1_61 {
           scf.for %arg3 = %c0_62 to %c4_60 step %c1_61 {
@@ -842,22 +842,22 @@ module {
           }
         }
       }
-      %109 = memref.get_global @aie_lock_semaphore_arr_18 : memref<1x!verif.semaphore>
+      %109 = memref.get_global @aie_lock_semaphore_arr_18 : memref<1x!verif.counting_semaphore>
       %c0_79 = arith.constant 0 : index
-      %110 = memref.load %109[%c0_79] : memref<1x!verif.semaphore>
+      %110 = memref.load %109[%c0_79] : memref<1x!verif.counting_semaphore>
       %c1_80 = arith.constant 1 : index
-      "verif.undef"(%110, %c1_80) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %111 = memref.get_global @aie_lock_semaphore_arr_20 : memref<1x!verif.semaphore>
+      verif.semaphore.release %110, %c1_80
+      %111 = memref.get_global @aie_lock_semaphore_arr_20 : memref<1x!verif.counting_semaphore>
       %c0_81 = arith.constant 0 : index
-      %112 = memref.load %111[%c0_81] : memref<1x!verif.semaphore>
+      %112 = memref.load %111[%c0_81] : memref<1x!verif.counting_semaphore>
       %c1_82 = arith.constant 1 : index
-      "verif.undef"(%112, %c1_82) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.release %112, %c1_82
     }
-    %95 = memref.get_global @aie_lock_semaphore_arr_23 : memref<1x!verif.semaphore>
+    %95 = memref.get_global @aie_lock_semaphore_arr_23 : memref<1x!verif.counting_semaphore>
     %c0_65 = arith.constant 0 : index
-    %96 = memref.load %95[%c0_65] : memref<1x!verif.semaphore>
+    %96 = memref.load %95[%c0_65] : memref<1x!verif.counting_semaphore>
     %c1_66 = arith.constant 1 : index
-    "verif.undef"(%96, %c1_66) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %96, %c1_66
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -869,11 +869,11 @@ module {
   func.func @tile_mem_1_3_block_0() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb2
-    %93 = memref.get_global @aie_lock_semaphore_arr_14 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_14 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_1ch0_to_1_3ch0 : memref<1xi32>
     %c4_61 = arith.constant 4 : index
@@ -897,18 +897,18 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %97, %c0_64
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_15 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_15 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb2
   ^bb2:  // pred: ^bb1
-    %100 = memref.get_global @aie_lock_semaphore_arr_14 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_14 : memref<1x!verif.counting_semaphore>
     %c0_68 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_68] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_68] : memref<1x!verif.counting_semaphore>
     %c1_69 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_69) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %101, %c1_69
     %102 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %103 = memref.get_global @aie_flow_1_1ch0_to_1_3ch0 : memref<1xi32>
     %c4_70 = arith.constant 4 : index
@@ -932,11 +932,11 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %104, %c0_73
     }
-    %105 = memref.get_global @aie_lock_semaphore_arr_15 : memref<1x!verif.semaphore>
+    %105 = memref.get_global @aie_lock_semaphore_arr_15 : memref<1x!verif.counting_semaphore>
     %c0_76 = arith.constant 0 : index
-    %106 = memref.load %105[%c0_76] : memref<1x!verif.semaphore>
+    %106 = memref.load %105[%c0_76] : memref<1x!verif.counting_semaphore>
     %c1_77 = arith.constant 1 : index
-    "verif.undef"(%106, %c1_77) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %106, %c1_77
     cf.br ^bb1
   ^bb3:  // no predecessors
     return
@@ -948,11 +948,11 @@ module {
   func.func @tile_mem_1_3_block_1() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb2
-    %93 = memref.get_global @aie_lock_semaphore_arr_12 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_12 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_2_1ch1_to_1_3ch1 : memref<1xi32>
     %c9_61 = arith.constant 9 : index
@@ -976,18 +976,18 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %97, %c0_64
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_13 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_13 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb2
   ^bb2:  // pred: ^bb1
-    %100 = memref.get_global @aie_lock_semaphore_arr_12 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_12 : memref<1x!verif.counting_semaphore>
     %c0_68 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_68] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_68] : memref<1x!verif.counting_semaphore>
     %c1_69 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_69) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %101, %c1_69
     %102 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %103 = memref.get_global @aie_flow_2_1ch1_to_1_3ch1 : memref<1xi32>
     %c9_70 = arith.constant 9 : index
@@ -1011,11 +1011,11 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %104, %c0_73
     }
-    %105 = memref.get_global @aie_lock_semaphore_arr_13 : memref<1x!verif.semaphore>
+    %105 = memref.get_global @aie_lock_semaphore_arr_13 : memref<1x!verif.counting_semaphore>
     %c0_76 = arith.constant 0 : index
-    %106 = memref.load %105[%c0_76] : memref<1x!verif.semaphore>
+    %106 = memref.load %105[%c0_76] : memref<1x!verif.counting_semaphore>
     %c1_77 = arith.constant 1 : index
-    "verif.undef"(%106, %c1_77) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %106, %c1_77
     cf.br ^bb1
   ^bb3:  // no predecessors
     return
@@ -1027,11 +1027,11 @@ module {
   func.func @tile_mem_1_3_block_2() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_17 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_17 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_3ch0_to_0_1ch2 : memref<1xi32>
     %c13_61 = arith.constant 13 : index
@@ -1055,11 +1055,11 @@ module {
       memref.store %106, %96[%c0_62] : memref<1xi32>
       verif.semaphore.set %97, %c1_65
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_16 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_16 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1077,11 +1077,11 @@ module {
     %c0_62 = arith.constant 0 : index
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_16 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_16 : memref<1x!verif.counting_semaphore>
     %c0_63 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_63] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_63] : memref<1x!verif.counting_semaphore>
     %c1_64 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_64) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_64
     scf.for %arg0 = %c0_62 to %c4_60 step %c1_61 {
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         %97 = memref.get_global @aie_buffer_buf9 : memref<4x4xi32, 2>
@@ -1089,16 +1089,16 @@ module {
       }
     }
     scf.for %arg0 = %c0_62 to %c16 step %c8_59 {
-      %97 = memref.get_global @aie_lock_semaphore_arr_15 : memref<1x!verif.semaphore>
+      %97 = memref.get_global @aie_lock_semaphore_arr_15 : memref<1x!verif.counting_semaphore>
       %c0_67 = arith.constant 0 : index
-      %98 = memref.load %97[%c0_67] : memref<1x!verif.semaphore>
+      %98 = memref.load %97[%c0_67] : memref<1x!verif.counting_semaphore>
       %c1_68 = arith.constant 1 : index
-      "verif.undef"(%98, %c1_68) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
-      %99 = memref.get_global @aie_lock_semaphore_arr_13 : memref<1x!verif.semaphore>
+      verif.semaphore.acquire %98, %c1_68
+      %99 = memref.get_global @aie_lock_semaphore_arr_13 : memref<1x!verif.counting_semaphore>
       %c0_69 = arith.constant 0 : index
-      %100 = memref.load %99[%c0_69] : memref<1x!verif.semaphore>
+      %100 = memref.load %99[%c0_69] : memref<1x!verif.counting_semaphore>
       %c1_70 = arith.constant 1 : index
-      "verif.undef"(%100, %c1_70) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.acquire %100, %c1_70
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         scf.for %arg2 = %c0_62 to %c4_60 step %c1_61 {
           scf.for %arg3 = %c0_62 to %c4_60 step %c1_61 {
@@ -1115,26 +1115,26 @@ module {
           }
         }
       }
-      %101 = memref.get_global @aie_lock_semaphore_arr_12 : memref<1x!verif.semaphore>
+      %101 = memref.get_global @aie_lock_semaphore_arr_12 : memref<1x!verif.counting_semaphore>
       %c0_71 = arith.constant 0 : index
-      %102 = memref.load %101[%c0_71] : memref<1x!verif.semaphore>
+      %102 = memref.load %101[%c0_71] : memref<1x!verif.counting_semaphore>
       %c1_72 = arith.constant 1 : index
-      "verif.undef"(%102, %c1_72) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %103 = memref.get_global @aie_lock_semaphore_arr_14 : memref<1x!verif.semaphore>
+      verif.semaphore.release %102, %c1_72
+      %103 = memref.get_global @aie_lock_semaphore_arr_14 : memref<1x!verif.counting_semaphore>
       %c0_73 = arith.constant 0 : index
-      %104 = memref.load %103[%c0_73] : memref<1x!verif.semaphore>
+      %104 = memref.load %103[%c0_73] : memref<1x!verif.counting_semaphore>
       %c1_74 = arith.constant 1 : index
-      "verif.undef"(%104, %c1_74) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %105 = memref.get_global @aie_lock_semaphore_arr_15 : memref<1x!verif.semaphore>
+      verif.semaphore.release %104, %c1_74
+      %105 = memref.get_global @aie_lock_semaphore_arr_15 : memref<1x!verif.counting_semaphore>
       %c0_75 = arith.constant 0 : index
-      %106 = memref.load %105[%c0_75] : memref<1x!verif.semaphore>
+      %106 = memref.load %105[%c0_75] : memref<1x!verif.counting_semaphore>
       %c1_76 = arith.constant 1 : index
-      "verif.undef"(%106, %c1_76) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
-      %107 = memref.get_global @aie_lock_semaphore_arr_13 : memref<1x!verif.semaphore>
+      verif.semaphore.acquire %106, %c1_76
+      %107 = memref.get_global @aie_lock_semaphore_arr_13 : memref<1x!verif.counting_semaphore>
       %c0_77 = arith.constant 0 : index
-      %108 = memref.load %107[%c0_77] : memref<1x!verif.semaphore>
+      %108 = memref.load %107[%c0_77] : memref<1x!verif.counting_semaphore>
       %c1_78 = arith.constant 1 : index
-      "verif.undef"(%108, %c1_78) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.acquire %108, %c1_78
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         scf.for %arg2 = %c0_62 to %c4_60 step %c1_61 {
           scf.for %arg3 = %c0_62 to %c4_60 step %c1_61 {
@@ -1151,22 +1151,22 @@ module {
           }
         }
       }
-      %109 = memref.get_global @aie_lock_semaphore_arr_12 : memref<1x!verif.semaphore>
+      %109 = memref.get_global @aie_lock_semaphore_arr_12 : memref<1x!verif.counting_semaphore>
       %c0_79 = arith.constant 0 : index
-      %110 = memref.load %109[%c0_79] : memref<1x!verif.semaphore>
+      %110 = memref.load %109[%c0_79] : memref<1x!verif.counting_semaphore>
       %c1_80 = arith.constant 1 : index
-      "verif.undef"(%110, %c1_80) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %111 = memref.get_global @aie_lock_semaphore_arr_14 : memref<1x!verif.semaphore>
+      verif.semaphore.release %110, %c1_80
+      %111 = memref.get_global @aie_lock_semaphore_arr_14 : memref<1x!verif.counting_semaphore>
       %c0_81 = arith.constant 0 : index
-      %112 = memref.load %111[%c0_81] : memref<1x!verif.semaphore>
+      %112 = memref.load %111[%c0_81] : memref<1x!verif.counting_semaphore>
       %c1_82 = arith.constant 1 : index
-      "verif.undef"(%112, %c1_82) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.release %112, %c1_82
     }
-    %95 = memref.get_global @aie_lock_semaphore_arr_17 : memref<1x!verif.semaphore>
+    %95 = memref.get_global @aie_lock_semaphore_arr_17 : memref<1x!verif.counting_semaphore>
     %c0_65 = arith.constant 0 : index
-    %96 = memref.load %95[%c0_65] : memref<1x!verif.semaphore>
+    %96 = memref.load %95[%c0_65] : memref<1x!verif.counting_semaphore>
     %c1_66 = arith.constant 1 : index
-    "verif.undef"(%96, %c1_66) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %96, %c1_66
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1178,11 +1178,11 @@ module {
   func.func @tile_mem_1_2_block_0() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb2
-    %93 = memref.get_global @aie_lock_semaphore_arr_8 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_8 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_1ch0_to_1_2ch0 : memref<1xi32>
     %c3_61 = arith.constant 3 : index
@@ -1206,18 +1206,18 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %97, %c0_64
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_9 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_9 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb2
   ^bb2:  // pred: ^bb1
-    %100 = memref.get_global @aie_lock_semaphore_arr_8 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_8 : memref<1x!verif.counting_semaphore>
     %c0_68 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_68] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_68] : memref<1x!verif.counting_semaphore>
     %c1_69 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_69) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %101, %c1_69
     %102 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %103 = memref.get_global @aie_flow_1_1ch0_to_1_2ch0 : memref<1xi32>
     %c3_70 = arith.constant 3 : index
@@ -1241,11 +1241,11 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %104, %c0_73
     }
-    %105 = memref.get_global @aie_lock_semaphore_arr_9 : memref<1x!verif.semaphore>
+    %105 = memref.get_global @aie_lock_semaphore_arr_9 : memref<1x!verif.counting_semaphore>
     %c0_76 = arith.constant 0 : index
-    %106 = memref.load %105[%c0_76] : memref<1x!verif.semaphore>
+    %106 = memref.load %105[%c0_76] : memref<1x!verif.counting_semaphore>
     %c1_77 = arith.constant 1 : index
-    "verif.undef"(%106, %c1_77) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %106, %c1_77
     cf.br ^bb1
   ^bb3:  // no predecessors
     return
@@ -1257,11 +1257,11 @@ module {
   func.func @tile_mem_1_2_block_1() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb2
-    %93 = memref.get_global @aie_lock_semaphore_arr_6 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_6 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_2_1ch0_to_1_2ch1 : memref<1xi32>
     %c7_61 = arith.constant 7 : index
@@ -1285,18 +1285,18 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %97, %c0_64
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_7 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_7 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb2
   ^bb2:  // pred: ^bb1
-    %100 = memref.get_global @aie_lock_semaphore_arr_6 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_6 : memref<1x!verif.counting_semaphore>
     %c0_68 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_68] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_68] : memref<1x!verif.counting_semaphore>
     %c1_69 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_69) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %101, %c1_69
     %102 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %103 = memref.get_global @aie_flow_2_1ch0_to_1_2ch1 : memref<1xi32>
     %c7_70 = arith.constant 7 : index
@@ -1320,11 +1320,11 @@ module {
       memref.store %112, %113[%107, %111] : memref<4x4xi32, 2>
       verif.semaphore.set %104, %c0_73
     }
-    %105 = memref.get_global @aie_lock_semaphore_arr_7 : memref<1x!verif.semaphore>
+    %105 = memref.get_global @aie_lock_semaphore_arr_7 : memref<1x!verif.counting_semaphore>
     %c0_76 = arith.constant 0 : index
-    %106 = memref.load %105[%c0_76] : memref<1x!verif.semaphore>
+    %106 = memref.load %105[%c0_76] : memref<1x!verif.counting_semaphore>
     %c1_77 = arith.constant 1 : index
-    "verif.undef"(%106, %c1_77) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %106, %c1_77
     cf.br ^bb1
   ^bb3:  // no predecessors
     return
@@ -1336,11 +1336,11 @@ module {
   func.func @tile_mem_1_2_block_2() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_11 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_11 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_2ch0_to_0_1ch0 : memref<1xi32>
     %c11_61 = arith.constant 11 : index
@@ -1364,11 +1364,11 @@ module {
       memref.store %106, %96[%c0_62] : memref<1xi32>
       verif.semaphore.set %97, %c1_65
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_10 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_10 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c1_67 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_67
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1386,11 +1386,11 @@ module {
     %c0_62 = arith.constant 0 : index
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_10 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_10 : memref<1x!verif.counting_semaphore>
     %c0_63 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_63] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_63] : memref<1x!verif.counting_semaphore>
     %c1_64 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_64) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_64
     scf.for %arg0 = %c0_62 to %c4_60 step %c1_61 {
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         %97 = memref.get_global @aie_buffer_buf4 : memref<4x4xi32, 2>
@@ -1398,16 +1398,16 @@ module {
       }
     }
     scf.for %arg0 = %c0_62 to %c16 step %c8_59 {
-      %97 = memref.get_global @aie_lock_semaphore_arr_9 : memref<1x!verif.semaphore>
+      %97 = memref.get_global @aie_lock_semaphore_arr_9 : memref<1x!verif.counting_semaphore>
       %c0_67 = arith.constant 0 : index
-      %98 = memref.load %97[%c0_67] : memref<1x!verif.semaphore>
+      %98 = memref.load %97[%c0_67] : memref<1x!verif.counting_semaphore>
       %c1_68 = arith.constant 1 : index
-      "verif.undef"(%98, %c1_68) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
-      %99 = memref.get_global @aie_lock_semaphore_arr_7 : memref<1x!verif.semaphore>
+      verif.semaphore.acquire %98, %c1_68
+      %99 = memref.get_global @aie_lock_semaphore_arr_7 : memref<1x!verif.counting_semaphore>
       %c0_69 = arith.constant 0 : index
-      %100 = memref.load %99[%c0_69] : memref<1x!verif.semaphore>
+      %100 = memref.load %99[%c0_69] : memref<1x!verif.counting_semaphore>
       %c1_70 = arith.constant 1 : index
-      "verif.undef"(%100, %c1_70) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.acquire %100, %c1_70
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         scf.for %arg2 = %c0_62 to %c4_60 step %c1_61 {
           scf.for %arg3 = %c0_62 to %c4_60 step %c1_61 {
@@ -1424,26 +1424,26 @@ module {
           }
         }
       }
-      %101 = memref.get_global @aie_lock_semaphore_arr_6 : memref<1x!verif.semaphore>
+      %101 = memref.get_global @aie_lock_semaphore_arr_6 : memref<1x!verif.counting_semaphore>
       %c0_71 = arith.constant 0 : index
-      %102 = memref.load %101[%c0_71] : memref<1x!verif.semaphore>
+      %102 = memref.load %101[%c0_71] : memref<1x!verif.counting_semaphore>
       %c1_72 = arith.constant 1 : index
-      "verif.undef"(%102, %c1_72) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %103 = memref.get_global @aie_lock_semaphore_arr_8 : memref<1x!verif.semaphore>
+      verif.semaphore.release %102, %c1_72
+      %103 = memref.get_global @aie_lock_semaphore_arr_8 : memref<1x!verif.counting_semaphore>
       %c0_73 = arith.constant 0 : index
-      %104 = memref.load %103[%c0_73] : memref<1x!verif.semaphore>
+      %104 = memref.load %103[%c0_73] : memref<1x!verif.counting_semaphore>
       %c1_74 = arith.constant 1 : index
-      "verif.undef"(%104, %c1_74) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %105 = memref.get_global @aie_lock_semaphore_arr_9 : memref<1x!verif.semaphore>
+      verif.semaphore.release %104, %c1_74
+      %105 = memref.get_global @aie_lock_semaphore_arr_9 : memref<1x!verif.counting_semaphore>
       %c0_75 = arith.constant 0 : index
-      %106 = memref.load %105[%c0_75] : memref<1x!verif.semaphore>
+      %106 = memref.load %105[%c0_75] : memref<1x!verif.counting_semaphore>
       %c1_76 = arith.constant 1 : index
-      "verif.undef"(%106, %c1_76) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
-      %107 = memref.get_global @aie_lock_semaphore_arr_7 : memref<1x!verif.semaphore>
+      verif.semaphore.acquire %106, %c1_76
+      %107 = memref.get_global @aie_lock_semaphore_arr_7 : memref<1x!verif.counting_semaphore>
       %c0_77 = arith.constant 0 : index
-      %108 = memref.load %107[%c0_77] : memref<1x!verif.semaphore>
+      %108 = memref.load %107[%c0_77] : memref<1x!verif.counting_semaphore>
       %c1_78 = arith.constant 1 : index
-      "verif.undef"(%108, %c1_78) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.acquire %108, %c1_78
       scf.for %arg1 = %c0_62 to %c4_60 step %c1_61 {
         scf.for %arg2 = %c0_62 to %c4_60 step %c1_61 {
           scf.for %arg3 = %c0_62 to %c4_60 step %c1_61 {
@@ -1460,22 +1460,22 @@ module {
           }
         }
       }
-      %109 = memref.get_global @aie_lock_semaphore_arr_6 : memref<1x!verif.semaphore>
+      %109 = memref.get_global @aie_lock_semaphore_arr_6 : memref<1x!verif.counting_semaphore>
       %c0_79 = arith.constant 0 : index
-      %110 = memref.load %109[%c0_79] : memref<1x!verif.semaphore>
+      %110 = memref.load %109[%c0_79] : memref<1x!verif.counting_semaphore>
       %c1_80 = arith.constant 1 : index
-      "verif.undef"(%110, %c1_80) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
-      %111 = memref.get_global @aie_lock_semaphore_arr_8 : memref<1x!verif.semaphore>
+      verif.semaphore.release %110, %c1_80
+      %111 = memref.get_global @aie_lock_semaphore_arr_8 : memref<1x!verif.counting_semaphore>
       %c0_81 = arith.constant 0 : index
-      %112 = memref.load %111[%c0_81] : memref<1x!verif.semaphore>
+      %112 = memref.load %111[%c0_81] : memref<1x!verif.counting_semaphore>
       %c1_82 = arith.constant 1 : index
-      "verif.undef"(%112, %c1_82) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+      verif.semaphore.release %112, %c1_82
     }
-    %95 = memref.get_global @aie_lock_semaphore_arr_11 : memref<1x!verif.semaphore>
+    %95 = memref.get_global @aie_lock_semaphore_arr_11 : memref<1x!verif.counting_semaphore>
     %c0_65 = arith.constant 0 : index
-    %96 = memref.load %95[%c0_65] : memref<1x!verif.semaphore>
+    %96 = memref.load %95[%c0_65] : memref<1x!verif.counting_semaphore>
     %c1_66 = arith.constant 1 : index
-    "verif.undef"(%96, %c1_66) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %96, %c1_66
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1487,11 +1487,11 @@ module {
   func.func @tile_mem_0_1_block_0() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_2ch0_to_0_1ch0 : memref<1xi32>
     %c11_61 = arith.constant 11 : index
@@ -1521,11 +1521,11 @@ module {
         verif.semaphore.set %97, %c0_64
       }
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.counting_semaphore>
     %c0_67 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_67] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_67] : memref<1x!verif.counting_semaphore>
     %c1_68 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_68) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_68
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1537,11 +1537,11 @@ module {
   func.func @tile_mem_0_1_block_1() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_4ch0_to_0_1ch1 : memref<1xi32>
     %c12_61 = arith.constant 12 : index
@@ -1573,11 +1573,11 @@ module {
         verif.semaphore.set %97, %c0_64
       }
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.counting_semaphore>
     %c0_67 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_67] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_67] : memref<1x!verif.counting_semaphore>
     %c1_68 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_68) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_68
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1589,11 +1589,11 @@ module {
   func.func @tile_mem_0_1_block_2() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_3ch0_to_0_1ch2 : memref<1xi32>
     %c13_61 = arith.constant 13 : index
@@ -1625,11 +1625,11 @@ module {
         verif.semaphore.set %97, %c0_64
       }
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.counting_semaphore>
     %c0_67 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_67] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_67] : memref<1x!verif.counting_semaphore>
     %c1_68 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_68) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_68
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1641,11 +1641,11 @@ module {
   func.func @tile_mem_0_1_block_3() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_5ch0_to_0_1ch3 : memref<1xi32>
     %c14_61 = arith.constant 14 : index
@@ -1677,11 +1677,11 @@ module {
         verif.semaphore.set %97, %c0_64
       }
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.counting_semaphore>
     %c0_67 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_67] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_67] : memref<1x!verif.counting_semaphore>
     %c1_68 = arith.constant 1 : index
-    "verif.undef"(%99, %c1_68) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c1_68
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1693,11 +1693,11 @@ module {
   func.func @tile_mem_0_1_block_4() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_5 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c4_60 = arith.constant 4 : index
-    "verif.undef"(%94, %c4_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c4_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_0_1ch0_to_0_0ch0 : memref<1xi32>
     %c2_61 = arith.constant 2 : index
@@ -1721,11 +1721,11 @@ module {
       memref.store %106, %96[%c0_62] : memref<1xi32>
       verif.semaphore.set %97, %c1_65
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_4 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c4_67 = arith.constant 4 : index
-    "verif.undef"(%99, %c4_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c4_67
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1737,11 +1737,11 @@ module {
   func.func @tile_mem_1_1_block_0() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_2 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_2 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c2_60 = arith.constant 2 : index
-    "verif.undef"(%94, %c2_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c2_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_0ch0_to_1_1ch0 : memref<1xi32>
     %c0_61 = arith.constant 0 : index
@@ -1765,11 +1765,11 @@ module {
       memref.store %105, %106[%100, %104] : memref<8x16xi32, 1>
       verif.semaphore.set %97, %c0_64
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_3 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_3 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c2_67 = arith.constant 2 : index
-    "verif.undef"(%99, %c2_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c2_67
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1781,11 +1781,11 @@ module {
   func.func @tile_mem_1_1_block_1() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_3 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_3 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_1ch0_to_1_3ch0 : memref<1xi32>
     %97 = memref.get_global @aie_flow_1_1ch0_to_1_2ch0 : memref<1xi32>
@@ -1857,11 +1857,11 @@ module {
       }
       async.yield
     }
-    %100 = memref.get_global @aie_lock_semaphore_arr_2 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_2 : memref<1x!verif.counting_semaphore>
     %c0_69 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_69] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_69] : memref<1x!verif.counting_semaphore>
     %c1_70 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_70) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %101, %c1_70
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1873,11 +1873,11 @@ module {
   func.func @tile_mem_1_1_block_2() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_3 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_3 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_1_1ch1_to_1_5ch0 : memref<1xi32>
     %97 = memref.get_global @aie_flow_1_1ch1_to_1_4ch0 : memref<1xi32>
@@ -1953,11 +1953,11 @@ module {
       }
       async.yield
     }
-    %100 = memref.get_global @aie_lock_semaphore_arr_2 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_2 : memref<1x!verif.counting_semaphore>
     %c0_69 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_69] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_69] : memref<1x!verif.counting_semaphore>
     %c1_70 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_70) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %101, %c1_70
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -1969,11 +1969,11 @@ module {
   func.func @tile_mem_2_1_block_0() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_0 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_0 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c2_60 = arith.constant 2 : index
-    "verif.undef"(%94, %c2_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c2_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_2_0ch0_to_2_1ch0 : memref<1xi32>
     %c1_61 = arith.constant 1 : index
@@ -1997,11 +1997,11 @@ module {
       memref.store %105, %106[%100, %104] : memref<16x8xi32, 1>
       verif.semaphore.set %97, %c0_64
     }
-    %98 = memref.get_global @aie_lock_semaphore_arr_1 : memref<1x!verif.semaphore>
+    %98 = memref.get_global @aie_lock_semaphore_arr_1 : memref<1x!verif.counting_semaphore>
     %c0_66 = arith.constant 0 : index
-    %99 = memref.load %98[%c0_66] : memref<1x!verif.semaphore>
+    %99 = memref.load %98[%c0_66] : memref<1x!verif.counting_semaphore>
     %c2_67 = arith.constant 2 : index
-    "verif.undef"(%99, %c2_67) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %99, %c2_67
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -2013,11 +2013,11 @@ module {
   func.func @tile_mem_2_1_block_1() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_1 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_1 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_2_1ch0_to_1_4ch1 : memref<1xi32>
     %97 = memref.get_global @aie_flow_2_1ch0_to_1_2ch1 : memref<1xi32>
@@ -2077,11 +2077,11 @@ module {
       }
       async.yield
     }
-    %100 = memref.get_global @aie_lock_semaphore_arr_0 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_0 : memref<1x!verif.counting_semaphore>
     %c0_69 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_69] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_69] : memref<1x!verif.counting_semaphore>
     %c1_70 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_70) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %101, %c1_70
     cf.br ^bb1
   ^bb2:  // no predecessors
     return
@@ -2093,11 +2093,11 @@ module {
   func.func @tile_mem_2_1_block_2() {
     cf.br ^bb1
   ^bb1:  // 2 preds: ^bb0, ^bb1
-    %93 = memref.get_global @aie_lock_semaphore_arr_1 : memref<1x!verif.semaphore>
+    %93 = memref.get_global @aie_lock_semaphore_arr_1 : memref<1x!verif.counting_semaphore>
     %c0_59 = arith.constant 0 : index
-    %94 = memref.load %93[%c0_59] : memref<1x!verif.semaphore>
+    %94 = memref.load %93[%c0_59] : memref<1x!verif.counting_semaphore>
     %c1_60 = arith.constant 1 : index
-    "verif.undef"(%94, %c1_60) <{name = "COUNTING_SEMAPHORE_ACQUIRE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.acquire %94, %c1_60
     %95 = memref.get_global @aie_global_semaphore_array : memref<128x!verif.semaphore>
     %96 = memref.get_global @aie_flow_2_1ch1_to_1_5ch1 : memref<1xi32>
     %97 = memref.get_global @aie_flow_2_1ch1_to_1_3ch1 : memref<1xi32>
@@ -2161,11 +2161,11 @@ module {
       }
       async.yield
     }
-    %100 = memref.get_global @aie_lock_semaphore_arr_0 : memref<1x!verif.semaphore>
+    %100 = memref.get_global @aie_lock_semaphore_arr_0 : memref<1x!verif.counting_semaphore>
     %c0_69 = arith.constant 0 : index
-    %101 = memref.load %100[%c0_69] : memref<1x!verif.semaphore>
+    %101 = memref.load %100[%c0_69] : memref<1x!verif.counting_semaphore>
     %c1_70 = arith.constant 1 : index
-    "verif.undef"(%101, %c1_70) <{name = "COUNTING_SEMAPHORE_RELEASE"}> : (!verif.semaphore, index) -> ()
+    verif.semaphore.release %101, %c1_70
     cf.br ^bb1
   ^bb2:  // no predecessors
     return

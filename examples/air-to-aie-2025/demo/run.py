@@ -11,9 +11,9 @@ from MLIRLexer import MlirLexer
 BOLD = '\033[1m'
 END_BOLD = '\033[0m'
 
-PASTCHECKER_DIR = '/data-host-share/pocc-devel/ir/past-clean/src'
-PASTCHECKER_COMMAND = 'pastchecker --enable-preprocessor --enable-subtrees'
-PASTCHECKER_COMMAND_VERBOSE = 'pastchecker --enable-preprocessor --enable-subtrees --verbose'
+PASTCHECKER_DIR = '../../../past-0.7.3-peqc-mlir/src/'
+PASTCHECKER_COMMAND = 'pastchecker --enable-preprocessor --enable-subtrees --happens-before'
+PASTCHECKER_COMMAND_VERBOSE = 'pastchecker --enable-preprocessor --enable-subtrees --verbose --happens-before'
 
 INPUT_DIR = 'input-small'
 
@@ -68,6 +68,7 @@ def single_pass(command, output_file, print_out=True, wait_after=True):
 def main():
   # put version of pastchecker above at beginning of path
   os.environ['PATH'] = PASTCHECKER_DIR + os.pathsep + os.environ.get('PATH', '')
+  run('which pastchecker')
 
   print()
 
@@ -119,6 +120,7 @@ def main():
   # maybe don't need to print this again
   # fprint(f'{INPUT_DIR}/compare.c', print_name=True)
   # wait()
+
 
   run(f'{PASTCHECKER_COMMAND} generated/air_input-translated.c generated/air_tiled-translated.c "A,B,C"',
       wait_before_run=True)
