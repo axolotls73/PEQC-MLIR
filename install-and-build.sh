@@ -14,7 +14,7 @@
 #
 #
 
-PAST_VERSION="past-0.7.3-beta";
+PAST_VERSION="past-0.7.3-peqc-mlir";
 PAST_WEBLINK="https://downloads.sourceforge.net/project/pocc/1.6/testing/modules/unstable-testing";
 base_dir=`pwd`;
 if [ ! -d "$PAST_VERSION" ]; then

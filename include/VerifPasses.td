@@ -44,4 +44,18 @@ def VerifMoveToMain: Pass<"verif-move-to-main", "::mlir::ModuleOp"> {
   ];
 }
 
+def VerifCreateMain: Pass<"verif-create-main", "::mlir::ModuleOp"> {
+  let summary = "if the module contains a single function with memref arguments, create a func.func @main that calls the function with corresponding memref.global arguments";
+  let description = [{
+  }];
+  let dependentDialects = [
+    "func::FuncDialect",
+    "memref::MemRefDialect",
+  ];
+  let options = [
+    ListOption<"argumentNames", "argument-names", "std::string",
+        "names of memref.global arguments">
+  ];
+}
+
 #endif // VERIF_PASS

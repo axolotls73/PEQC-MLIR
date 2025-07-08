@@ -44,3 +44,19 @@ module {
     %i = arith.constant 0 : index
     memref.store %1, %mr[%i] : memref<1x!verif.semaphore>
 }
+
+//--- acquire.mlir
+
+module {
+    %1 = verif.counting_semaphore(0 : index)
+    %2 = arith.constant 1 : index
+    verif.semaphore.acquire %1, %2
+}
+
+//--- release.mlir
+
+module {
+    %1 = verif.counting_semaphore(0 : index)
+    %2 = arith.constant 1 : index
+    verif.semaphore.release %1, %2
+}

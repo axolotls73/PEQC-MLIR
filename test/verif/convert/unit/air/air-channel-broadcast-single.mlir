@@ -21,8 +21,8 @@
 // CHECK: [[MAP:#.*]] = affine_map<(d0)[s0, s1] -> ((d0 + s0) * s1)>
 // CHECK: module
 module {
-// CHECK-DAG: memref.global "private" @[[BUF_ARR:.*]] memref<1x2xmemref<?xi64>>
-// CHECK-DAG: memref.global "private" @[[SEM_ARR:.*]] memref<1x2x!verif.semaphore>
+// CHECK-DAG: memref.global "private" @[[BUF_ARR:.*]] memref<1x1x1x2xi64>
+// CHECK-DAG: memref.global "private" @[[SEM_ARR:.*]] memref<1x1x1x2x!verif.semaphore>
 // CHECK-NOT: air.channel
   air.channel @channel [1, 1] {broadcast_shape = [1, 2]}
 
@@ -47,12 +47,11 @@ module {
 
 // CHECK:   [[PUT_CST2:%.*]] = arith.constant 2
 // CHECK:   scf.parallel ([[PARITER:%.*]]) = ([[PUT_CST0]]) to ([[PUT_CST2]]) step ([[PUT_CST1]])
-// CHECK:     [[PUTSEM:%.*]] = memref.load [[SEM_ARR_PUT]][[[CH_CST0]], [[PARITER]]]
+// CHECK:     [[PUTSEM:%.*]] = memref.load [[SEM_ARR_PUT]][[[PUT_CST0]], [[PUT_CST0]], [[CH_CST0]], [[PARITER]]]
 // CHECK:     [[PUTWAIT:%.*]] = arith.constant 0
 // CHECK:     verif.semaphore.wait [[PUTSEM]], [[PUTWAIT]]
-// CHECK:     [[PUTBUF:%.*]] = memref.load [[BUF_ARR_PUT]][[[CH_CST0]], [[PARITER]]]
 // CHECK:     [[PUTVAL:%.*]] = memref.load [[A]][[[PUT_DEL]]]
-// CHECK:     memref.store [[PUTVAL]], [[PUTBUF]][[[PUT_CST0]]]
+// CHECK:     memref.store [[PUTVAL]], [[BUF_ARR_PUT]][[[PUT_CST0]], [[PUT_CST0]], [[CH_CST0]], [[PARITER]]]
 // CHECK:     [[PUTSET:%.*]] = arith.constant 1
 // CHECK:     verif.semaphore.set [[PUTSEM]], [[PUTSET]]
 
@@ -69,11 +68,10 @@ module {
 // CHECK: scf.for [[ITER:%.*]] = [[GET_CST0]] to [[GET_CST1_SIZE]] step [[GET_CST1]]
 // CHECK:   [[GET_LI:%.*]] = affine.apply [[MAP]]([[ITER]])[[[GET_CST0]], [[GET_CST1_STRIDE]]]
 // CHECK:   [[GET_DEL:%.*]] = affine.delinearize_index [[GET_LI]] into (1)
-// CHECK:   [[GETSEM:%.*]] = memref.load [[SEM_ARR_GET]][[[CH_CST0]], [[CH_CST1]]]
+// CHECK:   [[GETSEM:%.*]] = memref.load [[SEM_ARR_GET]][[[GET_CST0]], [[GET_CST0]], [[CH_CST0]], [[CH_CST1]]]
 // CHECK:   [[GETWAIT:%.*]] = arith.constant 1
 // CHECK:   verif.semaphore.wait [[GETSEM]], [[GETWAIT]]
-// CHECK:   [[GETBUF:%.*]] = memref.load [[BUF_ARR_GET]][[[CH_CST0]], [[CH_CST1]]]
-// CHECK:   [[GETVAL:%.*]] = memref.load [[GETBUF]][[[GET_CST0]]]
+// CHECK:   [[GETVAL:%.*]] = memref.load [[BUF_ARR_GET]][[[GET_CST0]], [[GET_CST0]], [[CH_CST0]], [[CH_CST1]]]
 // CHECK:   memref.store [[GETVAL]], [[A]][[[GET_DEL]]]
 // CHECK:   [[GETSET:%.*]] = arith.constant 0
 // CHECK:   verif.semaphore.set [[GETSEM]], [[GETSET]]

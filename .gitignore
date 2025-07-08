@@ -1,0 +1,7 @@
+
+build
+
+experiments/polygeist-polybench/converted*
+experiments/polygeist-polybench/generated*
+
+**/__pycache__/

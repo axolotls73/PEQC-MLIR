@@ -26,4 +26,29 @@ struct std::hash<mlir::Value> {
   }
 };
 
+// https://stackoverflow.com/a/32685618
+struct pair_hash {
+  template <class T1, class T2>
+  std::size_t operator () (const std::pair<T1,T2> &p) const {
+      auto h1 = std::hash<T1>{}(p.first);
+      auto h2 = std::hash<T2>{}(p.second);
+      return h1 ^ h2;
+  }
+};
+
+struct pair_value_comparator {
+  bool operator()(const std::pair<mlir::Value, mlir::Value>& lhs,
+                  const std::pair<mlir::Value, mlir::Value>& rhs) const {
+      void* lhs_ptr = lhs.first.getAsOpaquePointer();
+      void* rhs_ptr = rhs.first.getAsOpaquePointer();
+      if (lhs_ptr != rhs_ptr) {
+          return lhs_ptr < rhs_ptr;
+      }
+
+      lhs_ptr = lhs.second.getAsOpaquePointer();
+      rhs_ptr = rhs.second.getAsOpaquePointer();
+      return lhs_ptr < rhs_ptr;
+  }
+};
+
 #endif // VERIF_VERIFUTIL_H

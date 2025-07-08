@@ -115,6 +115,7 @@ std::string PastTranslator::getTypeName(const Type& t) {
   );
 
   if (mlir::dyn_cast<verif::SemaphoreType>(t)) return "int";
+  if (mlir::dyn_cast<verif::CountingSemaphoreType>(t)) return "int";
   if (t.isIndex()) return "int";
 
   else if (t.isInteger()) {
@@ -401,6 +402,28 @@ s_past_node_t* PastTranslator::getPastSetSemaphore(s_symbol_t* semaphore, s_symb
       nodeChain(args)));
 }
 
+s_past_node_t* PastTranslator::getPastReleaseSemaphore(s_symbol_t* semaphore, s_symbol_t* val) {
+  NodeVec args = {
+    past_node_varref_create(semaphore),
+    past_node_varref_create(val)
+  };
+  return past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol("PAST_RELEASE_SEMAPHORE")),
+      nodeChain(args)));
+}
+
+s_past_node_t* PastTranslator::getPastAcquireSemaphore(s_symbol_t* semaphore, s_symbol_t* val) {
+  NodeVec args = {
+    past_node_varref_create(semaphore),
+    past_node_varref_create(val)
+  };
+  return past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol("PAST_ACQUIRE_SEMAPHORE")),
+      nodeChain(args)));
+}
+
 s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName, s_past_node_t* initval) {
   NodeVec args = {
     past_node_varref_create(semaphoreName),
@@ -409,6 +432,17 @@ s_past_node_t* PastTranslator::getPastNewSemaphore(s_symbol_t* semaphoreName, s_
   return past_node_statement_create(
     past_node_funcall_create(
       past_node_varref_create(getSymbol("PAST_NEW_SEMAPHORE")),
+      nodeChain(args)));
+}
+
+s_past_node_t* PastTranslator::getPastNewCountingSemaphore(s_symbol_t* semaphoreName, s_past_node_t* initval) {
+  NodeVec args = {
+    past_node_varref_create(semaphoreName),
+    initval
+  };
+  return past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol("PAST_NEW_COUNTING_SEMAPHORE")),
       nodeChain(args)));
 }
 
@@ -548,9 +582,17 @@ s_past_node_t* PastTranslator::translate(func::CallOp op) {
 
 // arith
 
-s_past_node_t* PastTranslator::translateConstant(arith::ConstantOp op, const Type& type, u_past_value_data_t val) {
+s_past_node_t* PastTranslator::translateConstant(arith::ConstantOp op, const Type& type, u_past_value_data_t val, int displayval) {
   OpResult res = op->getResult(0);
-  return getDeclareAndAssign(type, "arith_const", res, past_node_value_create(getTypePast(type), val));
+  ///FIXME: quick hack
+  auto name = new std::string("arith_const_" + std::to_string(displayval));
+  // replace hyphen if negative
+  size_t pos = name->find("-");
+  if (pos != std::string::npos) {
+      name->replace(pos, 1, "neg_");
+  }
+  return getDeclareAndAssign(type, name->c_str(),
+      res, past_node_value_create(getTypePast(type), val));
 }
 
 s_past_node_t* PastTranslator::translate(arith::ConstantIntOp op) {
@@ -569,12 +611,12 @@ s_past_node_t* PastTranslator::translate(arith::ConstantIntOp op) {
   //     break;
   //   default: assert(0);
   // }
-  return translateConstant(op, op.getResult().getType(), val);
+  return translateConstant(op, op.getResult().getType(), val, op.value());
 }
 
 s_past_node_t* PastTranslator::translate(arith::ConstantIndexOp op) {
   u_past_value_data_t val = { .intval = (int)op.value() };
-  return translateConstant(op, op.getResult().getType(), val);
+  return translateConstant(op, op.getResult().getType(), val, op.value());
 }
 
 s_past_node_t* PastTranslator::translate(arith::ConstantFloatOp op) {
@@ -588,7 +630,8 @@ s_past_node_t* PastTranslator::translate(arith::ConstantFloatOp op) {
       break;
     default: assert(0);
   }
-  return translateConstant(op, op.getResult().getType(), val);
+  return translateConstant(op, op.getResult().getType(), val,
+      op.value().roundToIntegral(APFloat::APFloatBase::roundingMode::TowardZero));
 }
 
 s_past_node_t* PastTranslator::translateArithBinop
@@ -771,6 +814,11 @@ s_past_node_t* PastTranslator::translate(arith::SelectOp op) {
         past_node_varref_create(getVarSymbol(op.getFalseValue())))));
 }
 
+s_past_node_t* PastTranslator::translate(arith::IndexCastOp op) {
+  getAndMapSymbol(op.getOperand(), op.getResult());
+  return nullptr;
+}
+
 // scf
 
 s_past_node_t* PastTranslator::translate(scf::ForOp op) {
@@ -873,6 +921,25 @@ s_past_node_t* PastTranslator::translate(cf::BranchOp op) {
   return past_node_statement_create(
     past_node_keyword_create(e_past_keyword_goto,
       past_node_varref_create(getBlockSymbol(op.getDest()))));
+}
+
+s_past_node_t* PastTranslator::translate(cf::CondBranchOp op) {
+  if (op.getTrueDestOperands().size() > 0 || op.getFalseDestOperands().size() > 0) {
+    op.emitError("cf.cond_br with operands not supported");
+    exit(1);
+  }
+  NodeVec stmts;
+  stmts.push_back(past_node_if_create(
+    past_node_varref_create(getVarSymbol(op.getCondition())),
+    past_node_block_create(
+      past_node_statement_create(
+        past_node_keyword_create(e_past_keyword_goto,
+          past_node_varref_create(getBlockSymbol(op.getTrueDest()))))),
+    past_node_block_create(
+      past_node_statement_create(
+        past_node_keyword_create(e_past_keyword_goto,
+          past_node_varref_create(getBlockSymbol(op.getFalseDest())))))));
+  return nodeChain(stmts);
 }
 
 // memref
@@ -1000,11 +1067,11 @@ s_past_node_t* PastTranslator::translate(memref::SubViewOp op) {
   NodeVec stmts;
 
   auto getFoldResultNode = [&](OpFoldResult res) {
-    if (res.is<Value>()) {
-      return past_node_varref_create(getVarSymbol(res.get<Value>()));
+    if (isa<Value>(res)) {
+      return past_node_varref_create(getVarSymbol(cast<Value>(res)));
     }
-    else if (res.is<Attribute>()) {
-      auto attr = cast_or_null<IntegerAttr>(res.get<Attribute>());
+    else if (cast<Attribute>(res)) {
+      auto attr = cast_or_null<IntegerAttr>(cast<Attribute>(res));
       if (!attr) {
         op.emitError("expected IntegerAttr in memref.subview");
         exit(1);
@@ -1168,48 +1235,23 @@ s_past_node_t* PastTranslator::translate(LLVM::UndefOp op) {
 s_past_node_t* PastTranslator::translate_unsupported(Operation* op) {
   assert(op);
 
-  // print op: use generic form to make it easy to find region
-  std::string s;
-  llvm::raw_string_ostream stream(s);
-  op->print(stream, OpPrintingFlags().printGenericOpForm());
-  LLVM_DEBUG (
-    llvm::errs() << "unsupported op: " << s << "\n";
-  );
-
-  // remove op's region, which will be translated separately
-  auto first = s.find("({");
-  if (first != std::string::npos) {
-    auto last = s.rfind("})");
-    assert(last != std::string::npos);
-    s.erase(first, last);
-  }
-  // overflows, thank you c++
-  // std::regex region(R"(\(\{(.|\n)*\}\))", std::regex::multiline);
-  // s = std::regex_replace(s, region, "");
-  std::regex quote(R"(")");
-  s = std::regex_replace(s, quote, "");
-
-  ///TODO: figure out how strings work...
-  s = "\"" + s + "\"";
-  char* str = (char*)malloc((s.size() + 1) * sizeof(char));
-  strcpy(str, s.c_str());
+  std::regex rep("[. ]");
+  std::string opname = std::regex_replace(op->getName().getIdentifier().str(), rep, "_");
 
   NodeVec nodes;
-  // declare results of operation so future uses are ok
-  for (auto res : op->getResults()) {
-    nodes.push_back(past_node_statement_create(
-      past_node_varref_create(getVarSymbol(res))));
+  NodeVec args;
+  for (auto a : op->getOperands()) {
+    args.push_back(past_node_varref_create(getVarSymbol(a)));
   }
-
   nodes.push_back(past_node_statement_create(
-    past_node_varref_create(getSymbol(str))));
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol(opname)),
+      nodeChain(args))));
+
   for (auto &r : op->getRegions()) {
     nodes.push_back(past_node_block_create(
       translate(r)));
   }
-  LLVM_DEBUG (
-    llvm::errs() << "unsupported op done\n";
-  );
   return nodeChain(nodes);
 }
 
@@ -1218,6 +1260,16 @@ s_past_node_t* PastTranslator::translate(verif::SemaphoreOp op) {
   nodes.push_back(past_node_statement_create(
     getVarDecl(op.getSem(), "verif_semaphore")));
   nodes.push_back(getPastNewSemaphore(
+    getVarSymbol(op.getSem()),
+    past_node_value_create_from_int(op.getInit().getInt())));
+  return nodeChain(nodes);
+}
+
+s_past_node_t* PastTranslator::translate(verif::CountingSemaphoreOp op) {
+  NodeVec nodes;
+  nodes.push_back(past_node_statement_create(
+    getVarDecl(op.getSem(), "verif_semaphore")));
+  nodes.push_back(getPastNewCountingSemaphore(
     getVarSymbol(op.getSem()),
     past_node_value_create_from_int(op.getInit().getInt())));
   return nodeChain(nodes);
@@ -1235,6 +1287,47 @@ s_past_node_t* PastTranslator::translate(verif::SemaphoreWaitOp op) {
   nodes.push_back(getPastWaitSemaphore
       (getVarSymbol(op.getSem(), "verif_semaphore"), getVarSymbol(op.getVal())));
   return nodeChain(nodes);
+}
+
+s_past_node_t* PastTranslator::translate(verif::SemaphoreReleaseOp op) {
+  NodeVec nodes;
+  nodes.push_back(getPastReleaseSemaphore
+      (getVarSymbol(op.getSem(), "verif_semaphore"), getVarSymbol(op.getVal())));
+  return nodeChain(nodes);
+}
+
+s_past_node_t* PastTranslator::translate(verif::SemaphoreAcquireOp op) {
+  NodeVec nodes;
+  nodes.push_back(getPastAcquireSemaphore
+      (getVarSymbol(op.getSem(), "verif_semaphore"), getVarSymbol(op.getVal())));
+  return nodeChain(nodes);
+}
+
+s_past_node_t* PastTranslator::translate(verif::ErrorOp op) {
+  NodeVec nodes;
+  auto message = op.getMessage().str();
+  message = std::regex_replace(message, std::regex("[^a-zA-Z0-9_]"), "_");
+  message = std::regex_replace(message, std::regex("_+"), "_");
+  message = std::regex_replace(message, std::regex("^(.*)"), "_$1");
+  nodes.push_back(past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol("_past_ai_api_error")),
+      past_node_varref_create(symbol_get_or_insert(symbolTable, message.c_str(), NULL)))));
+  return nodeChain(nodes);
+}
+
+s_past_node_t* PastTranslator::translate(verif::UndefOp op) {
+  if (op.getNumResults() > 0) {
+    llvm::errs() << "warning: verif.undef results unused\n";
+  }
+  NodeVec args;
+  for (auto a : op.getArgs()) {
+    args.push_back(past_node_varref_create(getVarSymbol(a)));
+  }
+  return past_node_statement_create(
+    past_node_funcall_create(
+      past_node_varref_create(getSymbol(op.getName().str().c_str())),
+      nodeChain(args)));
 }
 
 s_past_node_t* PastTranslator::translate(Operation* op) {
@@ -1270,12 +1363,14 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::CmpFOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::SelectOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<arith::IndexCastOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<scf::ForOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<scf::IfOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<scf::YieldOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<cf::BranchOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<cf::CondBranchOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<memref::AllocOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<memref::AllocaOp>(op)) res = translate(o);
@@ -1298,8 +1393,14 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<LLVM::UndefOp>(op)) res = translate(o);
 
   else if (auto o = dyn_cast<verif::SemaphoreOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<verif::CountingSemaphoreOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<verif::SemaphoreSetOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<verif::SemaphoreWaitOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<verif::SemaphoreReleaseOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<verif::SemaphoreAcquireOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<verif::ErrorOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<verif::UndefOp>(op)) res = translate(o);
+
   else {
     if (!allow_unsupported_ops) {
       op->emitError("verif-translate: unknown operation");
@@ -1310,6 +1411,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   }
   return res;
 }
+
 
 // returns a linked list of the translation of the contained blocks'
 // operations, chained
@@ -1368,7 +1470,6 @@ s_past_node_t* PastTranslator::translate(Region& region) {
   }
   return nodeChain(stmts);
 }
-
 
 // module: entry point for translation
 s_past_node_t* PastTranslator::translate(ModuleOp op) {

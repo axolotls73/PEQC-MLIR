@@ -47,14 +47,20 @@ class PastTranslator {
 
   public:
 
+  PastTranslator(bool allow_unsupported_ops, bool declare_variables, bool all_arrays_global):
+      allow_unsupported_ops(allow_unsupported_ops),
+      declare_variables(declare_variables),
+      all_arrays_global(all_arrays_global)
+      {};
+
   s_past_node_t* translate(Operation* op);
 
   private:
 
   //options
-  bool declare_variables = true;
-  bool all_arrays_global = false;
-  bool allow_unsupported_ops = false;
+  bool allow_unsupported_ops;
+  bool declare_variables;
+  bool all_arrays_global;
 
   symbol_table_t* symbolTable = symbol_table_malloc();
   std::unordered_map<Value, s_symbol_t*> valueNames;
@@ -122,7 +128,10 @@ class PastTranslator {
   s_past_node_t* getPastWaitSemaphore(s_symbol_t* semaphore, s_symbol_t* val);
   s_past_node_t* getPastWaitSemaphoreAll(s_symbol_t* semaphore_arr, s_symbol_t* size, s_symbol_t* val);
   s_past_node_t* getPastSetSemaphore(s_symbol_t* semaphore, s_symbol_t* val);
+  s_past_node_t* getPastReleaseSemaphore(s_symbol_t* semaphore, s_symbol_t* val);
+  s_past_node_t* getPastAcquireSemaphore(s_symbol_t* semaphore, s_symbol_t* val);
   s_past_node_t* getPastNewSemaphore(s_symbol_t* semaphoreName, s_past_node_t* initval);
+  s_past_node_t* getPastNewCountingSemaphore(s_symbol_t* semaphoreName, s_past_node_t* initval);
 
   s_past_node_t* wrapInAsyncBlock(s_past_node_t* node);
 
@@ -142,7 +151,7 @@ class PastTranslator {
   // arith
 
   s_past_node_t* translateConstant(arith::ConstantOp op,
-      const Type& type, u_past_value_data_t val);
+      const Type& type, u_past_value_data_t val, int displayval);
   s_past_node_t* translate(arith::ConstantIntOp op);
   s_past_node_t* translate(arith::ConstantIndexOp op);
   s_past_node_t* translate(arith::ConstantFloatOp op);
@@ -181,6 +190,8 @@ class PastTranslator {
 
   s_past_node_t* translate(arith::SelectOp op);
 
+  s_past_node_t* translate(arith::IndexCastOp op);
+
 
   // scf
 
@@ -193,6 +204,7 @@ class PastTranslator {
   // cf
 
   s_past_node_t* translate(cf::BranchOp op);
+  s_past_node_t* translate(cf::CondBranchOp op);
 
   // memref
 
@@ -230,9 +242,13 @@ class PastTranslator {
   s_past_node_t* translate(LLVM::UndefOp op);
 
   s_past_node_t* translate(verif::SemaphoreOp op);
+  s_past_node_t* translate(verif::CountingSemaphoreOp op);
   s_past_node_t* translate(verif::SemaphoreSetOp op);
   s_past_node_t* translate(verif::SemaphoreWaitOp op);
-
+  s_past_node_t* translate(verif::SemaphoreReleaseOp op);
+  s_past_node_t* translate(verif::SemaphoreAcquireOp op);
+  s_past_node_t* translate(verif::ErrorOp op);
+  s_past_node_t* translate(verif::UndefOp op);
   // returns a linked list of the translation of the contained blocks'
   // operations, chained
   s_past_node_t* translate(Region& region);

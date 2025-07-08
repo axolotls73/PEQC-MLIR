@@ -46,20 +46,26 @@ public:
                                 ConversionPatternRewriter &rewriter) const final {
     auto loc = op.getLoc();
 
-    auto dst = op.getDst();
-    auto src = op.getSrc();
+    auto dst = dyn_cast<TypedValue<MemRefType>>(op.getDst());
+    auto src = dyn_cast<TypedValue<MemRefType>>(op.getSrc());
+
+    if (!dst || !src) {
+      op.emitError("dma_memcpy_nd operands must be ranked");
+      return failure();
+    }
+
     if (src.getType().getRank() != dst.getType().getRank()) {
-      op.emitWarning("verif-convert: dma_memcpy_nd src and dst need same rank");
+      op.emitError("dma_memcpy_nd src and dst need same rank");
       return failure();
     }
 
     SmallVector<Value> src_strides, dst_strides;
     ///FIXME: verify correct strides
     auto cst1 = rewriter.create<arith::ConstantIndexOp>(loc, 1).getResult();
-    for (int i = 0; i < op.getSrcOffsets().size(); i++) {
+    for (size_t i = 0; i < op.getSrcOffsets().size(); i++) {
       src_strides.push_back(cst1);
     }
-    for (int i = 0; i < op.getDstOffsets().size(); i++) {
+    for (size_t i = 0; i < op.getDstOffsets().size(); i++) {
       dst_strides.push_back(cst1);
     }
 

@@ -18,8 +18,9 @@
 
 
 AIR_REPO=/opt/mlir-air
-# PAST_DIR=/data-host-share/pocc-devel/ir/past
-PAST_DIR=/data-host-share/past-0.7.3-beta
+PAST_DIR=/data-host-share/pocc-devel/ir/past
+# PAST_DIR=/data-host-share/past-0.7.3-beta
+# PAST_DIR=/data-host-share/pocc-devel/ir/past-clean
 LLVM_REPO=$AIR_REPO/llvm
 
 # rm -r build CMakeFiles
@@ -31,4 +32,5 @@ cmake -G Ninja .. \
   -DPAST_DIR=$PAST_DIR
 
 cmake --build . --target mlir-doc
+cmake --build . --target verif-lsp-server
 cmake --build . --target check-verif

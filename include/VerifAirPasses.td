@@ -29,7 +29,7 @@ If declared inside the `air.execute` region,
 scalar return values are stored in a memref declared outside the region,
 and the `memref.alloc` ops are moved outside of the region.
 
-See tests `test/verif/convert/unit/air-exec-scalar.mlir`, `test/verif/convert/unit/air-exec-alloc.mlir`.
+See tests `test/verif/convert/unit/air/air-exec-scalar.mlir`, `test/verif/convert/unit/air/air-exec-alloc.mlir`.
   }];
   let dependentDialects = [
     "arith::ArithDialect",
@@ -45,7 +45,7 @@ Convert `air.launch`, `air.segment`, and `air.herd` to an `scf.parallel` operati
 loop iterators starting at 0.
 If air ops are `async`, the `scf.parallel` operation is wrapped in `async.execute`.
 
-See tests `test/verif/convert/unit/air-herd-basic.mlir`, `test/verif/convert/unit/air-launch-basic-async.mlir`.
+See tests `test/verif/convert/unit/air/air-herd-basic.mlir`, `test/verif/convert/unit/air/air-launch-basic.mlir`.
   }];
   let dependentDialects = [
     "arith::ArithDialect",
@@ -60,7 +60,7 @@ def VerifDmaToMemref: Pass<"verif-air-dma-to-memref", "::mlir::ModuleOp"> {
 Convert `air.dma_memcpy_nd` to a combination of `memref.subview` and `memref.copy` operations,
 wrapping in `async.execute` if `async` is specified.
 
-See tests `test/verif/convert/unit/air-dma-nd-basic.mlir`, `test/verif/convert/unit/air-dma-nd-basic-async.mlir`.
+See tests `test/verif/convert/unit/air/air-dma-nd-basic.mlir`, `test/verif/convert/unit/air/air-dma-nd-basic-async.mlir`.
   }];
   let dependentDialects = [
     "arith::ArithDialect",
@@ -80,6 +80,29 @@ def VerifConvertChannel: Pass<"verif-air-convert-channel", "::mlir::ModuleOp"> {
     "affine::AffineDialect",
     "async::AsyncDialect",
     "verif::VerifDialect"
+  ];
+}
+
+def VerifConvertAIE: Pass<"verif-convert-aie", "::mlir::ModuleOp"> {
+  let summary = "Convert aie operations";
+  let description = [{
+Converts (a subset of) AIE operations to standard dialects.
+
+To use in `verif-translate`, `--affine-expand-index-ops` and/or `--lower-affine` must be used to lower the introduced `affine` ops.
+  }];
+  let dependentDialects = [
+    "arith::ArithDialect",
+    "memref::MemRefDialect",
+    "func::FuncDialect",
+    "scf::SCFDialect",
+    "cf::ControlFlowDialect",
+    "affine::AffineDialect",
+    "async::AsyncDialect",
+    "verif::VerifDialect"
+  ];
+  let options = [
+    Option<"countingSemToSpawn", "counting-semaphore-to-spawn", "bool", /*default=*/"false",
+        "convert multi-producer counting semaphore pattern to async spawn (experimental)">
   ];
 }
 
