@@ -137,7 +137,7 @@ LogicalResult convertAcquire(xilinx::AIE::ObjectFifoAcquireOp op) {
 
   // update start value
   indexval = builder.create<arith::AddIOp>(loc, IndexType::get(context), indexval, cst_1).getResult();
-  indexval = builder.create<arith::RemUIOp>(loc, indexval, numeltsval).getResult();
+  indexval = builder.create<arith::RemSIOp>(loc, indexval, numeltsval).getResult();
   builder.create<memref::StoreOp>(loc, indexval, indexarrval, SmallVector<Value>{cst_0});
 
   op.erase();
@@ -189,7 +189,7 @@ LogicalResult convertRelease(xilinx::AIE::ObjectFifoReleaseOp op) {
 
   // update end value
   Value newindexval = builder.create<arith::AddIOp>(loc, IndexType::get(context), indexval, cst_1).getResult();
-  newindexval = builder.create<arith::RemUIOp>(loc, newindexval, numeltsval).getResult();
+  newindexval = builder.create<arith::RemSIOp>(loc, newindexval, numeltsval).getResult();
   builder.create<memref::StoreOp>(loc, newindexval, indexarrval, SmallVector<Value>{cst_0});
 
   // set semaphores
@@ -287,6 +287,7 @@ LogicalResult convertObjectfifo() {
     }
   }
 
+  ofop.erase();
   return success();
 }
 

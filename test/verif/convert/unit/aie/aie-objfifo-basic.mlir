@@ -60,7 +60,7 @@ module {
 // CHECK:   [[PROD_BUFVAL:%.*]] = memref.load [[PROD_BUFARR]][[[PROD_SI]]]
 // CHECK:   memref.store [[PROD_BUFVAL]], [[PROD_SUBVIEW]][[[PROD_ITER]]]
 // CHECK:   [[PROD_SI2:%.*]] = arith.addi [[PROD_SI]], [[PROD_CST1]] : index
-// CHECK:   [[PROD_SI3:%.*]] = arith.remui [[PROD_SI2]], [[PROD_SIZE]] : index
+// CHECK:   [[PROD_SI3:%.*]] = arith.remsi [[PROD_SI2]], [[PROD_SIZE]] : index
 // CHECK:   memref.store [[PROD_SI3]], [[PROD_SI_ARR]][[[PROD_CST0]]] : memref<1xindex>
 // CHECK-NOT: aie.objectfifo.acquire
       %inputSubview = aie.objectfifo.acquire @of (Produce, 1) : !aie.objectfifosubview<memref<16xi32>>
