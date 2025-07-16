@@ -112,6 +112,40 @@ Value getIndexArr(Location loc, OpBuilder& builder, IndexArr arr) {
   return builder.create<memref::GetGlobalOp>(loc, indexarr_type, arrname).getResult();
 }
 
+LogicalResult buildAcquireReleaseSync(OpBuilder builder, Location loc, Value index, xilinx::AIE::ObjectFifoPort port, bool is_acquire) {
+  Value semarr = builder.create<memref::GetGlobalOp>(loc, semarr_type, semarr_name).getResult();
+  auto setwait = is_acquire ?
+      (port == xilinx::AIE::ObjectFifoPort::Produce ? READY_PRODUCE : READY_CONSUME) :
+      (port == xilinx::AIE::ObjectFifoPort::Produce ? READY_CONSUME : READY_PRODUCE);
+  auto setwaitval = builder.create<arith::ConstantIndexOp>(loc, setwait).getResult();
+
+  // one-to-one
+  if (producers.size() == 1 && consumers.size() == 1) {
+    Value sem = builder.create<memref::LoadOp>(loc, semarr, index).getResult();
+    if (is_acquire) {
+      builder.create<verif::SemaphoreWaitOp>(loc, sem, setwaitval);
+    }
+    else {
+      builder.create<verif::SemaphoreSetOp>(loc, sem, setwaitval);
+    }
+
+  }
+  // many-to-one
+  else if (producers.size() > 1 && consumers.size() == 1) {
+
+  }
+  // one-to-many
+  else if (producers.size() == 1 && consumers.size() > 1) {
+
+  }
+  else {
+    operation->emitError("unsupported producer-consumer pattern");
+    return failure();
+  }
+
+  return success();
+}
+
 LogicalResult convertAcquire(xilinx::AIE::ObjectFifoAcquireOp op) {
   auto loc = op.getLoc();
   auto builder = OpBuilder(op);
@@ -152,11 +186,7 @@ LogicalResult convertAcquire(xilinx::AIE::ObjectFifoAcquireOp op) {
   builder.setInsertionPointToStart(loop.getBody());
 
   // wait on semaphores
-  auto wait = op.getPort() == xilinx::AIE::ObjectFifoPort::Produce ?
-      READY_PRODUCE : READY_CONSUME;
-  Value sem = builder.create<memref::LoadOp>(loc, semarr, indexval).getResult();
-  auto waitval = builder.create<arith::ConstantIndexOp>(loc, wait).getResult();
-  builder.create<verif::SemaphoreWaitOp>(loc, sem, waitval);
+  buildAcquireReleaseSync(builder, loc, indexval, op.getPort(), true);
 
   // copy to local buffer
   Value bufval = builder.create<memref::LoadOp>(loc, bufarr, SmallVector<Value>{indexval});
@@ -202,7 +232,6 @@ LogicalResult convertRelease(xilinx::AIE::ObjectFifoReleaseOp op) {
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
   Value numeltsval = builder.create<arith::ConstantIndexOp>(loc, numelts).getResult();
   Value bufarr = builder.create<memref::GetGlobalOp>(loc, bufarr_type, bufarr_name).getResult();
-  Value semarr = builder.create<memref::GetGlobalOp>(loc, semarr_type, semarr_name).getResult();
   auto indexarr = op.getPort() == xilinx::AIE::ObjectFifoPort::Produce ?
       IndexArr::END_PRODUCER : IndexArr::END_CONSUMER;
   Value indexarrval = getIndexArr(loc, builder, indexarr);
@@ -220,11 +249,7 @@ LogicalResult convertRelease(xilinx::AIE::ObjectFifoReleaseOp op) {
   builder.create<memref::StoreOp>(loc, newindexval, indexarrval, SmallVector<Value>{cst_0});
 
   // set semaphores
-  auto set = op.getPort() == xilinx::AIE::ObjectFifoPort::Produce ?
-      READY_CONSUME : READY_PRODUCE;
-  Value sem = builder.create<memref::LoadOp>(loc, semarr, indexval).getResult();
-  auto setval = builder.create<arith::ConstantIndexOp>(loc, set).getResult();
-  builder.create<verif::SemaphoreSetOp>(loc, sem, setval);
+  buildAcquireReleaseSync(builder, loc, indexval, op.getPort(), false);
 
   op.erase();
   return success();

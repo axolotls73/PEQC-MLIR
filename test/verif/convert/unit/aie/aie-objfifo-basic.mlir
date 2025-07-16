@@ -50,10 +50,10 @@ module {
 // CHECK: [[PROD_CST1:%.*]] = arith.constant 1
 // CHECK: [[PROD_SIZE:%.*]] = arith.constant 1
 // CHECK: [[PROD_BUFARR:%.*]] = memref.get_global @[[BUFARRGLOBAL]]
-// CHECK: [[PROD_SEMARR:%.*]] = memref.get_global @[[SEMARRGLOBAL]]
 // CHECK: [[PROD_SI_ARR:%.*]] = memref.get_global @[[STR_PROD_I]]
 // CHECK: [[PROD_SI:%.*]] = memref.load [[PROD_SI_ARR]][[[PROD_CST0]]]
 // CHECK: scf.for [[PROD_ITER:%.*]] = [[PROD_CST0]] to [[PROD_SIZE]] step [[PROD_CST1]]
+// CHECK: [[PROD_SEMARR:%.*]] = memref.get_global @[[SEMARRGLOBAL]]
 // CHECK-DAG:   [[PROD_SEM:%.*]] = memref.load [[PROD_SEMARR]][[[PROD_SI]]]
 // CHECK-DAG:   [[PROD_WAIT:%.*]] = arith.constant 0
 // CHECK:   verif.semaphore.wait [[PROD_SEM]], [[PROD_WAIT]]
