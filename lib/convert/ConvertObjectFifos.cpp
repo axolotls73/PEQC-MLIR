@@ -51,16 +51,43 @@ class ObjfifoConverter {
 public:
 
 ObjfifoConverter(MLIRContext* context, ModuleOp module, xilinx::AIE::ObjectFifoCreateOp op) :
-    context(context), module(module), ofop(op) {}
+    context(context), module(module) {
+  operation = op.getOperation();
+
+  auto depthattr = dyn_cast<IntegerAttr>(op.getElemNumber());
+  assert(depthattr);
+  depth = depthattr.getInt();
+
+  ofname = op.getSymName().str();
+  elt_type = op.getElemType().getElementType();
+
+  producers.push_back(op.getProducerTile());
+  for (auto tile : op.getConsumerTiles()) {
+    consumers.push_back(tile);
+  }
+
+  producerdecls.push_back(op);
+  consumerdecls.push_back(op);
+}
 
 private:
 
 MLIRContext* context;
 ModuleOp module;
-xilinx::AIE::ObjectFifoCreateOp ofop;
+Operation* operation;
 
+std::string ofname;
 MemRefType elt_type;
 int64_t depth;
+
+// to keep track of the indices of each tile (as the index result of a TileOp)
+SmallVector<Value> producers;
+SmallVector<Value> consumers;
+
+// for link operations, keep track of both the "input" and "output" OFs.
+// if no link operation, these will both contain one element that's the same
+SmallVector<xilinx::AIE::ObjectFifoCreateOp> producerdecls;
+SmallVector<xilinx::AIE::ObjectFifoCreateOp> consumerdecls;
 
 std::string bufarr_name;
 MemRefType bufarr_type;
@@ -204,23 +231,18 @@ LogicalResult convertRelease(xilinx::AIE::ObjectFifoReleaseOp op) {
 }
 
 LogicalResult initObjfifo() {
-  auto depthattr = dyn_cast<IntegerAttr>(ofop.getElemNumber());
-  assert(depthattr);
-  depth = depthattr.getInt();
-
-  elt_type = ofop.getElemType().getElementType();
   if (elt_type.getNumDynamicDims() > 0) {
-    ofop.emitError("dynamic memref element types unsupported");
+    module.emitError("dynamic memref element types unsupported");
     return failure();
   }
 
-  auto loc = ofop.getLoc();
-  auto builder = OpBuilder(ofop);
+  auto loc = operation->getLoc();
+  auto builder = OpBuilder(operation);
 
   // declare and initialize buffer/semaphore array
-  bufarr_name = ofop.getSymName().str() + "_buffer";
+  bufarr_name = ofname + "_buffer";
   bufarr_type = MemRefType::get(SmallVector<int64_t>{depth}, elt_type);
-  semarr_name = ofop.getSymName().str() + "_sem";
+  semarr_name = ofname + "_sem";
   semarr_type = MemRefType::get(SmallVector<int64_t>{depth}, SemaphoreType::get(context));
 
   builder.create<memref::GlobalOp>(loc, StringAttr::get(context, bufarr_name),
@@ -248,7 +270,7 @@ LogicalResult initObjfifo() {
   SmallVector<const char*> indexarrnames = {"_start_producer", "_end_producer", "_start_consumer", "_end_consumer"};
   SmallVector<IndexArr> indexarrkeys = {IndexArr::START_PRODUCER, IndexArr::END_PRODUCER, IndexArr::START_CONSUMER, IndexArr::END_CONSUMER};
   for (auto [name, key] : llvm::zip_equal(indexarrnames, indexarrkeys)) {
-    auto globalname = ofop.getSymName().str() + name;
+    auto globalname = ofname + name;
     builder.create<memref::GlobalOp>(loc, StringAttr::get(context, globalname),
         StringAttr::get(context, "private"), TypeAttr::get(indexarr_type),
         Attribute{}, UnitAttr{}, IntegerAttr{});
@@ -261,33 +283,62 @@ LogicalResult initObjfifo() {
   return success();
 }
 
+LogicalResult convertUse(SymbolTable::SymbolUse use, bool one_to_one, bool is_producer) {
+  auto op = use.getUser();
+  llvm::errs() << "USE " << *op << "\n";
+  if (auto acquire = dyn_cast<xilinx::AIE::ObjectFifoAcquireOp>(op)) {
+    if (!one_to_one && (is_producer != (acquire.getPort() == xilinx::AIE::ObjectFifoPort::Produce))) {
+      op->emitError("link producer acquired as consumer or vice versa");
+      return failure();
+    }
+    auto res = convertAcquire(acquire);
+    if (res.failed()) return failure();
+  }
+  else if (auto release = dyn_cast<xilinx::AIE::ObjectFifoReleaseOp>(op)) {
+    if (!one_to_one && (is_producer != (release.getPort() == xilinx::AIE::ObjectFifoPort::Produce))) {
+      op->emitError("link producer released as consumer or vice versa");
+      return failure();
+    }
+    auto res = convertRelease(release);
+    if (res.failed()) return failure();
+  }
+  else {
+    op->emitError("unsupported objectfifo use operation");
+    return failure();
+  }
+  return success();
+}
+
 public:
 
 LogicalResult convertObjectfifo() {
   auto res = initObjfifo();
   if (res.failed()) return failure();
 
-  auto uses = ofop.getSymbolUses(module);
-  if (!uses.has_value()) return success();
+  bool one_to_one = producerdecls.size() == 1 && consumerdecls.size() == 1;
 
-  for (auto use : uses.value()) {
-    auto op = use.getUser();
-    llvm::errs() << "USE " << *op << "\n";
-    if (auto acquire = dyn_cast<xilinx::AIE::ObjectFifoAcquireOp>(op)) {
-      auto res = convertAcquire(acquire);
-      if (res.failed()) return failure();
-    }
-    else if (auto release = dyn_cast<xilinx::AIE::ObjectFifoReleaseOp>(op)) {
-      auto res = convertRelease(release);
-      if (res.failed()) return failure();
-    }
-    else {
-      op->emitError("unsupported objectfifo use operation");
-      return failure();
+  for (auto ofop : producerdecls) {
+    auto uses = ofop.getSymbolUses(module);
+    if (!uses.has_value()) continue;
+
+    for (auto use : uses.value()) {
+      convertUse(use, one_to_one, true);
     }
   }
 
-  ofop.erase();
+  // one-to-one connection: these will be the same, so we don't need to process the same thing again
+  if (one_to_one)
+    return success();
+
+  for (auto ofop : consumerdecls) {
+    auto uses = ofop.getSymbolUses(module);
+    if (!uses.has_value()) continue;
+
+    for (auto use : uses.value()) {
+      convertUse(use, one_to_one, false);
+    }
+  }
+
   return success();
 }
 
@@ -303,9 +354,15 @@ public:
     auto module = getOperation();
     auto context = module.getContext();
 
-    WalkResult res = module.walk([&] (xilinx::AIE::ObjectFifoCreateOp op) {
+    WalkResult res = module.walk([&] (xilinx::AIE::ObjectFifoLinkOp op) {
+      return WalkResult::advance();
+    });
+
+    res = module.walk([&] (xilinx::AIE::ObjectFifoCreateOp op) {
       auto converter = ObjfifoConverter(context, module, op);
-      return converter.convertObjectfifo().succeeded() ? WalkResult::advance() : WalkResult::interrupt();
+      if (!converter.convertObjectfifo().succeeded()) return WalkResult::interrupt();
+      op.erase();
+      return WalkResult::advance();
     });
 
     if (res.wasInterrupted())
