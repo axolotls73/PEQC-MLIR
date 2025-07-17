@@ -36,10 +36,18 @@ module {
 // CHECK:   [[SEMINIT:%.*]] = verif.semaphore(0
 // CHECK:   memref.store [[SEMINIT]], [[SEMARR]]
 
-// CHECK: memref.global "private" @[[STR_PROD_I:.*]] : memref<1xindex>
-// CHECK: memref.global "private" @[[END_PROD_I:.*]] : memref<1xindex>
-// CHECK: memref.global "private" @[[STR_CONS_I:.*]] : memref<1xindex>
-// CHECK: memref.global "private" @[[END_CONS_I:.*]] : memref<1xindex>
+// CHECK: memref.global "private" @[[PROD_I:.*]] : memref<1x2xindex>
+// CHECK-DAG: [[PIV:%.*]] = memref.get_global @[[PROD_I]]
+// CHECK-DAG: [[PISIZE:%.*]] = arith.constant 1 : index
+// CHECK: scf.for [[IPI:%.*]] = [[CST0]] to [[PISIZE]] step [[CST1]]
+// CHECK:   memref.store [[CST0]], [[PIV]][[[IPI]], [[CST0]]]
+// CHECK:   memref.store [[CST0]], [[PIV]][[[IPI]], [[CST1]]]
+// CHECK: memref.global "private" @[[CONS_I:.*]] : memref<1x2xindex>
+// CHECK-DAG: [[CIV:%.*]] = memref.get_global @[[CONS_I]]
+// CHECK-DAG: [[CISIZE:%.*]] = arith.constant 1 : index
+// CHECK: scf.for [[ICI:%.*]] = [[CST0]] to [[CISIZE]] step [[CST1]]
+// CHECK:   memref.store [[CST0]], [[CIV]][[[ICI]], [[CST0]]]
+// CHECK:   memref.store [[CST0]], [[CIV]][[[ICI]], [[CST1]]]
 
 
     aie.objectfifo @of (%tile14, {%tile34}, 5 : i32) : !aie.objectfifo<memref<16xi32>>
@@ -50,8 +58,10 @@ module {
 // CHECK: [[PROD_CST1:%.*]] = arith.constant 1
 // CHECK: [[PROD_SIZE:%.*]] = arith.constant 1
 // CHECK: [[PROD_BUFARR:%.*]] = memref.get_global @[[BUFARRGLOBAL]]
-// CHECK: [[PROD_SI_ARR:%.*]] = memref.get_global @[[STR_PROD_I]]
-// CHECK: [[PROD_SI:%.*]] = memref.load [[PROD_SI_ARR]][[[PROD_CST0]]]
+// CHECK: [[PROD_I_ARR:%.*]] = memref.get_global @[[PROD_I]]
+// CHECK: [[PI1:%.*]] = arith.constant 0
+// CHECK: [[PI2:%.*]] = arith.constant 0
+// CHECK: [[PROD_SI:%.*]] = memref.load [[PROD_I_ARR]][[[PI1]], [[PI2]]]
 // CHECK: scf.for [[PROD_ITER:%.*]] = [[PROD_CST0]] to [[PROD_SIZE]] step [[PROD_CST1]]
 // CHECK: [[PROD_SEMARR:%.*]] = memref.get_global @[[SEMARRGLOBAL]]
 // CHECK-DAG:   [[PROD_SEM:%.*]] = memref.load [[PROD_SEMARR]][[[PROD_SI]]]
@@ -61,7 +71,7 @@ module {
 // CHECK:   memref.store [[PROD_BUFVAL]], [[PROD_SUBVIEW]][[[PROD_ITER]]]
 // CHECK:   [[PROD_SI2:%.*]] = arith.addi [[PROD_SI]], [[PROD_CST1]] : index
 // CHECK:   [[PROD_SI3:%.*]] = arith.remsi [[PROD_SI2]], [[PROD_SIZE]] : index
-// CHECK:   memref.store [[PROD_SI3]], [[PROD_SI_ARR]][[[PROD_CST0]]] : memref<1xindex>
+// CHECK:   memref.store [[PROD_SI3]], [[PROD_I_ARR]][[[PI1]], [[PI2]]]
 // CHECK-NOT: aie.objectfifo.acquire
       %inputSubview = aie.objectfifo.acquire @of (Produce, 1) : !aie.objectfifosubview<memref<16xi32>>
 
