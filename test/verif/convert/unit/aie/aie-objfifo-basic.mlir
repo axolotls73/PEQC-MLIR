@@ -24,15 +24,12 @@ module {
 
 // CHECK: memref.global "private" @[[BUFARRGLOBAL:.*]] : memref<5xmemref<16xi32>>
 // CHECK: memref.global "private" @[[SEMARRGLOBAL:.*]] : memref<5x!verif.semaphore>
-// CHECK-DAG: [[BUFARR:%.*]] = memref.get_global @[[BUFARRGLOBAL]]
 // CHECK-DAG: [[SEMARR:%.*]] = memref.get_global @[[SEMARRGLOBAL]]
 
 // CHECK-DAG: [[CST0:%.*]] = arith.constant 0 : index
 // CHECK-DAG: [[CST1:%.*]] = arith.constant 1 : index
 // CHECK-DAG: [[DEPTH:%.*]] = arith.constant 5 : index
 // CHECK: scf.for [[I4:%.*]] = [[CST0]] to [[DEPTH]] step [[CST1]]
-// CHECK:   [[BUFINIT:%.*]] = memref.alloc() : memref<16xi32>
-// CHECK:   memref.store [[BUFINIT]], [[BUFARR]]
 // CHECK:   [[SEMINIT:%.*]] = verif.semaphore(0
 // CHECK:   memref.store [[SEMINIT]], [[SEMARR]]
 

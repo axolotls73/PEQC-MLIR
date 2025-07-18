@@ -175,7 +175,8 @@ Value getIndexArr(Location loc, OpBuilder& builder, IndexArr arr) {
   return builder.create<memref::GetGlobalOp>(loc, indexarrtypes[arr], arrname).getResult();
 }
 
-LogicalResult buildAcquireReleaseSync(OpBuilder builder, Location loc, Value index, xilinx::AIE::ObjectFifoPort port, bool is_acquire) {
+LogicalResult buildAcquireReleaseSync(OpBuilder builder, Location loc, int idindex,
+      Value index, xilinx::AIE::ObjectFifoPort port, bool is_acquire) {
   Value semarr = builder.create<memref::GetGlobalOp>(loc, semarr_type, semarr_name).getResult();
   auto setwait = is_acquire ?
       (port == xilinx::AIE::ObjectFifoPort::Produce ? READY_PRODUCE : READY_CONSUME) :
@@ -196,8 +197,34 @@ LogicalResult buildAcquireReleaseSync(OpBuilder builder, Location loc, Value ind
     case MANY_TO_ONE:
       assert(0);
       break;
-    case ONE_TO_MANY:
-      assert(0);
+    case ONE_TO_MANY: {
+      scf::ForOp loop = nullptr;
+      Value consindex;
+      if (port == xilinx::AIE::ObjectFifoPort::Produce) {
+        Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
+        Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
+        Value numc = builder.create<arith::ConstantIndexOp>(loc, consumers.size()).getResult();
+        loop = builder.create<scf::ForOp>(loc, cst_0, numc, cst_1);
+        builder.setInsertionPointToStart(loop.getBody());
+        consindex = loop.getInductionVar();
+      }
+      else {
+        consindex = builder.create<arith::ConstantIndexOp>(loc, idindex).getResult();
+      }
+
+      Value sem = builder.create<memref::LoadOp>(loc, semarr, SmallVector<Value>{consindex, index});
+      if (is_acquire) {
+        builder.create<SemaphoreWaitOp>(loc, sem, setwaitval);
+      }
+      else {
+        builder.create<SemaphoreSetOp>(loc, sem, setwaitval);
+      }
+
+      if (loop) {
+        builder.setInsertionPointAfter(loop);
+      }
+    }
+
       break;
   }
 
@@ -231,7 +258,7 @@ SmallVector<Value> buildIndexArrIndices(OpBuilder builder, Value indexarrval, Lo
 // to_stream == false: from fifo buffer -> local buffer
 LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreateOp ofop, bool to_stream, Location loc,
       Value local_buffer, Value local_buffer_index, Value fifo_buffer, Value fifo_buffer_index) {
-  auto t = ofop.getDimensionsFromStreamPerConsumer();
+  // auto t = ofop.getDimensionsFromStreamPerConsumer();
   // llvm::errs()<<"aaaaaa";
   // for (auto a : t) {
   // for (auto b : a) {
@@ -258,6 +285,9 @@ LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreate
     Value bufval = builder.create<memref::LoadOp>(loc, copyfrom, SmallVector<Value>{copyfromindex});
     builder.create<memref::StoreOp>(loc, bufval, copyto, SmallVector<Value>{copytoindex});
   }
+  Value bufval = builder.create<memref::LoadOp>(loc, copyfrom, SmallVector<Value>{copyfromindex});
+  Value bufval2 = builder.create<memref::LoadOp>(loc, copyto, SmallVector<Value>{copytoindex});
+  builder.create<memref::CopyOp>(loc, bufval, bufval2);
 
   return success();
 }
@@ -309,6 +339,12 @@ LogicalResult convertAcquireRelease(Operation* op, xilinx::AIE::ObjectFifoCreate
   }
   assert(localbuf);
 
+  Value tile = getTile(op);
+  auto pcarr = port == xilinx::AIE::ObjectFifoPort::Produce ? producers : consumers;
+  auto pciter = std::find(pcarr.begin(), pcarr.end(), std::pair{ofop, tile});
+  assert(pciter != pcarr.end());
+  int pcindex = pciter - pcarr.begin();
+
   // wait loop
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
@@ -318,7 +354,6 @@ LogicalResult convertAcquireRelease(Operation* op, xilinx::AIE::ObjectFifoCreate
       IndexArr::PRODUCER : IndexArr::CONSUMER;
   auto indexarr_index = is_acquire ? INDEXARR_START : INDEXARR_END;
   Value indexarrval = getIndexArr(loc, builder, indexarr);
-  Value tile = getTile(op);
   auto indexarrindices = buildIndexArrIndices(builder, indexarrval, loc, indexarr_index, port, ofop, tile);
   for (auto index : indexarrindices) {
     llvm::errs() << index << "\n";
@@ -329,13 +364,15 @@ LogicalResult convertAcquireRelease(Operation* op, xilinx::AIE::ObjectFifoCreate
 
   // if acquire, wait on semaphores
   if (is_acquire) {
-    auto syncres = buildAcquireReleaseSync(builder, loc, indexval, port, true);
+    auto syncres = buildAcquireReleaseSync(builder, loc, pcindex, indexval, port, true);
     if (syncres.failed()) return failure();
   }
 
   // copy to/from local buffer
-  auto copyres = buildOFBufferCopy(builder, ofop, !is_acquire, loc, localbuf, loop.getInductionVar(), bufarr, indexval);
-  if (copyres.failed()) return failure();
+  if (!(port == xilinx::AIE::ObjectFifoPort::Consume && !is_acquire)) { // if release consume, don't need to copy anything
+    auto copyres = buildOFBufferCopy(builder, ofop, !is_acquire, loc, localbuf, loop.getInductionVar(), bufarr, indexval);
+    if (copyres.failed()) return failure();
+  }
 
   // update start value
   indexval = builder.create<arith::AddIOp>(loc, IndexType::get(context), indexval, cst_1).getResult();
@@ -344,7 +381,7 @@ LogicalResult convertAcquireRelease(Operation* op, xilinx::AIE::ObjectFifoCreate
 
   // if release, set semaphores
   if (!is_acquire) {
-    auto syncres = buildAcquireReleaseSync(builder, loc, indexval, port, false);
+    auto syncres = buildAcquireReleaseSync(builder, loc, pcindex, indexval, port, false);
     if (syncres.failed()) return failure();
   }
 
@@ -385,18 +422,27 @@ LogicalResult initObjfifo() {
   builder.create<memref::GlobalOp>(loc, StringAttr::get(context, semarr_name),
       StringAttr::get(context, "private"), TypeAttr::get(semarr_type),
       Attribute{}, UnitAttr{}, IntegerAttr{});
-  Value bufarr = builder.create<memref::GetGlobalOp>(loc, bufarr_type, bufarr_name).getResult();
   Value semarr = builder.create<memref::GetGlobalOp>(loc, semarr_type, semarr_name).getResult();
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
   Value depthval = builder.create<arith::ConstantIndexOp>(loc, depth).getResult();
   auto loop = builder.create<scf::ForOp>(loc, cst_0, depthval, cst_1);
   builder.setInsertionPointToStart(loop.getBody());
-  auto bufinit = builder.create<memref::AllocOp>(loc, elt_type).getResult();
-  builder.create<memref::StoreOp>(loc, bufinit, bufarr, loop.getInductionVar());
-  auto seminit = builder.create<SemaphoreOp>(loc,
-      IntegerAttr::get(IndexType::get(context), READY_PRODUCE)).getResult();
-  builder.create<memref::StoreOp>(loc, seminit, semarr, loop.getInductionVar());
+  // one-to-one: 1d semaphore array. otherwise, 2d
+  if (pattern == ONE_TO_ONE) {
+    auto seminit = builder.create<SemaphoreOp>(loc,
+        IntegerAttr::get(IndexType::get(context), READY_PRODUCE)).getResult();
+    builder.create<memref::StoreOp>(loc, seminit, semarr, loop.getInductionVar());
+  }
+  else {
+    Value pcsize = builder.create<arith::ConstantIndexOp>(loc, semarrsize[0]).getResult();
+    auto innerloop = builder.create<scf::ForOp>(loc, cst_0, pcsize, cst_1);
+    builder.setInsertionPointToStart(innerloop.getBody());
+    auto seminit = builder.create<SemaphoreOp>(loc,
+        IntegerAttr::get(IndexType::get(context), READY_PRODUCE)).getResult();
+    builder.create<memref::StoreOp>(loc, seminit, semarr, SmallVector<Value>{innerloop.getInductionVar(), loop.getInductionVar()});
+    module.emitRemark();
+  }
 
   // buffer index array creation/initialization
   builder.setInsertionPointAfter(loop);
