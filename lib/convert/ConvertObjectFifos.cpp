@@ -74,17 +74,28 @@ ObjfifoConverter(MLIRContext* context, ModuleOp module, xilinx::AIE::DeviceOp de
   ofname = op.getSymName().str();
   elt_type = op.getElemType().getElementType();
 
-  producerops.push_back(op);
-  consumerops.push_back(op);
+  producers.insert({op, op.getProducerTile()});
+  for (auto tile : op.getConsumerTiles()) {
+    consumers.insert({op, tile});
+  }
 }
 
 ObjfifoConverter(MLIRContext* context, ModuleOp module, xilinx::AIE::DeviceOp device, Operation* op,
     int id, int64_t depth, MemRefType elt_type,
     SmallVector<xilinx::AIE::ObjectFifoCreateOp> producerops, SmallVector<xilinx::AIE::ObjectFifoCreateOp> consumerops) :
     context(context), module(module), operation(op),
-    elt_type(elt_type), depth(depth), producerops(producerops), consumerops(consumerops) {
+    elt_type(elt_type), depth(depth) {
 
   ofname = "link_" + std::to_string(id) + "_to_" + consumerops[0].getSymName().str();
+
+  for (auto op : producerops) {
+    producers.insert({op, op.getProducerTile()});
+  }
+  for (auto op : consumerops) {
+    for (auto tile : op.getConsumerTiles()) {
+      consumers.insert({op, tile});
+    }
+  }
 }
 
 private:
@@ -114,9 +125,9 @@ int64_t depth;
 ProdConsPattern pattern;
 
 // for link operations, keep track of both the "input" and "output" OFs.
-// if no link operation, these will both contain one element that's the same
-SmallVector<xilinx::AIE::ObjectFifoCreateOp> producerops;
-SmallVector<xilinx::AIE::ObjectFifoCreateOp> consumerops;
+// if no link operation, these will both contain one element that's the same.
+SetVector<std::pair<xilinx::AIE::ObjectFifoCreateOp, Value>> producers;
+SetVector<std::pair<xilinx::AIE::ObjectFifoCreateOp, Value>> consumers;
 
 std::string bufarr_name;
 MemRefType bufarr_type;
@@ -131,19 +142,30 @@ std::unordered_map<IndexArr, std::string> indexarrs;
 std::unordered_map<IndexArr, MemRefType> indexarrtypes;
 
 std::optional<ProdConsPattern> getPattern() {
-  if (producerops.size() == 1 && consumerops.size() == 1) {
+  if (producers.size() == 1 && consumers.size() == 1) {
     return ProdConsPattern::ONE_TO_ONE;
   }
-  else if (producerops.size() > 1 && consumerops.size() == 1) {
+  else if (producers.size() > 1 && consumers.size() == 1) {
     return ProdConsPattern::MANY_TO_ONE;
   }
-  else if (producerops.size() == 1 && consumerops.size() > 1) {
+  else if (producers.size() == 1 && consumers.size() > 1) {
     return ProdConsPattern::ONE_TO_MANY;
   }
   else {
     operation->emitError("unsupported producer-consumer pattern");
     return {};
   }
+}
+
+Value getTile(Operation* op) {
+  if (auto core = op->getParentOfType<xilinx::AIE::CoreOp>()) {
+    return core.getTile();
+  }
+  else {
+    op->emitError();
+    assert(0 && "unimplemented: getTile for parent type");
+  }
+  return nullptr;
 }
 
 Value getIndexArr(Location loc, OpBuilder& builder, IndexArr arr) {
@@ -185,15 +207,15 @@ LogicalResult buildAcquireReleaseSync(OpBuilder builder, Location loc, Value ind
 // index arrays hold the start and end indices of the fifo into the circular buffer.
 // there are separate arrays for producers/consumers -- this function returns
 // {producer/consumer index, start/end index}
-SmallVector<Value> createIndexArrIndices(OpBuilder builder, Value indexarrval, Location loc,
-      int64_t startendindex, xilinx::AIE::ObjectFifoPort port, xilinx::AIE::ObjectFifoCreateOp ofop) {
+SmallVector<Value> buildIndexArrIndices(OpBuilder builder, Value indexarrval, Location loc,
+      int64_t startendindex, xilinx::AIE::ObjectFifoPort port, xilinx::AIE::ObjectFifoCreateOp ofop, Value tile) {
   SmallVector<Value> indexarrindices;
 
   // if one-to-many, there's an index for each consumer
   if (pattern == ProdConsPattern::ONE_TO_MANY && port == xilinx::AIE::ObjectFifoPort::Consume) {
-    auto it = std::find(consumerops.begin(), consumerops.end(), ofop);
-    assert(it != consumerops.end());
-    Value consumer_index = builder.create<arith::ConstantIndexOp>(loc, it - consumerops.begin()).getResult();
+    auto it = std::find(consumers.begin(), consumers.end(), std::pair{ofop, tile});
+    assert(it != consumers.end());
+    Value consumer_index = builder.create<arith::ConstantIndexOp>(loc, it - consumers.begin()).getResult();
     indexarrindices.push_back(consumer_index);
   }
   else {
@@ -205,42 +227,99 @@ SmallVector<Value> createIndexArrIndices(OpBuilder builder, Value indexarrval, L
   return indexarrindices;
 }
 
-LogicalResult convertAcquire(xilinx::AIE::ObjectFifoAcquireOp op, xilinx::AIE::ObjectFifoCreateOp ofop) {
-  auto loc = op.getLoc();
-  auto builder = OpBuilder(op);
+// to_stream == true: from local buffer -> fifo buffer
+// to_stream == false: from fifo buffer -> local buffer
+LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreateOp ofop, bool to_stream, Location loc,
+      Value local_buffer, Value local_buffer_index, Value fifo_buffer, Value fifo_buffer_index) {
+  auto t = ofop.getDimensionsFromStreamPerConsumer();
+  // llvm::errs()<<"aaaaaa";
+  // for (auto a : t) {
+  // for (auto b : a) {
+  //   llvm::errs()<<"bbbb";
+  //   llvm::errs() << b << "\n";
+  // }
+  // }
 
-  auto numelts = op.getSize();
-  if (numelts > depth) {
-    op.emitError("unsupported: aquiring number of elements greater than the objectfifo size");
+  auto dims = ofop.getDimensionsToStream();
+  if (!to_stream) {
+    // get dims for specific consumer
+  }
+
+  auto copyto = to_stream ? fifo_buffer : local_buffer;
+  auto copytoindex = to_stream ? fifo_buffer_index : local_buffer_index;
+  auto copyfrom = to_stream ? local_buffer : fifo_buffer;
+  auto copyfromindex = to_stream ? local_buffer_index : fifo_buffer_index;
+
+  // do it the easy way if we can: one-to-one with no dims
+  if (dims.size() == 0 && pattern == ProdConsPattern::ONE_TO_ONE) {
+    // Value bufval = builder.create<memref::LoadOp>(loc, copyfrom, SmallVector<Value>{copyfromindex});
+    // Value bufval2 = builder.create<memref::LoadOp>(loc, copyto, SmallVector<Value>{copytoindex});
+    // builder.create<memref::CopyOp>(loc, bufval, bufval2);
+    Value bufval = builder.create<memref::LoadOp>(loc, copyfrom, SmallVector<Value>{copyfromindex});
+    builder.create<memref::StoreOp>(loc, bufval, copyto, SmallVector<Value>{copytoindex});
+  }
+
+  return success();
+}
+
+LogicalResult convertAcquireRelease(Operation* op, xilinx::AIE::ObjectFifoCreateOp ofop, xilinx::AIE::ObjectFifoPort port,
+      bool is_acquire, int32_t num_elts) {
+  auto loc = op->getLoc();
+  auto builder = OpBuilder(op);
+  if (num_elts > depth) {
+    op->emitError("unsupported: aquiring number of elements greater than the objectfifo size");
     return failure();
   }
-  auto allocval = builder.create<memref::AllocOp>(loc,
-      MemRefType::get(SmallVector<int64_t>{numelts}, elt_type)).getResult();
-  acquirebuffers.push_back(allocval);
 
-  SmallVector<xilinx::AIE::ObjectFifoSubviewAccessOp> users = llvm::map_to_vector(op.getResult().getUsers(), [](Operation* o) {
-    return dyn_cast<xilinx::AIE::ObjectFifoSubviewAccessOp>(o);
-  });
-  for (auto user : users) {
-    if (!user) {
-      user->emitError("unsupported objectfifo subview user");
+  // either allocate (for acquire) or find (for release) the local buffer
+  Value localbuf = nullptr;
+  if (is_acquire) {
+    localbuf = builder.create<memref::AllocOp>(loc,
+        MemRefType::get(SmallVector<int64_t>{num_elts}, ofop.getElemType().getElementType())).getResult();
+    acquirebuffers.push_back(localbuf);
+
+    SmallVector<xilinx::AIE::ObjectFifoSubviewAccessOp> users = llvm::map_to_vector(op->getResult(0).getUsers(), [](Operation* o) {
+      return dyn_cast<xilinx::AIE::ObjectFifoSubviewAccessOp>(o);
+    });
+    for (auto user : users) {
+      if (!user) {
+        user->emitError("unsupported objectfifo subview user");
+      }
+      auto builder = OpBuilder(user);
+      Value subviewindex = builder.create<arith::ConstantIndexOp>(loc, user.getIndex()).getResult();
+      Value loadval = builder.create<memref::LoadOp>(loc, localbuf, SmallVector<Value>{subviewindex}).getResult();
+      user.getResult().replaceAllUsesWith(loadval);
+      user->erase();
     }
-    auto builder = OpBuilder(user);
-    Value subviewindex = builder.create<arith::ConstantIndexOp>(loc, user.getIndex()).getResult();
-    Value loadval = builder.create<memref::LoadOp>(loc, allocval, SmallVector<Value>{subviewindex}).getResult();
-    user.getResult().replaceAllUsesWith(loadval);
-    user->erase();
   }
+  else {
+    DominanceInfo dom;
+    for (auto buf : acquirebuffers) {
+      if (!dom.properlyDominates(buf, op)) continue;
+      if (!localbuf) localbuf = buf;
+      else {
+        op->emitError("ambiguous which acquire corresponds to this release");
+        return failure();
+      }
+    }
+    if (!localbuf) {
+      op->emitError("release: can't find corresponding acquire");
+      return failure();
+    }
+  }
+  assert(localbuf);
 
   // wait loop
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
-  Value numeltsval = builder.create<arith::ConstantIndexOp>(loc, numelts).getResult();
+  Value numeltsval = builder.create<arith::ConstantIndexOp>(loc, num_elts).getResult();
   Value bufarr = builder.create<memref::GetGlobalOp>(loc, bufarr_type, bufarr_name).getResult();
-  auto indexarr = op.getPort() == xilinx::AIE::ObjectFifoPort::Produce ?
+  auto indexarr = port == xilinx::AIE::ObjectFifoPort::Produce ?
       IndexArr::PRODUCER : IndexArr::CONSUMER;
+  auto indexarr_index = is_acquire ? INDEXARR_START : INDEXARR_END;
   Value indexarrval = getIndexArr(loc, builder, indexarr);
-  auto indexarrindices = createIndexArrIndices(builder, indexarrval, loc, INDEXARR_START, op.getPort(), ofop);
+  Value tile = getTile(op);
+  auto indexarrindices = buildIndexArrIndices(builder, indexarrval, loc, indexarr_index, port, ofop, tile);
   for (auto index : indexarrindices) {
     llvm::errs() << index << "\n";
   }
@@ -248,79 +327,30 @@ LogicalResult convertAcquire(xilinx::AIE::ObjectFifoAcquireOp op, xilinx::AIE::O
   auto loop = builder.create<scf::ForOp>(loc, cst_0, numeltsval, cst_1);
   builder.setInsertionPointToStart(loop.getBody());
 
-  // wait on semaphores
-  auto syncres = buildAcquireReleaseSync(builder, loc, indexval, op.getPort(), true);
-  if (syncres.failed()) return failure();
+  // if acquire, wait on semaphores
+  if (is_acquire) {
+    auto syncres = buildAcquireReleaseSync(builder, loc, indexval, port, true);
+    if (syncres.failed()) return failure();
+  }
 
-  // copy to local buffer
-  Value bufval = builder.create<memref::LoadOp>(loc, bufarr, SmallVector<Value>{indexval});
-  builder.create<memref::StoreOp>(loc, bufval, allocval, SmallVector<Value>{loop.getInductionVar()});
+  // copy to/from local buffer
+  auto copyres = buildOFBufferCopy(builder, ofop, !is_acquire, loc, localbuf, loop.getInductionVar(), bufarr, indexval);
+  if (copyres.failed()) return failure();
 
   // update start value
   indexval = builder.create<arith::AddIOp>(loc, IndexType::get(context), indexval, cst_1).getResult();
   indexval = builder.create<arith::RemSIOp>(loc, indexval, numeltsval).getResult();
   builder.create<memref::StoreOp>(loc, indexval, indexarrval, indexarrindices);
 
-  op.erase();
+  // if release, set semaphores
+  if (!is_acquire) {
+    auto syncres = buildAcquireReleaseSync(builder, loc, indexval, port, false);
+    if (syncres.failed()) return failure();
+  }
+
+  op->erase();
   return success();
-}
 
-LogicalResult convertRelease(xilinx::AIE::ObjectFifoReleaseOp op, xilinx::AIE::ObjectFifoCreateOp ofop) {
-  auto loc = op.getLoc();
-  auto builder = OpBuilder(op);
-
-  auto numelts = op.getSize();
-  if (numelts > depth) {
-    op.emitError("unsupported: aquiring number of elements greater than the objectfifo size");
-    return failure();
-  }
-
-  // get local buffer to use
-  Value localbuf = nullptr;
-  DominanceInfo dom;
-  for (auto buf : acquirebuffers) {
-    if (!dom.properlyDominates(buf, op)) continue;
-    if (!localbuf) localbuf = buf;
-    else {
-      op.emitError("ambiguous which acquire corresponds to this release");
-      return failure();
-    }
-  }
-  if (!localbuf) {
-    op.emitError("can't find corresponding acquire");
-    return failure();
-  }
-
-  // set loop
-  Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
-  Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
-  Value numeltsval = builder.create<arith::ConstantIndexOp>(loc, numelts).getResult();
-  Value bufarr = builder.create<memref::GetGlobalOp>(loc, bufarr_type, bufarr_name).getResult();
-
-  auto indexarr = op.getPort() == xilinx::AIE::ObjectFifoPort::Produce ?
-      IndexArr::PRODUCER : IndexArr::CONSUMER;
-  Value indexarrval = getIndexArr(loc, builder, indexarr);
-  auto indexarrindices = createIndexArrIndices(builder, indexarrval, loc, INDEXARR_END, op.getPort(), ofop);
-  Value indexval = builder.create<memref::LoadOp>(loc, indexarrval, indexarrindices).getResult();
-
-  auto loop = builder.create<scf::ForOp>(loc, cst_0, numeltsval, cst_1);
-  builder.setInsertionPointToStart(loop.getBody());
-
-  // copy from local buffer
-  Value bufval = builder.create<memref::LoadOp>(loc, bufarr, SmallVector<Value>{indexval});
-  builder.create<memref::StoreOp>(loc, bufval, localbuf, SmallVector<Value>{loop.getInductionVar()});
-
-  // update end value
-  Value newindexval = builder.create<arith::AddIOp>(loc, IndexType::get(context), indexval, cst_1).getResult();
-  newindexval = builder.create<arith::RemSIOp>(loc, newindexval, numeltsval).getResult();
-  builder.create<memref::StoreOp>(loc, newindexval, indexarrval, indexarrindices);
-
-  // set semaphores
-  auto syncres = buildAcquireReleaseSync(builder, loc, indexval, op.getPort(), false);
-  if (syncres.failed()) return failure();
-
-  op.erase();
-  return success();
 }
 
 LogicalResult initObjfifo() {
@@ -340,7 +370,7 @@ LogicalResult initObjfifo() {
 
   auto semarrsize = SmallVector<int64_t>{depth};
   if (pattern != ONE_TO_ONE) {
-    semarrsize.insert(semarrsize.begin(), std::max(producerops.size(), consumerops.size()));
+    semarrsize.insert(semarrsize.begin(), std::max(producers.size(), consumers.size()));
   }
 
   // declare and initialize buffer/semaphore array
@@ -370,7 +400,7 @@ LogicalResult initObjfifo() {
 
   // buffer index array creation/initialization
   builder.setInsertionPointAfter(loop);
-  SmallVector<int64_t> indexarrsizes = {1, (int64_t)consumerops.size()};
+  SmallVector<int64_t> indexarrsizes = {1, (int64_t)consumers.size()};
   SmallVector<const char*> indexarrnames = {"_producer", "_consumer"};
   SmallVector<IndexArr> indexarrkeys = {IndexArr::PRODUCER, IndexArr::CONSUMER};
   for (auto [name, key, size] : llvm::zip_equal(indexarrnames, indexarrkeys, indexarrsizes)) {
@@ -394,28 +424,38 @@ LogicalResult initObjfifo() {
   return success();
 }
 
-LogicalResult convertUse(SymbolTable::SymbolUse use, xilinx::AIE::ObjectFifoCreateOp ofop, bool one_to_one, bool is_producer) {
+LogicalResult convertUse(SymbolTable::SymbolUse use) {
   auto op = use.getUser();
   llvm::errs() << "USE " << *op << "\n";
+
+  auto is_producer = [&](Operation* op, xilinx::AIE::ObjectFifoCreateOp ofop) {
+    Value tile = getTile(op);
+    llvm::errs() << tile << "\n";
+    if (std::find(producers.begin(), producers.end(), std::pair{ofop, tile}) != producers.end()) {
+      return true;
+    }
+    return false;
+  };
+
   if (auto acquire = dyn_cast<xilinx::AIE::ObjectFifoAcquireOp>(op)) {
-    if (!one_to_one && (is_producer != (acquire.getPort() == xilinx::AIE::ObjectFifoPort::Produce))) {
+    if (is_producer(op, acquire.getObjectFifo()) != (acquire.getPort() == xilinx::AIE::ObjectFifoPort::Produce)) {
       op->emitError("link producer acquired as consumer or vice versa");
       return failure();
     }
-    auto res = convertAcquire(acquire, ofop);
+    auto res = convertAcquireRelease(acquire, acquire.getObjectFifo(), acquire.getPort(), true, acquire.getSize());
     if (res.failed()) return failure();
   }
   else if (auto release = dyn_cast<xilinx::AIE::ObjectFifoReleaseOp>(op)) {
-    if (!one_to_one && (is_producer != (release.getPort() == xilinx::AIE::ObjectFifoPort::Produce))) {
+    if (is_producer(op, release.getObjectFifo()) != (release.getPort() == xilinx::AIE::ObjectFifoPort::Produce)) {
       op->emitError("link producer released as consumer or vice versa");
       return failure();
     }
-    auto res = convertRelease(release, ofop);
+    auto res = convertAcquireRelease(release, release.getObjectFifo(), release.getPort(), false, release.getSize());
     if (res.failed()) return failure();
   }
   else if (!dyn_cast<xilinx::AIE::ObjectFifoLinkOp>(op)) {
-    op->emitError("unsupported objectfifo use operation");
-    return failure();
+    op->emitWarning("unsupported objectfifo use operation");
+    return success();
   }
   return success();
 }
@@ -426,28 +466,20 @@ LogicalResult convertObjectfifo() {
   auto res = initObjfifo();
   if (res.failed()) return failure();
 
-  bool one_to_one = producerops.size() == 1 && consumerops.size() == 1;
-
-  for (auto ofop : producerops) {
-    auto uses = ofop.getSymbolUses(module);
-    if (!uses.has_value()) continue;
-
-    for (auto use : uses.value()) {
-      auto res = convertUse(use, ofop, one_to_one, true);
-      if (res.failed()) return failure();
-    }
+  DenseSet<xilinx::AIE::ObjectFifoCreateOp> ofset;
+  for (auto p : consumers) {
+    ofset.insert(p.first);
+  }
+  for (auto p : producers) {
+    ofset.insert(p.first);
   }
 
-  // don't process the same thing again
-  if (one_to_one && producerops[0] == consumerops[0])
-    return success();
-
-  for (auto ofop : consumerops) {
+  for (auto ofop : ofset) {
     auto uses = ofop.getSymbolUses(module);
     if (!uses.has_value()) continue;
 
     for (auto use : uses.value()) {
-      auto res = convertUse(use, ofop, one_to_one, false);
+      auto res = convertUse(use);
       if (res.failed()) return failure();
     }
   }
@@ -512,20 +544,37 @@ public:
         return signalPassFailure();
       }
       assert(consumers.size() == 1);
-      if (consumers[0].getConsumerTiles().size() > 1) {
-        link.emitError("unsupported: link with output objectfifo broadcast");
+      if (consumers[0].getConsumerTiles().size() > 1 && producers.size() > 1) {
+        link.emitError("unsupported: link with multiple producers and output objectfifo broadcast");
         return signalPassFailure();
       }
 
-      std::optional<MemRefType> elt_type = {};
+      std::optional<Type> elt_elt_type = {};
+      std::optional<int64_t> elt_size = {};
       std::optional<int64_t> depth = {};
       for (auto ofop : llvm::concat<xilinx::AIE::ObjectFifoCreateOp>(producers, consumers)) {
-        auto opeltt = ofop.getElemType().getElementType();
-        if (elt_type.has_value() && opeltt != elt_type.value()) {
+        auto opelttype = ofop.getElemType().getElementType();
+        if (opelttype.getNumDynamicDims() > 0) {
+          ofop.emitError("unsupported: dynamic objectfifo element type");
+          return signalPassFailure();
+        }
+        if (elt_elt_type.has_value() && elt_elt_type.value() != opelttype.getElementType()) {
+          llvm::errs() << elt_elt_type.value() << " " << opelttype.getElementType() << "\n";
           link.emitError("element type mismatch between linked objectfifos");
           return signalPassFailure();
         }
-        elt_type = opeltt;
+        elt_elt_type = opelttype.getElementType();
+
+        auto opeltsize = 1;
+        for (auto size : opelttype.getShape()) {
+          opeltsize *= size;
+        }
+        if (elt_size.has_value() && opeltsize != elt_size.value()) {
+          link.emitError("element size mismatch between linked objectfifos");
+          return signalPassFailure();
+        }
+        elt_size = opeltsize;
+
         auto depthattr = dyn_cast<IntegerAttr>(ofop.getElemNumber());
         assert(depthattr);
         auto opdepth = depthattr.getInt();
@@ -535,7 +584,11 @@ public:
         }
         depth = opdepth;
       }
-      if (!elt_type.has_value()) {
+      if (!elt_size.has_value()) {
+        link.emitError("couldn't infer element size");
+        return signalPassFailure();
+      }
+      if (!elt_elt_type.has_value()) {
         link.emitError("couldn't infer element type");
         return signalPassFailure();
       }
@@ -545,7 +598,7 @@ public:
       }
 
       auto converter = ObjfifoConverter(context, module, device, link,
-          i, depth.value(), elt_type.value(), producers, consumers);
+          i, depth.value(), MemRefType::get(SmallVector<int64_t>{elt_size.value()}, elt_elt_type.value()), producers, consumers);
       if (!converter.convertObjectfifo().succeeded()) return signalPassFailure();
       module.emitRemark();
       for (auto ofop : llvm::concat<xilinx::AIE::ObjectFifoCreateOp>(producers, consumers)) {
