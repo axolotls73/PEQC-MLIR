@@ -95,7 +95,8 @@ ObjfifoConverter(MLIRContext* context, ModuleOp module, xilinx::AIE::DeviceOp de
 
 ObjfifoConverter(MLIRContext* context, ModuleOp module, xilinx::AIE::DeviceOp device, Operation* op,
     int id, int64_t depth, MemRefType elt_type,
-    SmallVector<xilinx::AIE::ObjectFifoCreateOp> producerops, SmallVector<xilinx::AIE::ObjectFifoCreateOp> consumerops) :
+    SmallVector<xilinx::AIE::ObjectFifoCreateOp> producerops, SmallVector<xilinx::AIE::ObjectFifoCreateOp> consumerops,
+    ArrayAttr src_offsets) :
     context(context), module(module), operation(op),
     elt_type(elt_type), depth(depth) {
 
@@ -115,7 +116,9 @@ ObjfifoConverter(MLIRContext* context, ModuleOp module, xilinx::AIE::DeviceOp de
     }
   }
 
-  for (auto op : producerops) {
+  assert(producerops.size() == 1 || src_offsets.size() == producerops.size());
+
+  for (auto [i, op] : llvm::enumerate(producerops)) {
     assert(consumer_tostream.empty() || op.getDimensionsToStream().empty());
     assert(llvm::all_of(op.getDimensionsFromStreamPerConsumer(), [](auto d){return d.empty();}));
     producers.insert({op, op.getProducerTile()});
@@ -125,6 +128,10 @@ ObjfifoConverter(MLIRContext* context, ModuleOp module, xilinx::AIE::DeviceOp de
     else if (!op.getDimensionsToStream().empty()) {
       SmallVector<xilinx::AIE::BDDimLayoutAttr> producerdims(op.getDimensionsToStream().begin(), op.getDimensionsToStream().end());
       layout_dim_map[{op.getSymName().str(), op.getProducerTile()}] = producerdims;
+    }
+    if (!src_offsets.empty()) {
+      auto attr = dyn_cast<IntegerAttr>(src_offsets[i]).getInt();
+      layout_offset_map[{op.getSymName().str(), op.getProducerTile()}] = attr;
     }
   }
 }
@@ -178,6 +185,9 @@ std::unordered_map<IndexArr, std::string> indexarrs;
 std::unordered_map<IndexArr, MemRefType> indexarrtypes;
 
 std::optional<ProdConsPattern> getPattern() {
+  LLVM_DEBUG(
+    llvm::errs() << "producers: " << producers.size() << " consumers: " << consumers.size() << "\n"
+  );
   if (producers.size() == 1 && consumers.size() == 1) {
     return ProdConsPattern::ONE_TO_ONE;
   }
@@ -230,9 +240,34 @@ LogicalResult buildAcquireReleaseSync(OpBuilder builder, Location loc, int idind
       }
       break;
     }
-    case MANY_TO_ONE:
-      assert(0);
+    case MANY_TO_ONE: {
+      scf::ForOp loop = nullptr;
+      Value prodindex;
+      if (port == xilinx::AIE::ObjectFifoPort::Consume) {
+        Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
+        Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
+        Value nump = builder.create<arith::ConstantIndexOp>(loc, producers.size()).getResult();
+        loop = builder.create<scf::ForOp>(loc, cst_0, nump, cst_1);
+        builder.setInsertionPointToStart(loop.getBody());
+        prodindex = loop.getInductionVar();
+      }
+      else {
+        prodindex = builder.create<arith::ConstantIndexOp>(loc, idindex).getResult();
+      }
+
+      Value sem = builder.create<memref::LoadOp>(loc, semarr, SmallVector<Value>{prodindex, index});
+      if (is_acquire) {
+        builder.create<SemaphoreWaitOp>(loc, sem, setwaitval);
+      }
+      else {
+        builder.create<SemaphoreSetOp>(loc, sem, setwaitval);
+      }
+
+      if (loop) {
+        builder.setInsertionPointAfter(loop);
+      }
       break;
+    }
     case ONE_TO_MANY: {
       scf::ForOp loop = nullptr;
       Value consindex;
@@ -259,9 +294,8 @@ LogicalResult buildAcquireReleaseSync(OpBuilder builder, Location loc, int idind
       if (loop) {
         builder.setInsertionPointAfter(loop);
       }
-    }
-
       break;
+    }
   }
 
   return success();
@@ -281,6 +315,13 @@ SmallVector<Value> buildIndexArrIndices(OpBuilder builder, Value indexarrval, Lo
     Value consumer_index = builder.create<arith::ConstantIndexOp>(loc, it - consumers.begin()).getResult();
     indexarrindices.push_back(consumer_index);
   }
+  // if many-to-one, there's an index for each producer
+  else if (pattern == ProdConsPattern::MANY_TO_ONE && port == xilinx::AIE::ObjectFifoPort::Produce) {
+    auto it = std::find(producers.begin(), producers.end(), std::pair{ofop, tile});
+    assert(it != producers.end());
+    Value producer_index = builder.create<arith::ConstantIndexOp>(loc, it - producers.begin()).getResult();
+    indexarrindices.push_back(producer_index);
+  }
   else {
     Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
     indexarrindices.push_back(cst_0);
@@ -295,7 +336,19 @@ SmallVector<Value> buildIndexArrIndices(OpBuilder builder, Value indexarrval, Lo
 LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreateOp ofop, bool to_stream, Location loc, Value tile,
       Value local_buffer_arr, Value local_buffer_index, Value fifo_buffer_arr, Value fifo_buffer_index) {
 
-  int64_t buffersize = elt_type.getDimSize(0);
+  Value fifo_buffer = builder.create<memref::LoadOp>(loc, fifo_buffer_arr, SmallVector<Value>{fifo_buffer_index});
+  Value local_buffer = builder.create<memref::LoadOp>(loc, local_buffer_arr, SmallVector<Value>{local_buffer_index});
+
+  MemRefType fifo_type = dyn_cast<MemRefType>(fifo_buffer.getType());
+  MemRefType local_type = dyn_cast<MemRefType>(local_buffer.getType());
+  assert(fifo_type && local_type);
+  assert(fifo_type.getShape().size() == 1);
+
+  int64_t buffersize = 1;
+  auto sizetype = to_stream ? local_type : fifo_type;
+  for (auto s : sizetype.getShape()) {
+    buffersize *= s;
+  }
   SmallVector<int64_t> sizes = {buffersize};
   SmallVector<int64_t> strides = {1};
   auto layoutdimsiter = layout_dim_map.find({ofop.getSymName().str(), tile});
@@ -304,14 +357,6 @@ LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreate
     strides = llvm::map_to_vector(layoutdimsiter->second, [](auto a){return (int64_t)a.getStride();});
   }
   auto offset = layout_offset_map.count({ofop.getSymName().str(), tile}) ? layout_offset_map[{ofop.getSymName().str(), tile}] : 0;
-
-  Value fifo_buffer = builder.create<memref::LoadOp>(loc, fifo_buffer_arr, SmallVector<Value>{fifo_buffer_index});
-  Value local_buffer = builder.create<memref::LoadOp>(loc, local_buffer_arr, SmallVector<Value>{local_buffer_index});
-
-  MemRefType fifo_type = dyn_cast<MemRefType>(fifo_buffer.getType());
-  MemRefType local_type = dyn_cast<MemRefType>(local_buffer.getType());
-  assert(fifo_type && local_type);
-  assert(fifo_type.getShape().size() == 1);
 
   LLVM_DEBUG(
     llvm::errs() << "SIZES:\n";
@@ -348,7 +393,7 @@ LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreate
   }
 
   // calculate linear index with offsets and strides
-  AffineExpr indexexpr = builder.getAffineConstantExpr(offset);
+  AffineExpr indexexpr = builder.getAffineConstantExpr(0);
   for (size_t i = 0; i < sizes.size(); i++) {
     auto stride = builder.getAffineConstantExpr(strides[i]);
     auto iter = builder.getAffineDimExpr(i);
@@ -362,7 +407,13 @@ LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreate
     ValueRange delinindices = builder.create<affine::AffineDelinearizeIndexOp>(loc,
         linearindex, local_type.getShape()).getResults();
     Value bufval = builder.create<memref::LoadOp>(loc, local_buffer, delinindices);
-    builder.create<memref::StoreOp>(loc, bufval, fifo_buffer, iterindex);
+    // offset only for to_stream
+    Value fifo_index = iterindex;
+    if (offset) {
+      Value cst_offset = builder.create<arith::ConstantIndexOp>(loc, offset).getResult();
+      fifo_index = builder.create<arith::AddIOp>(loc, IndexType::get(context), iterindex, cst_offset).getResult();
+    }
+    builder.create<memref::StoreOp>(loc, bufval, fifo_buffer, fifo_index);
   }
   // delinearize iterindex using local_buffer size, local_buffer[delinindex] = fifo_buffer[linearindex]
   else {
@@ -535,7 +586,7 @@ LogicalResult initObjfifo() {
 
   // buffer index array creation/initialization
   builder.setInsertionPointAfter(loop);
-  SmallVector<int64_t> indexarrsizes = {1, (int64_t)consumers.size()};
+  SmallVector<int64_t> indexarrsizes = {(int64_t)producers.size(), (int64_t)consumers.size()};
   SmallVector<const char*> indexarrnames = {"_producer", "_consumer"};
   SmallVector<IndexArr> indexarrkeys = {IndexArr::PRODUCER, IndexArr::CONSUMER};
   for (auto [name, key, size] : llvm::zip_equal(indexarrnames, indexarrkeys, indexarrsizes)) {
@@ -704,7 +755,7 @@ public:
         for (auto size : opelttype.getShape()) {
           opeltsize *= size;
         }
-        if (elt_size.has_value() && opeltsize != elt_size.value()) {
+        if (producers.size() == 0 && elt_size.has_value() && opeltsize != elt_size.value()) {
           link.emitError("element size mismatch between linked objectfifos");
           return signalPassFailure();
         }
@@ -736,7 +787,7 @@ public:
           i, depth.value(),
           // buffer is linearized
           MemRefType::get(SmallVector<int64_t>{elt_size.value()}, elt_elt_type.value()),
-          producers, consumers);
+          producers, consumers, link.getSrcOffsets());
       if (!converter.convertObjectfifo().succeeded()) return signalPassFailure();
       module.emitRemark();
       for (auto ofop : llvm::concat<xilinx::AIE::ObjectFifoCreateOp>(producers, consumers)) {
