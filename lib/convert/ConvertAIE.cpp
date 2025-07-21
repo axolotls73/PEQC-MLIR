@@ -521,7 +521,6 @@ LogicalResult AIEConverter::createDMABDCopy(Operation* op, Value tile, int32_t c
     Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
 
     // delinearize index
-    // auto getConstantVector
     auto delinop = builder.create<affine::AffineDelinearizeIndexOp>(loc,
         linearindex, memref.getType().getShape());
     ValueRange delinindices = delinop.getResults();

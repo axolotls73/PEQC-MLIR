@@ -64,8 +64,6 @@ module {
 // CHECK-DAG:   [[PROD_SEM:%.*]] = memref.load [[PROD_SEMARR]][[[PROD_SI]]]
 // CHECK-DAG:   [[PROD_WAIT:%.*]] = arith.constant 0
 // CHECK:   verif.semaphore.wait [[PROD_SEM]], [[PROD_WAIT]]
-// CHECK:   [[PROD_BUFVAL:%.*]] = memref.load [[PROD_BUFARR]][[[PROD_SI]]]
-// CHECK:   memref.store [[PROD_BUFVAL]], [[PROD_SUBVIEW]][[[PROD_ITER]]]
 // CHECK:   [[PROD_SI2:%.*]] = arith.addi [[PROD_SI]], [[PROD_CST1]] : index
 // CHECK:   [[PROD_SI3:%.*]] = arith.remsi [[PROD_SI2]], [[PROD_SIZE]] : index
 // CHECK:   memref.store [[PROD_SI3]], [[PROD_I_ARR]][[[PI1]], [[PI2]]]
@@ -85,6 +83,7 @@ module {
       aie.end
     }
 
+// CHECK: aie.core
     aie.core(%tile34) {
 // CHECK: [[CONS_SUBVIEW:%.*]] = memref.alloc() : memref<1xmemref<16xi32>>
 // CHECK-NOT: objectfifo.acquire

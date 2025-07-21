@@ -19,7 +19,7 @@
 // REQUIRES: air
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-aie-convert-objfifo %t/input.mlir > %t/objfifoconv.mlir && \
-// RUN: verif-opt --verif-convert-aie %t/objfifoconv.mlir > %t/conversion.mlir && \
+// RUN: verif-opt --verif-convert-aie --lower-affine %t/objfifoconv.mlir > %t/conversion.mlir && \
 // RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c
 // RUN: %add_epilogue %t/result.c %t/translation.c
 
