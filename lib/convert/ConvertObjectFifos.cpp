@@ -101,12 +101,30 @@ ObjfifoConverter(MLIRContext* context, ModuleOp module, xilinx::AIE::DeviceOp de
 
   ofname = "link_" + std::to_string(id) + "_to_" + consumerops[0].getSymName().str();
 
-  for (auto op : producerops) {
-    producers.insert({op, op.getProducerTile()});
-  }
+  SmallVector<xilinx::AIE::BDDimLayoutAttr> consumer_tostream;
   for (auto op : consumerops) {
-    for (auto tile : op.getConsumerTiles()) {
+    if (!op.getDimensionsToStream().empty()) {
+      assert(consumer_tostream.empty());
+      consumer_tostream.append(op.getDimensionsToStream().begin(), op.getDimensionsToStream().end());
+    }
+    for (auto [tile, fromstream] : llvm::zip_equal(op.getConsumerTiles(), op.getDimensionsFromStreamPerConsumer())) {
       consumers.insert({op, tile});
+      if (fromstream.empty()) continue;
+      SmallVector<xilinx::AIE::BDDimLayoutAttr> consumerdims(fromstream.begin(), fromstream.end());
+      layout_dim_map[{op.getSymName().str(), tile}] = consumerdims;
+    }
+  }
+
+  for (auto op : producerops) {
+    assert(consumer_tostream.empty() || op.getDimensionsToStream().empty());
+    assert(llvm::all_of(op.getDimensionsFromStreamPerConsumer(), [](auto d){return d.empty();}));
+    producers.insert({op, op.getProducerTile()});
+    if (!consumer_tostream.empty()) {
+      layout_dim_map[{op.getSymName().str(), op.getProducerTile()}] = consumer_tostream;
+    }
+    else if (!op.getDimensionsToStream().empty()) {
+      SmallVector<xilinx::AIE::BDDimLayoutAttr> producerdims(op.getDimensionsToStream().begin(), op.getDimensionsToStream().end());
+      layout_dim_map[{op.getSymName().str(), op.getProducerTile()}] = producerdims;
     }
   }
 }
@@ -309,7 +327,6 @@ LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreate
 
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
-  Value cst_bufsize = builder.create<arith::ConstantIndexOp>(loc, buffersize).getResult();
 
   // make for loops with sizes
   SmallVector<Value> iterators;
@@ -330,7 +347,7 @@ LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreate
     iterators.push_back(forop.getInductionVar());
   }
 
-  // calculate linear index (to access elts from copyfrom) with offsets and strides
+  // calculate linear index with offsets and strides
   AffineExpr indexexpr = builder.getAffineConstantExpr(offset);
   for (size_t i = 0; i < sizes.size(); i++) {
     auto stride = builder.getAffineConstantExpr(strides[i]);
