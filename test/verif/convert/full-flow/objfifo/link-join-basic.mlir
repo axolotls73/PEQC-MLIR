@@ -14,8 +14,6 @@
 //
 //
 
-// fix: error: ObjectFifoLinkOp join and distribute are unavailable on compute or shim tiles
-
 // REQUIRES: air
 // RUN: split-file %s %t && \
 // RUN: verif-opt --verif-aie-convert-objfifo %t/input.mlir > %t/objfifoconv.mlir && \

@@ -13,6 +13,8 @@
  *
  */
 
+#include <numeric>
+
 #include "llvm/ADT/STLExtras.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/IR/PatternMatch.h"
@@ -203,9 +205,20 @@ std::optional<ProdConsPattern> getPattern() {
   }
 }
 
-Value getTile(Operation* op) {
+Value getTile(Operation* op, xilinx::AIE::ObjectFifoCreateOp ofop, xilinx::AIE::ObjectFifoPort port) {
   if (auto core = op->getParentOfType<xilinx::AIE::CoreOp>()) {
     return core.getTile();
+  }
+  // ugly hack: this op was created in convertRuntimeSequence, just get whichever tile
+  // it would have to be
+  else if (auto async = op->getParentOfType<async::ExecuteOp>()) {
+    if (port == xilinx::AIE::ObjectFifoPort::Produce) {
+      return ofop.getProducerTile();
+    }
+    else {
+      assert(ofop.getConsumerTiles().size() == 1);
+      return ofop.getConsumerTiles()[0];
+    }
   }
   else {
     op->emitError();
@@ -344,11 +357,8 @@ LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreate
   assert(fifo_type && local_type);
   assert(fifo_type.getShape().size() == 1);
 
-  int64_t buffersize = 1;
   auto sizetype = to_stream ? local_type : fifo_type;
-  for (auto s : sizetype.getShape()) {
-    buffersize *= s;
-  }
+  int64_t buffersize = std::reduce(sizetype.getShape().begin(), sizetype.getShape().end(), 1, std::multiplies<int64_t>());
   SmallVector<int64_t> sizes = {buffersize};
   SmallVector<int64_t> strides = {1};
   auto layoutdimsiter = layout_dim_map.find({ofop.getSymName().str(), tile});
@@ -478,7 +488,7 @@ LogicalResult convertAcquireRelease(Operation* op, xilinx::AIE::ObjectFifoCreate
   }
   assert(localbuf);
 
-  Value tile = getTile(op);
+  Value tile = getTile(op, ofop, port);
   auto pcarr = port == xilinx::AIE::ObjectFifoPort::Produce ? producers : consumers;
   auto pciter = std::find(pcarr.begin(), pcarr.end(), std::pair{ofop, tile});
   assert(pciter != pcarr.end());
@@ -614,8 +624,8 @@ LogicalResult convertUse(SymbolTable::SymbolUse use) {
   auto op = use.getUser();
   llvm::errs() << "USE " << *op << "\n";
 
-  auto is_producer = [&](Operation* op, xilinx::AIE::ObjectFifoCreateOp ofop) {
-    Value tile = getTile(op);
+  auto is_producer = [&](Operation* op, xilinx::AIE::ObjectFifoPort port, xilinx::AIE::ObjectFifoCreateOp ofop) {
+    Value tile = getTile(op, ofop, port);
     llvm::errs() << tile << "\n";
     if (std::find(producers.begin(), producers.end(), std::pair{ofop, tile}) != producers.end()) {
       return true;
@@ -624,7 +634,8 @@ LogicalResult convertUse(SymbolTable::SymbolUse use) {
   };
 
   if (auto acquire = dyn_cast<xilinx::AIE::ObjectFifoAcquireOp>(op)) {
-    if (is_producer(op, acquire.getObjectFifo()) != (acquire.getPort() == xilinx::AIE::ObjectFifoPort::Produce)) {
+    if (is_producer(op, acquire.getPort(), acquire.getObjectFifo()) !=
+          (acquire.getPort() == xilinx::AIE::ObjectFifoPort::Produce)) {
       op->emitError("link producer acquired as consumer or vice versa");
       return failure();
     }
@@ -632,7 +643,8 @@ LogicalResult convertUse(SymbolTable::SymbolUse use) {
     if (res.failed()) return failure();
   }
   else if (auto release = dyn_cast<xilinx::AIE::ObjectFifoReleaseOp>(op)) {
-    if (is_producer(op, release.getObjectFifo()) != (release.getPort() == xilinx::AIE::ObjectFifoPort::Produce)) {
+    if (is_producer(op, release.getPort(), release.getObjectFifo()) !=
+          (release.getPort() == xilinx::AIE::ObjectFifoPort::Produce)) {
       op->emitError("link producer released as consumer or vice versa");
       return failure();
     }
@@ -675,6 +687,185 @@ LogicalResult convertObjectfifo() {
 
 };
 
+void convertDMACopyProduce(MLIRContext* context, xilinx::AIE::DeviceOp device, OpBuilder builder, IRMapping mapper,
+      xilinx::AIEX::NpuDmaMemcpyNdOp dmaop, xilinx::AIE::ObjectFifoCreateOp ofop) {
+  auto loc = dmaop.getLoc();
+  auto sizes = dmaop.getStaticSizes();
+  auto strides = dmaop.getStaticStrides();
+  auto offsets = dmaop.getStaticOffsets();
+  assert(offsets.size() >= 3 && offsets[0] == 0 && offsets[1] == 0 && offsets[2] == 0);
+
+  Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
+  Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
+
+  auto local_buffer = builder.create<memref::AllocOp>(loc, ofop.getElemType().getElementType()).getResult();
+  auto input_buffer = dyn_cast<TypedValue<MemRefType>>(mapper.lookup(dmaop.getMemref()));
+  assert(input_buffer);
+  auto localshape = local_buffer.getType().getShape();
+  auto numelts = std::reduce(localshape.begin(), localshape.end(), 1, std::multiplies<int64_t>());
+  Value cst_numelts = builder.create<arith::ConstantIndexOp>(loc, numelts).getResult();
+
+  // make for loops with sizes
+  SmallVector<Value> iterators;
+  scf::ForOp outerloop = nullptr;
+  Value iterindex = cst_0;
+  for (auto size : sizes) {
+    Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
+    auto forop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1, SmallVector<Value>{iterindex});
+    // creating an inner loop: need to yield iter arg
+    if (iterindex != cst_0) {
+      builder.create<scf::YieldOp>(loc, forop.getResult(0));
+    }
+    else outerloop = forop;
+    builder.setInsertionPointToStart(forop.getBody());
+
+    iterindex = forop.getRegionIterArg(0);
+    llvm::errs() << iterindex << "\n";
+    iterators.push_back(forop.getInductionVar());
+  }
+  device.emitRemark();
+
+  // calculate linear index with offsets and strides
+  AffineExpr indexexpr = builder.getAffineConstantExpr(0);
+  for (size_t i = 0; i < sizes.size(); i++) {
+    auto stride = builder.getAffineConstantExpr(strides[i]);
+    auto iter = builder.getAffineDimExpr(i);
+    indexexpr = indexexpr + (iter * stride);
+  }
+  AffineMap indexmap = AffineMap::get(iterators.size(), 0, indexexpr, context);
+  Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
+
+  // local_buffer[delin(iterindex)] = input_buffer[delin(linearindex)]
+  ValueRange delinlocal = builder.create<affine::AffineDelinearizeIndexOp>(loc,
+      iterindex, local_buffer.getType().getShape()).getResults();
+  ValueRange delininput = builder.create<affine::AffineDelinearizeIndexOp>(loc,
+      linearindex, input_buffer.getType().getShape()).getResults();
+  Value bufval = builder.create<memref::LoadOp>(loc, input_buffer, delininput);
+  builder.create<memref::StoreOp>(loc, bufval, local_buffer, delinlocal);
+
+  // increment iter counter
+  Value iterincr = builder.create<arith::AddIOp>(loc, IndexType::get(context), iterindex, cst_1).getResult();
+  iterincr = builder.create<arith::RemSIOp>(loc, iterincr, cst_numelts).getResult();
+
+
+  Value cond = builder.create<arith::CmpIOp>(loc, IntegerType::get(context, 1), arith::CmpIPredicate::eq, iterincr, cst_0);
+  builder.create<scf::IfOp>(loc, cond, [&](OpBuilder& b, Location loc) {
+    auto subviewtype = xilinx::AIE::AIEObjectFifoSubviewType::get(local_buffer.getType());
+    auto subview = b.create<xilinx::AIE::ObjectFifoAcquireOp>(loc, subviewtype,
+        xilinx::AIE::ObjectFifoPort::Produce, ofop.getSymNameAttr(), 1).getResult();
+    auto ofbuf = b.create<xilinx::AIE::ObjectFifoSubviewAccessOp>(loc,
+        local_buffer.getType(), subview, IntegerAttr::get(IntegerType::get(context, 32), 0));
+    b.create<memref::CopyOp>(loc, local_buffer, ofbuf);
+    b.create<xilinx::AIE::ObjectFifoReleaseOp>(loc, xilinx::AIE::ObjectFifoPort::Produce, ofop.getSymNameAttr(), 1);
+    b.create<scf::YieldOp>(loc);
+  });
+
+  builder.create<scf::YieldOp>(loc, iterincr);
+
+  builder.setInsertionPointAfter(outerloop);
+}
+
+void convertDMACopyConsume() {
+
+}
+
+LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp device, xilinx::AIEX::RuntimeSequenceOp op) {
+  auto builder = OpBuilder(op);
+  auto loc = op.getLoc();
+
+  // there are no main functions for AIE files, but want to make sure this happens
+  // after initialization etc (which is synchronous), so put everything at the end
+  builder.setInsertionPoint(device.getBody()->getTerminator());
+
+  auto& blocks = op.getBody().getBlocks();
+  if (blocks.size() != 1) {
+    op.emitError("expected runtime_sequence to have 1 block");
+    return failure();
+  }
+
+  IRMapping mapper;
+  auto& block = blocks.front();
+  for (auto [i, arg] : llvm::enumerate(block.getArguments())) {
+    auto argtype = dyn_cast<MemRefType>(arg.getType());
+    if (!argtype) {
+      op.emitError("non-memref argument");
+      return failure();
+    }
+    auto argname = "arg" + std::to_string(i);
+
+    builder.create<memref::GlobalOp>(loc, StringAttr::get(context, argname),
+        StringAttr::get(context, "private"), TypeAttr::get(argtype),
+        Attribute{}, UnitAttr{}, IntegerAttr{});
+    Value newarg = builder.create<memref::GetGlobalOp>(loc, argtype, argname).getResult();
+    mapper.map(arg, newarg);
+  }
+
+  // assuming all dma ops happen in parallel except for the ones that use the same objfifo,
+  // so need to separate them accordingly
+  std::unordered_map<std::string, SmallVector<xilinx::AIEX::NpuDmaMemcpyNdOp>> dmaopmap;
+  for (auto dmaop : block.getOps<xilinx::AIEX::NpuDmaMemcpyNdOp>()) {
+    auto ofname = dmaop.getProperties().getMetadata().getValue().str();
+    if (!dmaopmap.count(ofname)) {
+      dmaopmap[ofname] = SmallVector<xilinx::AIEX::NpuDmaMemcpyNdOp>{dmaop};
+    }
+    else {
+      auto vec = dmaopmap[ofname];
+      vec.push_back(dmaop);
+    }
+  }
+
+  for (auto [ofname, dmaops] : dmaopmap) {
+    auto ofop = dyn_cast<xilinx::AIE::ObjectFifoCreateOp>(device.lookupSymbol(StringAttr::get(context, ofname)));
+    if (!ofop) {
+      op.emitError("objectfifo not found: " + ofname);
+      return failure();
+    }
+
+    // figure out whether to consume or produce
+    std::optional<xilinx::AIE::ObjectFifoPort> port = {};
+    auto uses = ofop.getSymbolUses(device);
+    assert(uses.has_value());
+    for (auto use : uses.value()) {
+      if (!isa<xilinx::AIE::ObjectFifoLinkOp>(use.getUser())) continue;
+      auto link = dyn_cast<xilinx::AIE::ObjectFifoLinkOp>(use.getUser());
+      assert(link);
+
+      if (llvm::any_of(link.getInputObjectFifos(), [&](auto o){return o.getSymName() == ofop.getSymName();})) {
+        assert(!port.has_value() || port.value() == xilinx::AIE::ObjectFifoPort::Produce);
+        port = xilinx::AIE::ObjectFifoPort::Produce;
+      }
+      else if (llvm::any_of(link.getOutputObjectFifos(), [&](auto o){return o.getSymName() == ofop.getSymName();})) {
+        assert(!port.has_value() || port.value() == xilinx::AIE::ObjectFifoPort::Consume);
+        port = xilinx::AIE::ObjectFifoPort::Consume;
+      }
+      else {
+        assert(0);
+      }
+    }
+    assert(port.has_value());
+
+    auto async = builder.create<async::ExecuteOp>(op.getLoc(),
+        SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
+        [&] (OpBuilder &b, Location loc, ValueRange v) {
+          IRMapping map;
+      for (auto dmaop : dmaops) {
+        if (port.value() == xilinx::AIE::ObjectFifoPort::Produce) {
+          convertDMACopyProduce(context, device, b, mapper, dmaop, ofop);
+        }
+        else {
+          convertDMACopyConsume();
+        }
+      }
+      b.create<async::YieldOp>(loc, SmallVector<Value>{});
+    });
+  }
+
+  ///TODO: handle dma_wait!!
+
+  op.erase();
+  return success();
+}
+
 
 class VerifConvertObjfifo
     : public impl::VerifConvertObjfifoBase<VerifConvertObjfifo> {
@@ -689,9 +880,16 @@ public:
       device = deviceop;
       return WalkResult::interrupt();
     });
+    assert(device);
+
+    WalkResult res = module.walk([&] (xilinx::AIEX::RuntimeSequenceOp op) {
+      if (convertRuntimeSequence(context, device, op).failed()) return WalkResult::interrupt();
+      return WalkResult::advance();
+    });
+    if (res.wasInterrupted()) return signalPassFailure();
 
     SmallVector<xilinx::AIE::ObjectFifoLinkOp> links;
-    WalkResult res = module.walk([&] (xilinx::AIE::ObjectFifoLinkOp op) {
+    module.walk([&] (xilinx::AIE::ObjectFifoLinkOp op) {
       links.push_back(op);
       return WalkResult::advance();
     });
