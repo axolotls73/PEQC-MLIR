@@ -16,7 +16,15 @@
 
 // REQUIRES: air
 // RUN: split-file %s %t && \
-// RUN: verif-opt --verif-aie-convert-objfifo %t/input.mlir > %t/objfifoconv.mlir
+// RUN: aie-opt --convert-linalg-to-loops %t/input.mlir > %t/input-lowered.mlir && \
+// RUN: verif-opt --verif-aie-convert-objfifo %t/input-lowered.mlir > %t/objfifoconv.mlir && \
+// RUN: verif-opt --verif-convert-aie --lower-affine %t/objfifoconv.mlir > %t/conversion.mlir && \
+// RUN: verif-translate --translate-to-past %t/conversion.mlir > %t/result.c
+// RUN: %add_epilogue %t/result.c %t/translation.c
+
+// RUN: %pastchecker %t/translation.c %t/translation.c arg2 | grep YES
+
+// RUN: %pastchecker %t/translation.c %t/compare.c arg2 | grep YES
 
 //--- input.mlir
 
@@ -24,19 +32,19 @@ module {
   aie.device(npu1_1col) {
 
     // added body to this external function
-    // func.func private @zero_i32(%m: memref<8x4xi32>) {
-    //   %c0_i32 = arith.constant 0 : i32
-    //   linalg.fill ins(%c0_i32 : i32) outs(%m : memref<8x4xi32>)
-    //   return
-    // }
-    func.func private @zero_i32(memref<8x4xi32>)
+    func.func private @zero_i32(%m: memref<8x4xi32>) {
+      %c0_i32 = arith.constant 0 : i32
+      linalg.fill ins(%c0_i32 : i32) outs(%m : memref<8x4xi32>)
+      return
+    }
+    // func.func private @zero_i32(memref<8x4xi32>)
 
     // added body to this external function
-    // func.func private @matmul_i16_i32(%a: memref<8x8xi16>, %b: memref<8x4xi16>, %c: memref<8x4xi32>) {
-    //   linalg.matmul ins(%a, %b: memref<8x8xi16>, memref<8x4xi16>) outs(%c: memref<8x4xi32>)
-    //   return
-    // }
-    func.func private @matmul_i16_i32(memref<8x8xi16>, memref<8x4xi16>, memref<8x4xi32>)
+    func.func private @matmul_i16_i32(%a: memref<8x8xi16>, %b: memref<8x4xi16>, %c: memref<8x4xi32>) {
+      linalg.matmul ins(%a, %b: memref<8x8xi16>, memref<8x4xi16>) outs(%c: memref<8x4xi32>)
+      return
+    }
+    // func.func private @matmul_i16_i32(memref<8x8xi16>, memref<8x4xi16>, memref<8x4xi32>)
 
     %shim_noc_tile_0_0 = aie.tile(0, 0)
     %mem_tile_0_1 = aie.tile(0, 1)
@@ -90,3 +98,18 @@ module {
   }
 }
 
+//--- compare.c
+
+#pragma pocc-region-start
+int* arg0;
+int* arg1;
+int* arg2;
+{
+  for (int i = 0; i < 16; i++)
+    for (int j = 0; j < 16; j++){
+      arg2[i * 16 + j] = 0;
+      for (int k = 0; k < 16; k++)
+        arg2[i * 16 + j] += arg0[i * 16 + k] * arg1[k * 16 + j];
+    }
+}
+#pragma pocc-region-end

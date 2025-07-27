@@ -184,6 +184,7 @@ class PastTranslator {
   s_past_node_t* translate(math::ExpOp op);
 
   s_past_node_t* translate(arith::ExtUIOp op);
+  s_past_node_t* translate(arith::ExtSIOp op);
 
   s_past_node_t* translate(arith::CmpIOp op);
   s_past_node_t* translate(arith::CmpFOp op);

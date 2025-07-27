@@ -133,6 +133,7 @@ std::string PastTranslator::getTypeName(const Type& t) {
 
     switch (it.getWidth()) {
       case 1:
+      case 16:
       case 32:
         // ret += "long ";
         break;
@@ -188,6 +189,7 @@ e_past_value_type_t PastTranslator::getTypePast(const Type& t) {
     switch (it.getWidth()) {
       case 1:
         // return e_past_value_bool;
+      case 16:
       case 32:
         // return e_past_value_longint;
       case 64:
@@ -712,6 +714,11 @@ s_past_node_t* PastTranslator::translate(math::ExpOp op) {
 }
 //don't care about width, everything's int anyway
 s_past_node_t* PastTranslator::translate(arith::ExtUIOp op) {
+  return getDeclareAndAssign(op.getResult().getType(), "arith_extui",
+      op.getResult(), past_node_varref_create(getVarSymbol(op.getIn())));
+}
+// same as above
+s_past_node_t* PastTranslator::translate(arith::ExtSIOp op) {
   return getDeclareAndAssign(op.getResult().getType(), "arith_extui",
       op.getResult(), past_node_varref_create(getVarSymbol(op.getIn())));
 }
@@ -1360,6 +1367,7 @@ s_past_node_t* PastTranslator::translate(Operation* op) {
   else if (auto o = dyn_cast<arith::NegFOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<math::ExpOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::ExtUIOp>(op)) res = translate(o);
+  else if (auto o = dyn_cast<arith::ExtSIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::CmpIOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::CmpFOp>(op)) res = translate(o);
   else if (auto o = dyn_cast<arith::SelectOp>(op)) res = translate(o);
