@@ -694,6 +694,7 @@ void convertDMACopyProduce(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   auto strides = dmaop.getStaticStrides();
   auto offsets = dmaop.getStaticOffsets();
   assert(offsets.size() >= 3 && offsets[0] == 0 && offsets[1] == 0 && offsets[2] == 0);
+  auto offset = offsets[0];
 
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
@@ -704,6 +705,9 @@ void convertDMACopyProduce(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   auto localshape = local_buffer.getType().getShape();
   auto numelts = std::reduce(localshape.begin(), localshape.end(), 1, std::multiplies<int64_t>());
   Value cst_numelts = builder.create<arith::ConstantIndexOp>(loc, numelts).getResult();
+  ///TODO: make this not an assertion
+  assert(((std::reduce(input_buffer.getType().getShape().begin(), input_buffer.getType().getShape().end(),
+        1, std::multiplies<int64_t>()) % numelts) == 0));
 
   // make for loops with sizes
   SmallVector<Value> iterators;
@@ -734,6 +738,10 @@ void convertDMACopyProduce(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   }
   AffineMap indexmap = AffineMap::get(iterators.size(), 0, indexexpr, context);
   Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
+  if (offset) {
+    Value cst_offset = builder.create<arith::ConstantIndexOp>(loc, offset).getResult();
+    linearindex = builder.create<arith::AddIOp>(loc, IndexType::get(context), iterindex, cst_offset).getResult();
+  }
 
   // local_buffer[delin(iterindex)] = input_buffer[delin(linearindex)]
   ValueRange delinlocal = builder.create<affine::AffineDelinearizeIndexOp>(loc,
@@ -765,8 +773,104 @@ void convertDMACopyProduce(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   builder.setInsertionPointAfter(outerloop);
 }
 
-void convertDMACopyConsume() {
+void convertDMACopyConsume(MLIRContext* context, xilinx::AIE::DeviceOp device, OpBuilder builder, IRMapping mapper,
+      xilinx::AIEX::NpuDmaMemcpyNdOp dmaop, xilinx::AIE::ObjectFifoCreateOp ofop) {
+ auto loc = dmaop.getLoc();
+  auto sizes = dmaop.getStaticSizes();
+  auto strides = dmaop.getStaticStrides();
+  auto offsets = dmaop.getStaticOffsets();
+  assert(offsets.size() >= 3 && offsets[0] == 0 && offsets[1] == 0 && offsets[2] == 0);
+  auto offset = offsets[0];
 
+  Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
+  Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
+
+  auto output_buffer = dyn_cast<TypedValue<MemRefType>>(mapper.lookup(dmaop.getMemref()));
+  assert(output_buffer);
+  auto ofelttype = ofop.getElemType().getElementType();
+  auto localelttype = ofelttype.getElementType();
+  auto outputshape = output_buffer.getType().getShape();
+  auto outputnumelts = std::reduce(outputshape.begin(), outputshape.end(), 1, std::multiplies<int64_t>());
+  auto ofnumelts = std::reduce(ofelttype.getShape().begin(), ofelttype.getShape().end(),
+      1, std::multiplies<int64_t>());
+  ///TODO: make this not an assertion
+  assert((outputnumelts % ofnumelts) == 0);
+  Value cst_ofnumelts = builder.create<arith::ConstantIndexOp>(loc, ofnumelts).getResult();
+
+  auto local_buffer = builder.create<memref::AllocOp>(loc,
+      MemRefType::get(SmallVector<int64_t>{outputnumelts}, localelttype)).getResult();
+  auto localperoutput = outputnumelts / ofnumelts;
+  Value localperoutputval = builder.create<arith::ConstantIndexOp>(loc, outputnumelts / ofnumelts).getResult();
+
+  auto writeouter = builder.create<scf::ForOp>(loc, cst_0, localperoutputval, cst_1, std::nullopt,
+      [&](OpBuilder& b, Location loc, Value outeri, ValueRange) {
+    auto subviewtype = xilinx::AIE::AIEObjectFifoSubviewType::get(ofelttype);
+    auto subview = b.create<xilinx::AIE::ObjectFifoAcquireOp>(loc, subviewtype,
+        xilinx::AIE::ObjectFifoPort::Consume, ofop.getSymNameAttr(), 1).getResult();
+    auto ofbuf = b.create<xilinx::AIE::ObjectFifoSubviewAccessOp>(loc,
+        ofelttype, subview, IntegerAttr::get(IntegerType::get(context, 32), 0));
+
+    b.create<scf::ForOp>(loc, cst_0, cst_ofnumelts, cst_1, std::nullopt,
+        [&](OpBuilder& b, Location loc, Value inneri, ValueRange) {
+      Value localindex = b.create<affine::AffineLinearizeIndexOp>(loc, SmallVector<Value>{outeri, inneri}, ofnumelts).getResult();
+      auto ofbufindex = b.create<affine::AffineDelinearizeIndexOp>(loc, inneri, ofbuf.getType().getShape()).getResults();
+      Value bufval = builder.create<memref::LoadOp>(loc, ofbuf, ofbufindex);
+      builder.create<memref::StoreOp>(loc, bufval, local_buffer, localindex);
+      b.create<scf::YieldOp>(loc);
+    });
+
+    b.create<xilinx::AIE::ObjectFifoReleaseOp>(loc, xilinx::AIE::ObjectFifoPort::Consume, ofop.getSymNameAttr(), 1);
+    b.create<scf::YieldOp>(loc);
+  });
+
+
+  // make for loops with sizes
+  SmallVector<Value> iterators;
+  scf::ForOp outerloop = nullptr;
+  Value iterindex = cst_0;
+  for (auto size : sizes) {
+    Value sizeval = builder.create<arith::ConstantIndexOp>(loc, size).getResult();
+    auto forop = builder.create<scf::ForOp>(loc, cst_0, sizeval, cst_1, SmallVector<Value>{iterindex});
+    // creating an inner loop: need to yield iter arg
+    if (iterindex != cst_0) {
+      builder.create<scf::YieldOp>(loc, forop.getResult(0));
+    }
+    else outerloop = forop;
+    builder.setInsertionPointToStart(forop.getBody());
+
+    iterindex = forop.getRegionIterArg(0);
+    llvm::errs() << iterindex << "\n";
+    iterators.push_back(forop.getInductionVar());
+  }
+  device.emitRemark();
+
+  // calculate linear index with offsets and strides
+  AffineExpr indexexpr = builder.getAffineConstantExpr(0);
+  for (size_t i = 0; i < sizes.size(); i++) {
+    auto stride = builder.getAffineConstantExpr(strides[i]);
+    auto iter = builder.getAffineDimExpr(i);
+    indexexpr = indexexpr + (iter * stride);
+  }
+  AffineMap indexmap = AffineMap::get(iterators.size(), 0, indexexpr, context);
+  Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
+  if (offset) {
+    Value cst_offset = builder.create<arith::ConstantIndexOp>(loc, offset).getResult();
+    linearindex = builder.create<arith::AddIOp>(loc, IndexType::get(context), iterindex, cst_offset).getResult();
+  }
+
+  // output_buffer[delin(iterindex)] = local_buffer[delin(linearindex)]
+  // ValueRange delinlocal = builder.create<affine::AffineDelinearizeIndexOp>(loc,
+  //     linearindex, ofelttype.getShape()).getResults();
+  ValueRange delinoutput = builder.create<affine::AffineDelinearizeIndexOp>(loc,
+      iterindex, output_buffer.getType().getShape()).getResults();
+  Value bufval = builder.create<memref::LoadOp>(loc, local_buffer, linearindex);
+  builder.create<memref::StoreOp>(loc, bufval, output_buffer, delinoutput);
+
+  // increment iter counter
+  Value iterincr = builder.create<arith::AddIOp>(loc, IndexType::get(context), iterindex, cst_1).getResult();
+  builder.create<scf::YieldOp>(loc, iterincr);
+
+  builder.setInsertionPointAfter(outerloop);
 }
 
 LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp device, xilinx::AIEX::RuntimeSequenceOp op) {
@@ -853,7 +957,7 @@ LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp
           convertDMACopyProduce(context, device, b, mapper, dmaop, ofop);
         }
         else {
-          convertDMACopyConsume();
+          convertDMACopyConsume(context, device, b, mapper, dmaop, ofop);
         }
       }
       b.create<async::YieldOp>(loc, SmallVector<Value>{});
@@ -861,7 +965,8 @@ LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp
   }
 
   ///TODO: handle dma_wait!!
-
+  device.emitRemark("AAAA");
+  // assert(0);
   op.erase();
   return success();
 }
