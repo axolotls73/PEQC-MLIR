@@ -57,7 +57,7 @@ module @tutorial_4 {
         }
         // this is renamed arg0, no name mapping yet
         aiex.runtime_sequence @sequence(%A: memref<16xi32>) {
-            aiex.npu.dma_memcpy_nd(%A[0, 0, 0, 0][1, 1, 1, 256][0, 0, 0, 1]) {id = 0 : i64, metadata = @of1} : memref<16xi32>
+            aiex.npu.dma_memcpy_nd(%A[0, 0, 0, 0][1, 1, 1, 16][0, 0, 0, 1]) {id = 0 : i64, metadata = @of1} : memref<16xi32>
         }
     }
 }

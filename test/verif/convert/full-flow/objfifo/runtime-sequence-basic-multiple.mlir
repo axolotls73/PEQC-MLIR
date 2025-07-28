@@ -1,6 +1,6 @@
 
 //
-// runtime-sequence-basic-consume.mlir: This file is part of the PEQC-MLIR project.
+// runtime-sequence-basic-multiple.mlir: This file is part of the PEQC-MLIR project.
 //
 // Copyright (C) 2025 Colorado State University
 //
@@ -33,27 +33,37 @@ module @tutorial_4 {
         %tile24 = aie.tile(2, 4)
         %tile34 = aie.tile(3, 4)
 
-        %buf14 = aie.buffer(%tile14) { sym_name = "a14" } : memref<16xi32>
-        %buf34 = aie.buffer(%tile34) { sym_name = "a34" } : memref<16xi32>
+        %buf34 = aie.buffer(%tile34) { sym_name = "a34" } : memref<32xi32>
 
         aie.objectfifo @of1 (%tile14, {%tile24}, 1 : i32) : !aie.objectfifo<memref<16xi32>>
         aie.objectfifo @of2 (%tile24, {%tile34}, 1 : i32) : !aie.objectfifo<memref<16xi32>>
         aie.objectfifo.link [@of1] -> [@of2]([] [])
 
-        %core14 = aie.core(%tile14) {
-            %inputSubview = aie.objectfifo.acquire @of1 (Produce, 1) : !aie.objectfifosubview<memref<16xi32>>
+        %core34 = aie.core(%tile34) {
 
-            %input = aie.objectfifo.subview.access %inputSubview[0] : !aie.objectfifosubview<memref<16xi32>> -> memref<16xi32>
+            %cst0 = arith.constant 0 : index
+            %cst1 = arith.constant 1 : index
+            %cst2 = arith.constant 2 : index
+            %cst16 = arith.constant 16 : index
+            scf.for %i = %cst0 to %cst2 step %cst1 {
+                %inputSubview = aie.objectfifo.acquire @of2 (Consume, 1) : !aie.objectfifosubview<memref<16xi32>>
+                %input = aie.objectfifo.subview.access %inputSubview[0] : !aie.objectfifosubview<memref<16xi32>> -> memref<16xi32>
 
-            memref.copy %buf14, %input : memref<16xi32> to memref<16xi32>
+                scf.for %j = %cst0 to %cst16 step %cst1 {
+                    %lindex = affine.linearize_index [%i, %j] by (16) : index
+                    %val = memref.load %input[%j] : memref<16xi32>
+                    memref.store %val, %buf34[%lindex] : memref<32xi32>
+                }
 
-            aie.objectfifo.release @of1 (Produce, 1)
+                aie.objectfifo.release @of2 (Consume, 1)
+            }
+
             aie.end
         }
-
         // this is renamed arg0, no name mapping yet
         aiex.runtime_sequence @sequence(%A: memref<16xi32>) {
-            aiex.npu.dma_memcpy_nd(%A[0, 0, 0, 0][1, 1, 1, 16][0, 0, 0, 1]) {id = 0 : i64, metadata = @of2} : memref<16xi32>
+            aiex.npu.dma_memcpy_nd(%A[0, 0, 0, 0][1, 1, 1, 16][0, 0, 0, 1]) {id = 0 : i64, metadata = @of1} : memref<16xi32>
+            aiex.npu.dma_memcpy_nd(%A[0, 0, 0, 16][1, 1, 1, 16][0, 0, 0, 1]) {id = 0 : i64, metadata = @of1} : memref<16xi32>
         }
     }
 }
@@ -64,8 +74,8 @@ module @tutorial_4 {
 int* aie_buffer_a14;
 int* aie_buffer_a34;
 {
-    for (int i = 0; i < 16; i++) {
-        arg0[i] = aie_buffer_a14[i];
+    for (int i = 0; i < 32; i++) {
+        aie_buffer_a34[i] = arg0[i];
     }
 }
 #pragma pocc-region-end

@@ -694,7 +694,7 @@ void convertDMACopyProduce(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   auto strides = dmaop.getStaticStrides();
   auto offsets = dmaop.getStaticOffsets();
   assert(offsets.size() >= 3 && offsets[0] == 0 && offsets[1] == 0 && offsets[2] == 0);
-  auto offset = offsets[0];
+  auto offset = offsets[3];
 
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
@@ -705,9 +705,13 @@ void convertDMACopyProduce(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   auto localshape = local_buffer.getType().getShape();
   auto numelts = std::reduce(localshape.begin(), localshape.end(), 1, std::multiplies<int64_t>());
   Value cst_numelts = builder.create<arith::ConstantIndexOp>(loc, numelts).getResult();
-  ///TODO: make this not an assertion
-  assert(((std::reduce(input_buffer.getType().getShape().begin(), input_buffer.getType().getShape().end(),
-        1, std::multiplies<int64_t>()) % numelts) == 0));
+
+  ///TODO: make these not assertions
+  assert("must transfer a multiple of objfifo size in npu memcpy" &&
+      (std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<int64_t>()) % numelts) == 0);
+  assert("objfifo size must divide npu memref operand size" &&
+      (std::reduce(input_buffer.getType().getShape().begin(), input_buffer.getType().getShape().end(),
+      1, std::multiplies<int64_t>()) % numelts) == 0);
 
   // make for loops with sizes
   SmallVector<Value> iterators;
@@ -727,7 +731,6 @@ void convertDMACopyProduce(MLIRContext* context, xilinx::AIE::DeviceOp device, O
     llvm::errs() << iterindex << "\n";
     iterators.push_back(forop.getInductionVar());
   }
-  device.emitRemark();
 
   // calculate linear index with offsets and strides
   AffineExpr indexexpr = builder.getAffineConstantExpr(0);
@@ -780,7 +783,7 @@ void convertDMACopyConsume(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   auto strides = dmaop.getStaticStrides();
   auto offsets = dmaop.getStaticOffsets();
   assert(offsets.size() >= 3 && offsets[0] == 0 && offsets[1] == 0 && offsets[2] == 0);
-  auto offset = offsets[0];
+  auto offset = offsets[3];
 
   Value cst_0 = builder.create<arith::ConstantIndexOp>(loc, 0).getResult();
   Value cst_1 = builder.create<arith::ConstantIndexOp>(loc, 1).getResult();
@@ -842,7 +845,6 @@ void convertDMACopyConsume(MLIRContext* context, xilinx::AIE::DeviceOp device, O
     llvm::errs() << iterindex << "\n";
     iterators.push_back(forop.getInductionVar());
   }
-  device.emitRemark();
 
   // calculate linear index with offsets and strides
   AffineExpr indexexpr = builder.getAffineConstantExpr(0);
@@ -855,12 +857,9 @@ void convertDMACopyConsume(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
   if (offset) {
     Value cst_offset = builder.create<arith::ConstantIndexOp>(loc, offset).getResult();
-    linearindex = builder.create<arith::AddIOp>(loc, IndexType::get(context), iterindex, cst_offset).getResult();
+    linearindex = builder.create<arith::AddIOp>(loc, IndexType::get(context), linearindex, cst_offset).getResult();
   }
 
-  // output_buffer[delin(iterindex)] = local_buffer[delin(linearindex)]
-  // ValueRange delinlocal = builder.create<affine::AffineDelinearizeIndexOp>(loc,
-  //     linearindex, ofelttype.getShape()).getResults();
   ValueRange delinoutput = builder.create<affine::AffineDelinearizeIndexOp>(loc,
       iterindex, output_buffer.getType().getShape()).getResults();
   Value bufval = builder.create<memref::LoadOp>(loc, local_buffer, linearindex);
@@ -909,16 +908,11 @@ LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp
   std::unordered_map<std::string, SmallVector<xilinx::AIEX::NpuDmaMemcpyNdOp>> dmaopmap;
   for (auto dmaop : block.getOps<xilinx::AIEX::NpuDmaMemcpyNdOp>()) {
     auto ofname = dmaop.getProperties().getMetadata().getValue().str();
-    if (!dmaopmap.count(ofname)) {
-      dmaopmap[ofname] = SmallVector<xilinx::AIEX::NpuDmaMemcpyNdOp>{dmaop};
-    }
-    else {
-      auto vec = dmaopmap[ofname];
-      vec.push_back(dmaop);
-    }
+    dmaopmap[ofname].push_back(dmaop);
   }
 
   for (auto [ofname, dmaops] : dmaopmap) {
+    llvm::errs() << "OFNAME: " + ofname + "\n";
     auto ofop = dyn_cast<xilinx::AIE::ObjectFifoCreateOp>(device.lookupSymbol(StringAttr::get(context, ofname)));
     if (!ofop) {
       op.emitError("objectfifo not found: " + ofname);
@@ -953,6 +947,7 @@ LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp
         [&] (OpBuilder &b, Location loc, ValueRange v) {
           IRMapping map;
       for (auto dmaop : dmaops) {
+        llvm::errs() << "  DMA OP: " << dmaop << "\n";
         if (port.value() == xilinx::AIE::ObjectFifoPort::Produce) {
           convertDMACopyProduce(context, device, b, mapper, dmaop, ofop);
         }
@@ -965,8 +960,7 @@ LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp
   }
 
   ///TODO: handle dma_wait!!
-  device.emitRemark("AAAA");
-  // assert(0);
+
   op.erase();
   return success();
 }
@@ -1092,7 +1086,6 @@ public:
           MemRefType::get(SmallVector<int64_t>{elt_size.value()}, elt_elt_type.value()),
           producers, consumers, link.getSrcOffsets());
       if (!converter.convertObjectfifo().succeeded()) return signalPassFailure();
-      module.emitRemark();
       for (auto ofop : llvm::concat<xilinx::AIE::ObjectFifoCreateOp>(producers, consumers)) {
         ofop.erase();
       }
