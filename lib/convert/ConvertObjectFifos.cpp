@@ -591,7 +591,6 @@ LogicalResult initObjfifo() {
     auto seminit = builder.create<SemaphoreOp>(loc,
         IntegerAttr::get(IndexType::get(context), READY_PRODUCE)).getResult();
     builder.create<memref::StoreOp>(loc, seminit, semarr, SmallVector<Value>{innerloop.getInductionVar(), loop.getInductionVar()});
-    module.emitRemark();
   }
 
   // buffer index array creation/initialization
@@ -743,7 +742,7 @@ void convertDMACopyProduce(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
   if (offset) {
     Value cst_offset = builder.create<arith::ConstantIndexOp>(loc, offset).getResult();
-    linearindex = builder.create<arith::AddIOp>(loc, IndexType::get(context), iterindex, cst_offset).getResult();
+    linearindex = builder.create<arith::AddIOp>(loc, IndexType::get(context), linearindex, cst_offset).getResult();
   }
 
   // local_buffer[delin(iterindex)] = input_buffer[delin(linearindex)]
@@ -861,8 +860,8 @@ void convertDMACopyConsume(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   }
 
   ValueRange delinoutput = builder.create<affine::AffineDelinearizeIndexOp>(loc,
-      iterindex, output_buffer.getType().getShape()).getResults();
-  Value bufval = builder.create<memref::LoadOp>(loc, local_buffer, linearindex);
+      linearindex, output_buffer.getType().getShape()).getResults();
+  Value bufval = builder.create<memref::LoadOp>(loc, local_buffer, iterindex);
   builder.create<memref::StoreOp>(loc, bufval, output_buffer, delinoutput);
 
   // increment iter counter

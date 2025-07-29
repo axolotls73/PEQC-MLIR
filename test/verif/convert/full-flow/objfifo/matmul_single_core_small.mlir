@@ -50,7 +50,9 @@ module {
     %mem_tile_0_1 = aie.tile(0, 1)
     %tile_0_2 = aie.tile(0, 2)
     aie.objectfifo @inA(%shim_noc_tile_0_0, {%mem_tile_0_1}, 2 : i32) : !aie.objectfifo<memref<8x8xi16>>
-    aie.objectfifo @memA(%mem_tile_0_1 dimensionsToStream [<size = 2, stride = 32>, <size = 2, stride = 4>, <size = 4, stride = 8>, <size = 4, stride = 1>], {%tile_0_2}, 2 : i32) : !aie.objectfifo<memref<8x8xi16>>
+    aie.objectfifo @memA(%mem_tile_0_1, {%tile_0_2}, 2 : i32) : !aie.objectfifo<memref<8x8xi16>>
+    // old declaration: incorrect?
+    // aie.objectfifo @memA(%mem_tile_0_1 dimensionsToStream [<size = 2, stride = 32>, <size = 2, stride = 4>, <size = 4, stride = 8>, <size = 4, stride = 1>], {%tile_0_2}, 2 : i32) : !aie.objectfifo<memref<8x8xi16>>
     aie.objectfifo.link [@inA] -> [@memA]([] [])
     aie.objectfifo @inB(%shim_noc_tile_0_0, {%mem_tile_0_1}, 2 : i32) : !aie.objectfifo<memref<8x4xi16>>
     aie.objectfifo @memB(%mem_tile_0_1 dimensionsToStream [<size = 2, stride = 16>, <size = 1, stride = 4>, <size = 4, stride = 4>, <size = 4, stride = 1>], {%tile_0_2}, 2 : i32) : !aie.objectfifo<memref<8x4xi16>>
