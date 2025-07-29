@@ -398,7 +398,6 @@ LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreate
     builder.setInsertionPointToStart(forop.getBody());
 
     iterindex = forop.getRegionIterArg(0);
-    llvm::errs() << iterindex << "\n";
     iterators.push_back(forop.getInductionVar());
   }
 
@@ -504,9 +503,6 @@ LogicalResult convertAcquireRelease(Operation* op, xilinx::AIE::ObjectFifoCreate
   auto indexarr_index = is_acquire ? INDEXARR_START : INDEXARR_END;
   Value indexarrval = getIndexArr(loc, builder, indexarr);
   auto indexarrindices = buildIndexArrIndices(builder, indexarrval, loc, indexarr_index, port, ofop, tile);
-  for (auto index : indexarrindices) {
-    llvm::errs() << index << "\n";
-  }
   Value indexval = builder.create<memref::LoadOp>(loc, indexarrval, indexarrindices).getResult();
   auto loop = builder.create<scf::ForOp>(loc, cst_0, numeltsval, cst_1);
   builder.setInsertionPointToStart(loop.getBody());
@@ -621,11 +617,9 @@ LogicalResult initObjfifo() {
 
 LogicalResult convertUse(SymbolTable::SymbolUse use) {
   auto op = use.getUser();
-  llvm::errs() << "USE " << *op << "\n";
 
   auto is_producer = [&](Operation* op, xilinx::AIE::ObjectFifoPort port, xilinx::AIE::ObjectFifoCreateOp ofop) {
     Value tile = getTile(op, ofop, port);
-    llvm::errs() << tile << "\n";
     if (std::find(producers.begin(), producers.end(), std::pair{ofop, tile}) != producers.end()) {
       return true;
     }
@@ -727,7 +721,6 @@ void convertDMACopyProduce(MLIRContext* context, xilinx::AIE::DeviceOp device, O
     builder.setInsertionPointToStart(forop.getBody());
 
     iterindex = forop.getRegionIterArg(0);
-    llvm::errs() << iterindex << "\n";
     iterators.push_back(forop.getInductionVar());
   }
 
@@ -801,10 +794,9 @@ void convertDMACopyConsume(MLIRContext* context, xilinx::AIE::DeviceOp device, O
 
   auto local_buffer = builder.create<memref::AllocOp>(loc,
       MemRefType::get(SmallVector<int64_t>{outputnumelts}, localelttype)).getResult();
-  auto localperoutput = outputnumelts / ofnumelts;
   Value localperoutputval = builder.create<arith::ConstantIndexOp>(loc, outputnumelts / ofnumelts).getResult();
 
-  auto writeouter = builder.create<scf::ForOp>(loc, cst_0, localperoutputval, cst_1, std::nullopt,
+  builder.create<scf::ForOp>(loc, cst_0, localperoutputval, cst_1, std::nullopt,
       [&](OpBuilder& b, Location loc, Value outeri, ValueRange) {
     auto subviewtype = xilinx::AIE::AIEObjectFifoSubviewType::get(ofelttype);
     auto subview = b.create<xilinx::AIE::ObjectFifoAcquireOp>(loc, subviewtype,
@@ -841,7 +833,6 @@ void convertDMACopyConsume(MLIRContext* context, xilinx::AIE::DeviceOp device, O
     builder.setInsertionPointToStart(forop.getBody());
 
     iterindex = forop.getRegionIterArg(0);
-    llvm::errs() << iterindex << "\n";
     iterators.push_back(forop.getInductionVar());
   }
 
@@ -911,7 +902,9 @@ LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp
   }
 
   for (auto [ofname, dmaops] : dmaopmap) {
-    llvm::errs() << "OFNAME: " + ofname + "\n";
+    LLVM_DEBUG(
+      llvm::errs() << "OFNAME: " + ofname + "\n";
+    );
     auto ofop = dyn_cast<xilinx::AIE::ObjectFifoCreateOp>(device.lookupSymbol(StringAttr::get(context, ofname)));
     if (!ofop) {
       op.emitError("objectfifo not found: " + ofname);
@@ -941,12 +934,14 @@ LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp
     }
     assert(port.has_value());
 
-    auto async = builder.create<async::ExecuteOp>(op.getLoc(),
+    builder.create<async::ExecuteOp>(op.getLoc(),
         SmallVector<Type>{}, SmallVector<Value>{}, SmallVector<Value>{},
         [&] (OpBuilder &b, Location loc, ValueRange v) {
           IRMapping map;
       for (auto dmaop : dmaops) {
-        llvm::errs() << "  DMA OP: " << dmaop << "\n";
+        LLVM_DEBUG(
+          llvm::errs() << "  DMA OP: " << dmaop << "\n";
+        );
         if (port.value() == xilinx::AIE::ObjectFifoPort::Produce) {
           convertDMACopyProduce(context, device, b, mapper, dmaop, ofop);
         }
@@ -1041,7 +1036,6 @@ public:
           return signalPassFailure();
         }
         if (elt_elt_type.has_value() && elt_elt_type.value() != opelttype.getElementType()) {
-          llvm::errs() << elt_elt_type.value() << " " << opelttype.getElementType() << "\n";
           link.emitError("element type mismatch between linked objectfifos");
           return signalPassFailure();
         }
