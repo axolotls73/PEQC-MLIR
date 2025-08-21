@@ -411,20 +411,20 @@ LogicalResult buildOFBufferCopy(OpBuilder builder, xilinx::AIE::ObjectFifoCreate
   AffineMap indexmap = AffineMap::get(iterators.size(), 0, indexexpr, context);
   Value linearindex = builder.create<affine::AffineApplyOp>(loc, indexmap, iterators).getResult();
 
-  // delinearize linearindex using local_buffer size, fifo_buffer[iterindex] = local_buffer[delinindex]
+  // fifo_buffer[linearindex] = local_buffer[delinearize(iterindex)]
   if (to_stream) {
     ValueRange delinindices = builder.create<affine::AffineDelinearizeIndexOp>(loc,
-        linearindex, local_type.getShape()).getResults();
-    Value bufval = builder.create<memref::LoadOp>(loc, local_buffer, delinindices);
+        iterindex, local_type.getShape()).getResults();
     // offset only for to_stream
-    Value fifo_index = iterindex;
+    Value fifo_index = linearindex;
     if (offset) {
       Value cst_offset = builder.create<arith::ConstantIndexOp>(loc, offset).getResult();
-      fifo_index = builder.create<arith::AddIOp>(loc, IndexType::get(context), iterindex, cst_offset).getResult();
+      fifo_index = builder.create<arith::AddIOp>(loc, IndexType::get(context), linearindex, cst_offset).getResult();
     }
+    Value bufval = builder.create<memref::LoadOp>(loc, local_buffer, delinindices);
     builder.create<memref::StoreOp>(loc, bufval, fifo_buffer, fifo_index);
   }
-  // delinearize iterindex using local_buffer size, local_buffer[delinindex] = fifo_buffer[linearindex]
+  // local_buffer[delinearize(iterindex)] = fifo_buffer[linearindex]
   else {
     ValueRange delinindices = builder.create<affine::AffineDelinearizeIndexOp>(loc,
         iterindex, local_type.getShape()).getResults();
