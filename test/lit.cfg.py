@@ -34,10 +34,10 @@ config.substitutions.append(("%shlibext", config.llvm_shlib_ext))
 config.substitutions.append(("%add_epilogue", os.path.join(config.verif_src_root, "script/add_epilogue.py")))
 
 config.substitutions.append(("%pastchecker_path",
-        f"{lit_config.params['PAST_DIR']}/src/pastchecker"))
+        f"{lit_config.params['PAST_DIR']}/bin/pastchecker"))
 # pastchecker with arguments
 config.substitutions.append(("%pastchecker",
-        f"{lit_config.params['PAST_DIR']}/src/pastchecker --enable-preprocessor --timing-mode --verbose --enable-subtrees --happens-before"))
+        f"{lit_config.params['PAST_DIR']}/bin/pastchecker --enable-preprocessor --timing-mode --verbose --enable-subtrees --happens-before"))
 
 llvm_config.with_system_environment(["HOME", "INCLUDE", "LIB", "TMP", "TEMP"])
 

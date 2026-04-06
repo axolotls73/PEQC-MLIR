@@ -48,7 +48,7 @@ include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})
 include_directories(${VERIF_SOURCE_DIR}/include)
 include_directories(${VERIF_BINARY_DIR}/include)
-include_directories(${PAST_DIR}/past/include)
+include_directories(${PAST_DIR}/include)
 link_directories(${LLVM_BUILD_LIBRARY_DIR})
 add_definitions(${LLVM_DEFINITIONS})
 
@@ -67,8 +67,7 @@ if (COMPILE_WITH_AIR)
   # ^ these two need to be specified separately, no idea why
 endif()
 
-set(libpast ${PAST_DIR}/past/.libs/libpast.so)
-
+set(libpast ${PAST_DIR}/lib/libpast.so)
 add_subdirectory(include)
 add_subdirectory(lib)
 add_subdirectory(test)
