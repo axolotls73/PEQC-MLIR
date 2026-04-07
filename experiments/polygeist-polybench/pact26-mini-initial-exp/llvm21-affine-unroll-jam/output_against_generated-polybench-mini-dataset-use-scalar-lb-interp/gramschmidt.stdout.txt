@@ -1,0 +1,514 @@
+command line: /usr/bin/time -v pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees generated-polybench-mini-dataset-use-scalar-lb/interp/gramschmidt-interp.c pact26-mini-initial-exp/llvm21-affine-unroll-jam/translated/gramschmidt-8-translated-noasyncepilogue.c "A,R,Q"
+return code: 0
+[PAST] Verify equivalence of programs by abstract interpretation.
+[PAST] Program P1:
+void kernel_gramschmidt(int m, int n, double A[(20 + 0)][(30 + 0)], double R[(30 + 0)][(30 + 0)], double Q[(20 + 0)][(30 + 0)])
+{
+  int i; 
+  int j; 
+  int k; 
+  double nrm; 
+  for (k = 0; k < 30; k++)
+    {
+      nrm = 0.000000; 
+      for (i = 0; i < 20; i++)
+        {
+          nrm += (A[i][k] * A[i][k]); 
+        }
+      
+      R[k][k] = sqrt(nrm); 
+      for (i = 0; i < 20; i++)
+        {
+          Q[i][k] = (A[i][k] / R[k][k]); 
+        }
+      
+      for (j = (k + 1); j < 30; j++)
+        {
+          R[k][j] = 0.000000; 
+          for (i = 0; i < 20; i++)
+            {
+              R[k][j] += (Q[i][k] * A[i][j]); 
+            }
+          
+          for (i = 0; i < 20; i++)
+            {
+              A[i][j] = (A[i][j] - (Q[i][k] * R[k][j])); 
+            }
+          
+        }
+      
+    }
+  
+}
+{
+  int m; 
+  int n; 
+  double* A; 
+  double* R; 
+  double* Q; 
+  kernel_gramschmidt(m, n, A, R, Q); 
+}
+[PAST] Program P2:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i++)
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i++)
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j++)
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_gramschmidt(int func_arg_0, int func_arg_1, double* func_arg_2, double* func_arg_3, double* func_arg_4)
+{
+  int arith_const_20_5 = 20; 
+  int arith_const_1_6 = 1; 
+  int arith_const_30_7 = 30; 
+  int arith_const_0_8 = 0; 
+  double _9; 
+  double arith_const_0_10 = 0.000000; 
+  double* memref_alloca_11; 
+  memref_alloca_11[0] = _9; 
+  for (int for_iter_12 = arith_const_0_8; for_iter_12 < arith_const_30_7; for_iter_12 += arith_const_1_6)
+    {
+      memref_alloca_11[0] = arith_const_0_10; 
+      for (int for_iter_13 = arith_const_0_8; for_iter_13 < arith_const_20_5; for_iter_13 += arith_const_1_6)
+        {
+          double memref_load_14 = func_arg_2[for_iter_13][for_iter_12]; 
+          double arith_mulf_15 = (memref_load_14 * memref_load_14); 
+          double memref_load_16 = memref_alloca_11[0]; 
+          double arith_addf_17 = (memref_load_16 + arith_mulf_15); 
+          memref_alloca_11[0] = arith_addf_17; 
+        }
+      
+      double memref_load_18 = memref_alloca_11[0]; 
+      double math_sqrt_19 = sqrt(memref_load_18); 
+      func_arg_3[for_iter_12][for_iter_12] = math_sqrt_19; 
+      for (int for_iter_20 = arith_const_0_8; for_iter_20 < arith_const_20_5; for_iter_20 += arith_const_1_6)
+        {
+          double memref_load_21 = func_arg_2[for_iter_20][for_iter_12]; 
+          double memref_load_22 = func_arg_3[for_iter_12][for_iter_12]; 
+          double arith_divf_23 = (memref_load_21 / memref_load_22); 
+          func_arg_4[for_iter_20][for_iter_12] = arith_divf_23; 
+        }
+      
+      int arith_addi_24 = (for_iter_12 + arith_const_1_6); 
+      for (int for_iter_25 = arith_addi_24; for_iter_25 < arith_const_30_7; for_iter_25 += arith_const_1_6)
+        {
+          func_arg_3[for_iter_12][for_iter_25] = arith_const_0_10; 
+          for (int for_iter_26 = arith_const_0_8; for_iter_26 < arith_const_20_5; for_iter_26 += arith_const_1_6)
+            {
+              double memref_load_27 = func_arg_4[for_iter_26][for_iter_12]; 
+              double memref_load_28 = func_arg_2[for_iter_26][for_iter_25]; 
+              double arith_mulf_29 = (memref_load_27 * memref_load_28); 
+              double memref_load_30 = func_arg_3[for_iter_12][for_iter_25]; 
+              double arith_addf_31 = (memref_load_30 + arith_mulf_29); 
+              func_arg_3[for_iter_12][for_iter_25] = arith_addf_31; 
+            }
+          
+          for (int for_iter_32 = arith_const_0_8; for_iter_32 < arith_const_20_5; for_iter_32 += arith_const_1_6)
+            {
+              double memref_load_33 = func_arg_2[for_iter_32][for_iter_25]; 
+              double memref_load_34 = func_arg_4[for_iter_32][for_iter_12]; 
+              double memref_load_35 = func_arg_3[for_iter_12][for_iter_25]; 
+              double arith_mulf_36 = (memref_load_34 * memref_load_35); 
+              double arith_subf_37 = (memref_load_33 - arith_mulf_36); 
+              func_arg_2[for_iter_32][for_iter_25] = arith_subf_37; 
+            }
+          
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int m; 
+  int n; 
+  double* A; 
+  double* R; 
+  double* Q; 
+  kernel_gramschmidt(m, n, A, R, Q); 
+}
+[PAST] Live-out variables to be checked for equivalence: A R Q 
+[PAST][AI][Equivalence] Interpret program P1...
+[PAST][AI] Clone and normalize program before interpretation...
+void kernel_gramschmidt(int m, int n, double A[(20 + 0)][(30 + 0)], double R[(30 + 0)][(30 + 0)], double Q[(20 + 0)][(30 + 0)])
+{
+  int i; 
+  int j; 
+  int k; 
+  double nrm; 
+  for (k = 0; k < 30; k = (k + 1))
+    {
+      nrm = _past_fp_value_0_000000; 
+      for (i = 0; i < 20; i = (i + 1))
+        {
+          nrm = (nrm + (A[i][k] * A[i][k])); 
+        }
+      
+      R[k][k] = sqrt(nrm); 
+      for (i = 0; i < 20; i = (i + 1))
+        {
+          Q[i][k] = (A[i][k] / R[k][k]); 
+        }
+      
+      for (j = (k + 1); j < 30; j = (j + 1))
+        {
+          R[k][j] = _past_fp_value_0_000000; 
+          for (i = 0; i < 20; i = (i + 1))
+            {
+              R[k][j] = (R[k][j] + (Q[i][k] * A[i][j])); 
+            }
+          
+          for (i = 0; i < 20; i = (i + 1))
+            {
+              A[i][j] = (A[i][j] - (Q[i][k] * R[k][j])); 
+            }
+          
+        }
+      
+    }
+  
+}
+{
+  int m; 
+  int n; 
+  double* A; 
+  double* R; 
+  double* Q; 
+  kernel_gramschmidt(m, n, A, R, Q); 
+}
+[PAST] Final program interpreted:
+void kernel_gramschmidt(int m, int n, double A[(20 + 0)][(30 + 0)], double R[(30 + 0)][(30 + 0)], double Q[(20 + 0)][(30 + 0)])
+{
+  int i; 
+  int j; 
+  int k; 
+  double nrm; 
+  for (k = 0; k < 30; k = (k + 1))
+    {
+      nrm = _past_fp_value_0_000000; 
+      for (i = 0; i < 20; i = (i + 1))
+        {
+          nrm = (nrm + (A[i][k] * A[i][k])); 
+        }
+      
+      R[k][k] = sqrt(nrm); 
+      for (i = 0; i < 20; i = (i + 1))
+        {
+          Q[i][k] = (A[i][k] / R[k][k]); 
+        }
+      
+      for (j = (k + 1); j < 30; j = (j + 1))
+        {
+          R[k][j] = _past_fp_value_0_000000; 
+          for (i = 0; i < 20; i = (i + 1))
+            {
+              R[k][j] = (R[k][j] + (Q[i][k] * A[i][j])); 
+            }
+          
+          for (i = 0; i < 20; i = (i + 1))
+            {
+              A[i][j] = (A[i][j] - (Q[i][k] * R[k][j])); 
+            }
+          
+        }
+      
+    }
+  
+}
+{
+  int m; 
+  int n; 
+  double* A; 
+  double* R; 
+  double* Q; 
+  kernel_gramschmidt(m, n, A, R, Q); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x559bcf31a9b0
+[INFO]	1 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	1 calls to evaluate funcalls
+[INFO]	961 calls to evaluate for loops
+[INFO]	59167 calls to evaluate statements
+[INFO]	19105 CDAGs created
+[INFO]	36630 non-CDFG operations in CDAGs
+[INFO]	24 symbols in symbol table
+[INFO]	26 variables
+[INFO]	23 scalar variables
+[INFO]	3 array variables
+[INFO]	2123 memory elements used
+[INFO]	3440 memory elements allocated
+[INFO]	169840 memory bytes used
+[INFO]	275200 memory bytes allocated
+[PAST][AI][Equivalence] Interpret program P2...
+[PAST][AI] Clone and normalize program before interpretation...
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_gramschmidt(int func_arg_0, int func_arg_1, double* func_arg_2, double* func_arg_3, double* func_arg_4)
+{
+  int arith_const_20_5 = 20; 
+  int arith_const_1_6 = 1; 
+  int arith_const_30_7 = 30; 
+  int arith_const_0_8 = 0; 
+  double _9; 
+  double arith_const_0_10 = _past_fp_value_0_000000; 
+  double* memref_alloca_11; 
+  memref_alloca_11[0] = _9; 
+  for (int for_iter_12 = arith_const_0_8; for_iter_12 < arith_const_30_7; for_iter_12 = (for_iter_12 + arith_const_1_6))
+    {
+      memref_alloca_11[0] = arith_const_0_10; 
+      for (int for_iter_13 = arith_const_0_8; for_iter_13 < arith_const_20_5; for_iter_13 = (for_iter_13 + arith_const_1_6))
+        {
+          double memref_load_14 = func_arg_2[for_iter_13][for_iter_12]; 
+          double arith_mulf_15 = (memref_load_14 * memref_load_14); 
+          double memref_load_16 = memref_alloca_11[0]; 
+          double arith_addf_17 = (memref_load_16 + arith_mulf_15); 
+          memref_alloca_11[0] = arith_addf_17; 
+        }
+      
+      double memref_load_18 = memref_alloca_11[0]; 
+      double math_sqrt_19 = sqrt(memref_load_18); 
+      func_arg_3[for_iter_12][for_iter_12] = math_sqrt_19; 
+      for (int for_iter_20 = arith_const_0_8; for_iter_20 < arith_const_20_5; for_iter_20 = (for_iter_20 + arith_const_1_6))
+        {
+          double memref_load_21 = func_arg_2[for_iter_20][for_iter_12]; 
+          double memref_load_22 = func_arg_3[for_iter_12][for_iter_12]; 
+          double arith_divf_23 = (memref_load_21 / memref_load_22); 
+          func_arg_4[for_iter_20][for_iter_12] = arith_divf_23; 
+        }
+      
+      int arith_addi_24 = (for_iter_12 + arith_const_1_6); 
+      for (int for_iter_25 = arith_addi_24; for_iter_25 < arith_const_30_7; for_iter_25 = (for_iter_25 + arith_const_1_6))
+        {
+          func_arg_3[for_iter_12][for_iter_25] = arith_const_0_10; 
+          for (int for_iter_26 = arith_const_0_8; for_iter_26 < arith_const_20_5; for_iter_26 = (for_iter_26 + arith_const_1_6))
+            {
+              double memref_load_27 = func_arg_4[for_iter_26][for_iter_12]; 
+              double memref_load_28 = func_arg_2[for_iter_26][for_iter_25]; 
+              double arith_mulf_29 = (memref_load_27 * memref_load_28); 
+              double memref_load_30 = func_arg_3[for_iter_12][for_iter_25]; 
+              double arith_addf_31 = (memref_load_30 + arith_mulf_29); 
+              func_arg_3[for_iter_12][for_iter_25] = arith_addf_31; 
+            }
+          
+          for (int for_iter_32 = arith_const_0_8; for_iter_32 < arith_const_20_5; for_iter_32 = (for_iter_32 + arith_const_1_6))
+            {
+              double memref_load_33 = func_arg_2[for_iter_32][for_iter_25]; 
+              double memref_load_34 = func_arg_4[for_iter_32][for_iter_12]; 
+              double memref_load_35 = func_arg_3[for_iter_12][for_iter_25]; 
+              double arith_mulf_36 = (memref_load_34 * memref_load_35); 
+              double arith_subf_37 = (memref_load_33 - arith_mulf_36); 
+              func_arg_2[for_iter_32][for_iter_25] = arith_subf_37; 
+            }
+          
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int m; 
+  int n; 
+  double* A; 
+  double* R; 
+  double* Q; 
+  kernel_gramschmidt(m, n, A, R, Q); 
+}
+[PAST] Final program interpreted:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_gramschmidt(int func_arg_0, int func_arg_1, double* func_arg_2, double* func_arg_3, double* func_arg_4)
+{
+  int arith_const_20_5 = 20; 
+  int arith_const_1_6 = 1; 
+  int arith_const_30_7 = 30; 
+  int arith_const_0_8 = 0; 
+  double _9; 
+  double arith_const_0_10 = _past_fp_value_0_000000; 
+  double* memref_alloca_11; 
+  memref_alloca_11[0] = _9; 
+  for (int for_iter_12 = arith_const_0_8; for_iter_12 < arith_const_30_7; for_iter_12 = (for_iter_12 + arith_const_1_6))
+    {
+      memref_alloca_11[0] = arith_const_0_10; 
+      for (int for_iter_13 = arith_const_0_8; for_iter_13 < arith_const_20_5; for_iter_13 = (for_iter_13 + arith_const_1_6))
+        {
+          double memref_load_14 = func_arg_2[for_iter_13][for_iter_12]; 
+          double arith_mulf_15 = (memref_load_14 * memref_load_14); 
+          double memref_load_16 = memref_alloca_11[0]; 
+          double arith_addf_17 = (memref_load_16 + arith_mulf_15); 
+          memref_alloca_11[0] = arith_addf_17; 
+        }
+      
+      double memref_load_18 = memref_alloca_11[0]; 
+      double math_sqrt_19 = sqrt(memref_load_18); 
+      func_arg_3[for_iter_12][for_iter_12] = math_sqrt_19; 
+      for (int for_iter_20 = arith_const_0_8; for_iter_20 < arith_const_20_5; for_iter_20 = (for_iter_20 + arith_const_1_6))
+        {
+          double memref_load_21 = func_arg_2[for_iter_20][for_iter_12]; 
+          double memref_load_22 = func_arg_3[for_iter_12][for_iter_12]; 
+          double arith_divf_23 = (memref_load_21 / memref_load_22); 
+          func_arg_4[for_iter_20][for_iter_12] = arith_divf_23; 
+        }
+      
+      int arith_addi_24 = (for_iter_12 + arith_const_1_6); 
+      for (int for_iter_25 = arith_addi_24; for_iter_25 < arith_const_30_7; for_iter_25 = (for_iter_25 + arith_const_1_6))
+        {
+          func_arg_3[for_iter_12][for_iter_25] = arith_const_0_10; 
+          for (int for_iter_26 = arith_const_0_8; for_iter_26 < arith_const_20_5; for_iter_26 = (for_iter_26 + arith_const_1_6))
+            {
+              double memref_load_27 = func_arg_4[for_iter_26][for_iter_12]; 
+              double memref_load_28 = func_arg_2[for_iter_26][for_iter_25]; 
+              double arith_mulf_29 = (memref_load_27 * memref_load_28); 
+              double memref_load_30 = func_arg_3[for_iter_12][for_iter_25]; 
+              double arith_addf_31 = (memref_load_30 + arith_mulf_29); 
+              func_arg_3[for_iter_12][for_iter_25] = arith_addf_31; 
+            }
+          
+          for (int for_iter_32 = arith_const_0_8; for_iter_32 < arith_const_20_5; for_iter_32 = (for_iter_32 + arith_const_1_6))
+            {
+              double memref_load_33 = func_arg_2[for_iter_32][for_iter_25]; 
+              double memref_load_34 = func_arg_4[for_iter_32][for_iter_12]; 
+              double memref_load_35 = func_arg_3[for_iter_12][for_iter_25]; 
+              double arith_mulf_36 = (memref_load_34 * memref_load_35); 
+              double arith_subf_37 = (memref_load_33 - arith_mulf_36); 
+              func_arg_2[for_iter_32][for_iter_25] = arith_subf_37; 
+            }
+          
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int m; 
+  int n; 
+  double* A; 
+  double* R; 
+  double* Q; 
+  kernel_gramschmidt(m, n, A, R, Q); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x559bcf31ae60
+[INFO]	3 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	2 calls to evaluate funcalls
+[INFO]	961 calls to evaluate for loops
+[INFO]	150471 calls to evaluate statements
+[INFO]	110367 CDAGs created
+[INFO]	0 non-CDFG operations in CDAGs
+[INFO]	85 symbols in symbol table
+[INFO]	62 variables
+[INFO]	59 scalar variables
+[INFO]	3 array variables
+[INFO]	2159 memory elements used
+[INFO]	4016 memory elements allocated
+[INFO]	172720 memory bytes used
+[INFO]	321280 memory bytes allocated
+[PAST][AI][Equivalence] Start checking states for equivalence...
+[PAST][AI][Equivalence] Success: variable A is compliant
+[PAST][AI][Equivalence] Success: variable R is compliant
+[PAST][AI][Equivalence] Success: variable Q is compliant
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P1: total=115326, min=1, max=7165
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P2: total=115326, min=1, max=7165
+[PAST][AI][Equivalence] Approximate cumulative memory size: 13527632 Bytes
+[PAST][AI][Equivalence] Success: P1 and P2 are equivalent
+[PAST][AI] Timers:
+Time elapsed for timer 64 for Parsing: 0.017733 seconds
+Time elapsed for timer 65 for Interpret P1: 0.209962 seconds
+Time elapsed for timer 66 for Interpret P2: 0.454229 seconds
+Time elapsed for timer 67 for Equivalence checking: 0.012297 seconds
+[PAST] YES => Programs generated-polybench-mini-dataset-use-scalar-lb/interp/gramschmidt-interp.c and pact26-mini-initial-exp/llvm21-affine-unroll-jam/translated/gramschmidt-8-translated-noasyncepilogue.c are equivalent.

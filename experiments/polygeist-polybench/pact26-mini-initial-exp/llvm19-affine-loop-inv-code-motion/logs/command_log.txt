@@ -1,0 +1,207 @@
+config file: ./config/pact26/mini-initial-exp.json, output dir pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion
+{'cgeist_args': '-raise-scf-to-affine', 'mliropt_args': '--affine-loop-invariant-code-motion', 'output_dir': 'llvm19-affine-loop-inv-code-motion', '_mlir_opt_path': '/opt/mlir-air-1124/llvm/install/bin/mlir-opt', '_mlir_opt_name': 'llvm19', '_optionset': 'affine-loop-inv-code-motion'}
+converting syrk
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/syrk-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/syrk-3-after-inline.mlir --affine-loop-invariant-code-motion
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/syrk-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/syrk-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/syrk-6-after-conversion.mlir
+converting gemm
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gemm-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gemm-3-after-inline.mlir --affine-loop-invariant-code-motion
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gemm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gemm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gemm-6-after-conversion.mlir
+converting 3mm
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/3mm-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/3mm-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/3mm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/3mm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/3mm-6-after-conversion.mlir
+converting doitgen
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/doitgen-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/doitgen-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/doitgen-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/doitgen-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/doitgen-6-after-conversion.mlir
+converting durbin
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/durbin-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/durbin-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/durbin-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/durbin-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/durbin-6-after-conversion.mlir
+converting floyd-warshall
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/floyd-warshall-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/floyd-warshall-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/floyd-warshall-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/floyd-warshall-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/floyd-warshall-6-after-conversion.mlir
+converting deriche
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/deriche-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/deriche-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/deriche-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/deriche-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/deriche-6-after-conversion.mlir
+converting gramschmidt
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gramschmidt-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gramschmidt-3-after-inline.mlir --affine-loop-invariant-code-motion
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gramschmidt-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gramschmidt-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gramschmidt-6-after-conversion.mlir
+converting nussinov
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/nussinov-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/nussinov-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/nussinov-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/nussinov-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/nussinov-6-after-conversion.mlir
+converting bicg
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/bicg-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/bicg-3-after-inline.mlir --affine-loop-invariant-code-motion
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/bicg-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/bicg-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/bicg-6-after-conversion.mlir
+converting ludcmp
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/ludcmp-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/ludcmp-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/ludcmp-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/ludcmp-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/ludcmp-6-after-conversion.mlir
+converting mvt
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/mvt-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/mvt-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/mvt-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/mvt-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/mvt-6-after-conversion.mlir
+converting correlation
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/correlation-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/correlation-3-after-inline.mlir --affine-loop-invariant-code-motion
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/correlation-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/correlation-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/correlation-6-after-conversion.mlir
+converting 2mm
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/2mm-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/2mm-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/2mm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/2mm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/2mm-6-after-conversion.mlir
+converting syr2k
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/syr2k-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/syr2k-3-after-inline.mlir --affine-loop-invariant-code-motion
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/syr2k-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/syr2k-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/syr2k-6-after-conversion.mlir
+converting gesummv
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gesummv-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gesummv-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gesummv-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gesummv-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gesummv-6-after-conversion.mlir
+converting trisolv
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/trisolv-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/trisolv-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/trisolv-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/trisolv-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/trisolv-6-after-conversion.mlir
+converting heat-3d
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/heat-3d-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/heat-3d-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/heat-3d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/heat-3d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/heat-3d-6-after-conversion.mlir
+converting trmm
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/trmm-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/trmm-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/trmm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/trmm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/trmm-6-after-conversion.mlir
+converting jacobi-1d
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/jacobi-1d-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/jacobi-1d-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/jacobi-1d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/jacobi-1d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/jacobi-1d-6-after-conversion.mlir
+converting seidel-2d
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/seidel-2d-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/seidel-2d-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/seidel-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/seidel-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/seidel-2d-6-after-conversion.mlir
+converting covariance
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/covariance-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/covariance-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/covariance-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/covariance-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/covariance-6-after-conversion.mlir
+converting lu
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/lu-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/lu-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/lu-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/lu-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/lu-6-after-conversion.mlir
+converting fdtd-2d
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/fdtd-2d-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/fdtd-2d-3-after-inline.mlir --affine-loop-invariant-code-motion
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/fdtd-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/fdtd-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/fdtd-2d-6-after-conversion.mlir
+converting adi
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/adi-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/adi-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/adi-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/adi-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/adi-6-after-conversion.mlir
+converting cholesky
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/cholesky-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/cholesky-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/cholesky-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/cholesky-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/cholesky-6-after-conversion.mlir
+converting atax
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/atax-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/atax-3-after-inline.mlir --affine-loop-invariant-code-motion
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/atax-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/atax-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/atax-6-after-conversion.mlir
+converting gemver
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gemver-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gemver-3-after-inline.mlir --affine-loop-invariant-code-motion
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gemver-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gemver-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/gemver-6-after-conversion.mlir
+converting jacobi-2d
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/jacobi-2d-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/jacobi-2d-3-after-inline.mlir --affine-loop-invariant-code-motion
+    **pass output same as input**
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/jacobi-2d-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/jacobi-2d-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/jacobi-2d-6-after-conversion.mlir
+converting symm
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --inline pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/symm-1-original.mlir
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/symm-3-after-inline.mlir --affine-loop-invariant-code-motion
+    /opt/mlir-air-1124/llvm/install/bin/mlir-opt --lower-affine pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/symm-4-after-mliropt.mlir
+    verif-opt --verif-scf-parallel-to-async pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/symm-5-after-loweraffine.mlir
+    verif-translate --translate-to-past pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/conversion/symm-6-after-conversion.mlir
+
+
+fail before conversion:
+fail during conversion:
+fail during translation:

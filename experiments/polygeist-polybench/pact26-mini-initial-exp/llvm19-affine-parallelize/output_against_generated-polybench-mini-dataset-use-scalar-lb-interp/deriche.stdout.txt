@@ -1,0 +1,4079 @@
+command line: /usr/bin/time -v pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees generated-polybench-mini-dataset-use-scalar-lb/interp/deriche-interp.c pact26-mini-initial-exp/llvm19-affine-parallelize/translated/deriche-8-translated.c "alpha,imgIn,imgOut,y1,y2"
+return code: 134
+[PAST] Verify equivalence of programs by abstract interpretation.
+[PAST] Program P1:
+void kernel_deriche(int w, int h, float alpha, float imgIn[(64 + 0)][(64 + 0)], float imgOut[(64 + 0)][(64 + 0)], float y1[(64 + 0)][(64 + 0)], float y2[(64 + 0)][(64 + 0)])
+{
+  int i; 
+  int j; 
+  float xm1; 
+  float tm1; 
+  float ym1; 
+  float ym2; 
+  float xp1; 
+  float xp2; 
+  float tp1; 
+  float tp2; 
+  float yp1; 
+  float yp2; 
+  float k; 
+  float a1; 
+  float a2; 
+  float a3; 
+  float a4; 
+  float a5; 
+  float a6; 
+  float a7; 
+  float a8; 
+  float b1; 
+  float b2; 
+  float c1; 
+  float c2; 
+  k = (((1.000000 - exp(-(alpha))) * (1.000000 - exp(-(alpha)))) / ((((alpha * exp(-(alpha))) * 2.000000) + 1.000000) - exp((alpha * 2.000000)))); 
+  a1 = (a5 = k); 
+  a2 = (a6 = ((k * exp(-(alpha))) * (alpha - 1.000000))); 
+  a3 = (a7 = ((k * exp(-(alpha))) * (alpha + 1.000000))); 
+  a4 = (a8 = (-(k) * exp((alpha * -(2.000000))))); 
+  b1 = pow(2.000000, -(alpha)); 
+  b2 = -(exp((alpha * -(2.000000)))); 
+  c1 = (c2 = 1); 
+  for (i = 0; i < 64; i++)
+    {
+      ym1 = 0.000000; 
+      ym2 = 0.000000; 
+      xm1 = 0.000000; 
+      for (j = 0; j < 64; j++)
+        {
+          y1[i][j] = ((((a1 * imgIn[i][j]) + (a2 * xm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          xm1 = imgIn[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i++)
+    {
+      yp1 = 0.000000; 
+      yp2 = 0.000000; 
+      xp1 = 0.000000; 
+      xp2 = 0.000000; 
+      for (j = (64 - 1); j >= 0; j--)
+        {
+          y2[i][j] = ((((a3 * xp1) + (a4 * xp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          xp2 = xp1; 
+          xp1 = imgIn[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i++)
+    {
+      for (j = 0; j < 64; j++)
+        {
+          imgOut[i][j] = (c1 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j++)
+    {
+      tm1 = 0.000000; 
+      ym1 = 0.000000; 
+      ym2 = 0.000000; 
+      for (i = 0; i < 64; i++)
+        {
+          y1[i][j] = ((((a5 * imgOut[i][j]) + (a6 * tm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          tm1 = imgOut[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j++)
+    {
+      tp1 = 0.000000; 
+      tp2 = 0.000000; 
+      yp1 = 0.000000; 
+      yp2 = 0.000000; 
+      for (i = (64 - 1); i >= 0; i--)
+        {
+          y2[i][j] = ((((a7 * tp1) + (a8 * tp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          tp2 = tp1; 
+          tp1 = imgOut[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i++)
+    {
+      for (j = 0; j < 64; j++)
+        {
+          imgOut[i][j] = (c2 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+}
+{
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+}
+[PAST] Program P2:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 3000; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+  for (int i = 0; i < max_nb_threads; ++(i))
+    {
+      _past_ai_api_concurrent_initialize_semaphore_value(i, 0); 
+    }
+  
+}
+void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* func_arg_3, float* func_arg_4, float* func_arg_5, float* func_arg_6)
+{
+  int arith_const_63_7 = 63; 
+  int arith_const_neg_1_8 = -(1); 
+  int arith_const_1_9 = 1; 
+  int arith_const_64_10 = 64; 
+  int arith_const_0_11 = 0; 
+  float arith_const_0_12 = 0.000000; 
+  float arith_const_0_13 = -(2.000000); 
+  float arith_const_0_14 = 2.000000; 
+  float arith_const_0_15 = 1.000000; 
+  float _16; 
+  float* memref_alloca_17; 
+  memref_alloca_17[0] = _16; 
+  float* memref_alloca_18; 
+  memref_alloca_18[0] = _16; 
+  float* memref_alloca_19; 
+  memref_alloca_19[0] = _16; 
+  float* memref_alloca_20; 
+  memref_alloca_20[0] = _16; 
+  float* memref_alloca_21; 
+  memref_alloca_21[0] = _16; 
+  float* memref_alloca_22; 
+  memref_alloca_22[0] = _16; 
+  float* memref_alloca_23; 
+  memref_alloca_23[0] = _16; 
+  float* memref_alloca_24; 
+  memref_alloca_24[0] = _16; 
+  float* memref_alloca_25; 
+  memref_alloca_25[0] = _16; 
+  float* memref_alloca_26; 
+  memref_alloca_26[0] = _16; 
+  float arith_negf_27 = -(func_arg_2); 
+  float math_exp_28 = exp(arith_negf_27); 
+  float arith_subf_29 = (arith_const_0_15 - math_exp_28); 
+  float arith_mulf_30 = (arith_subf_29 * arith_subf_29); 
+  float arith_mulf_31 = (func_arg_2 * math_exp_28); 
+  float arith_mulf_32 = (arith_mulf_31 * arith_const_0_14); 
+  float arith_addf_33 = (arith_mulf_32 + arith_const_0_15); 
+  float arith_mulf_34 = (func_arg_2 * arith_const_0_14); 
+  float math_exp_35 = exp(arith_mulf_34); 
+  float arith_subf_36 = (arith_addf_33 - math_exp_35); 
+  float arith_divf_37 = (arith_mulf_30 / arith_subf_36); 
+  float arith_mulf_38 = (arith_divf_37 * math_exp_28); 
+  float arith_subf_39 = (func_arg_2 - arith_const_0_15); 
+  float arith_mulf_40 = (arith_mulf_38 * arith_subf_39); 
+  float arith_addf_41 = (func_arg_2 + arith_const_0_15); 
+  float arith_mulf_42 = (arith_mulf_38 * arith_addf_41); 
+  float arith_negf_43 = -(arith_divf_37); 
+  float arith_mulf_44 = (func_arg_2 * arith_const_0_13); 
+  float math_exp_45 = exp(arith_mulf_44); 
+  float arith_mulf_46 = (arith_negf_43 * math_exp_45); 
+  float math_powf_47 = pow(arith_const_0_14, arith_negf_27); 
+  float arith_negf_48 = -(math_exp_45); 
+  for (int for_iter_49 = arith_const_0_11; for_iter_49 < arith_const_64_10; for_iter_49 += arith_const_1_9)
+    {
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      memref_alloca_26[0] = arith_const_0_12; 
+      for (int for_iter_50 = arith_const_0_11; for_iter_50 < arith_const_64_10; for_iter_50 += arith_const_1_9)
+        {
+          float memref_load_51 = func_arg_3[for_iter_49][for_iter_50]; 
+          float arith_mulf_52 = (arith_divf_37 * memref_load_51); 
+          float memref_load_53 = memref_alloca_26[0]; 
+          float arith_mulf_54 = (arith_mulf_40 * memref_load_53); 
+          float arith_addf_55 = (arith_mulf_52 + arith_mulf_54); 
+          float memref_load_56 = memref_alloca_24[0]; 
+          float arith_mulf_57 = (math_powf_47 * memref_load_56); 
+          float arith_addf_58 = (arith_addf_55 + arith_mulf_57); 
+          float memref_load_59 = memref_alloca_23[0]; 
+          float arith_mulf_60 = (arith_negf_48 * memref_load_59); 
+          float arith_addf_61 = (arith_addf_58 + arith_mulf_60); 
+          func_arg_5[for_iter_49][for_iter_50] = arith_addf_61; 
+          float memref_load_62 = func_arg_3[for_iter_49][for_iter_50]; 
+          memref_alloca_26[0] = memref_load_62; 
+          memref_alloca_23[0] = memref_load_56; 
+          float memref_load_63 = func_arg_5[for_iter_49][for_iter_50]; 
+          memref_alloca_24[0] = memref_load_63; 
+        }
+      
+    }
+  
+  for (int for_iter_64 = arith_const_0_11; for_iter_64 < arith_const_64_10; for_iter_64 += arith_const_1_9)
+    {
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      memref_alloca_22[0] = arith_const_0_12; 
+      memref_alloca_21[0] = arith_const_0_12; 
+      for (int for_iter_65 = arith_const_0_11; for_iter_65 < arith_const_64_10; for_iter_65 += arith_const_1_9)
+        {
+          float memref_load_66 = memref_alloca_22[0]; 
+          float arith_mulf_67 = (arith_mulf_42 * memref_load_66); 
+          float memref_load_68 = memref_alloca_21[0]; 
+          float arith_mulf_69 = (arith_mulf_46 * memref_load_68); 
+          float arith_addf_70 = (arith_mulf_67 + arith_mulf_69); 
+          float memref_load_71 = memref_alloca_18[0]; 
+          float arith_mulf_72 = (math_powf_47 * memref_load_71); 
+          float arith_addf_73 = (arith_addf_70 + arith_mulf_72); 
+          float memref_load_74 = memref_alloca_17[0]; 
+          float arith_mulf_75 = (arith_negf_48 * memref_load_74); 
+          float arith_addf_76 = (arith_addf_73 + arith_mulf_75); 
+          int arith_muli_77 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_78 = (arith_muli_77 + arith_const_63_7); 
+          func_arg_6[for_iter_64][arith_addi_78] = arith_addf_76; 
+          memref_alloca_21[0] = memref_load_66; 
+          int arith_muli_79 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_80 = (arith_muli_79 + arith_const_63_7); 
+          float memref_load_81 = func_arg_3[for_iter_64][arith_addi_80]; 
+          memref_alloca_22[0] = memref_load_81; 
+          memref_alloca_17[0] = memref_load_71; 
+          int arith_muli_82 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_83 = (arith_muli_82 + arith_const_63_7); 
+          float memref_load_84 = func_arg_6[for_iter_64][arith_addi_83]; 
+          memref_alloca_18[0] = memref_load_84; 
+        }
+      
+    }
+  
+  int* async_group_85; 
+  int async_group_index_86 = 0; 
+  int for_iter_arg_88 = arith_const_0_11; 
+  for (int for_iter_87 = arith_const_0_11; for_iter_87 < arith_const_64_10; for_iter_87 += arith_const_1_9)
+    {
+      PAST_NEW_SEMAPHORE; 
+      #pragma peqc async_execute
+      {
+        for (int for_iter_90 = arith_const_0_11; for_iter_90 < arith_const_64_10; for_iter_90 += arith_const_1_9)
+          {
+            float memref_load_91 = func_arg_5[for_iter_87][for_iter_90]; 
+            float memref_load_92 = func_arg_6[for_iter_87][for_iter_90]; 
+            float arith_addf_93 = (memref_load_91 + memref_load_92); 
+            func_arg_4[for_iter_87][for_iter_90] = arith_addf_93; 
+          }
+        
+        _past_ai_api_concurrent_set_semaphore_value(execute_token_89, PAST_TASK_FINISHED); 
+      }
+      async_group_85[async_group_index_86] = execute_token_89; 
+      async_group_index_86++; 
+      int arith_addi_94 = (for_iter_arg_88 + arith_const_1_9); 
+      for_iter_arg_88 = arith_addi_94; 
+    }
+  
+  for (int __past_ai_global_nocheck_sem_index = 0; __past_ai_global_nocheck_sem_index < async_group_index_86; __past_ai_global_nocheck_sem_index++)
+    {
+      _past_ai_api_concurrent_wait_until_semaphore(async_group_85[__past_ai_global_nocheck_sem_index], PAST_TASK_FINISHED); 
+    }
+  
+  for (int for_iter_95 = arith_const_0_11; for_iter_95 < arith_const_64_10; for_iter_95 += arith_const_1_9)
+    {
+      memref_alloca_25[0] = arith_const_0_12; 
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      for (int for_iter_96 = arith_const_0_11; for_iter_96 < arith_const_64_10; for_iter_96 += arith_const_1_9)
+        {
+          float memref_load_97 = func_arg_4[for_iter_96][for_iter_95]; 
+          float arith_mulf_98 = (arith_divf_37 * memref_load_97); 
+          float memref_load_99 = memref_alloca_25[0]; 
+          float arith_mulf_100 = (arith_mulf_40 * memref_load_99); 
+          float arith_addf_101 = (arith_mulf_98 + arith_mulf_100); 
+          float memref_load_102 = memref_alloca_24[0]; 
+          float arith_mulf_103 = (math_powf_47 * memref_load_102); 
+          float arith_addf_104 = (arith_addf_101 + arith_mulf_103); 
+          float memref_load_105 = memref_alloca_23[0]; 
+          float arith_mulf_106 = (arith_negf_48 * memref_load_105); 
+          float arith_addf_107 = (arith_addf_104 + arith_mulf_106); 
+          func_arg_5[for_iter_96][for_iter_95] = arith_addf_107; 
+          float memref_load_108 = func_arg_4[for_iter_96][for_iter_95]; 
+          memref_alloca_25[0] = memref_load_108; 
+          memref_alloca_23[0] = memref_load_102; 
+          float memref_load_109 = func_arg_5[for_iter_96][for_iter_95]; 
+          memref_alloca_24[0] = memref_load_109; 
+        }
+      
+    }
+  
+  for (int for_iter_110 = arith_const_0_11; for_iter_110 < arith_const_64_10; for_iter_110 += arith_const_1_9)
+    {
+      memref_alloca_20[0] = arith_const_0_12; 
+      memref_alloca_19[0] = arith_const_0_12; 
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      for (int for_iter_111 = arith_const_0_11; for_iter_111 < arith_const_64_10; for_iter_111 += arith_const_1_9)
+        {
+          float memref_load_112 = memref_alloca_20[0]; 
+          float arith_mulf_113 = (arith_mulf_42 * memref_load_112); 
+          float memref_load_114 = memref_alloca_19[0]; 
+          float arith_mulf_115 = (arith_mulf_46 * memref_load_114); 
+          float arith_addf_116 = (arith_mulf_113 + arith_mulf_115); 
+          float memref_load_117 = memref_alloca_18[0]; 
+          float arith_mulf_118 = (math_powf_47 * memref_load_117); 
+          float arith_addf_119 = (arith_addf_116 + arith_mulf_118); 
+          float memref_load_120 = memref_alloca_17[0]; 
+          float arith_mulf_121 = (arith_negf_48 * memref_load_120); 
+          float arith_addf_122 = (arith_addf_119 + arith_mulf_121); 
+          int arith_muli_123 = (for_iter_111 * arith_const_neg_1_8); 
+          int arith_addi_124 = (arith_muli_123 + arith_const_63_7); 
+          func_arg_6[arith_addi_124][for_iter_110] = arith_addf_122; 
+          memref_alloca_19[0] = memref_load_112; 
+          int arith_muli_125 = (for_iter_111 * arith_const_neg_1_8); 
+          int arith_addi_126 = (arith_muli_125 + arith_const_63_7); 
+          float memref_load_127 = func_arg_4[arith_addi_126][for_iter_110]; 
+          memref_alloca_20[0] = memref_load_127; 
+          memref_alloca_17[0] = memref_load_117; 
+          int arith_muli_128 = (for_iter_111 * arith_const_neg_1_8); 
+          int arith_addi_129 = (arith_muli_128 + arith_const_63_7); 
+          float memref_load_130 = func_arg_6[arith_addi_129][for_iter_110]; 
+          memref_alloca_18[0] = memref_load_130; 
+        }
+      
+    }
+  
+  int* async_group_131; 
+  int async_group_index_132 = 0; 
+  int for_iter_arg_134 = arith_const_0_11; 
+  for (int for_iter_133 = arith_const_0_11; for_iter_133 < arith_const_64_10; for_iter_133 += arith_const_1_9)
+    {
+      PAST_NEW_SEMAPHORE; 
+      #pragma peqc async_execute
+      {
+        for (int for_iter_136 = arith_const_0_11; for_iter_136 < arith_const_64_10; for_iter_136 += arith_const_1_9)
+          {
+            float memref_load_137 = func_arg_5[for_iter_133][for_iter_136]; 
+            float memref_load_138 = func_arg_6[for_iter_133][for_iter_136]; 
+            float arith_addf_139 = (memref_load_137 + memref_load_138); 
+            func_arg_4[for_iter_133][for_iter_136] = arith_addf_139; 
+          }
+        
+        _past_ai_api_concurrent_set_semaphore_value(execute_token_135, PAST_TASK_FINISHED); 
+      }
+      async_group_131[async_group_index_132] = execute_token_135; 
+      async_group_index_132++; 
+      int arith_addi_140 = (for_iter_arg_134 + arith_const_1_9); 
+      for_iter_arg_134 = arith_addi_140; 
+    }
+  
+  for (int __past_ai_global_nocheck_sem_index = 0; __past_ai_global_nocheck_sem_index < async_group_index_132; __past_ai_global_nocheck_sem_index++)
+    {
+      _past_ai_api_concurrent_wait_until_semaphore(async_group_131[__past_ai_global_nocheck_sem_index], PAST_TASK_FINISHED); 
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  #pragma peqc async_execute
+  {
+    kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+  }
+}
+[PAST] Live-out variables to be checked for equivalence: alpha imgIn imgOut y1 y2 
+[PAST][AI][Equivalence] Interpret program P1...
+[PAST][AI] Clone and normalize program before interpretation...
+void kernel_deriche(int w, int h, float alpha, float imgIn[(64 + 0)][(64 + 0)], float imgOut[(64 + 0)][(64 + 0)], float y1[(64 + 0)][(64 + 0)], float y2[(64 + 0)][(64 + 0)])
+{
+  int i; 
+  int j; 
+  float xm1; 
+  float tm1; 
+  float ym1; 
+  float ym2; 
+  float xp1; 
+  float xp2; 
+  float tp1; 
+  float tp2; 
+  float yp1; 
+  float yp2; 
+  float k; 
+  float a1; 
+  float a2; 
+  float a3; 
+  float a4; 
+  float a5; 
+  float a6; 
+  float a7; 
+  float a8; 
+  float b1; 
+  float b2; 
+  float c1; 
+  float c2; 
+  k = (((_past_fp_value_1_000000 - exp(-(alpha))) * (_past_fp_value_1_000000 - exp(-(alpha)))) / ((((alpha * exp(-(alpha))) * _past_fp_value_2_000000) + _past_fp_value_1_000000) - exp((alpha * _past_fp_value_2_000000)))); 
+  a5 = k; 
+  __tmp_past_ai_assign_worker_0_2 = a5; 
+  a1 = __tmp_past_ai_assign_worker_0_2; 
+  a6 = ((k * exp(-(alpha))) * (alpha - _past_fp_value_1_000000)); 
+  __tmp_past_ai_assign_worker_0_2 = a6; 
+  a2 = __tmp_past_ai_assign_worker_0_2; 
+  a7 = ((k * exp(-(alpha))) * (alpha + _past_fp_value_1_000000)); 
+  __tmp_past_ai_assign_worker_0_2 = a7; 
+  a3 = __tmp_past_ai_assign_worker_0_2; 
+  a8 = (-(k) * exp((alpha * -(_past_fp_value_2_000000)))); 
+  __tmp_past_ai_assign_worker_0_2 = a8; 
+  a4 = __tmp_past_ai_assign_worker_0_2; 
+  b1 = pow(_past_fp_value_2_000000, -(alpha)); 
+  b2 = -(exp((alpha * -(_past_fp_value_2_000000)))); 
+  c2 = 1; 
+  __tmp_past_ai_assign_worker_0_2 = c2; 
+  c1 = __tmp_past_ai_assign_worker_0_2; 
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      ym1 = _past_fp_value_0_000000; 
+      ym2 = _past_fp_value_0_000000; 
+      xm1 = _past_fp_value_0_000000; 
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          y1[i][j] = ((((a1 * imgIn[i][j]) + (a2 * xm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          xm1 = imgIn[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      yp1 = _past_fp_value_0_000000; 
+      yp2 = _past_fp_value_0_000000; 
+      xp1 = _past_fp_value_0_000000; 
+      xp2 = _past_fp_value_0_000000; 
+      for (j = (64 - 1); j >= 0; j = (j - 1))
+        {
+          y2[i][j] = ((((a3 * xp1) + (a4 * xp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          xp2 = xp1; 
+          xp1 = imgIn[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          imgOut[i][j] = (c1 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j = (j + 1))
+    {
+      tm1 = _past_fp_value_0_000000; 
+      ym1 = _past_fp_value_0_000000; 
+      ym2 = _past_fp_value_0_000000; 
+      for (i = 0; i < 64; i = (i + 1))
+        {
+          y1[i][j] = ((((a5 * imgOut[i][j]) + (a6 * tm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          tm1 = imgOut[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j = (j + 1))
+    {
+      tp1 = _past_fp_value_0_000000; 
+      tp2 = _past_fp_value_0_000000; 
+      yp1 = _past_fp_value_0_000000; 
+      yp2 = _past_fp_value_0_000000; 
+      for (i = (64 - 1); i >= 0; i = (i - 1))
+        {
+          y2[i][j] = ((((a7 * tp1) + (a8 * tp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          tp2 = tp1; 
+          tp1 = imgOut[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          imgOut[i][j] = (c2 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+}
+{
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+}
+[PAST] Final program interpreted:
+void kernel_deriche(int w, int h, float alpha, float imgIn[(64 + 0)][(64 + 0)], float imgOut[(64 + 0)][(64 + 0)], float y1[(64 + 0)][(64 + 0)], float y2[(64 + 0)][(64 + 0)])
+{
+  int i; 
+  int j; 
+  float xm1; 
+  float tm1; 
+  float ym1; 
+  float ym2; 
+  float xp1; 
+  float xp2; 
+  float tp1; 
+  float tp2; 
+  float yp1; 
+  float yp2; 
+  float k; 
+  float a1; 
+  float a2; 
+  float a3; 
+  float a4; 
+  float a5; 
+  float a6; 
+  float a7; 
+  float a8; 
+  float b1; 
+  float b2; 
+  float c1; 
+  float c2; 
+  k = (((_past_fp_value_1_000000 - exp(-(alpha))) * (_past_fp_value_1_000000 - exp(-(alpha)))) / ((((alpha * exp(-(alpha))) * _past_fp_value_2_000000) + _past_fp_value_1_000000) - exp((alpha * _past_fp_value_2_000000)))); 
+  a5 = k; 
+  __tmp_past_ai_assign_worker_0_2 = a5; 
+  a1 = __tmp_past_ai_assign_worker_0_2; 
+  a6 = ((k * exp(-(alpha))) * (alpha - _past_fp_value_1_000000)); 
+  __tmp_past_ai_assign_worker_0_2 = a6; 
+  a2 = __tmp_past_ai_assign_worker_0_2; 
+  a7 = ((k * exp(-(alpha))) * (alpha + _past_fp_value_1_000000)); 
+  __tmp_past_ai_assign_worker_0_2 = a7; 
+  a3 = __tmp_past_ai_assign_worker_0_2; 
+  a8 = (-(k) * exp((alpha * -(_past_fp_value_2_000000)))); 
+  __tmp_past_ai_assign_worker_0_2 = a8; 
+  a4 = __tmp_past_ai_assign_worker_0_2; 
+  b1 = pow(_past_fp_value_2_000000, -(alpha)); 
+  b2 = -(exp((alpha * -(_past_fp_value_2_000000)))); 
+  c2 = 1; 
+  __tmp_past_ai_assign_worker_0_2 = c2; 
+  c1 = __tmp_past_ai_assign_worker_0_2; 
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      ym1 = _past_fp_value_0_000000; 
+      ym2 = _past_fp_value_0_000000; 
+      xm1 = _past_fp_value_0_000000; 
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          y1[i][j] = ((((a1 * imgIn[i][j]) + (a2 * xm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          xm1 = imgIn[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      yp1 = _past_fp_value_0_000000; 
+      yp2 = _past_fp_value_0_000000; 
+      xp1 = _past_fp_value_0_000000; 
+      xp2 = _past_fp_value_0_000000; 
+      for (j = (64 - 1); j >= 0; j = (j - 1))
+        {
+          y2[i][j] = ((((a3 * xp1) + (a4 * xp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          xp2 = xp1; 
+          xp1 = imgIn[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          imgOut[i][j] = (c1 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j = (j + 1))
+    {
+      tm1 = _past_fp_value_0_000000; 
+      ym1 = _past_fp_value_0_000000; 
+      ym2 = _past_fp_value_0_000000; 
+      for (i = 0; i < 64; i = (i + 1))
+        {
+          y1[i][j] = ((((a5 * imgOut[i][j]) + (a6 * tm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          tm1 = imgOut[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j = (j + 1))
+    {
+      tp1 = _past_fp_value_0_000000; 
+      tp2 = _past_fp_value_0_000000; 
+      yp1 = _past_fp_value_0_000000; 
+      yp2 = _past_fp_value_0_000000; 
+      for (i = (64 - 1); i >= 0; i = (i - 1))
+        {
+          y2[i][j] = ((((a7 * tp1) + (a8 * tp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          tp2 = tp1; 
+          tp1 = imgOut[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          imgOut[i][j] = (c2 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+}
+{
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x564af5cc5920
+[INFO]	1 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	1 calls to evaluate funcalls
+[INFO]	390 calls to evaluate for loops
+[INFO]	133581 calls to evaluate statements
+[INFO]	82845 CDAGs created
+[INFO]	122917 non-CDFG operations in CDAGs
+[INFO]	52 symbols in symbol table
+[INFO]	62 variables
+[INFO]	58 scalar variables
+[INFO]	4 array variables
+[INFO]	16442 memory elements used
+[INFO]	17312 memory elements allocated
+[INFO]	1315360 memory bytes used
+[INFO]	1384960 memory bytes allocated
+[PAST][AI][Equivalence] Interpret program P2...
+[PAST][AI] Clone and normalize program before interpretation...
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 3000; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+  for (int i = 0; i < max_nb_threads; i = (i + 1))
+    {
+      _past_ai_api_concurrent_initialize_semaphore_value(i, 0); 
+    }
+  
+}
+void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* func_arg_3, float* func_arg_4, float* func_arg_5, float* func_arg_6)
+{
+  int arith_const_63_7 = 63; 
+  int arith_const_neg_1_8 = -(1); 
+  int arith_const_1_9 = 1; 
+  int arith_const_64_10 = 64; 
+  int arith_const_0_11 = 0; 
+  float arith_const_0_12 = _past_fp_value_0_000000; 
+  float arith_const_0_13 = -(_past_fp_value_2_000000); 
+  float arith_const_0_14 = _past_fp_value_2_000000; 
+  float arith_const_0_15 = _past_fp_value_1_000000; 
+  float _16; 
+  float* memref_alloca_17; 
+  memref_alloca_17[0] = _16; 
+  float* memref_alloca_18; 
+  memref_alloca_18[0] = _16; 
+  float* memref_alloca_19; 
+  memref_alloca_19[0] = _16; 
+  float* memref_alloca_20; 
+  memref_alloca_20[0] = _16; 
+  float* memref_alloca_21; 
+  memref_alloca_21[0] = _16; 
+  float* memref_alloca_22; 
+  memref_alloca_22[0] = _16; 
+  float* memref_alloca_23; 
+  memref_alloca_23[0] = _16; 
+  float* memref_alloca_24; 
+  memref_alloca_24[0] = _16; 
+  float* memref_alloca_25; 
+  memref_alloca_25[0] = _16; 
+  float* memref_alloca_26; 
+  memref_alloca_26[0] = _16; 
+  float arith_negf_27 = -(func_arg_2); 
+  float math_exp_28 = exp(arith_negf_27); 
+  float arith_subf_29 = (arith_const_0_15 - math_exp_28); 
+  float arith_mulf_30 = (arith_subf_29 * arith_subf_29); 
+  float arith_mulf_31 = (func_arg_2 * math_exp_28); 
+  float arith_mulf_32 = (arith_mulf_31 * arith_const_0_14); 
+  float arith_addf_33 = (arith_mulf_32 + arith_const_0_15); 
+  float arith_mulf_34 = (func_arg_2 * arith_const_0_14); 
+  float math_exp_35 = exp(arith_mulf_34); 
+  float arith_subf_36 = (arith_addf_33 - math_exp_35); 
+  float arith_divf_37 = (arith_mulf_30 / arith_subf_36); 
+  float arith_mulf_38 = (arith_divf_37 * math_exp_28); 
+  float arith_subf_39 = (func_arg_2 - arith_const_0_15); 
+  float arith_mulf_40 = (arith_mulf_38 * arith_subf_39); 
+  float arith_addf_41 = (func_arg_2 + arith_const_0_15); 
+  float arith_mulf_42 = (arith_mulf_38 * arith_addf_41); 
+  float arith_negf_43 = -(arith_divf_37); 
+  float arith_mulf_44 = (func_arg_2 * arith_const_0_13); 
+  float math_exp_45 = exp(arith_mulf_44); 
+  float arith_mulf_46 = (arith_negf_43 * math_exp_45); 
+  float math_powf_47 = pow(arith_const_0_14, arith_negf_27); 
+  float arith_negf_48 = -(math_exp_45); 
+  for (int for_iter_49 = arith_const_0_11; for_iter_49 < arith_const_64_10; for_iter_49 = (for_iter_49 + arith_const_1_9))
+    {
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      memref_alloca_26[0] = arith_const_0_12; 
+      for (int for_iter_50 = arith_const_0_11; for_iter_50 < arith_const_64_10; for_iter_50 = (for_iter_50 + arith_const_1_9))
+        {
+          float memref_load_51 = func_arg_3[for_iter_49][for_iter_50]; 
+          float arith_mulf_52 = (arith_divf_37 * memref_load_51); 
+          float memref_load_53 = memref_alloca_26[0]; 
+          float arith_mulf_54 = (arith_mulf_40 * memref_load_53); 
+          float arith_addf_55 = (arith_mulf_52 + arith_mulf_54); 
+          float memref_load_56 = memref_alloca_24[0]; 
+          float arith_mulf_57 = (math_powf_47 * memref_load_56); 
+          float arith_addf_58 = (arith_addf_55 + arith_mulf_57); 
+          float memref_load_59 = memref_alloca_23[0]; 
+          float arith_mulf_60 = (arith_negf_48 * memref_load_59); 
+          float arith_addf_61 = (arith_addf_58 + arith_mulf_60); 
+          func_arg_5[for_iter_49][for_iter_50] = arith_addf_61; 
+          float memref_load_62 = func_arg_3[for_iter_49][for_iter_50]; 
+          memref_alloca_26[0] = memref_load_62; 
+          memref_alloca_23[0] = memref_load_56; 
+          float memref_load_63 = func_arg_5[for_iter_49][for_iter_50]; 
+          memref_alloca_24[0] = memref_load_63; 
+        }
+      
+    }
+  
+  for (int for_iter_64 = arith_const_0_11; for_iter_64 < arith_const_64_10; for_iter_64 = (for_iter_64 + arith_const_1_9))
+    {
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      memref_alloca_22[0] = arith_const_0_12; 
+      memref_alloca_21[0] = arith_const_0_12; 
+      for (int for_iter_65 = arith_const_0_11; for_iter_65 < arith_const_64_10; for_iter_65 = (for_iter_65 + arith_const_1_9))
+        {
+          float memref_load_66 = memref_alloca_22[0]; 
+          float arith_mulf_67 = (arith_mulf_42 * memref_load_66); 
+          float memref_load_68 = memref_alloca_21[0]; 
+          float arith_mulf_69 = (arith_mulf_46 * memref_load_68); 
+          float arith_addf_70 = (arith_mulf_67 + arith_mulf_69); 
+          float memref_load_71 = memref_alloca_18[0]; 
+          float arith_mulf_72 = (math_powf_47 * memref_load_71); 
+          float arith_addf_73 = (arith_addf_70 + arith_mulf_72); 
+          float memref_load_74 = memref_alloca_17[0]; 
+          float arith_mulf_75 = (arith_negf_48 * memref_load_74); 
+          float arith_addf_76 = (arith_addf_73 + arith_mulf_75); 
+          int arith_muli_77 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_78 = (arith_muli_77 + arith_const_63_7); 
+          func_arg_6[for_iter_64][arith_addi_78] = arith_addf_76; 
+          memref_alloca_21[0] = memref_load_66; 
+          int arith_muli_79 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_80 = (arith_muli_79 + arith_const_63_7); 
+          float memref_load_81 = func_arg_3[for_iter_64][arith_addi_80]; 
+          memref_alloca_22[0] = memref_load_81; 
+          memref_alloca_17[0] = memref_load_71; 
+          int arith_muli_82 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_83 = (arith_muli_82 + arith_const_63_7); 
+          float memref_load_84 = func_arg_6[for_iter_64][arith_addi_83]; 
+          memref_alloca_18[0] = memref_load_84; 
+        }
+      
+    }
+  
+  int* async_group_85; 
+  int async_group_index_86 = 0; 
+  int for_iter_arg_88 = arith_const_0_11; 
+  for (int for_iter_87 = arith_const_0_11; for_iter_87 < arith_const_64_10; for_iter_87 = (for_iter_87 + arith_const_1_9))
+    {
+      PAST_NEW_SEMAPHORE; 
+      #pragma peqc async_execute
+      {
+        for (int for_iter_90 = arith_const_0_11; for_iter_90 < arith_const_64_10; for_iter_90 = (for_iter_90 + arith_const_1_9))
+          {
+            float memref_load_91 = func_arg_5[for_iter_87][for_iter_90]; 
+            float memref_load_92 = func_arg_6[for_iter_87][for_iter_90]; 
+            float arith_addf_93 = (memref_load_91 + memref_load_92); 
+            func_arg_4[for_iter_87][for_iter_90] = arith_addf_93; 
+          }
+        
+        _past_ai_api_concurrent_set_semaphore_value(execute_token_89, PAST_TASK_FINISHED); 
+      }
+      async_group_85[async_group_index_86] = execute_token_89; 
+      async_group_index_86 = (async_group_index_86 + 1); 
+      int arith_addi_94 = (for_iter_arg_88 + arith_const_1_9); 
+      for_iter_arg_88 = arith_addi_94; 
+    }
+  
+  for (int __past_ai_global_nocheck_sem_index = 0; __past_ai_global_nocheck_sem_index < async_group_index_86; __past_ai_global_nocheck_sem_index = (__past_ai_global_nocheck_sem_index + 1))
+    {
+      _past_ai_api_concurrent_wait_until_semaphore(async_group_85[__past_ai_global_nocheck_sem_index], PAST_TASK_FINISHED); 
+    }
+  
+  for (int for_iter_95 = arith_const_0_11; for_iter_95 < arith_const_64_10; for_iter_95 = (for_iter_95 + arith_const_1_9))
+    {
+      memref_alloca_25[0] = arith_const_0_12; 
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      for (int for_iter_96 = arith_const_0_11; for_iter_96 < arith_const_64_10; for_iter_96 = (for_iter_96 + arith_const_1_9))
+        {
+          float memref_load_97 = func_arg_4[for_iter_96][for_iter_95]; 
+          float arith_mulf_98 = (arith_divf_37 * memref_load_97); 
+          float memref_load_99 = memref_alloca_25[0]; 
+          float arith_mulf_100 = (arith_mulf_40 * memref_load_99); 
+          float arith_addf_101 = (arith_mulf_98 + arith_mulf_100); 
+          float memref_load_102 = memref_alloca_24[0]; 
+          float arith_mulf_103 = (math_powf_47 * memref_load_102); 
+          float arith_addf_104 = (arith_addf_101 + arith_mulf_103); 
+          float memref_load_105 = memref_alloca_23[0]; 
+          float arith_mulf_106 = (arith_negf_48 * memref_load_105); 
+          float arith_addf_107 = (arith_addf_104 + arith_mulf_106); 
+          func_arg_5[for_iter_96][for_iter_95] = arith_addf_107; 
+          float memref_load_108 = func_arg_4[for_iter_96][for_iter_95]; 
+          memref_alloca_25[0] = memref_load_108; 
+          memref_alloca_23[0] = memref_load_102; 
+          float memref_load_109 = func_arg_5[for_iter_96][for_iter_95]; 
+          memref_alloca_24[0] = memref_load_109; 
+        }
+      
+    }
+  
+  for (int for_iter_110 = arith_const_0_11; for_iter_110 < arith_const_64_10; for_iter_110 = (for_iter_110 + arith_const_1_9))
+    {
+      memref_alloca_20[0] = arith_const_0_12; 
+      memref_alloca_19[0] = arith_const_0_12; 
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      for (int for_iter_111 = arith_const_0_11; for_iter_111 < arith_const_64_10; for_iter_111 = (for_iter_111 + arith_const_1_9))
+        {
+          float memref_load_112 = memref_alloca_20[0]; 
+          float arith_mulf_113 = (arith_mulf_42 * memref_load_112); 
+          float memref_load_114 = memref_alloca_19[0]; 
+          float arith_mulf_115 = (arith_mulf_46 * memref_load_114); 
+          float arith_addf_116 = (arith_mulf_113 + arith_mulf_115); 
+          float memref_load_117 = memref_alloca_18[0]; 
+          float arith_mulf_118 = (math_powf_47 * memref_load_117); 
+          float arith_addf_119 = (arith_addf_116 + arith_mulf_118); 
+          float memref_load_120 = memref_alloca_17[0]; 
+          float arith_mulf_121 = (arith_negf_48 * memref_load_120); 
+          float arith_addf_122 = (arith_addf_119 + arith_mulf_121); 
+          int arith_muli_123 = (for_iter_111 * arith_const_neg_1_8); 
+          int arith_addi_124 = (arith_muli_123 + arith_const_63_7); 
+          func_arg_6[arith_addi_124][for_iter_110] = arith_addf_122; 
+          memref_alloca_19[0] = memref_load_112; 
+          int arith_muli_125 = (for_iter_111 * arith_const_neg_1_8); 
+          int arith_addi_126 = (arith_muli_125 + arith_const_63_7); 
+          float memref_load_127 = func_arg_4[arith_addi_126][for_iter_110]; 
+          memref_alloca_20[0] = memref_load_127; 
+          memref_alloca_17[0] = memref_load_117; 
+          int arith_muli_128 = (for_iter_111 * arith_const_neg_1_8); 
+          int arith_addi_129 = (arith_muli_128 + arith_const_63_7); 
+          float memref_load_130 = func_arg_6[arith_addi_129][for_iter_110]; 
+          memref_alloca_18[0] = memref_load_130; 
+        }
+      
+    }
+  
+  int* async_group_131; 
+  int async_group_index_132 = 0; 
+  int for_iter_arg_134 = arith_const_0_11; 
+  for (int for_iter_133 = arith_const_0_11; for_iter_133 < arith_const_64_10; for_iter_133 = (for_iter_133 + arith_const_1_9))
+    {
+      PAST_NEW_SEMAPHORE; 
+      #pragma peqc async_execute
+      {
+        for (int for_iter_136 = arith_const_0_11; for_iter_136 < arith_const_64_10; for_iter_136 = (for_iter_136 + arith_const_1_9))
+          {
+            float memref_load_137 = func_arg_5[for_iter_133][for_iter_136]; 
+            float memref_load_138 = func_arg_6[for_iter_133][for_iter_136]; 
+            float arith_addf_139 = (memref_load_137 + memref_load_138); 
+            func_arg_4[for_iter_133][for_iter_136] = arith_addf_139; 
+          }
+        
+        _past_ai_api_concurrent_set_semaphore_value(execute_token_135, PAST_TASK_FINISHED); 
+      }
+      async_group_131[async_group_index_132] = execute_token_135; 
+      async_group_index_132 = (async_group_index_132 + 1); 
+      int arith_addi_140 = (for_iter_arg_134 + arith_const_1_9); 
+      for_iter_arg_134 = arith_addi_140; 
+    }
+  
+  for (int __past_ai_global_nocheck_sem_index = 0; __past_ai_global_nocheck_sem_index < async_group_index_132; __past_ai_global_nocheck_sem_index = (__past_ai_global_nocheck_sem_index + 1))
+    {
+      _past_ai_api_concurrent_wait_until_semaphore(async_group_131[__past_ai_global_nocheck_sem_index], PAST_TASK_FINISHED); 
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  #pragma peqc async_execute
+  {
+    kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+  }
+}
+[PAST] Final program interpreted:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 3000; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+  for (int i = 0; i < max_nb_threads; i = (i + 1))
+    {
+      _past_ai_api_concurrent_initialize_semaphore_value(i, 0); 
+    }
+  
+}
+void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* func_arg_3, float* func_arg_4, float* func_arg_5, float* func_arg_6)
+{
+  int arith_const_63_7 = 63; 
+  int arith_const_neg_1_8 = -(1); 
+  int arith_const_1_9 = 1; 
+  int arith_const_64_10 = 64; 
+  int arith_const_0_11 = 0; 
+  float arith_const_0_12 = _past_fp_value_0_000000; 
+  float arith_const_0_13 = -(_past_fp_value_2_000000); 
+  float arith_const_0_14 = _past_fp_value_2_000000; 
+  float arith_const_0_15 = _past_fp_value_1_000000; 
+  float _16; 
+  float* memref_alloca_17; 
+  memref_alloca_17[0] = _16; 
+  float* memref_alloca_18; 
+  memref_alloca_18[0] = _16; 
+  float* memref_alloca_19; 
+  memref_alloca_19[0] = _16; 
+  float* memref_alloca_20; 
+  memref_alloca_20[0] = _16; 
+  float* memref_alloca_21; 
+  memref_alloca_21[0] = _16; 
+  float* memref_alloca_22; 
+  memref_alloca_22[0] = _16; 
+  float* memref_alloca_23; 
+  memref_alloca_23[0] = _16; 
+  float* memref_alloca_24; 
+  memref_alloca_24[0] = _16; 
+  float* memref_alloca_25; 
+  memref_alloca_25[0] = _16; 
+  float* memref_alloca_26; 
+  memref_alloca_26[0] = _16; 
+  float arith_negf_27 = -(func_arg_2); 
+  float math_exp_28 = exp(arith_negf_27); 
+  float arith_subf_29 = (arith_const_0_15 - math_exp_28); 
+  float arith_mulf_30 = (arith_subf_29 * arith_subf_29); 
+  float arith_mulf_31 = (func_arg_2 * math_exp_28); 
+  float arith_mulf_32 = (arith_mulf_31 * arith_const_0_14); 
+  float arith_addf_33 = (arith_mulf_32 + arith_const_0_15); 
+  float arith_mulf_34 = (func_arg_2 * arith_const_0_14); 
+  float math_exp_35 = exp(arith_mulf_34); 
+  float arith_subf_36 = (arith_addf_33 - math_exp_35); 
+  float arith_divf_37 = (arith_mulf_30 / arith_subf_36); 
+  float arith_mulf_38 = (arith_divf_37 * math_exp_28); 
+  float arith_subf_39 = (func_arg_2 - arith_const_0_15); 
+  float arith_mulf_40 = (arith_mulf_38 * arith_subf_39); 
+  float arith_addf_41 = (func_arg_2 + arith_const_0_15); 
+  float arith_mulf_42 = (arith_mulf_38 * arith_addf_41); 
+  float arith_negf_43 = -(arith_divf_37); 
+  float arith_mulf_44 = (func_arg_2 * arith_const_0_13); 
+  float math_exp_45 = exp(arith_mulf_44); 
+  float arith_mulf_46 = (arith_negf_43 * math_exp_45); 
+  float math_powf_47 = pow(arith_const_0_14, arith_negf_27); 
+  float arith_negf_48 = -(math_exp_45); 
+  for (int for_iter_49 = arith_const_0_11; for_iter_49 < arith_const_64_10; for_iter_49 = (for_iter_49 + arith_const_1_9))
+    {
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      memref_alloca_26[0] = arith_const_0_12; 
+      for (int for_iter_50 = arith_const_0_11; for_iter_50 < arith_const_64_10; for_iter_50 = (for_iter_50 + arith_const_1_9))
+        {
+          float memref_load_51 = func_arg_3[for_iter_49][for_iter_50]; 
+          float arith_mulf_52 = (arith_divf_37 * memref_load_51); 
+          float memref_load_53 = memref_alloca_26[0]; 
+          float arith_mulf_54 = (arith_mulf_40 * memref_load_53); 
+          float arith_addf_55 = (arith_mulf_52 + arith_mulf_54); 
+          float memref_load_56 = memref_alloca_24[0]; 
+          float arith_mulf_57 = (math_powf_47 * memref_load_56); 
+          float arith_addf_58 = (arith_addf_55 + arith_mulf_57); 
+          float memref_load_59 = memref_alloca_23[0]; 
+          float arith_mulf_60 = (arith_negf_48 * memref_load_59); 
+          float arith_addf_61 = (arith_addf_58 + arith_mulf_60); 
+          func_arg_5[for_iter_49][for_iter_50] = arith_addf_61; 
+          float memref_load_62 = func_arg_3[for_iter_49][for_iter_50]; 
+          memref_alloca_26[0] = memref_load_62; 
+          memref_alloca_23[0] = memref_load_56; 
+          float memref_load_63 = func_arg_5[for_iter_49][for_iter_50]; 
+          memref_alloca_24[0] = memref_load_63; 
+        }
+      
+    }
+  
+  for (int for_iter_64 = arith_const_0_11; for_iter_64 < arith_const_64_10; for_iter_64 = (for_iter_64 + arith_const_1_9))
+    {
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      memref_alloca_22[0] = arith_const_0_12; 
+      memref_alloca_21[0] = arith_const_0_12; 
+      for (int for_iter_65 = arith_const_0_11; for_iter_65 < arith_const_64_10; for_iter_65 = (for_iter_65 + arith_const_1_9))
+        {
+          float memref_load_66 = memref_alloca_22[0]; 
+          float arith_mulf_67 = (arith_mulf_42 * memref_load_66); 
+          float memref_load_68 = memref_alloca_21[0]; 
+          float arith_mulf_69 = (arith_mulf_46 * memref_load_68); 
+          float arith_addf_70 = (arith_mulf_67 + arith_mulf_69); 
+          float memref_load_71 = memref_alloca_18[0]; 
+          float arith_mulf_72 = (math_powf_47 * memref_load_71); 
+          float arith_addf_73 = (arith_addf_70 + arith_mulf_72); 
+          float memref_load_74 = memref_alloca_17[0]; 
+          float arith_mulf_75 = (arith_negf_48 * memref_load_74); 
+          float arith_addf_76 = (arith_addf_73 + arith_mulf_75); 
+          int arith_muli_77 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_78 = (arith_muli_77 + arith_const_63_7); 
+          func_arg_6[for_iter_64][arith_addi_78] = arith_addf_76; 
+          memref_alloca_21[0] = memref_load_66; 
+          int arith_muli_79 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_80 = (arith_muli_79 + arith_const_63_7); 
+          float memref_load_81 = func_arg_3[for_iter_64][arith_addi_80]; 
+          memref_alloca_22[0] = memref_load_81; 
+          memref_alloca_17[0] = memref_load_71; 
+          int arith_muli_82 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_83 = (arith_muli_82 + arith_const_63_7); 
+          float memref_load_84 = func_arg_6[for_iter_64][arith_addi_83]; 
+          memref_alloca_18[0] = memref_load_84; 
+        }
+      
+    }
+  
+  int* async_group_85; 
+  int async_group_index_86 = 0; 
+  int for_iter_arg_88 = arith_const_0_11; 
+  for (int for_iter_87 = arith_const_0_11; for_iter_87 < arith_const_64_10; for_iter_87 = (for_iter_87 + arith_const_1_9))
+    {
+      PAST_NEW_SEMAPHORE; 
+      _past_ai_api_concurrent_region_set_concurrent_async_block(); 
+      {
+        for (int for_iter_90 = arith_const_0_11; for_iter_90 < arith_const_64_10; for_iter_90 = (for_iter_90 + arith_const_1_9))
+          {
+            float memref_load_91 = func_arg_5[for_iter_87][for_iter_90]; 
+            float memref_load_92 = func_arg_6[for_iter_87][for_iter_90]; 
+            float arith_addf_93 = (memref_load_91 + memref_load_92); 
+            func_arg_4[for_iter_87][for_iter_90] = arith_addf_93; 
+          }
+        
+        _past_ai_api_concurrent_set_semaphore_value(execute_token_89, PAST_TASK_FINISHED); 
+      }
+      async_group_85[async_group_index_86] = execute_token_89; 
+      async_group_index_86 = (async_group_index_86 + 1); 
+      int arith_addi_94 = (for_iter_arg_88 + arith_const_1_9); 
+      for_iter_arg_88 = arith_addi_94; 
+    }
+  
+  for (int __past_ai_global_nocheck_sem_index = 0; __past_ai_global_nocheck_sem_index < async_group_index_86; __past_ai_global_nocheck_sem_index = (__past_ai_global_nocheck_sem_index + 1))
+    {
+      _past_ai_api_concurrent_wait_until_semaphore(async_group_85[__past_ai_global_nocheck_sem_index], PAST_TASK_FINISHED); 
+    }
+  
+  for (int for_iter_95 = arith_const_0_11; for_iter_95 < arith_const_64_10; for_iter_95 = (for_iter_95 + arith_const_1_9))
+    {
+      memref_alloca_25[0] = arith_const_0_12; 
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      for (int for_iter_96 = arith_const_0_11; for_iter_96 < arith_const_64_10; for_iter_96 = (for_iter_96 + arith_const_1_9))
+        {
+          float memref_load_97 = func_arg_4[for_iter_96][for_iter_95]; 
+          float arith_mulf_98 = (arith_divf_37 * memref_load_97); 
+          float memref_load_99 = memref_alloca_25[0]; 
+          float arith_mulf_100 = (arith_mulf_40 * memref_load_99); 
+          float arith_addf_101 = (arith_mulf_98 + arith_mulf_100); 
+          float memref_load_102 = memref_alloca_24[0]; 
+          float arith_mulf_103 = (math_powf_47 * memref_load_102); 
+          float arith_addf_104 = (arith_addf_101 + arith_mulf_103); 
+          float memref_load_105 = memref_alloca_23[0]; 
+          float arith_mulf_106 = (arith_negf_48 * memref_load_105); 
+          float arith_addf_107 = (arith_addf_104 + arith_mulf_106); 
+          func_arg_5[for_iter_96][for_iter_95] = arith_addf_107; 
+          float memref_load_108 = func_arg_4[for_iter_96][for_iter_95]; 
+          memref_alloca_25[0] = memref_load_108; 
+          memref_alloca_23[0] = memref_load_102; 
+          float memref_load_109 = func_arg_5[for_iter_96][for_iter_95]; 
+          memref_alloca_24[0] = memref_load_109; 
+        }
+      
+    }
+  
+  for (int for_iter_110 = arith_const_0_11; for_iter_110 < arith_const_64_10; for_iter_110 = (for_iter_110 + arith_const_1_9))
+    {
+      memref_alloca_20[0] = arith_const_0_12; 
+      memref_alloca_19[0] = arith_const_0_12; 
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      for (int for_iter_111 = arith_const_0_11; for_iter_111 < arith_const_64_10; for_iter_111 = (for_iter_111 + arith_const_1_9))
+        {
+          float memref_load_112 = memref_alloca_20[0]; 
+          float arith_mulf_113 = (arith_mulf_42 * memref_load_112); 
+          float memref_load_114 = memref_alloca_19[0]; 
+          float arith_mulf_115 = (arith_mulf_46 * memref_load_114); 
+          float arith_addf_116 = (arith_mulf_113 + arith_mulf_115); 
+          float memref_load_117 = memref_alloca_18[0]; 
+          float arith_mulf_118 = (math_powf_47 * memref_load_117); 
+          float arith_addf_119 = (arith_addf_116 + arith_mulf_118); 
+          float memref_load_120 = memref_alloca_17[0]; 
+          float arith_mulf_121 = (arith_negf_48 * memref_load_120); 
+          float arith_addf_122 = (arith_addf_119 + arith_mulf_121); 
+          int arith_muli_123 = (for_iter_111 * arith_const_neg_1_8); 
+          int arith_addi_124 = (arith_muli_123 + arith_const_63_7); 
+          func_arg_6[arith_addi_124][for_iter_110] = arith_addf_122; 
+          memref_alloca_19[0] = memref_load_112; 
+          int arith_muli_125 = (for_iter_111 * arith_const_neg_1_8); 
+          int arith_addi_126 = (arith_muli_125 + arith_const_63_7); 
+          float memref_load_127 = func_arg_4[arith_addi_126][for_iter_110]; 
+          memref_alloca_20[0] = memref_load_127; 
+          memref_alloca_17[0] = memref_load_117; 
+          int arith_muli_128 = (for_iter_111 * arith_const_neg_1_8); 
+          int arith_addi_129 = (arith_muli_128 + arith_const_63_7); 
+          float memref_load_130 = func_arg_6[arith_addi_129][for_iter_110]; 
+          memref_alloca_18[0] = memref_load_130; 
+        }
+      
+    }
+  
+  int* async_group_131; 
+  int async_group_index_132 = 0; 
+  int for_iter_arg_134 = arith_const_0_11; 
+  for (int for_iter_133 = arith_const_0_11; for_iter_133 < arith_const_64_10; for_iter_133 = (for_iter_133 + arith_const_1_9))
+    {
+      PAST_NEW_SEMAPHORE; 
+      _past_ai_api_concurrent_region_set_concurrent_async_block(); 
+      {
+        for (int for_iter_136 = arith_const_0_11; for_iter_136 < arith_const_64_10; for_iter_136 = (for_iter_136 + arith_const_1_9))
+          {
+            float memref_load_137 = func_arg_5[for_iter_133][for_iter_136]; 
+            float memref_load_138 = func_arg_6[for_iter_133][for_iter_136]; 
+            float arith_addf_139 = (memref_load_137 + memref_load_138); 
+            func_arg_4[for_iter_133][for_iter_136] = arith_addf_139; 
+          }
+        
+        _past_ai_api_concurrent_set_semaphore_value(execute_token_135, PAST_TASK_FINISHED); 
+      }
+      async_group_131[async_group_index_132] = execute_token_135; 
+      async_group_index_132 = (async_group_index_132 + 1); 
+      int arith_addi_140 = (for_iter_arg_134 + arith_const_1_9); 
+      for_iter_arg_134 = arith_addi_140; 
+    }
+  
+  for (int __past_ai_global_nocheck_sem_index = 0; __past_ai_global_nocheck_sem_index < async_group_index_132; __past_ai_global_nocheck_sem_index = (__past_ai_global_nocheck_sem_index + 1))
+    {
+      _past_ai_api_concurrent_wait_until_semaphore(async_group_131[__past_ai_global_nocheck_sem_index], PAST_TASK_FINISHED); 
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  _past_ai_api_concurrent_region_set_concurrent_async_block(); 
+  {
+    kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+  }
+}
+
+[PAST][AI] Start interpretation...
+GETELT SEM 2999
+GETELT SEM 2998
+GETELT SEM 2997
+GETELT SEM 2996
+GETELT SEM 2995
+GETELT SEM 2994
+GETELT SEM 2993
+GETELT SEM 2992
+GETELT SEM 2991
+GETELT SEM 2990
+GETELT SEM 2989
+GETELT SEM 2988
+GETELT SEM 2987
+GETELT SEM 2986
+GETELT SEM 2985
+GETELT SEM 2984
+GETELT SEM 2983
+GETELT SEM 2982
+GETELT SEM 2981
+GETELT SEM 2980
+GETELT SEM 2979
+GETELT SEM 2978
+GETELT SEM 2977
+GETELT SEM 2976
+GETELT SEM 2975
+GETELT SEM 2974
+GETELT SEM 2973
+GETELT SEM 2972
+GETELT SEM 2971
+GETELT SEM 2970
+GETELT SEM 2969
+GETELT SEM 2968
+GETELT SEM 2967
+GETELT SEM 2966
+GETELT SEM 2965
+GETELT SEM 2964
+GETELT SEM 2963
+GETELT SEM 2962
+GETELT SEM 2961
+GETELT SEM 2960
+GETELT SEM 2959
+GETELT SEM 2958
+GETELT SEM 2957
+GETELT SEM 2956
+GETELT SEM 2955
+GETELT SEM 2954
+GETELT SEM 2953
+GETELT SEM 2952
+GETELT SEM 2951
+GETELT SEM 2950
+GETELT SEM 2949
+GETELT SEM 2948
+GETELT SEM 2947
+GETELT SEM 2946
+GETELT SEM 2945
+GETELT SEM 2944
+GETELT SEM 2943
+GETELT SEM 2942
+GETELT SEM 2941
+GETELT SEM 2940
+GETELT SEM 2939
+GETELT SEM 2938
+GETELT SEM 2937
+GETELT SEM 2936
+GETELT SEM 2935
+GETELT SEM 2934
+GETELT SEM 2933
+GETELT SEM 2932
+GETELT SEM 2931
+GETELT SEM 2930
+GETELT SEM 2929
+GETELT SEM 2928
+GETELT SEM 2927
+GETELT SEM 2926
+GETELT SEM 2925
+GETELT SEM 2924
+GETELT SEM 2923
+GETELT SEM 2922
+GETELT SEM 2921
+GETELT SEM 2920
+GETELT SEM 2919
+GETELT SEM 2918
+GETELT SEM 2917
+GETELT SEM 2916
+GETELT SEM 2915
+GETELT SEM 2914
+GETELT SEM 2913
+GETELT SEM 2912
+GETELT SEM 2911
+GETELT SEM 2910
+GETELT SEM 2909
+GETELT SEM 2908
+GETELT SEM 2907
+GETELT SEM 2906
+GETELT SEM 2905
+GETELT SEM 2904
+GETELT SEM 2903
+GETELT SEM 2902
+GETELT SEM 2901
+GETELT SEM 2900
+GETELT SEM 2899
+GETELT SEM 2898
+GETELT SEM 2897
+GETELT SEM 2896
+GETELT SEM 2895
+GETELT SEM 2894
+GETELT SEM 2893
+GETELT SEM 2892
+GETELT SEM 2891
+GETELT SEM 2890
+GETELT SEM 2889
+GETELT SEM 2888
+GETELT SEM 2887
+GETELT SEM 2886
+GETELT SEM 2885
+GETELT SEM 2884
+GETELT SEM 2883
+GETELT SEM 2882
+GETELT SEM 2881
+GETELT SEM 2880
+GETELT SEM 2879
+GETELT SEM 2878
+GETELT SEM 2877
+GETELT SEM 2876
+GETELT SEM 2875
+GETELT SEM 2874
+GETELT SEM 2873
+GETELT SEM 2872
+GETELT SEM 2871
+GETELT SEM 2870
+GETELT SEM 2869
+GETELT SEM 2868
+GETELT SEM 2867
+GETELT SEM 2866
+GETELT SEM 2865
+GETELT SEM 2864
+GETELT SEM 2863
+GETELT SEM 2862
+GETELT SEM 2861
+GETELT SEM 2860
+GETELT SEM 2859
+GETELT SEM 2858
+GETELT SEM 2857
+GETELT SEM 2856
+GETELT SEM 2855
+GETELT SEM 2854
+GETELT SEM 2853
+GETELT SEM 2852
+GETELT SEM 2851
+GETELT SEM 2850
+GETELT SEM 2849
+GETELT SEM 2848
+GETELT SEM 2847
+GETELT SEM 2846
+GETELT SEM 2845
+GETELT SEM 2844
+GETELT SEM 2843
+GETELT SEM 2842
+GETELT SEM 2841
+GETELT SEM 2840
+GETELT SEM 2839
+GETELT SEM 2838
+GETELT SEM 2837
+GETELT SEM 2836
+GETELT SEM 2835
+GETELT SEM 2834
+GETELT SEM 2833
+GETELT SEM 2832
+GETELT SEM 2831
+GETELT SEM 2830
+GETELT SEM 2829
+GETELT SEM 2828
+GETELT SEM 2827
+GETELT SEM 2826
+GETELT SEM 2825
+GETELT SEM 2824
+GETELT SEM 2823
+GETELT SEM 2822
+GETELT SEM 2821
+GETELT SEM 2820
+GETELT SEM 2819
+GETELT SEM 2818
+GETELT SEM 2817
+GETELT SEM 2816
+GETELT SEM 2815
+GETELT SEM 2814
+GETELT SEM 2813
+GETELT SEM 2812
+GETELT SEM 2811
+GETELT SEM 2810
+GETELT SEM 2809
+GETELT SEM 2808
+GETELT SEM 2807
+GETELT SEM 2806
+GETELT SEM 2805
+GETELT SEM 2804
+GETELT SEM 2803
+GETELT SEM 2802
+GETELT SEM 2801
+GETELT SEM 2800
+GETELT SEM 2799
+GETELT SEM 2798
+GETELT SEM 2797
+GETELT SEM 2796
+GETELT SEM 2795
+GETELT SEM 2794
+GETELT SEM 2793
+GETELT SEM 2792
+GETELT SEM 2791
+GETELT SEM 2790
+GETELT SEM 2789
+GETELT SEM 2788
+GETELT SEM 2787
+GETELT SEM 2786
+GETELT SEM 2785
+GETELT SEM 2784
+GETELT SEM 2783
+GETELT SEM 2782
+GETELT SEM 2781
+GETELT SEM 2780
+GETELT SEM 2779
+GETELT SEM 2778
+GETELT SEM 2777
+GETELT SEM 2776
+GETELT SEM 2775
+GETELT SEM 2774
+GETELT SEM 2773
+GETELT SEM 2772
+GETELT SEM 2771
+GETELT SEM 2770
+GETELT SEM 2769
+GETELT SEM 2768
+GETELT SEM 2767
+GETELT SEM 2766
+GETELT SEM 2765
+GETELT SEM 2764
+GETELT SEM 2763
+GETELT SEM 2762
+GETELT SEM 2761
+GETELT SEM 2760
+GETELT SEM 2759
+GETELT SEM 2758
+GETELT SEM 2757
+GETELT SEM 2756
+GETELT SEM 2755
+GETELT SEM 2754
+GETELT SEM 2753
+GETELT SEM 2752
+GETELT SEM 2751
+GETELT SEM 2750
+GETELT SEM 2749
+GETELT SEM 2748
+GETELT SEM 2747
+GETELT SEM 2746
+GETELT SEM 2745
+GETELT SEM 2744
+GETELT SEM 2743
+GETELT SEM 2742
+GETELT SEM 2741
+GETELT SEM 2740
+GETELT SEM 2739
+GETELT SEM 2738
+GETELT SEM 2737
+GETELT SEM 2736
+GETELT SEM 2735
+GETELT SEM 2734
+GETELT SEM 2733
+GETELT SEM 2732
+GETELT SEM 2731
+GETELT SEM 2730
+GETELT SEM 2729
+GETELT SEM 2728
+GETELT SEM 2727
+GETELT SEM 2726
+GETELT SEM 2725
+GETELT SEM 2724
+GETELT SEM 2723
+GETELT SEM 2722
+GETELT SEM 2721
+GETELT SEM 2720
+GETELT SEM 2719
+GETELT SEM 2718
+GETELT SEM 2717
+GETELT SEM 2716
+GETELT SEM 2715
+GETELT SEM 2714
+GETELT SEM 2713
+GETELT SEM 2712
+GETELT SEM 2711
+GETELT SEM 2710
+GETELT SEM 2709
+GETELT SEM 2708
+GETELT SEM 2707
+GETELT SEM 2706
+GETELT SEM 2705
+GETELT SEM 2704
+GETELT SEM 2703
+GETELT SEM 2702
+GETELT SEM 2701
+GETELT SEM 2700
+GETELT SEM 2699
+GETELT SEM 2698
+GETELT SEM 2697
+GETELT SEM 2696
+GETELT SEM 2695
+GETELT SEM 2694
+GETELT SEM 2693
+GETELT SEM 2692
+GETELT SEM 2691
+GETELT SEM 2690
+GETELT SEM 2689
+GETELT SEM 2688
+GETELT SEM 2687
+GETELT SEM 2686
+GETELT SEM 2685
+GETELT SEM 2684
+GETELT SEM 2683
+GETELT SEM 2682
+GETELT SEM 2681
+GETELT SEM 2680
+GETELT SEM 2679
+GETELT SEM 2678
+GETELT SEM 2677
+GETELT SEM 2676
+GETELT SEM 2675
+GETELT SEM 2674
+GETELT SEM 2673
+GETELT SEM 2672
+GETELT SEM 2671
+GETELT SEM 2670
+GETELT SEM 2669
+GETELT SEM 2668
+GETELT SEM 2667
+GETELT SEM 2666
+GETELT SEM 2665
+GETELT SEM 2664
+GETELT SEM 2663
+GETELT SEM 2662
+GETELT SEM 2661
+GETELT SEM 2660
+GETELT SEM 2659
+GETELT SEM 2658
+GETELT SEM 2657
+GETELT SEM 2656
+GETELT SEM 2655
+GETELT SEM 2654
+GETELT SEM 2653
+GETELT SEM 2652
+GETELT SEM 2651
+GETELT SEM 2650
+GETELT SEM 2649
+GETELT SEM 2648
+GETELT SEM 2647
+GETELT SEM 2646
+GETELT SEM 2645
+GETELT SEM 2644
+GETELT SEM 2643
+GETELT SEM 2642
+GETELT SEM 2641
+GETELT SEM 2640
+GETELT SEM 2639
+GETELT SEM 2638
+GETELT SEM 2637
+GETELT SEM 2636
+GETELT SEM 2635
+GETELT SEM 2634
+GETELT SEM 2633
+GETELT SEM 2632
+GETELT SEM 2631
+GETELT SEM 2630
+GETELT SEM 2629
+GETELT SEM 2628
+GETELT SEM 2627
+GETELT SEM 2626
+GETELT SEM 2625
+GETELT SEM 2624
+GETELT SEM 2623
+GETELT SEM 2622
+GETELT SEM 2621
+GETELT SEM 2620
+GETELT SEM 2619
+GETELT SEM 2618
+GETELT SEM 2617
+GETELT SEM 2616
+GETELT SEM 2615
+GETELT SEM 2614
+GETELT SEM 2613
+GETELT SEM 2612
+GETELT SEM 2611
+GETELT SEM 2610
+GETELT SEM 2609
+GETELT SEM 2608
+GETELT SEM 2607
+GETELT SEM 2606
+GETELT SEM 2605
+GETELT SEM 2604
+GETELT SEM 2603
+GETELT SEM 2602
+GETELT SEM 2601
+GETELT SEM 2600
+GETELT SEM 2599
+GETELT SEM 2598
+GETELT SEM 2597
+GETELT SEM 2596
+GETELT SEM 2595
+GETELT SEM 2594
+GETELT SEM 2593
+GETELT SEM 2592
+GETELT SEM 2591
+GETELT SEM 2590
+GETELT SEM 2589
+GETELT SEM 2588
+GETELT SEM 2587
+GETELT SEM 2586
+GETELT SEM 2585
+GETELT SEM 2584
+GETELT SEM 2583
+GETELT SEM 2582
+GETELT SEM 2581
+GETELT SEM 2580
+GETELT SEM 2579
+GETELT SEM 2578
+GETELT SEM 2577
+GETELT SEM 2576
+GETELT SEM 2575
+GETELT SEM 2574
+GETELT SEM 2573
+GETELT SEM 2572
+GETELT SEM 2571
+GETELT SEM 2570
+GETELT SEM 2569
+GETELT SEM 2568
+GETELT SEM 2567
+GETELT SEM 2566
+GETELT SEM 2565
+GETELT SEM 2564
+GETELT SEM 2563
+GETELT SEM 2562
+GETELT SEM 2561
+GETELT SEM 2560
+GETELT SEM 2559
+GETELT SEM 2558
+GETELT SEM 2557
+GETELT SEM 2556
+GETELT SEM 2555
+GETELT SEM 2554
+GETELT SEM 2553
+GETELT SEM 2552
+GETELT SEM 2551
+GETELT SEM 2550
+GETELT SEM 2549
+GETELT SEM 2548
+GETELT SEM 2547
+GETELT SEM 2546
+GETELT SEM 2545
+GETELT SEM 2544
+GETELT SEM 2543
+GETELT SEM 2542
+GETELT SEM 2541
+GETELT SEM 2540
+GETELT SEM 2539
+GETELT SEM 2538
+GETELT SEM 2537
+GETELT SEM 2536
+GETELT SEM 2535
+GETELT SEM 2534
+GETELT SEM 2533
+GETELT SEM 2532
+GETELT SEM 2531
+GETELT SEM 2530
+GETELT SEM 2529
+GETELT SEM 2528
+GETELT SEM 2527
+GETELT SEM 2526
+GETELT SEM 2525
+GETELT SEM 2524
+GETELT SEM 2523
+GETELT SEM 2522
+GETELT SEM 2521
+GETELT SEM 2520
+GETELT SEM 2519
+GETELT SEM 2518
+GETELT SEM 2517
+GETELT SEM 2516
+GETELT SEM 2515
+GETELT SEM 2514
+GETELT SEM 2513
+GETELT SEM 2512
+GETELT SEM 2511
+GETELT SEM 2510
+GETELT SEM 2509
+GETELT SEM 2508
+GETELT SEM 2507
+GETELT SEM 2506
+GETELT SEM 2505
+GETELT SEM 2504
+GETELT SEM 2503
+GETELT SEM 2502
+GETELT SEM 2501
+GETELT SEM 2500
+GETELT SEM 2499
+GETELT SEM 2498
+GETELT SEM 2497
+GETELT SEM 2496
+GETELT SEM 2495
+GETELT SEM 2494
+GETELT SEM 2493
+GETELT SEM 2492
+GETELT SEM 2491
+GETELT SEM 2490
+GETELT SEM 2489
+GETELT SEM 2488
+GETELT SEM 2487
+GETELT SEM 2486
+GETELT SEM 2485
+GETELT SEM 2484
+GETELT SEM 2483
+GETELT SEM 2482
+GETELT SEM 2481
+GETELT SEM 2480
+GETELT SEM 2479
+GETELT SEM 2478
+GETELT SEM 2477
+GETELT SEM 2476
+GETELT SEM 2475
+GETELT SEM 2474
+GETELT SEM 2473
+GETELT SEM 2472
+GETELT SEM 2471
+GETELT SEM 2470
+GETELT SEM 2469
+GETELT SEM 2468
+GETELT SEM 2467
+GETELT SEM 2466
+GETELT SEM 2465
+GETELT SEM 2464
+GETELT SEM 2463
+GETELT SEM 2462
+GETELT SEM 2461
+GETELT SEM 2460
+GETELT SEM 2459
+GETELT SEM 2458
+GETELT SEM 2457
+GETELT SEM 2456
+GETELT SEM 2455
+GETELT SEM 2454
+GETELT SEM 2453
+GETELT SEM 2452
+GETELT SEM 2451
+GETELT SEM 2450
+GETELT SEM 2449
+GETELT SEM 2448
+GETELT SEM 2447
+GETELT SEM 2446
+GETELT SEM 2445
+GETELT SEM 2444
+GETELT SEM 2443
+GETELT SEM 2442
+GETELT SEM 2441
+GETELT SEM 2440
+GETELT SEM 2439
+GETELT SEM 2438
+GETELT SEM 2437
+GETELT SEM 2436
+GETELT SEM 2435
+GETELT SEM 2434
+GETELT SEM 2433
+GETELT SEM 2432
+GETELT SEM 2431
+GETELT SEM 2430
+GETELT SEM 2429
+GETELT SEM 2428
+GETELT SEM 2427
+GETELT SEM 2426
+GETELT SEM 2425
+GETELT SEM 2424
+GETELT SEM 2423
+GETELT SEM 2422
+GETELT SEM 2421
+GETELT SEM 2420
+GETELT SEM 2419
+GETELT SEM 2418
+GETELT SEM 2417
+GETELT SEM 2416
+GETELT SEM 2415
+GETELT SEM 2414
+GETELT SEM 2413
+GETELT SEM 2412
+GETELT SEM 2411
+GETELT SEM 2410
+GETELT SEM 2409
+GETELT SEM 2408
+GETELT SEM 2407
+GETELT SEM 2406
+GETELT SEM 2405
+GETELT SEM 2404
+GETELT SEM 2403
+GETELT SEM 2402
+GETELT SEM 2401
+GETELT SEM 2400
+GETELT SEM 2399
+GETELT SEM 2398
+GETELT SEM 2397
+GETELT SEM 2396
+GETELT SEM 2395
+GETELT SEM 2394
+GETELT SEM 2393
+GETELT SEM 2392
+GETELT SEM 2391
+GETELT SEM 2390
+GETELT SEM 2389
+GETELT SEM 2388
+GETELT SEM 2387
+GETELT SEM 2386
+GETELT SEM 2385
+GETELT SEM 2384
+GETELT SEM 2383
+GETELT SEM 2382
+GETELT SEM 2381
+GETELT SEM 2380
+GETELT SEM 2379
+GETELT SEM 2378
+GETELT SEM 2377
+GETELT SEM 2376
+GETELT SEM 2375
+GETELT SEM 2374
+GETELT SEM 2373
+GETELT SEM 2372
+GETELT SEM 2371
+GETELT SEM 2370
+GETELT SEM 2369
+GETELT SEM 2368
+GETELT SEM 2367
+GETELT SEM 2366
+GETELT SEM 2365
+GETELT SEM 2364
+GETELT SEM 2363
+GETELT SEM 2362
+GETELT SEM 2361
+GETELT SEM 2360
+GETELT SEM 2359
+GETELT SEM 2358
+GETELT SEM 2357
+GETELT SEM 2356
+GETELT SEM 2355
+GETELT SEM 2354
+GETELT SEM 2353
+GETELT SEM 2352
+GETELT SEM 2351
+GETELT SEM 2350
+GETELT SEM 2349
+GETELT SEM 2348
+GETELT SEM 2347
+GETELT SEM 2346
+GETELT SEM 2345
+GETELT SEM 2344
+GETELT SEM 2343
+GETELT SEM 2342
+GETELT SEM 2341
+GETELT SEM 2340
+GETELT SEM 2339
+GETELT SEM 2338
+GETELT SEM 2337
+GETELT SEM 2336
+GETELT SEM 2335
+GETELT SEM 2334
+GETELT SEM 2333
+GETELT SEM 2332
+GETELT SEM 2331
+GETELT SEM 2330
+GETELT SEM 2329
+GETELT SEM 2328
+GETELT SEM 2327
+GETELT SEM 2326
+GETELT SEM 2325
+GETELT SEM 2324
+GETELT SEM 2323
+GETELT SEM 2322
+GETELT SEM 2321
+GETELT SEM 2320
+GETELT SEM 2319
+GETELT SEM 2318
+GETELT SEM 2317
+GETELT SEM 2316
+GETELT SEM 2315
+GETELT SEM 2314
+GETELT SEM 2313
+GETELT SEM 2312
+GETELT SEM 2311
+GETELT SEM 2310
+GETELT SEM 2309
+GETELT SEM 2308
+GETELT SEM 2307
+GETELT SEM 2306
+GETELT SEM 2305
+GETELT SEM 2304
+GETELT SEM 2303
+GETELT SEM 2302
+GETELT SEM 2301
+GETELT SEM 2300
+GETELT SEM 2299
+GETELT SEM 2298
+GETELT SEM 2297
+GETELT SEM 2296
+GETELT SEM 2295
+GETELT SEM 2294
+GETELT SEM 2293
+GETELT SEM 2292
+GETELT SEM 2291
+GETELT SEM 2290
+GETELT SEM 2289
+GETELT SEM 2288
+GETELT SEM 2287
+GETELT SEM 2286
+GETELT SEM 2285
+GETELT SEM 2284
+GETELT SEM 2283
+GETELT SEM 2282
+GETELT SEM 2281
+GETELT SEM 2280
+GETELT SEM 2279
+GETELT SEM 2278
+GETELT SEM 2277
+GETELT SEM 2276
+GETELT SEM 2275
+GETELT SEM 2274
+GETELT SEM 2273
+GETELT SEM 2272
+GETELT SEM 2271
+GETELT SEM 2270
+GETELT SEM 2269
+GETELT SEM 2268
+GETELT SEM 2267
+GETELT SEM 2266
+GETELT SEM 2265
+GETELT SEM 2264
+GETELT SEM 2263
+GETELT SEM 2262
+GETELT SEM 2261
+GETELT SEM 2260
+GETELT SEM 2259
+GETELT SEM 2258
+GETELT SEM 2257
+GETELT SEM 2256
+GETELT SEM 2255
+GETELT SEM 2254
+GETELT SEM 2253
+GETELT SEM 2252
+GETELT SEM 2251
+GETELT SEM 2250
+GETELT SEM 2249
+GETELT SEM 2248
+GETELT SEM 2247
+GETELT SEM 2246
+GETELT SEM 2245
+GETELT SEM 2244
+GETELT SEM 2243
+GETELT SEM 2242
+GETELT SEM 2241
+GETELT SEM 2240
+GETELT SEM 2239
+GETELT SEM 2238
+GETELT SEM 2237
+GETELT SEM 2236
+GETELT SEM 2235
+GETELT SEM 2234
+GETELT SEM 2233
+GETELT SEM 2232
+GETELT SEM 2231
+GETELT SEM 2230
+GETELT SEM 2229
+GETELT SEM 2228
+GETELT SEM 2227
+GETELT SEM 2226
+GETELT SEM 2225
+GETELT SEM 2224
+GETELT SEM 2223
+GETELT SEM 2222
+GETELT SEM 2221
+GETELT SEM 2220
+GETELT SEM 2219
+GETELT SEM 2218
+GETELT SEM 2217
+GETELT SEM 2216
+GETELT SEM 2215
+GETELT SEM 2214
+GETELT SEM 2213
+GETELT SEM 2212
+GETELT SEM 2211
+GETELT SEM 2210
+GETELT SEM 2209
+GETELT SEM 2208
+GETELT SEM 2207
+GETELT SEM 2206
+GETELT SEM 2205
+GETELT SEM 2204
+GETELT SEM 2203
+GETELT SEM 2202
+GETELT SEM 2201
+GETELT SEM 2200
+GETELT SEM 2199
+GETELT SEM 2198
+GETELT SEM 2197
+GETELT SEM 2196
+GETELT SEM 2195
+GETELT SEM 2194
+GETELT SEM 2193
+GETELT SEM 2192
+GETELT SEM 2191
+GETELT SEM 2190
+GETELT SEM 2189
+GETELT SEM 2188
+GETELT SEM 2187
+GETELT SEM 2186
+GETELT SEM 2185
+GETELT SEM 2184
+GETELT SEM 2183
+GETELT SEM 2182
+GETELT SEM 2181
+GETELT SEM 2180
+GETELT SEM 2179
+GETELT SEM 2178
+GETELT SEM 2177
+GETELT SEM 2176
+GETELT SEM 2175
+GETELT SEM 2174
+GETELT SEM 2173
+GETELT SEM 2172
+GETELT SEM 2171
+GETELT SEM 2170
+GETELT SEM 2169
+GETELT SEM 2168
+GETELT SEM 2167
+GETELT SEM 2166
+GETELT SEM 2165
+GETELT SEM 2164
+GETELT SEM 2163
+GETELT SEM 2162
+GETELT SEM 2161
+GETELT SEM 2160
+GETELT SEM 2159
+GETELT SEM 2158
+GETELT SEM 2157
+GETELT SEM 2156
+GETELT SEM 2155
+GETELT SEM 2154
+GETELT SEM 2153
+GETELT SEM 2152
+GETELT SEM 2151
+GETELT SEM 2150
+GETELT SEM 2149
+GETELT SEM 2148
+GETELT SEM 2147
+GETELT SEM 2146
+GETELT SEM 2145
+GETELT SEM 2144
+GETELT SEM 2143
+GETELT SEM 2142
+GETELT SEM 2141
+GETELT SEM 2140
+GETELT SEM 2139
+GETELT SEM 2138
+GETELT SEM 2137
+GETELT SEM 2136
+GETELT SEM 2135
+GETELT SEM 2134
+GETELT SEM 2133
+GETELT SEM 2132
+GETELT SEM 2131
+GETELT SEM 2130
+GETELT SEM 2129
+GETELT SEM 2128
+GETELT SEM 2127
+GETELT SEM 2126
+GETELT SEM 2125
+GETELT SEM 2124
+GETELT SEM 2123
+GETELT SEM 2122
+GETELT SEM 2121
+GETELT SEM 2120
+GETELT SEM 2119
+GETELT SEM 2118
+GETELT SEM 2117
+GETELT SEM 2116
+GETELT SEM 2115
+GETELT SEM 2114
+GETELT SEM 2113
+GETELT SEM 2112
+GETELT SEM 2111
+GETELT SEM 2110
+GETELT SEM 2109
+GETELT SEM 2108
+GETELT SEM 2107
+GETELT SEM 2106
+GETELT SEM 2105
+GETELT SEM 2104
+GETELT SEM 2103
+GETELT SEM 2102
+GETELT SEM 2101
+GETELT SEM 2100
+GETELT SEM 2099
+GETELT SEM 2098
+GETELT SEM 2097
+GETELT SEM 2096
+GETELT SEM 2095
+GETELT SEM 2094
+GETELT SEM 2093
+GETELT SEM 2092
+GETELT SEM 2091
+GETELT SEM 2090
+GETELT SEM 2089
+GETELT SEM 2088
+GETELT SEM 2087
+GETELT SEM 2086
+GETELT SEM 2085
+GETELT SEM 2084
+GETELT SEM 2083
+GETELT SEM 2082
+GETELT SEM 2081
+GETELT SEM 2080
+GETELT SEM 2079
+GETELT SEM 2078
+GETELT SEM 2077
+GETELT SEM 2076
+GETELT SEM 2075
+GETELT SEM 2074
+GETELT SEM 2073
+GETELT SEM 2072
+GETELT SEM 2071
+GETELT SEM 2070
+GETELT SEM 2069
+GETELT SEM 2068
+GETELT SEM 2067
+GETELT SEM 2066
+GETELT SEM 2065
+GETELT SEM 2064
+GETELT SEM 2063
+GETELT SEM 2062
+GETELT SEM 2061
+GETELT SEM 2060
+GETELT SEM 2059
+GETELT SEM 2058
+GETELT SEM 2057
+GETELT SEM 2056
+GETELT SEM 2055
+GETELT SEM 2054
+GETELT SEM 2053
+GETELT SEM 2052
+GETELT SEM 2051
+GETELT SEM 2050
+GETELT SEM 2049
+GETELT SEM 2048
+GETELT SEM 2047
+GETELT SEM 2046
+GETELT SEM 2045
+GETELT SEM 2044
+GETELT SEM 2043
+GETELT SEM 2042
+GETELT SEM 2041
+GETELT SEM 2040
+GETELT SEM 2039
+GETELT SEM 2038
+GETELT SEM 2037
+GETELT SEM 2036
+GETELT SEM 2035
+GETELT SEM 2034
+GETELT SEM 2033
+GETELT SEM 2032
+GETELT SEM 2031
+GETELT SEM 2030
+GETELT SEM 2029
+GETELT SEM 2028
+GETELT SEM 2027
+GETELT SEM 2026
+GETELT SEM 2025
+GETELT SEM 2024
+GETELT SEM 2023
+GETELT SEM 2022
+GETELT SEM 2021
+GETELT SEM 2020
+GETELT SEM 2019
+GETELT SEM 2018
+GETELT SEM 2017
+GETELT SEM 2016
+GETELT SEM 2015
+GETELT SEM 2014
+GETELT SEM 2013
+GETELT SEM 2012
+GETELT SEM 2011
+GETELT SEM 2010
+GETELT SEM 2009
+GETELT SEM 2008
+GETELT SEM 2007
+GETELT SEM 2006
+GETELT SEM 2005
+GETELT SEM 2004
+GETELT SEM 2003
+GETELT SEM 2002
+GETELT SEM 2001
+GETELT SEM 2000
+GETELT SEM 1999
+GETELT SEM 1998
+GETELT SEM 1997
+GETELT SEM 1996
+GETELT SEM 1995
+GETELT SEM 1994
+GETELT SEM 1993
+GETELT SEM 1992
+GETELT SEM 1991
+GETELT SEM 1990
+GETELT SEM 1989
+GETELT SEM 1988
+GETELT SEM 1987
+GETELT SEM 1986
+GETELT SEM 1985
+GETELT SEM 1984
+GETELT SEM 1983
+GETELT SEM 1982
+GETELT SEM 1981
+GETELT SEM 1980
+GETELT SEM 1979
+GETELT SEM 1978
+GETELT SEM 1977
+GETELT SEM 1976
+GETELT SEM 1975
+GETELT SEM 1974
+GETELT SEM 1973
+GETELT SEM 1972
+GETELT SEM 1971
+GETELT SEM 1970
+GETELT SEM 1969
+GETELT SEM 1968
+GETELT SEM 1967
+GETELT SEM 1966
+GETELT SEM 1965
+GETELT SEM 1964
+GETELT SEM 1963
+GETELT SEM 1962
+GETELT SEM 1961
+GETELT SEM 1960
+GETELT SEM 1959
+GETELT SEM 1958
+GETELT SEM 1957
+GETELT SEM 1956
+GETELT SEM 1955
+GETELT SEM 1954
+GETELT SEM 1953
+GETELT SEM 1952
+GETELT SEM 1951
+GETELT SEM 1950
+GETELT SEM 1949
+GETELT SEM 1948
+GETELT SEM 1947
+GETELT SEM 1946
+GETELT SEM 1945
+GETELT SEM 1944
+GETELT SEM 1943
+GETELT SEM 1942
+GETELT SEM 1941
+GETELT SEM 1940
+GETELT SEM 1939
+GETELT SEM 1938
+GETELT SEM 1937
+GETELT SEM 1936
+GETELT SEM 1935
+GETELT SEM 1934
+GETELT SEM 1933
+GETELT SEM 1932
+GETELT SEM 1931
+GETELT SEM 1930
+GETELT SEM 1929
+GETELT SEM 1928
+GETELT SEM 1927
+GETELT SEM 1926
+GETELT SEM 1925
+GETELT SEM 1924
+GETELT SEM 1923
+GETELT SEM 1922
+GETELT SEM 1921
+GETELT SEM 1920
+GETELT SEM 1919
+GETELT SEM 1918
+GETELT SEM 1917
+GETELT SEM 1916
+GETELT SEM 1915
+GETELT SEM 1914
+GETELT SEM 1913
+GETELT SEM 1912
+GETELT SEM 1911
+GETELT SEM 1910
+GETELT SEM 1909
+GETELT SEM 1908
+GETELT SEM 1907
+GETELT SEM 1906
+GETELT SEM 1905
+GETELT SEM 1904
+GETELT SEM 1903
+GETELT SEM 1902
+GETELT SEM 1901
+GETELT SEM 1900
+GETELT SEM 1899
+GETELT SEM 1898
+GETELT SEM 1897
+GETELT SEM 1896
+GETELT SEM 1895
+GETELT SEM 1894
+GETELT SEM 1893
+GETELT SEM 1892
+GETELT SEM 1891
+GETELT SEM 1890
+GETELT SEM 1889
+GETELT SEM 1888
+GETELT SEM 1887
+GETELT SEM 1886
+GETELT SEM 1885
+GETELT SEM 1884
+GETELT SEM 1883
+GETELT SEM 1882
+GETELT SEM 1881
+GETELT SEM 1880
+GETELT SEM 1879
+GETELT SEM 1878
+GETELT SEM 1877
+GETELT SEM 1876
+GETELT SEM 1875
+GETELT SEM 1874
+GETELT SEM 1873
+GETELT SEM 1872
+GETELT SEM 1871
+GETELT SEM 1870
+GETELT SEM 1869
+GETELT SEM 1868
+GETELT SEM 1867
+GETELT SEM 1866
+GETELT SEM 1865
+GETELT SEM 1864
+GETELT SEM 1863
+GETELT SEM 1862
+GETELT SEM 1861
+GETELT SEM 1860
+GETELT SEM 1859
+GETELT SEM 1858
+GETELT SEM 1857
+GETELT SEM 1856
+GETELT SEM 1855
+GETELT SEM 1854
+GETELT SEM 1853
+GETELT SEM 1852
+GETELT SEM 1851
+GETELT SEM 1850
+GETELT SEM 1849
+GETELT SEM 1848
+GETELT SEM 1847
+GETELT SEM 1846
+GETELT SEM 1845
+GETELT SEM 1844
+GETELT SEM 1843
+GETELT SEM 1842
+GETELT SEM 1841
+GETELT SEM 1840
+GETELT SEM 1839
+GETELT SEM 1838
+GETELT SEM 1837
+GETELT SEM 1836
+GETELT SEM 1835
+GETELT SEM 1834
+GETELT SEM 1833
+GETELT SEM 1832
+GETELT SEM 1831
+GETELT SEM 1830
+GETELT SEM 1829
+GETELT SEM 1828
+GETELT SEM 1827
+GETELT SEM 1826
+GETELT SEM 1825
+GETELT SEM 1824
+GETELT SEM 1823
+GETELT SEM 1822
+GETELT SEM 1821
+GETELT SEM 1820
+GETELT SEM 1819
+GETELT SEM 1818
+GETELT SEM 1817
+GETELT SEM 1816
+GETELT SEM 1815
+GETELT SEM 1814
+GETELT SEM 1813
+GETELT SEM 1812
+GETELT SEM 1811
+GETELT SEM 1810
+GETELT SEM 1809
+GETELT SEM 1808
+GETELT SEM 1807
+GETELT SEM 1806
+GETELT SEM 1805
+GETELT SEM 1804
+GETELT SEM 1803
+GETELT SEM 1802
+GETELT SEM 1801
+GETELT SEM 1800
+GETELT SEM 1799
+GETELT SEM 1798
+GETELT SEM 1797
+GETELT SEM 1796
+GETELT SEM 1795
+GETELT SEM 1794
+GETELT SEM 1793
+GETELT SEM 1792
+GETELT SEM 1791
+GETELT SEM 1790
+GETELT SEM 1789
+GETELT SEM 1788
+GETELT SEM 1787
+GETELT SEM 1786
+GETELT SEM 1785
+GETELT SEM 1784
+GETELT SEM 1783
+GETELT SEM 1782
+GETELT SEM 1781
+GETELT SEM 1780
+GETELT SEM 1779
+GETELT SEM 1778
+GETELT SEM 1777
+GETELT SEM 1776
+GETELT SEM 1775
+GETELT SEM 1774
+GETELT SEM 1773
+GETELT SEM 1772
+GETELT SEM 1771
+GETELT SEM 1770
+GETELT SEM 1769
+GETELT SEM 1768
+GETELT SEM 1767
+GETELT SEM 1766
+GETELT SEM 1765
+GETELT SEM 1764
+GETELT SEM 1763
+GETELT SEM 1762
+GETELT SEM 1761
+GETELT SEM 1760
+GETELT SEM 1759
+GETELT SEM 1758
+GETELT SEM 1757
+GETELT SEM 1756
+GETELT SEM 1755
+GETELT SEM 1754
+GETELT SEM 1753
+GETELT SEM 1752
+GETELT SEM 1751
+GETELT SEM 1750
+GETELT SEM 1749
+GETELT SEM 1748
+GETELT SEM 1747
+GETELT SEM 1746
+GETELT SEM 1745
+GETELT SEM 1744
+GETELT SEM 1743
+GETELT SEM 1742
+GETELT SEM 1741
+GETELT SEM 1740
+GETELT SEM 1739
+GETELT SEM 1738
+GETELT SEM 1737
+GETELT SEM 1736
+GETELT SEM 1735
+GETELT SEM 1734
+GETELT SEM 1733
+GETELT SEM 1732
+GETELT SEM 1731
+GETELT SEM 1730
+GETELT SEM 1729
+GETELT SEM 1728
+GETELT SEM 1727
+GETELT SEM 1726
+GETELT SEM 1725
+GETELT SEM 1724
+GETELT SEM 1723
+GETELT SEM 1722
+GETELT SEM 1721
+GETELT SEM 1720
+GETELT SEM 1719
+GETELT SEM 1718
+GETELT SEM 1717
+GETELT SEM 1716
+GETELT SEM 1715
+GETELT SEM 1714
+GETELT SEM 1713
+GETELT SEM 1712
+GETELT SEM 1711
+GETELT SEM 1710
+GETELT SEM 1709
+GETELT SEM 1708
+GETELT SEM 1707
+GETELT SEM 1706
+GETELT SEM 1705
+GETELT SEM 1704
+GETELT SEM 1703
+GETELT SEM 1702
+GETELT SEM 1701
+GETELT SEM 1700
+GETELT SEM 1699
+GETELT SEM 1698
+GETELT SEM 1697
+GETELT SEM 1696
+GETELT SEM 1695
+GETELT SEM 1694
+GETELT SEM 1693
+GETELT SEM 1692
+GETELT SEM 1691
+GETELT SEM 1690
+GETELT SEM 1689
+GETELT SEM 1688
+GETELT SEM 1687
+GETELT SEM 1686
+GETELT SEM 1685
+GETELT SEM 1684
+GETELT SEM 1683
+GETELT SEM 1682
+GETELT SEM 1681
+GETELT SEM 1680
+GETELT SEM 1679
+GETELT SEM 1678
+GETELT SEM 1677
+GETELT SEM 1676
+GETELT SEM 1675
+GETELT SEM 1674
+GETELT SEM 1673
+GETELT SEM 1672
+GETELT SEM 1671
+GETELT SEM 1670
+GETELT SEM 1669
+GETELT SEM 1668
+GETELT SEM 1667
+GETELT SEM 1666
+GETELT SEM 1665
+GETELT SEM 1664
+GETELT SEM 1663
+GETELT SEM 1662
+GETELT SEM 1661
+GETELT SEM 1660
+GETELT SEM 1659
+GETELT SEM 1658
+GETELT SEM 1657
+GETELT SEM 1656
+GETELT SEM 1655
+GETELT SEM 1654
+GETELT SEM 1653
+GETELT SEM 1652
+GETELT SEM 1651
+GETELT SEM 1650
+GETELT SEM 1649
+GETELT SEM 1648
+GETELT SEM 1647
+GETELT SEM 1646
+GETELT SEM 1645
+GETELT SEM 1644
+GETELT SEM 1643
+GETELT SEM 1642
+GETELT SEM 1641
+GETELT SEM 1640
+GETELT SEM 1639
+GETELT SEM 1638
+GETELT SEM 1637
+GETELT SEM 1636
+GETELT SEM 1635
+GETELT SEM 1634
+GETELT SEM 1633
+GETELT SEM 1632
+GETELT SEM 1631
+GETELT SEM 1630
+GETELT SEM 1629
+GETELT SEM 1628
+GETELT SEM 1627
+GETELT SEM 1626
+GETELT SEM 1625
+GETELT SEM 1624
+GETELT SEM 1623
+GETELT SEM 1622
+GETELT SEM 1621
+GETELT SEM 1620
+GETELT SEM 1619
+GETELT SEM 1618
+GETELT SEM 1617
+GETELT SEM 1616
+GETELT SEM 1615
+GETELT SEM 1614
+GETELT SEM 1613
+GETELT SEM 1612
+GETELT SEM 1611
+GETELT SEM 1610
+GETELT SEM 1609
+GETELT SEM 1608
+GETELT SEM 1607
+GETELT SEM 1606
+GETELT SEM 1605
+GETELT SEM 1604
+GETELT SEM 1603
+GETELT SEM 1602
+GETELT SEM 1601
+GETELT SEM 1600
+GETELT SEM 1599
+GETELT SEM 1598
+GETELT SEM 1597
+GETELT SEM 1596
+GETELT SEM 1595
+GETELT SEM 1594
+GETELT SEM 1593
+GETELT SEM 1592
+GETELT SEM 1591
+GETELT SEM 1590
+GETELT SEM 1589
+GETELT SEM 1588
+GETELT SEM 1587
+GETELT SEM 1586
+GETELT SEM 1585
+GETELT SEM 1584
+GETELT SEM 1583
+GETELT SEM 1582
+GETELT SEM 1581
+GETELT SEM 1580
+GETELT SEM 1579
+GETELT SEM 1578
+GETELT SEM 1577
+GETELT SEM 1576
+GETELT SEM 1575
+GETELT SEM 1574
+GETELT SEM 1573
+GETELT SEM 1572
+GETELT SEM 1571
+GETELT SEM 1570
+GETELT SEM 1569
+GETELT SEM 1568
+GETELT SEM 1567
+GETELT SEM 1566
+GETELT SEM 1565
+GETELT SEM 1564
+GETELT SEM 1563
+GETELT SEM 1562
+GETELT SEM 1561
+GETELT SEM 1560
+GETELT SEM 1559
+GETELT SEM 1558
+GETELT SEM 1557
+GETELT SEM 1556
+GETELT SEM 1555
+GETELT SEM 1554
+GETELT SEM 1553
+GETELT SEM 1552
+GETELT SEM 1551
+GETELT SEM 1550
+GETELT SEM 1549
+GETELT SEM 1548
+GETELT SEM 1547
+GETELT SEM 1546
+GETELT SEM 1545
+GETELT SEM 1544
+GETELT SEM 1543
+GETELT SEM 1542
+GETELT SEM 1541
+GETELT SEM 1540
+GETELT SEM 1539
+GETELT SEM 1538
+GETELT SEM 1537
+GETELT SEM 1536
+GETELT SEM 1535
+GETELT SEM 1534
+GETELT SEM 1533
+GETELT SEM 1532
+GETELT SEM 1531
+GETELT SEM 1530
+GETELT SEM 1529
+GETELT SEM 1528
+GETELT SEM 1527
+GETELT SEM 1526
+GETELT SEM 1525
+GETELT SEM 1524
+GETELT SEM 1523
+GETELT SEM 1522
+GETELT SEM 1521
+GETELT SEM 1520
+GETELT SEM 1519
+GETELT SEM 1518
+GETELT SEM 1517
+GETELT SEM 1516
+GETELT SEM 1515
+GETELT SEM 1514
+GETELT SEM 1513
+GETELT SEM 1512
+GETELT SEM 1511
+GETELT SEM 1510
+GETELT SEM 1509
+GETELT SEM 1508
+GETELT SEM 1507
+GETELT SEM 1506
+GETELT SEM 1505
+GETELT SEM 1504
+GETELT SEM 1503
+GETELT SEM 1502
+GETELT SEM 1501
+GETELT SEM 1500
+GETELT SEM 1499
+GETELT SEM 1498
+GETELT SEM 1497
+GETELT SEM 1496
+GETELT SEM 1495
+GETELT SEM 1494
+GETELT SEM 1493
+GETELT SEM 1492
+GETELT SEM 1491
+GETELT SEM 1490
+GETELT SEM 1489
+GETELT SEM 1488
+GETELT SEM 1487
+GETELT SEM 1486
+GETELT SEM 1485
+GETELT SEM 1484
+GETELT SEM 1483
+GETELT SEM 1482
+GETELT SEM 1481
+GETELT SEM 1480
+GETELT SEM 1479
+GETELT SEM 1478
+GETELT SEM 1477
+GETELT SEM 1476
+GETELT SEM 1475
+GETELT SEM 1474
+GETELT SEM 1473
+GETELT SEM 1472
+GETELT SEM 1471
+GETELT SEM 1470
+GETELT SEM 1469
+GETELT SEM 1468
+GETELT SEM 1467
+GETELT SEM 1466
+GETELT SEM 1465
+GETELT SEM 1464
+GETELT SEM 1463
+GETELT SEM 1462
+GETELT SEM 1461
+GETELT SEM 1460
+GETELT SEM 1459
+GETELT SEM 1458
+GETELT SEM 1457
+GETELT SEM 1456
+GETELT SEM 1455
+GETELT SEM 1454
+GETELT SEM 1453
+GETELT SEM 1452
+GETELT SEM 1451
+GETELT SEM 1450
+GETELT SEM 1449
+GETELT SEM 1448
+GETELT SEM 1447
+GETELT SEM 1446
+GETELT SEM 1445
+GETELT SEM 1444
+GETELT SEM 1443
+GETELT SEM 1442
+GETELT SEM 1441
+GETELT SEM 1440
+GETELT SEM 1439
+GETELT SEM 1438
+GETELT SEM 1437
+GETELT SEM 1436
+GETELT SEM 1435
+GETELT SEM 1434
+GETELT SEM 1433
+GETELT SEM 1432
+GETELT SEM 1431
+GETELT SEM 1430
+GETELT SEM 1429
+GETELT SEM 1428
+GETELT SEM 1427
+GETELT SEM 1426
+GETELT SEM 1425
+GETELT SEM 1424
+GETELT SEM 1423
+GETELT SEM 1422
+GETELT SEM 1421
+GETELT SEM 1420
+GETELT SEM 1419
+GETELT SEM 1418
+GETELT SEM 1417
+GETELT SEM 1416
+GETELT SEM 1415
+GETELT SEM 1414
+GETELT SEM 1413
+GETELT SEM 1412
+GETELT SEM 1411
+GETELT SEM 1410
+GETELT SEM 1409
+GETELT SEM 1408
+GETELT SEM 1407
+GETELT SEM 1406
+GETELT SEM 1405
+GETELT SEM 1404
+GETELT SEM 1403
+GETELT SEM 1402
+GETELT SEM 1401
+GETELT SEM 1400
+GETELT SEM 1399
+GETELT SEM 1398
+GETELT SEM 1397
+GETELT SEM 1396
+GETELT SEM 1395
+GETELT SEM 1394
+GETELT SEM 1393
+GETELT SEM 1392
+GETELT SEM 1391
+GETELT SEM 1390
+GETELT SEM 1389
+GETELT SEM 1388
+GETELT SEM 1387
+GETELT SEM 1386
+GETELT SEM 1385
+GETELT SEM 1384
+GETELT SEM 1383
+GETELT SEM 1382
+GETELT SEM 1381
+GETELT SEM 1380
+GETELT SEM 1379
+GETELT SEM 1378
+GETELT SEM 1377
+GETELT SEM 1376
+GETELT SEM 1375
+GETELT SEM 1374
+GETELT SEM 1373
+GETELT SEM 1372
+GETELT SEM 1371
+GETELT SEM 1370
+GETELT SEM 1369
+GETELT SEM 1368
+GETELT SEM 1367
+GETELT SEM 1366
+GETELT SEM 1365
+GETELT SEM 1364
+GETELT SEM 1363
+GETELT SEM 1362
+GETELT SEM 1361
+GETELT SEM 1360
+GETELT SEM 1359
+GETELT SEM 1358
+GETELT SEM 1357
+GETELT SEM 1356
+GETELT SEM 1355
+GETELT SEM 1354
+GETELT SEM 1353
+GETELT SEM 1352
+GETELT SEM 1351
+GETELT SEM 1350
+GETELT SEM 1349
+GETELT SEM 1348
+GETELT SEM 1347
+GETELT SEM 1346
+GETELT SEM 1345
+GETELT SEM 1344
+GETELT SEM 1343
+GETELT SEM 1342
+GETELT SEM 1341
+GETELT SEM 1340
+GETELT SEM 1339
+GETELT SEM 1338
+GETELT SEM 1337
+GETELT SEM 1336
+GETELT SEM 1335
+GETELT SEM 1334
+GETELT SEM 1333
+GETELT SEM 1332
+GETELT SEM 1331
+GETELT SEM 1330
+GETELT SEM 1329
+GETELT SEM 1328
+GETELT SEM 1327
+GETELT SEM 1326
+GETELT SEM 1325
+GETELT SEM 1324
+GETELT SEM 1323
+GETELT SEM 1322
+GETELT SEM 1321
+GETELT SEM 1320
+GETELT SEM 1319
+GETELT SEM 1318
+GETELT SEM 1317
+GETELT SEM 1316
+GETELT SEM 1315
+GETELT SEM 1314
+GETELT SEM 1313
+GETELT SEM 1312
+GETELT SEM 1311
+GETELT SEM 1310
+GETELT SEM 1309
+GETELT SEM 1308
+GETELT SEM 1307
+GETELT SEM 1306
+GETELT SEM 1305
+GETELT SEM 1304
+GETELT SEM 1303
+GETELT SEM 1302
+GETELT SEM 1301
+GETELT SEM 1300
+GETELT SEM 1299
+GETELT SEM 1298
+GETELT SEM 1297
+GETELT SEM 1296
+GETELT SEM 1295
+GETELT SEM 1294
+GETELT SEM 1293
+GETELT SEM 1292
+GETELT SEM 1291
+GETELT SEM 1290
+GETELT SEM 1289
+GETELT SEM 1288
+GETELT SEM 1287
+GETELT SEM 1286
+GETELT SEM 1285
+GETELT SEM 1284
+GETELT SEM 1283
+GETELT SEM 1282
+GETELT SEM 1281
+GETELT SEM 1280
+GETELT SEM 1279
+GETELT SEM 1278
+GETELT SEM 1277
+GETELT SEM 1276
+GETELT SEM 1275
+GETELT SEM 1274
+GETELT SEM 1273
+GETELT SEM 1272
+GETELT SEM 1271
+GETELT SEM 1270
+GETELT SEM 1269
+GETELT SEM 1268
+GETELT SEM 1267
+GETELT SEM 1266
+GETELT SEM 1265
+GETELT SEM 1264
+GETELT SEM 1263
+GETELT SEM 1262
+GETELT SEM 1261
+GETELT SEM 1260
+GETELT SEM 1259
+GETELT SEM 1258
+GETELT SEM 1257
+GETELT SEM 1256
+GETELT SEM 1255
+GETELT SEM 1254
+GETELT SEM 1253
+GETELT SEM 1252
+GETELT SEM 1251
+GETELT SEM 1250
+GETELT SEM 1249
+GETELT SEM 1248
+GETELT SEM 1247
+GETELT SEM 1246
+GETELT SEM 1245
+GETELT SEM 1244
+GETELT SEM 1243
+GETELT SEM 1242
+GETELT SEM 1241
+GETELT SEM 1240
+GETELT SEM 1239
+GETELT SEM 1238
+GETELT SEM 1237
+GETELT SEM 1236
+GETELT SEM 1235
+GETELT SEM 1234
+GETELT SEM 1233
+GETELT SEM 1232
+GETELT SEM 1231
+GETELT SEM 1230
+GETELT SEM 1229
+GETELT SEM 1228
+GETELT SEM 1227
+GETELT SEM 1226
+GETELT SEM 1225
+GETELT SEM 1224
+GETELT SEM 1223
+GETELT SEM 1222
+GETELT SEM 1221
+GETELT SEM 1220
+GETELT SEM 1219
+GETELT SEM 1218
+GETELT SEM 1217
+GETELT SEM 1216
+GETELT SEM 1215
+GETELT SEM 1214
+GETELT SEM 1213
+GETELT SEM 1212
+GETELT SEM 1211
+GETELT SEM 1210
+GETELT SEM 1209
+GETELT SEM 1208
+GETELT SEM 1207
+GETELT SEM 1206
+GETELT SEM 1205
+GETELT SEM 1204
+GETELT SEM 1203
+GETELT SEM 1202
+GETELT SEM 1201
+GETELT SEM 1200
+GETELT SEM 1199
+GETELT SEM 1198
+GETELT SEM 1197
+GETELT SEM 1196
+GETELT SEM 1195
+GETELT SEM 1194
+GETELT SEM 1193
+GETELT SEM 1192
+GETELT SEM 1191
+GETELT SEM 1190
+GETELT SEM 1189
+GETELT SEM 1188
+GETELT SEM 1187
+GETELT SEM 1186
+GETELT SEM 1185
+GETELT SEM 1184
+GETELT SEM 1183
+GETELT SEM 1182
+GETELT SEM 1181
+GETELT SEM 1180
+GETELT SEM 1179
+GETELT SEM 1178
+GETELT SEM 1177
+GETELT SEM 1176
+GETELT SEM 1175
+GETELT SEM 1174
+GETELT SEM 1173
+GETELT SEM 1172
+GETELT SEM 1171
+GETELT SEM 1170
+GETELT SEM 1169
+GETELT SEM 1168
+GETELT SEM 1167
+GETELT SEM 1166
+GETELT SEM 1165
+GETELT SEM 1164
+GETELT SEM 1163
+GETELT SEM 1162
+GETELT SEM 1161
+GETELT SEM 1160
+GETELT SEM 1159
+GETELT SEM 1158
+GETELT SEM 1157
+GETELT SEM 1156
+GETELT SEM 1155
+GETELT SEM 1154
+GETELT SEM 1153
+GETELT SEM 1152
+GETELT SEM 1151
+GETELT SEM 1150
+GETELT SEM 1149
+GETELT SEM 1148
+GETELT SEM 1147
+GETELT SEM 1146
+GETELT SEM 1145
+GETELT SEM 1144
+GETELT SEM 1143
+GETELT SEM 1142
+GETELT SEM 1141
+GETELT SEM 1140
+GETELT SEM 1139
+GETELT SEM 1138
+GETELT SEM 1137
+GETELT SEM 1136
+GETELT SEM 1135
+GETELT SEM 1134
+GETELT SEM 1133
+GETELT SEM 1132
+GETELT SEM 1131
+GETELT SEM 1130
+GETELT SEM 1129
+GETELT SEM 1128
+GETELT SEM 1127
+GETELT SEM 1126
+GETELT SEM 1125
+GETELT SEM 1124
+GETELT SEM 1123
+GETELT SEM 1122
+GETELT SEM 1121
+GETELT SEM 1120
+GETELT SEM 1119
+GETELT SEM 1118
+GETELT SEM 1117
+GETELT SEM 1116
+GETELT SEM 1115
+GETELT SEM 1114
+GETELT SEM 1113
+GETELT SEM 1112
+GETELT SEM 1111
+GETELT SEM 1110
+GETELT SEM 1109
+GETELT SEM 1108
+GETELT SEM 1107
+GETELT SEM 1106
+GETELT SEM 1105
+GETELT SEM 1104
+GETELT SEM 1103
+GETELT SEM 1102
+GETELT SEM 1101
+GETELT SEM 1100
+GETELT SEM 1099
+GETELT SEM 1098
+GETELT SEM 1097
+GETELT SEM 1096
+GETELT SEM 1095
+GETELT SEM 1094
+GETELT SEM 1093
+GETELT SEM 1092
+GETELT SEM 1091
+GETELT SEM 1090
+GETELT SEM 1089
+GETELT SEM 1088
+GETELT SEM 1087
+GETELT SEM 1086
+GETELT SEM 1085
+GETELT SEM 1084
+GETELT SEM 1083
+GETELT SEM 1082
+GETELT SEM 1081
+GETELT SEM 1080
+GETELT SEM 1079
+GETELT SEM 1078
+GETELT SEM 1077
+GETELT SEM 1076
+GETELT SEM 1075
+GETELT SEM 1074
+GETELT SEM 1073
+GETELT SEM 1072
+GETELT SEM 1071
+GETELT SEM 1070
+GETELT SEM 1069
+GETELT SEM 1068
+GETELT SEM 1067
+GETELT SEM 1066
+GETELT SEM 1065
+GETELT SEM 1064
+GETELT SEM 1063
+GETELT SEM 1062
+GETELT SEM 1061
+GETELT SEM 1060
+GETELT SEM 1059
+GETELT SEM 1058
+GETELT SEM 1057
+GETELT SEM 1056
+GETELT SEM 1055
+GETELT SEM 1054
+GETELT SEM 1053
+GETELT SEM 1052
+GETELT SEM 1051
+GETELT SEM 1050
+GETELT SEM 1049
+GETELT SEM 1048
+GETELT SEM 1047
+GETELT SEM 1046
+GETELT SEM 1045
+GETELT SEM 1044
+GETELT SEM 1043
+GETELT SEM 1042
+GETELT SEM 1041
+GETELT SEM 1040
+GETELT SEM 1039
+GETELT SEM 1038
+GETELT SEM 1037
+GETELT SEM 1036
+GETELT SEM 1035
+GETELT SEM 1034
+GETELT SEM 1033
+GETELT SEM 1032
+GETELT SEM 1031
+GETELT SEM 1030
+GETELT SEM 1029
+GETELT SEM 1028
+GETELT SEM 1027
+GETELT SEM 1026
+GETELT SEM 1025
+GETELT SEM 1024
+GETELT SEM 1023
+GETELT SEM 1022
+GETELT SEM 1021
+GETELT SEM 1020
+GETELT SEM 1019
+GETELT SEM 1018
+GETELT SEM 1017
+GETELT SEM 1016
+GETELT SEM 1015
+GETELT SEM 1014
+GETELT SEM 1013
+GETELT SEM 1012
+GETELT SEM 1011
+GETELT SEM 1010
+GETELT SEM 1009
+GETELT SEM 1008
+GETELT SEM 1007
+GETELT SEM 1006
+GETELT SEM 1005
+GETELT SEM 1004
+GETELT SEM 1003
+GETELT SEM 1002
+GETELT SEM 1001
+GETELT SEM 1000
+GETELT SEM 999
+GETELT SEM 998
+GETELT SEM 997
+GETELT SEM 996
+GETELT SEM 995
+GETELT SEM 994
+GETELT SEM 993
+GETELT SEM 992
+GETELT SEM 991
+GETELT SEM 990
+GETELT SEM 989
+GETELT SEM 988
+GETELT SEM 987
+GETELT SEM 986
+GETELT SEM 985
+GETELT SEM 984
+GETELT SEM 983
+GETELT SEM 982
+GETELT SEM 981
+GETELT SEM 980
+GETELT SEM 979
+GETELT SEM 978
+GETELT SEM 977
+GETELT SEM 976
+GETELT SEM 975
+GETELT SEM 974
+GETELT SEM 973
+GETELT SEM 972
+GETELT SEM 971
+GETELT SEM 970
+GETELT SEM 969
+GETELT SEM 968
+GETELT SEM 967
+GETELT SEM 966
+GETELT SEM 965
+GETELT SEM 964
+GETELT SEM 963
+GETELT SEM 962
+GETELT SEM 961
+GETELT SEM 960
+GETELT SEM 959
+GETELT SEM 958
+GETELT SEM 957
+GETELT SEM 956
+GETELT SEM 955
+GETELT SEM 954
+GETELT SEM 953
+GETELT SEM 952
+GETELT SEM 951
+GETELT SEM 950
+GETELT SEM 949
+GETELT SEM 948
+GETELT SEM 947
+GETELT SEM 946
+GETELT SEM 945
+GETELT SEM 944
+GETELT SEM 943
+GETELT SEM 942
+GETELT SEM 941
+GETELT SEM 940
+GETELT SEM 939
+GETELT SEM 938
+GETELT SEM 937
+GETELT SEM 936
+GETELT SEM 935
+GETELT SEM 934
+GETELT SEM 933
+GETELT SEM 932
+GETELT SEM 931
+GETELT SEM 930
+GETELT SEM 929
+GETELT SEM 928
+GETELT SEM 927
+GETELT SEM 926
+GETELT SEM 925
+GETELT SEM 924
+GETELT SEM 923
+GETELT SEM 922
+GETELT SEM 921
+GETELT SEM 920
+GETELT SEM 919
+GETELT SEM 918
+GETELT SEM 917
+GETELT SEM 916
+GETELT SEM 915
+GETELT SEM 914
+GETELT SEM 913
+GETELT SEM 912
+GETELT SEM 911
+GETELT SEM 910
+GETELT SEM 909
+GETELT SEM 908
+GETELT SEM 907
+GETELT SEM 906
+GETELT SEM 905
+GETELT SEM 904
+GETELT SEM 903
+GETELT SEM 902
+GETELT SEM 901
+GETELT SEM 900
+GETELT SEM 899
+GETELT SEM 898
+GETELT SEM 897
+GETELT SEM 896
+GETELT SEM 895
+GETELT SEM 894
+GETELT SEM 893
+GETELT SEM 892
+GETELT SEM 891
+GETELT SEM 890
+GETELT SEM 889
+GETELT SEM 888
+GETELT SEM 887
+GETELT SEM 886
+GETELT SEM 885
+GETELT SEM 884
+GETELT SEM 883
+GETELT SEM 882
+GETELT SEM 881
+GETELT SEM 880
+GETELT SEM 879
+GETELT SEM 878
+GETELT SEM 877
+GETELT SEM 876
+GETELT SEM 875
+GETELT SEM 874
+GETELT SEM 873
+GETELT SEM 872
+GETELT SEM 871
+GETELT SEM 870
+GETELT SEM 869
+GETELT SEM 868
+GETELT SEM 867
+GETELT SEM 866
+GETELT SEM 865
+GETELT SEM 864
+GETELT SEM 863
+GETELT SEM 862
+GETELT SEM 861
+GETELT SEM 860
+GETELT SEM 859
+GETELT SEM 858
+GETELT SEM 857
+GETELT SEM 856
+GETELT SEM 855
+GETELT SEM 854
+GETELT SEM 853
+GETELT SEM 852
+GETELT SEM 851
+GETELT SEM 850
+GETELT SEM 849
+GETELT SEM 848
+GETELT SEM 847
+GETELT SEM 846
+GETELT SEM 845
+GETELT SEM 844
+GETELT SEM 843
+GETELT SEM 842
+GETELT SEM 841
+GETELT SEM 840
+GETELT SEM 839
+GETELT SEM 838
+GETELT SEM 837
+GETELT SEM 836
+GETELT SEM 835
+GETELT SEM 834
+GETELT SEM 833
+GETELT SEM 832
+GETELT SEM 831
+GETELT SEM 830
+GETELT SEM 829
+GETELT SEM 828
+GETELT SEM 827
+GETELT SEM 826
+GETELT SEM 825
+GETELT SEM 824
+GETELT SEM 823
+GETELT SEM 822
+GETELT SEM 821
+GETELT SEM 820
+GETELT SEM 819
+GETELT SEM 818
+GETELT SEM 817
+GETELT SEM 816
+GETELT SEM 815
+GETELT SEM 814
+GETELT SEM 813
+GETELT SEM 812
+GETELT SEM 811
+GETELT SEM 810
+GETELT SEM 809
+GETELT SEM 808
+GETELT SEM 807
+GETELT SEM 806
+GETELT SEM 805
+GETELT SEM 804
+GETELT SEM 803
+GETELT SEM 802
+GETELT SEM 801
+GETELT SEM 800
+GETELT SEM 799
+GETELT SEM 798
+GETELT SEM 797
+GETELT SEM 796
+GETELT SEM 795
+GETELT SEM 794
+GETELT SEM 793
+GETELT SEM 792
+GETELT SEM 791
+GETELT SEM 790
+GETELT SEM 789
+GETELT SEM 788
+GETELT SEM 787
+GETELT SEM 786
+GETELT SEM 785
+GETELT SEM 784
+GETELT SEM 783
+GETELT SEM 782
+GETELT SEM 781
+GETELT SEM 780
+GETELT SEM 779
+GETELT SEM 778
+GETELT SEM 777
+GETELT SEM 776
+GETELT SEM 775
+GETELT SEM 774
+GETELT SEM 773
+GETELT SEM 772
+GETELT SEM 771
+GETELT SEM 770
+GETELT SEM 769
+GETELT SEM 768
+GETELT SEM 767
+GETELT SEM 766
+GETELT SEM 765
+GETELT SEM 764
+GETELT SEM 763
+GETELT SEM 762
+GETELT SEM 761
+GETELT SEM 760
+GETELT SEM 759
+GETELT SEM 758
+GETELT SEM 757
+GETELT SEM 756
+GETELT SEM 755
+GETELT SEM 754
+GETELT SEM 753
+GETELT SEM 752
+GETELT SEM 751
+GETELT SEM 750
+GETELT SEM 749
+GETELT SEM 748
+GETELT SEM 747
+GETELT SEM 746
+GETELT SEM 745
+GETELT SEM 744
+GETELT SEM 743
+GETELT SEM 742
+GETELT SEM 741
+GETELT SEM 740
+GETELT SEM 739
+GETELT SEM 738
+GETELT SEM 737
+GETELT SEM 736
+GETELT SEM 735
+GETELT SEM 734
+GETELT SEM 733
+GETELT SEM 732
+GETELT SEM 731
+GETELT SEM 730
+GETELT SEM 729
+GETELT SEM 728
+GETELT SEM 727
+GETELT SEM 726
+GETELT SEM 725
+GETELT SEM 724
+GETELT SEM 723
+GETELT SEM 722
+GETELT SEM 721
+GETELT SEM 720
+GETELT SEM 719
+GETELT SEM 718
+GETELT SEM 717
+GETELT SEM 716
+GETELT SEM 715
+GETELT SEM 714
+GETELT SEM 713
+GETELT SEM 712
+GETELT SEM 711
+GETELT SEM 710
+GETELT SEM 709
+GETELT SEM 708
+GETELT SEM 707
+GETELT SEM 706
+GETELT SEM 705
+GETELT SEM 704
+GETELT SEM 703
+GETELT SEM 702
+GETELT SEM 701
+GETELT SEM 700
+GETELT SEM 699
+GETELT SEM 698
+GETELT SEM 697
+GETELT SEM 696
+GETELT SEM 695
+GETELT SEM 694
+GETELT SEM 693
+GETELT SEM 692
+GETELT SEM 691
+GETELT SEM 690
+GETELT SEM 689
+GETELT SEM 688
+GETELT SEM 687
+GETELT SEM 686
+GETELT SEM 685
+GETELT SEM 684
+GETELT SEM 683
+GETELT SEM 682
+GETELT SEM 681
+GETELT SEM 680
+GETELT SEM 679
+GETELT SEM 678
+GETELT SEM 677
+GETELT SEM 676
+GETELT SEM 675
+GETELT SEM 674
+GETELT SEM 673
+GETELT SEM 672
+GETELT SEM 671
+GETELT SEM 670
+GETELT SEM 669
+GETELT SEM 668
+GETELT SEM 667
+GETELT SEM 666
+GETELT SEM 665
+GETELT SEM 664
+GETELT SEM 663
+GETELT SEM 662
+GETELT SEM 661
+GETELT SEM 660
+GETELT SEM 659
+GETELT SEM 658
+GETELT SEM 657
+GETELT SEM 656
+GETELT SEM 655
+GETELT SEM 654
+GETELT SEM 653
+GETELT SEM 652
+GETELT SEM 651
+GETELT SEM 650
+GETELT SEM 649
+GETELT SEM 648
+GETELT SEM 647
+GETELT SEM 646
+GETELT SEM 645
+GETELT SEM 644
+GETELT SEM 643
+GETELT SEM 642
+GETELT SEM 641
+GETELT SEM 640
+GETELT SEM 639
+GETELT SEM 638
+GETELT SEM 637
+GETELT SEM 636
+GETELT SEM 635
+GETELT SEM 634
+GETELT SEM 633
+GETELT SEM 632
+GETELT SEM 631
+GETELT SEM 630
+GETELT SEM 629
+GETELT SEM 628
+GETELT SEM 627
+GETELT SEM 626
+GETELT SEM 625
+GETELT SEM 624
+GETELT SEM 623
+GETELT SEM 622
+GETELT SEM 621
+GETELT SEM 620
+GETELT SEM 619
+GETELT SEM 618
+GETELT SEM 617
+GETELT SEM 616
+GETELT SEM 615
+GETELT SEM 614
+GETELT SEM 613
+GETELT SEM 612
+GETELT SEM 611
+GETELT SEM 610
+GETELT SEM 609
+GETELT SEM 608
+GETELT SEM 607
+GETELT SEM 606
+GETELT SEM 605
+GETELT SEM 604
+GETELT SEM 603
+GETELT SEM 602
+GETELT SEM 601
+GETELT SEM 600
+GETELT SEM 599
+GETELT SEM 598
+GETELT SEM 597
+GETELT SEM 596
+GETELT SEM 595
+GETELT SEM 594
+GETELT SEM 593
+GETELT SEM 592
+GETELT SEM 591
+GETELT SEM 590
+GETELT SEM 589
+GETELT SEM 588
+GETELT SEM 587
+GETELT SEM 586
+GETELT SEM 585
+GETELT SEM 584
+GETELT SEM 583
+GETELT SEM 582
+GETELT SEM 581
+GETELT SEM 580
+GETELT SEM 579
+GETELT SEM 578
+GETELT SEM 577
+GETELT SEM 576
+GETELT SEM 575
+GETELT SEM 574
+GETELT SEM 573
+GETELT SEM 572
+GETELT SEM 571
+GETELT SEM 570
+GETELT SEM 569
+GETELT SEM 568
+GETELT SEM 567
+GETELT SEM 566
+GETELT SEM 565
+GETELT SEM 564
+GETELT SEM 563
+GETELT SEM 562
+GETELT SEM 561
+GETELT SEM 560
+GETELT SEM 559
+GETELT SEM 558
+GETELT SEM 557
+GETELT SEM 556
+GETELT SEM 555
+GETELT SEM 554
+GETELT SEM 553
+GETELT SEM 552
+GETELT SEM 551
+GETELT SEM 550
+GETELT SEM 549
+GETELT SEM 548
+GETELT SEM 547
+GETELT SEM 546
+GETELT SEM 545
+GETELT SEM 544
+GETELT SEM 543
+GETELT SEM 542
+GETELT SEM 541
+GETELT SEM 540
+GETELT SEM 539
+GETELT SEM 538
+GETELT SEM 537
+GETELT SEM 536
+GETELT SEM 535
+GETELT SEM 534
+GETELT SEM 533
+GETELT SEM 532
+GETELT SEM 531
+GETELT SEM 530
+GETELT SEM 529
+GETELT SEM 528
+GETELT SEM 527
+GETELT SEM 526
+GETELT SEM 525
+GETELT SEM 524
+GETELT SEM 523
+GETELT SEM 522
+GETELT SEM 521
+GETELT SEM 520
+GETELT SEM 519
+GETELT SEM 518
+GETELT SEM 517
+GETELT SEM 516
+GETELT SEM 515
+GETELT SEM 514
+GETELT SEM 513
+GETELT SEM 512
+GETELT SEM 511
+GETELT SEM 510
+GETELT SEM 509
+GETELT SEM 508
+GETELT SEM 507
+GETELT SEM 506
+GETELT SEM 505
+GETELT SEM 504
+GETELT SEM 503
+GETELT SEM 502
+GETELT SEM 501
+GETELT SEM 500
+GETELT SEM 499
+GETELT SEM 498
+GETELT SEM 497
+GETELT SEM 496
+GETELT SEM 495
+GETELT SEM 494
+GETELT SEM 493
+GETELT SEM 492
+GETELT SEM 491
+GETELT SEM 490
+GETELT SEM 489
+GETELT SEM 488
+GETELT SEM 487
+GETELT SEM 486
+GETELT SEM 485
+GETELT SEM 484
+GETELT SEM 483
+GETELT SEM 482
+GETELT SEM 481
+GETELT SEM 480
+GETELT SEM 479
+GETELT SEM 478
+GETELT SEM 477
+GETELT SEM 476
+GETELT SEM 475
+GETELT SEM 474
+GETELT SEM 473
+GETELT SEM 472
+GETELT SEM 471
+GETELT SEM 470
+GETELT SEM 469
+GETELT SEM 468
+GETELT SEM 467
+GETELT SEM 466
+GETELT SEM 465
+GETELT SEM 464
+GETELT SEM 463
+GETELT SEM 462
+GETELT SEM 461
+GETELT SEM 460
+GETELT SEM 459
+GETELT SEM 458
+GETELT SEM 457
+GETELT SEM 456
+GETELT SEM 455
+GETELT SEM 454
+GETELT SEM 453
+GETELT SEM 452
+GETELT SEM 451
+GETELT SEM 450
+GETELT SEM 449
+GETELT SEM 448
+GETELT SEM 447
+GETELT SEM 446
+GETELT SEM 445
+GETELT SEM 444
+GETELT SEM 443
+GETELT SEM 442
+GETELT SEM 441
+GETELT SEM 440
+GETELT SEM 439
+GETELT SEM 438
+GETELT SEM 437
+GETELT SEM 436
+GETELT SEM 435
+GETELT SEM 434
+GETELT SEM 433
+GETELT SEM 432
+GETELT SEM 431
+GETELT SEM 430
+GETELT SEM 429
+GETELT SEM 428
+GETELT SEM 427
+GETELT SEM 426
+GETELT SEM 425
+GETELT SEM 424
+GETELT SEM 423
+GETELT SEM 422
+GETELT SEM 421
+GETELT SEM 420
+GETELT SEM 419
+GETELT SEM 418
+GETELT SEM 417
+GETELT SEM 416
+GETELT SEM 415
+GETELT SEM 414
+GETELT SEM 413
+GETELT SEM 412
+GETELT SEM 411
+GETELT SEM 410
+GETELT SEM 409
+GETELT SEM 408
+GETELT SEM 407
+GETELT SEM 406
+GETELT SEM 405
+GETELT SEM 404
+GETELT SEM 403
+GETELT SEM 402
+GETELT SEM 401
+GETELT SEM 400
+GETELT SEM 399
+GETELT SEM 398
+GETELT SEM 397
+GETELT SEM 396
+GETELT SEM 395
+GETELT SEM 394
+GETELT SEM 393
+GETELT SEM 392
+GETELT SEM 391
+GETELT SEM 390
+GETELT SEM 389
+GETELT SEM 388
+GETELT SEM 387
+GETELT SEM 386
+GETELT SEM 385
+GETELT SEM 384
+GETELT SEM 383
+GETELT SEM 382
+GETELT SEM 381
+GETELT SEM 380
+GETELT SEM 379
+GETELT SEM 378
+GETELT SEM 377
+GETELT SEM 376
+GETELT SEM 375
+GETELT SEM 374
+GETELT SEM 373
+GETELT SEM 372
+GETELT SEM 371
+GETELT SEM 370
+GETELT SEM 369
+GETELT SEM 368
+GETELT SEM 367
+GETELT SEM 366
+GETELT SEM 365
+GETELT SEM 364
+GETELT SEM 363
+GETELT SEM 362
+GETELT SEM 361
+GETELT SEM 360
+GETELT SEM 359
+GETELT SEM 358
+GETELT SEM 357
+GETELT SEM 356
+GETELT SEM 355
+GETELT SEM 354
+GETELT SEM 353
+GETELT SEM 352
+GETELT SEM 351
+GETELT SEM 350
+GETELT SEM 349
+GETELT SEM 348
+GETELT SEM 347
+GETELT SEM 346
+GETELT SEM 345
+GETELT SEM 344
+GETELT SEM 343
+GETELT SEM 342
+GETELT SEM 341
+GETELT SEM 340
+GETELT SEM 339
+GETELT SEM 338
+GETELT SEM 337
+GETELT SEM 336
+GETELT SEM 335
+GETELT SEM 334
+GETELT SEM 333
+GETELT SEM 332
+GETELT SEM 331
+GETELT SEM 330
+GETELT SEM 329
+GETELT SEM 328
+GETELT SEM 327
+GETELT SEM 326
+GETELT SEM 325
+GETELT SEM 324
+GETELT SEM 323
+GETELT SEM 322
+GETELT SEM 321
+GETELT SEM 320
+GETELT SEM 319
+GETELT SEM 318
+GETELT SEM 317
+GETELT SEM 316
+GETELT SEM 315
+GETELT SEM 314
+GETELT SEM 313
+GETELT SEM 312
+GETELT SEM 311
+GETELT SEM 310
+GETELT SEM 309
+GETELT SEM 308
+GETELT SEM 307
+GETELT SEM 306
+GETELT SEM 305
+GETELT SEM 304
+GETELT SEM 303
+GETELT SEM 302
+GETELT SEM 301
+GETELT SEM 300
+GETELT SEM 299
+GETELT SEM 298
+GETELT SEM 297
+GETELT SEM 296
+GETELT SEM 295
+GETELT SEM 294
+GETELT SEM 293
+GETELT SEM 292
+GETELT SEM 291
+GETELT SEM 290
+GETELT SEM 289
+GETELT SEM 288
+GETELT SEM 287
+GETELT SEM 286
+GETELT SEM 285
+GETELT SEM 284
+GETELT SEM 283
+GETELT SEM 282
+GETELT SEM 281
+GETELT SEM 280
+GETELT SEM 279
+GETELT SEM 278
+GETELT SEM 277
+GETELT SEM 276
+GETELT SEM 275
+GETELT SEM 274
+GETELT SEM 273
+GETELT SEM 272
+GETELT SEM 271
+GETELT SEM 270
+GETELT SEM 269
+GETELT SEM 268
+GETELT SEM 267
+GETELT SEM 266
+GETELT SEM 265
+GETELT SEM 264
+GETELT SEM 263
+GETELT SEM 262
+GETELT SEM 261
+GETELT SEM 260
+GETELT SEM 259
+GETELT SEM 258
+GETELT SEM 257
+GETELT SEM 256
+GETELT SEM 255
+GETELT SEM 254
+GETELT SEM 253
+GETELT SEM 252
+GETELT SEM 251
+GETELT SEM 250
+GETELT SEM 249
+GETELT SEM 248
+GETELT SEM 247
+GETELT SEM 246
+GETELT SEM 245
+GETELT SEM 244
+GETELT SEM 243
+GETELT SEM 242
+GETELT SEM 241
+GETELT SEM 240
+GETELT SEM 239
+GETELT SEM 238
+GETELT SEM 237
+GETELT SEM 236
+GETELT SEM 235
+GETELT SEM 234
+GETELT SEM 233
+GETELT SEM 232
+GETELT SEM 231
+GETELT SEM 230
+GETELT SEM 229
+GETELT SEM 228
+GETELT SEM 227
+GETELT SEM 226
+GETELT SEM 225
+GETELT SEM 224
+GETELT SEM 223
+GETELT SEM 222
+GETELT SEM 221
+GETELT SEM 220
+GETELT SEM 219
+GETELT SEM 218
+GETELT SEM 217
+GETELT SEM 216
+GETELT SEM 215
+GETELT SEM 214
+GETELT SEM 213
+GETELT SEM 212
+GETELT SEM 211
+GETELT SEM 210
+GETELT SEM 209
+GETELT SEM 208
+GETELT SEM 207
+GETELT SEM 206
+GETELT SEM 205
+GETELT SEM 204
+GETELT SEM 203
+GETELT SEM 202
+GETELT SEM 201
+GETELT SEM 200
+GETELT SEM 199
+GETELT SEM 198
+GETELT SEM 197
+GETELT SEM 196
+GETELT SEM 195
+GETELT SEM 194
+GETELT SEM 193
+GETELT SEM 192
+GETELT SEM 191
+GETELT SEM 190
+GETELT SEM 189
+GETELT SEM 188
+GETELT SEM 187
+GETELT SEM 186
+GETELT SEM 185
+GETELT SEM 184
+GETELT SEM 183
+GETELT SEM 182
+GETELT SEM 181
+GETELT SEM 180
+GETELT SEM 179
+GETELT SEM 178
+GETELT SEM 177
+GETELT SEM 176
+GETELT SEM 175
+GETELT SEM 

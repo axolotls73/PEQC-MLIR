@@ -1,0 +1,745 @@
+command line: /usr/bin/time -v pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees generated-polybench-mini-dataset-use-scalar-lb/interp/ludcmp-interp.c pact26-mini-initial-exp/llvm23-affine-tile/translated/ludcmp-8-translated-noasyncepilogue.c "A,B,x,y"
+return code: 0
+[PAST] Verify equivalence of programs by abstract interpretation.
+[PAST] Program P1:
+void kernel_ludcmp(int n, double A[(40 + 0)][(40 + 0)], double b[(40 + 0)], double x[(40 + 0)], double y[(40 + 0)])
+{
+  int i; 
+  int j; 
+  int k; 
+  double w; 
+  for (i = 0; i < 40; i++)
+    {
+      for (j = 0; j < i; j++)
+        {
+          w = A[i][j]; 
+          for (k = 0; k < j; k++)
+            {
+              w -= (A[i][k] * A[k][j]); 
+            }
+          
+          A[i][j] = (w / A[j][j]); 
+        }
+      
+      for (j = i; j < 40; j++)
+        {
+          w = A[i][j]; 
+          for (k = 0; k < i; k++)
+            {
+              w -= (A[i][k] * A[k][j]); 
+            }
+          
+          A[i][j] = w; 
+        }
+      
+    }
+  
+  for (i = 0; i < 40; i++)
+    {
+      w = b[i]; 
+      for (j = 0; j < i; j++)
+        {
+          w -= (A[i][j] * y[j]); 
+        }
+      
+      y[i] = w; 
+    }
+  
+  for (i = (40 - 1); i >= 0; i--)
+    {
+      w = y[i]; 
+      for (j = (i + 1); j < 40; j++)
+        {
+          w -= (A[i][j] * x[j]); 
+        }
+      
+      x[i] = (w / A[i][i]); 
+    }
+  
+}
+{
+  int n; 
+  double* A; 
+  double* b; 
+  double* x; 
+  double* y; 
+  kernel_ludcmp(n, A, b, x, y); 
+}
+[PAST] Program P2:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i++)
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i++)
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j++)
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_ludcmp(int func_arg_0, double* func_arg_1, double* func_arg_2, double* func_arg_3, double* func_arg_4)
+{
+  int arith_const_39_5 = 39; 
+  int arith_const_neg_1_6 = -(1); 
+  int arith_const_1_7 = 1; 
+  int arith_const_32_8 = 32; 
+  int arith_const_40_9 = 40; 
+  int arith_const_0_10 = 0; 
+  double _11; 
+  double* memref_alloca_12; 
+  memref_alloca_12[0] = _11; 
+  for (int for_iter_13 = arith_const_0_10; for_iter_13 < arith_const_40_9; for_iter_13 += arith_const_32_8)
+    {
+      int arith_addi_14 = (for_iter_13 + arith_const_32_8); 
+      int arith_minsi_15 = min(arith_addi_14, arith_const_40_9); 
+      for (int for_iter_16 = for_iter_13; for_iter_16 < arith_minsi_15; for_iter_16 += arith_const_1_7)
+        {
+          for (int for_iter_17 = arith_const_0_10; for_iter_17 < for_iter_16; for_iter_17 += arith_const_1_7)
+            {
+              double memref_load_18 = func_arg_1[for_iter_16][for_iter_17]; 
+              memref_alloca_12[0] = memref_load_18; 
+              for (int for_iter_19 = arith_const_0_10; for_iter_19 < for_iter_17; for_iter_19 += arith_const_1_7)
+                {
+                  double memref_load_20 = func_arg_1[for_iter_16][for_iter_19]; 
+                  double memref_load_21 = func_arg_1[for_iter_19][for_iter_17]; 
+                  double arith_mulf_22 = (memref_load_20 * memref_load_21); 
+                  double memref_load_23 = memref_alloca_12[0]; 
+                  double arith_subf_24 = (memref_load_23 - arith_mulf_22); 
+                  memref_alloca_12[0] = arith_subf_24; 
+                }
+              
+              double memref_load_25 = memref_alloca_12[0]; 
+              double memref_load_26 = func_arg_1[for_iter_17][for_iter_17]; 
+              double arith_divf_27 = (memref_load_25 / memref_load_26); 
+              func_arg_1[for_iter_16][for_iter_17] = arith_divf_27; 
+            }
+          
+          for (int for_iter_28 = for_iter_16; for_iter_28 < arith_const_40_9; for_iter_28 += arith_const_1_7)
+            {
+              double memref_load_29 = func_arg_1[for_iter_16][for_iter_28]; 
+              memref_alloca_12[0] = memref_load_29; 
+              for (int for_iter_30 = arith_const_0_10; for_iter_30 < for_iter_16; for_iter_30 += arith_const_1_7)
+                {
+                  double memref_load_31 = func_arg_1[for_iter_16][for_iter_30]; 
+                  double memref_load_32 = func_arg_1[for_iter_30][for_iter_28]; 
+                  double arith_mulf_33 = (memref_load_31 * memref_load_32); 
+                  double memref_load_34 = memref_alloca_12[0]; 
+                  double arith_subf_35 = (memref_load_34 - arith_mulf_33); 
+                  memref_alloca_12[0] = arith_subf_35; 
+                }
+              
+              double memref_load_36 = memref_alloca_12[0]; 
+              func_arg_1[for_iter_16][for_iter_28] = memref_load_36; 
+            }
+          
+        }
+      
+    }
+  
+  for (int for_iter_37 = arith_const_0_10; for_iter_37 < arith_const_40_9; for_iter_37 += arith_const_32_8)
+    {
+      int arith_addi_38 = (for_iter_37 + arith_const_32_8); 
+      int arith_minsi_39 = min(arith_addi_38, arith_const_40_9); 
+      for (int for_iter_40 = for_iter_37; for_iter_40 < arith_minsi_39; for_iter_40 += arith_const_1_7)
+        {
+          double memref_load_41 = func_arg_2[for_iter_40]; 
+          memref_alloca_12[0] = memref_load_41; 
+          for (int for_iter_42 = arith_const_0_10; for_iter_42 < for_iter_40; for_iter_42 += arith_const_1_7)
+            {
+              double memref_load_43 = func_arg_1[for_iter_40][for_iter_42]; 
+              double memref_load_44 = func_arg_4[for_iter_42]; 
+              double arith_mulf_45 = (memref_load_43 * memref_load_44); 
+              double memref_load_46 = memref_alloca_12[0]; 
+              double arith_subf_47 = (memref_load_46 - arith_mulf_45); 
+              memref_alloca_12[0] = arith_subf_47; 
+            }
+          
+          double memref_load_48 = memref_alloca_12[0]; 
+          func_arg_4[for_iter_40] = memref_load_48; 
+        }
+      
+    }
+  
+  for (int for_iter_49 = arith_const_0_10; for_iter_49 < arith_const_40_9; for_iter_49 += arith_const_32_8)
+    {
+      int arith_addi_50 = (for_iter_49 + arith_const_32_8); 
+      int arith_minsi_51 = min(arith_addi_50, arith_const_40_9); 
+      for (int for_iter_52 = for_iter_49; for_iter_52 < arith_minsi_51; for_iter_52 += arith_const_1_7)
+        {
+          int arith_muli_53 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_54 = (arith_muli_53 + arith_const_39_5); 
+          double memref_load_55 = func_arg_4[arith_addi_54]; 
+          memref_alloca_12[0] = memref_load_55; 
+          int arith_muli_56 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_57 = (arith_muli_56 + arith_const_40_9); 
+          for (int for_iter_58 = arith_addi_57; for_iter_58 < arith_const_40_9; for_iter_58 += arith_const_1_7)
+            {
+              int arith_muli_59 = (for_iter_52 * arith_const_neg_1_6); 
+              int arith_addi_60 = (arith_muli_59 + arith_const_39_5); 
+              double memref_load_61 = func_arg_1[arith_addi_60][for_iter_58]; 
+              double memref_load_62 = func_arg_3[for_iter_58]; 
+              double arith_mulf_63 = (memref_load_61 * memref_load_62); 
+              double memref_load_64 = memref_alloca_12[0]; 
+              double arith_subf_65 = (memref_load_64 - arith_mulf_63); 
+              memref_alloca_12[0] = arith_subf_65; 
+            }
+          
+          double memref_load_66 = memref_alloca_12[0]; 
+          int arith_muli_67 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_68 = (arith_muli_67 + arith_const_39_5); 
+          int arith_muli_69 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_70 = (arith_muli_69 + arith_const_39_5); 
+          double memref_load_71 = func_arg_1[arith_addi_68][arith_addi_70]; 
+          double arith_divf_72 = (memref_load_66 / memref_load_71); 
+          int arith_muli_73 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_74 = (arith_muli_73 + arith_const_39_5); 
+          func_arg_3[arith_addi_74] = arith_divf_72; 
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int n; 
+  double* A; 
+  double* b; 
+  double* x; 
+  double* y; 
+  kernel_ludcmp(n, A, b, x, y); 
+}
+[PAST] Live-out variables to be checked for equivalence: A B x y 
+[PAST][AI][Equivalence] Interpret program P1...
+[PAST][AI] Clone and normalize program before interpretation...
+void kernel_ludcmp(int n, double A[(40 + 0)][(40 + 0)], double b[(40 + 0)], double x[(40 + 0)], double y[(40 + 0)])
+{
+  int i; 
+  int j; 
+  int k; 
+  double w; 
+  for (i = 0; i < 40; i = (i + 1))
+    {
+      for (j = 0; j < i; j = (j + 1))
+        {
+          w = A[i][j]; 
+          for (k = 0; k < j; k = (k + 1))
+            {
+              w = (w - (A[i][k] * A[k][j])); 
+            }
+          
+          A[i][j] = (w / A[j][j]); 
+        }
+      
+      for (j = i; j < 40; j = (j + 1))
+        {
+          w = A[i][j]; 
+          for (k = 0; k < i; k = (k + 1))
+            {
+              w = (w - (A[i][k] * A[k][j])); 
+            }
+          
+          A[i][j] = w; 
+        }
+      
+    }
+  
+  for (i = 0; i < 40; i = (i + 1))
+    {
+      w = b[i]; 
+      for (j = 0; j < i; j = (j + 1))
+        {
+          w = (w - (A[i][j] * y[j])); 
+        }
+      
+      y[i] = w; 
+    }
+  
+  for (i = (40 - 1); i >= 0; i = (i - 1))
+    {
+      w = y[i]; 
+      for (j = (i + 1); j < 40; j = (j + 1))
+        {
+          w = (w - (A[i][j] * x[j])); 
+        }
+      
+      x[i] = (w / A[i][i]); 
+    }
+  
+}
+{
+  int n; 
+  double* A; 
+  double* b; 
+  double* x; 
+  double* y; 
+  kernel_ludcmp(n, A, b, x, y); 
+}
+[PAST] Final program interpreted:
+void kernel_ludcmp(int n, double A[(40 + 0)][(40 + 0)], double b[(40 + 0)], double x[(40 + 0)], double y[(40 + 0)])
+{
+  int i; 
+  int j; 
+  int k; 
+  double w; 
+  for (i = 0; i < 40; i = (i + 1))
+    {
+      for (j = 0; j < i; j = (j + 1))
+        {
+          w = A[i][j]; 
+          for (k = 0; k < j; k = (k + 1))
+            {
+              w = (w - (A[i][k] * A[k][j])); 
+            }
+          
+          A[i][j] = (w / A[j][j]); 
+        }
+      
+      for (j = i; j < 40; j = (j + 1))
+        {
+          w = A[i][j]; 
+          for (k = 0; k < i; k = (k + 1))
+            {
+              w = (w - (A[i][k] * A[k][j])); 
+            }
+          
+          A[i][j] = w; 
+        }
+      
+    }
+  
+  for (i = 0; i < 40; i = (i + 1))
+    {
+      w = b[i]; 
+      for (j = 0; j < i; j = (j + 1))
+        {
+          w = (w - (A[i][j] * y[j])); 
+        }
+      
+      y[i] = w; 
+    }
+  
+  for (i = (40 - 1); i >= 0; i = (i - 1))
+    {
+      w = y[i]; 
+      for (j = (i + 1); j < 40; j = (j + 1))
+        {
+          w = (w - (A[i][j] * x[j])); 
+        }
+      
+      x[i] = (w / A[i][i]); 
+    }
+  
+}
+{
+  int n; 
+  double* A; 
+  double* b; 
+  double* x; 
+  double* y; 
+  kernel_ludcmp(n, A, b, x, y); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x55fcd0dce610
+[INFO]	1 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	1 calls to evaluate funcalls
+[INFO]	1763 calls to evaluate for loops
+[INFO]	76646 calls to evaluate statements
+[INFO]	25470 CDAGs created
+[INFO]	45020 non-CDFG operations in CDAGs
+[INFO]	23 symbols in symbol table
+[INFO]	28 variables
+[INFO]	24 scalar variables
+[INFO]	4 array variables
+[INFO]	1744 memory elements used
+[INFO]	4648 memory elements allocated
+[INFO]	139520 memory bytes used
+[INFO]	371840 memory bytes allocated
+[PAST][AI][Equivalence] Interpret program P2...
+[PAST][AI] Clone and normalize program before interpretation...
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_ludcmp(int func_arg_0, double* func_arg_1, double* func_arg_2, double* func_arg_3, double* func_arg_4)
+{
+  int arith_const_39_5 = 39; 
+  int arith_const_neg_1_6 = -(1); 
+  int arith_const_1_7 = 1; 
+  int arith_const_32_8 = 32; 
+  int arith_const_40_9 = 40; 
+  int arith_const_0_10 = 0; 
+  double _11; 
+  double* memref_alloca_12; 
+  memref_alloca_12[0] = _11; 
+  for (int for_iter_13 = arith_const_0_10; for_iter_13 < arith_const_40_9; for_iter_13 = (for_iter_13 + arith_const_32_8))
+    {
+      int arith_addi_14 = (for_iter_13 + arith_const_32_8); 
+      int arith_minsi_15 = min(arith_addi_14, arith_const_40_9); 
+      for (int for_iter_16 = for_iter_13; for_iter_16 < arith_minsi_15; for_iter_16 = (for_iter_16 + arith_const_1_7))
+        {
+          for (int for_iter_17 = arith_const_0_10; for_iter_17 < for_iter_16; for_iter_17 = (for_iter_17 + arith_const_1_7))
+            {
+              double memref_load_18 = func_arg_1[for_iter_16][for_iter_17]; 
+              memref_alloca_12[0] = memref_load_18; 
+              for (int for_iter_19 = arith_const_0_10; for_iter_19 < for_iter_17; for_iter_19 = (for_iter_19 + arith_const_1_7))
+                {
+                  double memref_load_20 = func_arg_1[for_iter_16][for_iter_19]; 
+                  double memref_load_21 = func_arg_1[for_iter_19][for_iter_17]; 
+                  double arith_mulf_22 = (memref_load_20 * memref_load_21); 
+                  double memref_load_23 = memref_alloca_12[0]; 
+                  double arith_subf_24 = (memref_load_23 - arith_mulf_22); 
+                  memref_alloca_12[0] = arith_subf_24; 
+                }
+              
+              double memref_load_25 = memref_alloca_12[0]; 
+              double memref_load_26 = func_arg_1[for_iter_17][for_iter_17]; 
+              double arith_divf_27 = (memref_load_25 / memref_load_26); 
+              func_arg_1[for_iter_16][for_iter_17] = arith_divf_27; 
+            }
+          
+          for (int for_iter_28 = for_iter_16; for_iter_28 < arith_const_40_9; for_iter_28 = (for_iter_28 + arith_const_1_7))
+            {
+              double memref_load_29 = func_arg_1[for_iter_16][for_iter_28]; 
+              memref_alloca_12[0] = memref_load_29; 
+              for (int for_iter_30 = arith_const_0_10; for_iter_30 < for_iter_16; for_iter_30 = (for_iter_30 + arith_const_1_7))
+                {
+                  double memref_load_31 = func_arg_1[for_iter_16][for_iter_30]; 
+                  double memref_load_32 = func_arg_1[for_iter_30][for_iter_28]; 
+                  double arith_mulf_33 = (memref_load_31 * memref_load_32); 
+                  double memref_load_34 = memref_alloca_12[0]; 
+                  double arith_subf_35 = (memref_load_34 - arith_mulf_33); 
+                  memref_alloca_12[0] = arith_subf_35; 
+                }
+              
+              double memref_load_36 = memref_alloca_12[0]; 
+              func_arg_1[for_iter_16][for_iter_28] = memref_load_36; 
+            }
+          
+        }
+      
+    }
+  
+  for (int for_iter_37 = arith_const_0_10; for_iter_37 < arith_const_40_9; for_iter_37 = (for_iter_37 + arith_const_32_8))
+    {
+      int arith_addi_38 = (for_iter_37 + arith_const_32_8); 
+      int arith_minsi_39 = min(arith_addi_38, arith_const_40_9); 
+      for (int for_iter_40 = for_iter_37; for_iter_40 < arith_minsi_39; for_iter_40 = (for_iter_40 + arith_const_1_7))
+        {
+          double memref_load_41 = func_arg_2[for_iter_40]; 
+          memref_alloca_12[0] = memref_load_41; 
+          for (int for_iter_42 = arith_const_0_10; for_iter_42 < for_iter_40; for_iter_42 = (for_iter_42 + arith_const_1_7))
+            {
+              double memref_load_43 = func_arg_1[for_iter_40][for_iter_42]; 
+              double memref_load_44 = func_arg_4[for_iter_42]; 
+              double arith_mulf_45 = (memref_load_43 * memref_load_44); 
+              double memref_load_46 = memref_alloca_12[0]; 
+              double arith_subf_47 = (memref_load_46 - arith_mulf_45); 
+              memref_alloca_12[0] = arith_subf_47; 
+            }
+          
+          double memref_load_48 = memref_alloca_12[0]; 
+          func_arg_4[for_iter_40] = memref_load_48; 
+        }
+      
+    }
+  
+  for (int for_iter_49 = arith_const_0_10; for_iter_49 < arith_const_40_9; for_iter_49 = (for_iter_49 + arith_const_32_8))
+    {
+      int arith_addi_50 = (for_iter_49 + arith_const_32_8); 
+      int arith_minsi_51 = min(arith_addi_50, arith_const_40_9); 
+      for (int for_iter_52 = for_iter_49; for_iter_52 < arith_minsi_51; for_iter_52 = (for_iter_52 + arith_const_1_7))
+        {
+          int arith_muli_53 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_54 = (arith_muli_53 + arith_const_39_5); 
+          double memref_load_55 = func_arg_4[arith_addi_54]; 
+          memref_alloca_12[0] = memref_load_55; 
+          int arith_muli_56 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_57 = (arith_muli_56 + arith_const_40_9); 
+          for (int for_iter_58 = arith_addi_57; for_iter_58 < arith_const_40_9; for_iter_58 = (for_iter_58 + arith_const_1_7))
+            {
+              int arith_muli_59 = (for_iter_52 * arith_const_neg_1_6); 
+              int arith_addi_60 = (arith_muli_59 + arith_const_39_5); 
+              double memref_load_61 = func_arg_1[arith_addi_60][for_iter_58]; 
+              double memref_load_62 = func_arg_3[for_iter_58]; 
+              double arith_mulf_63 = (memref_load_61 * memref_load_62); 
+              double memref_load_64 = memref_alloca_12[0]; 
+              double arith_subf_65 = (memref_load_64 - arith_mulf_63); 
+              memref_alloca_12[0] = arith_subf_65; 
+            }
+          
+          double memref_load_66 = memref_alloca_12[0]; 
+          int arith_muli_67 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_68 = (arith_muli_67 + arith_const_39_5); 
+          int arith_muli_69 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_70 = (arith_muli_69 + arith_const_39_5); 
+          double memref_load_71 = func_arg_1[arith_addi_68][arith_addi_70]; 
+          double arith_divf_72 = (memref_load_66 / memref_load_71); 
+          int arith_muli_73 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_74 = (arith_muli_73 + arith_const_39_5); 
+          func_arg_3[arith_addi_74] = arith_divf_72; 
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int n; 
+  double* A; 
+  double* b; 
+  double* x; 
+  double* y; 
+  kernel_ludcmp(n, A, b, x, y); 
+}
+[PAST] Final program interpreted:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_ludcmp(int func_arg_0, double* func_arg_1, double* func_arg_2, double* func_arg_3, double* func_arg_4)
+{
+  int arith_const_39_5 = 39; 
+  int arith_const_neg_1_6 = -(1); 
+  int arith_const_1_7 = 1; 
+  int arith_const_32_8 = 32; 
+  int arith_const_40_9 = 40; 
+  int arith_const_0_10 = 0; 
+  double _11; 
+  double* memref_alloca_12; 
+  memref_alloca_12[0] = _11; 
+  for (int for_iter_13 = arith_const_0_10; for_iter_13 < arith_const_40_9; for_iter_13 = (for_iter_13 + arith_const_32_8))
+    {
+      int arith_addi_14 = (for_iter_13 + arith_const_32_8); 
+      int arith_minsi_15 = min(arith_addi_14, arith_const_40_9); 
+      for (int for_iter_16 = for_iter_13; for_iter_16 < arith_minsi_15; for_iter_16 = (for_iter_16 + arith_const_1_7))
+        {
+          for (int for_iter_17 = arith_const_0_10; for_iter_17 < for_iter_16; for_iter_17 = (for_iter_17 + arith_const_1_7))
+            {
+              double memref_load_18 = func_arg_1[for_iter_16][for_iter_17]; 
+              memref_alloca_12[0] = memref_load_18; 
+              for (int for_iter_19 = arith_const_0_10; for_iter_19 < for_iter_17; for_iter_19 = (for_iter_19 + arith_const_1_7))
+                {
+                  double memref_load_20 = func_arg_1[for_iter_16][for_iter_19]; 
+                  double memref_load_21 = func_arg_1[for_iter_19][for_iter_17]; 
+                  double arith_mulf_22 = (memref_load_20 * memref_load_21); 
+                  double memref_load_23 = memref_alloca_12[0]; 
+                  double arith_subf_24 = (memref_load_23 - arith_mulf_22); 
+                  memref_alloca_12[0] = arith_subf_24; 
+                }
+              
+              double memref_load_25 = memref_alloca_12[0]; 
+              double memref_load_26 = func_arg_1[for_iter_17][for_iter_17]; 
+              double arith_divf_27 = (memref_load_25 / memref_load_26); 
+              func_arg_1[for_iter_16][for_iter_17] = arith_divf_27; 
+            }
+          
+          for (int for_iter_28 = for_iter_16; for_iter_28 < arith_const_40_9; for_iter_28 = (for_iter_28 + arith_const_1_7))
+            {
+              double memref_load_29 = func_arg_1[for_iter_16][for_iter_28]; 
+              memref_alloca_12[0] = memref_load_29; 
+              for (int for_iter_30 = arith_const_0_10; for_iter_30 < for_iter_16; for_iter_30 = (for_iter_30 + arith_const_1_7))
+                {
+                  double memref_load_31 = func_arg_1[for_iter_16][for_iter_30]; 
+                  double memref_load_32 = func_arg_1[for_iter_30][for_iter_28]; 
+                  double arith_mulf_33 = (memref_load_31 * memref_load_32); 
+                  double memref_load_34 = memref_alloca_12[0]; 
+                  double arith_subf_35 = (memref_load_34 - arith_mulf_33); 
+                  memref_alloca_12[0] = arith_subf_35; 
+                }
+              
+              double memref_load_36 = memref_alloca_12[0]; 
+              func_arg_1[for_iter_16][for_iter_28] = memref_load_36; 
+            }
+          
+        }
+      
+    }
+  
+  for (int for_iter_37 = arith_const_0_10; for_iter_37 < arith_const_40_9; for_iter_37 = (for_iter_37 + arith_const_32_8))
+    {
+      int arith_addi_38 = (for_iter_37 + arith_const_32_8); 
+      int arith_minsi_39 = min(arith_addi_38, arith_const_40_9); 
+      for (int for_iter_40 = for_iter_37; for_iter_40 < arith_minsi_39; for_iter_40 = (for_iter_40 + arith_const_1_7))
+        {
+          double memref_load_41 = func_arg_2[for_iter_40]; 
+          memref_alloca_12[0] = memref_load_41; 
+          for (int for_iter_42 = arith_const_0_10; for_iter_42 < for_iter_40; for_iter_42 = (for_iter_42 + arith_const_1_7))
+            {
+              double memref_load_43 = func_arg_1[for_iter_40][for_iter_42]; 
+              double memref_load_44 = func_arg_4[for_iter_42]; 
+              double arith_mulf_45 = (memref_load_43 * memref_load_44); 
+              double memref_load_46 = memref_alloca_12[0]; 
+              double arith_subf_47 = (memref_load_46 - arith_mulf_45); 
+              memref_alloca_12[0] = arith_subf_47; 
+            }
+          
+          double memref_load_48 = memref_alloca_12[0]; 
+          func_arg_4[for_iter_40] = memref_load_48; 
+        }
+      
+    }
+  
+  for (int for_iter_49 = arith_const_0_10; for_iter_49 < arith_const_40_9; for_iter_49 = (for_iter_49 + arith_const_32_8))
+    {
+      int arith_addi_50 = (for_iter_49 + arith_const_32_8); 
+      int arith_minsi_51 = min(arith_addi_50, arith_const_40_9); 
+      for (int for_iter_52 = for_iter_49; for_iter_52 < arith_minsi_51; for_iter_52 = (for_iter_52 + arith_const_1_7))
+        {
+          int arith_muli_53 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_54 = (arith_muli_53 + arith_const_39_5); 
+          double memref_load_55 = func_arg_4[arith_addi_54]; 
+          memref_alloca_12[0] = memref_load_55; 
+          int arith_muli_56 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_57 = (arith_muli_56 + arith_const_40_9); 
+          for (int for_iter_58 = arith_addi_57; for_iter_58 < arith_const_40_9; for_iter_58 = (for_iter_58 + arith_const_1_7))
+            {
+              int arith_muli_59 = (for_iter_52 * arith_const_neg_1_6); 
+              int arith_addi_60 = (arith_muli_59 + arith_const_39_5); 
+              double memref_load_61 = func_arg_1[arith_addi_60][for_iter_58]; 
+              double memref_load_62 = func_arg_3[for_iter_58]; 
+              double arith_mulf_63 = (memref_load_61 * memref_load_62); 
+              double memref_load_64 = memref_alloca_12[0]; 
+              double arith_subf_65 = (memref_load_64 - arith_mulf_63); 
+              memref_alloca_12[0] = arith_subf_65; 
+            }
+          
+          double memref_load_66 = memref_alloca_12[0]; 
+          int arith_muli_67 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_68 = (arith_muli_67 + arith_const_39_5); 
+          int arith_muli_69 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_70 = (arith_muli_69 + arith_const_39_5); 
+          double memref_load_71 = func_arg_1[arith_addi_68][arith_addi_70]; 
+          double arith_divf_72 = (memref_load_66 / memref_load_71); 
+          int arith_muli_73 = (for_iter_52 * arith_const_neg_1_6); 
+          int arith_addi_74 = (arith_muli_73 + arith_const_39_5); 
+          func_arg_3[arith_addi_74] = arith_divf_72; 
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int n; 
+  double* A; 
+  double* b; 
+  double* x; 
+  double* y; 
+  kernel_ludcmp(n, A, b, x, y); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x55fcd0dceac0
+[INFO]	3 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	2 calls to evaluate funcalls
+[INFO]	1769 calls to evaluate for loops
+[INFO]	194157 calls to evaluate statements
+[INFO]	140971 CDAGs created
+[INFO]	0 non-CDFG operations in CDAGs
+[INFO]	121 symbols in symbol table
+[INFO]	104 variables
+[INFO]	100 scalar variables
+[INFO]	4 array variables
+[INFO]	1820 memory elements used
+[INFO]	5864 memory elements allocated
+[INFO]	145600 memory bytes used
+[INFO]	469120 memory bytes allocated
+[PAST][AI][Equivalence] Start checking states for equivalence...
+[PAST][AI][Equivalence] Success: variable A is compliant
+[PAST][AI][Equivalence] Success: variable x is compliant
+[PAST][AI][Equivalence] Success: variable y is compliant
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P1: total=141655, min=1, max=9523
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P2: total=141655, min=1, max=9523
+[PAST][AI][Equivalence] Approximate cumulative memory size: 16611888 Bytes
+[PAST][AI][Equivalence] Success: P1 and P2 are equivalent
+[PAST][AI] Timers:
+Time elapsed for timer 64 for Parsing: 0.024523 seconds
+Time elapsed for timer 65 for Interpret P1: 0.228158 seconds
+Time elapsed for timer 66 for Interpret P2: 0.584634 seconds
+Time elapsed for timer 67 for Equivalence checking: 0.014764 seconds
+[PAST] YES => Programs generated-polybench-mini-dataset-use-scalar-lb/interp/ludcmp-interp.c and pact26-mini-initial-exp/llvm23-affine-tile/translated/ludcmp-8-translated-noasyncepilogue.c are equivalent.

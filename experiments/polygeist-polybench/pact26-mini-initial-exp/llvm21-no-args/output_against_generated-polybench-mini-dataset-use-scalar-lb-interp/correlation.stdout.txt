@@ -1,0 +1,671 @@
+command line: /usr/bin/time -v pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees generated-polybench-mini-dataset-use-scalar-lb/interp/correlation-interp.c pact26-mini-initial-exp/llvm21-no-args/translated/correlation-8-translated-noasyncepilogue.c "data,corr,mean,stddev"
+return code: 0
+[PAST] Verify equivalence of programs by abstract interpretation.
+[PAST] Program P1:
+void kernel_correlation(int m, int n, double float_n, double data[(32 + 0)][(28 + 0)], double corr[(28 + 0)][(28 + 0)], double mean[(28 + 0)], double stddev[(28 + 0)])
+{
+  int i; 
+  int j; 
+  int k; 
+  double eps = 0.100000; 
+  for (j = 0; j < 28; j++)
+    {
+      mean[j] = 0.000000; 
+      for (i = 0; i < 32; i++)
+        {
+          mean[j] += data[i][j]; 
+        }
+      
+      mean[j] /= float_n; 
+    }
+  
+  for (j = 0; j < 28; j++)
+    {
+      stddev[j] = 0.000000; 
+      for (i = 0; i < 32; i++)
+        {
+          stddev[j] += ((data[i][j] - mean[j]) * (data[i][j] - mean[j])); 
+        }
+      
+      stddev[j] /= float_n; 
+      stddev[j] = sqrt(stddev[j]); 
+      stddev[j] = ((stddev[j] <= eps) ? 1.000000 : stddev[j]); 
+    }
+  
+  for (i = 0; i < 32; i++)
+    {
+      for (j = 0; j < 28; j++)
+        {
+          data[i][j] -= mean[j]; 
+          data[i][j] /= (sqrt(float_n) * stddev[j]); 
+        }
+      
+    }
+  
+  for (i = 0; i < (28 - 1); i++)
+    {
+      corr[i][i] = 1.000000; 
+      for (j = (i + 1); j < 28; j++)
+        {
+          corr[i][j] = 0.000000; 
+          for (k = 0; k < 32; k++)
+            {
+              corr[i][j] += (data[k][i] * data[k][j]); 
+            }
+          
+          corr[j][i] = corr[i][j]; 
+        }
+      
+    }
+  
+  corr[(28 - 1)][(28 - 1)] = 1.000000; 
+}
+{
+  int m; 
+  int n; 
+  double float_n; 
+  double* data; 
+  double* corr; 
+  double* mean; 
+  double* stddev; 
+  kernel_correlation(m, n, float_n, data, corr, mean, stddev); 
+}
+[PAST] Program P2:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i++)
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i++)
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j++)
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_correlation(int func_arg_0, int func_arg_1, double func_arg_2, double* func_arg_3, double* func_arg_4, double* func_arg_5, double* func_arg_6)
+{
+  int arith_const_27_7 = 27; 
+  int arith_const_32_8 = 32; 
+  double arith_const_0_9 = 1.000000; 
+  double arith_const_0_10 = 0.000000; 
+  double arith_const_16_11 = 0.100000; 
+  int arith_const_0_12 = 0; 
+  int arith_const_28_13 = 28; 
+  int arith_const_1_14 = 1; 
+  for (int for_iter_15 = arith_const_0_12; for_iter_15 < arith_const_28_13; for_iter_15 += arith_const_1_14)
+    {
+      func_arg_5[for_iter_15] = arith_const_0_10; 
+      for (int for_iter_16 = arith_const_0_12; for_iter_16 < arith_const_32_8; for_iter_16 += arith_const_1_14)
+        {
+          double memref_load_17 = func_arg_3[for_iter_16][for_iter_15]; 
+          double memref_load_18 = func_arg_5[for_iter_15]; 
+          double arith_addf_19 = (memref_load_18 + memref_load_17); 
+          func_arg_5[for_iter_15] = arith_addf_19; 
+        }
+      
+      double memref_load_20 = func_arg_5[for_iter_15]; 
+      double arith_divf_21 = (memref_load_20 / func_arg_2); 
+      func_arg_5[for_iter_15] = arith_divf_21; 
+    }
+  
+  for (int for_iter_22 = arith_const_0_12; for_iter_22 < arith_const_28_13; for_iter_22 += arith_const_1_14)
+    {
+      func_arg_6[for_iter_22] = arith_const_0_10; 
+      for (int for_iter_23 = arith_const_0_12; for_iter_23 < arith_const_32_8; for_iter_23 += arith_const_1_14)
+        {
+          double memref_load_24 = func_arg_3[for_iter_23][for_iter_22]; 
+          double memref_load_25 = func_arg_5[for_iter_22]; 
+          double arith_subf_26 = (memref_load_24 - memref_load_25); 
+          double arith_mulf_27 = (arith_subf_26 * arith_subf_26); 
+          double memref_load_28 = func_arg_6[for_iter_22]; 
+          double arith_addf_29 = (memref_load_28 + arith_mulf_27); 
+          func_arg_6[for_iter_22] = arith_addf_29; 
+        }
+      
+      double memref_load_30 = func_arg_6[for_iter_22]; 
+      double arith_divf_31 = (memref_load_30 / func_arg_2); 
+      double math_sqrt_32 = sqrt(arith_divf_31); 
+      int arith_cmpi_33 = (math_sqrt_32 <= arith_const_16_11); 
+      double arith_select_34 = (arith_cmpi_33 ? arith_const_0_9 : math_sqrt_32); 
+      func_arg_6[for_iter_22] = arith_select_34; 
+    }
+  
+  double math_sqrt_35 = sqrt(func_arg_2); 
+  for (int for_iter_36 = arith_const_0_12; for_iter_36 < arith_const_32_8; for_iter_36 += arith_const_1_14)
+    {
+      for (int for_iter_37 = arith_const_0_12; for_iter_37 < arith_const_28_13; for_iter_37 += arith_const_1_14)
+        {
+          double memref_load_38 = func_arg_5[for_iter_37]; 
+          double memref_load_39 = func_arg_3[for_iter_36][for_iter_37]; 
+          double arith_subf_40 = (memref_load_39 - memref_load_38); 
+          func_arg_3[for_iter_36][for_iter_37] = arith_subf_40; 
+          double memref_load_41 = func_arg_6[for_iter_37]; 
+          double arith_mulf_42 = (math_sqrt_35 * memref_load_41); 
+          double arith_divf_43 = (arith_subf_40 / arith_mulf_42); 
+          func_arg_3[for_iter_36][for_iter_37] = arith_divf_43; 
+        }
+      
+    }
+  
+  for (int for_iter_44 = arith_const_0_12; for_iter_44 < arith_const_27_7; for_iter_44 += arith_const_1_14)
+    {
+      func_arg_4[for_iter_44][for_iter_44] = arith_const_0_9; 
+      int arith_addi_45 = (for_iter_44 + arith_const_1_14); 
+      for (int for_iter_46 = arith_addi_45; for_iter_46 < arith_const_28_13; for_iter_46 += arith_const_1_14)
+        {
+          func_arg_4[for_iter_44][for_iter_46] = arith_const_0_10; 
+          for (int for_iter_47 = arith_const_0_12; for_iter_47 < arith_const_32_8; for_iter_47 += arith_const_1_14)
+            {
+              double memref_load_48 = func_arg_3[for_iter_47][for_iter_44]; 
+              double memref_load_49 = func_arg_3[for_iter_47][for_iter_46]; 
+              double arith_mulf_50 = (memref_load_48 * memref_load_49); 
+              double memref_load_51 = func_arg_4[for_iter_44][for_iter_46]; 
+              double arith_addf_52 = (memref_load_51 + arith_mulf_50); 
+              func_arg_4[for_iter_44][for_iter_46] = arith_addf_52; 
+            }
+          
+          double memref_load_53 = func_arg_4[for_iter_44][for_iter_46]; 
+          func_arg_4[for_iter_46][for_iter_44] = memref_load_53; 
+        }
+      
+    }
+  
+  func_arg_4[arith_const_27_7][arith_const_27_7] = arith_const_0_9; 
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int m; 
+  int n; 
+  double float_n; 
+  double* data; 
+  double* corr; 
+  double* mean; 
+  double* stddev; 
+  kernel_correlation(m, n, float_n, data, corr, mean, stddev); 
+}
+[PAST] Live-out variables to be checked for equivalence: data corr mean stddev 
+[PAST][AI][Equivalence] Interpret program P1...
+[PAST][AI] Clone and normalize program before interpretation...
+void kernel_correlation(int m, int n, double float_n, double data[(32 + 0)][(28 + 0)], double corr[(28 + 0)][(28 + 0)], double mean[(28 + 0)], double stddev[(28 + 0)])
+{
+  int i; 
+  int j; 
+  int k; 
+  double eps = _past_fp_value_0_100000; 
+  for (j = 0; j < 28; j = (j + 1))
+    {
+      mean[j] = _past_fp_value_0_000000; 
+      for (i = 0; i < 32; i = (i + 1))
+        {
+          mean[j] = (mean[j] + data[i][j]); 
+        }
+      
+      mean[j] = (mean[j] / float_n); 
+    }
+  
+  for (j = 0; j < 28; j = (j + 1))
+    {
+      stddev[j] = _past_fp_value_0_000000; 
+      for (i = 0; i < 32; i = (i + 1))
+        {
+          stddev[j] = (stddev[j] + ((data[i][j] - mean[j]) * (data[i][j] - mean[j]))); 
+        }
+      
+      stddev[j] = (stddev[j] / float_n); 
+      stddev[j] = sqrt(stddev[j]); 
+      stddev[j] = ((stddev[j] <= eps) ? _past_fp_value_1_000000 : stddev[j]); 
+    }
+  
+  for (i = 0; i < 32; i = (i + 1))
+    {
+      for (j = 0; j < 28; j = (j + 1))
+        {
+          data[i][j] = (data[i][j] - mean[j]); 
+          data[i][j] = (data[i][j] / (sqrt(float_n) * stddev[j])); 
+        }
+      
+    }
+  
+  for (i = 0; i < (28 - 1); i = (i + 1))
+    {
+      corr[i][i] = _past_fp_value_1_000000; 
+      for (j = (i + 1); j < 28; j = (j + 1))
+        {
+          corr[i][j] = _past_fp_value_0_000000; 
+          for (k = 0; k < 32; k = (k + 1))
+            {
+              corr[i][j] = (corr[i][j] + (data[k][i] * data[k][j])); 
+            }
+          
+          corr[j][i] = corr[i][j]; 
+        }
+      
+    }
+  
+  corr[(28 - 1)][(28 - 1)] = _past_fp_value_1_000000; 
+}
+{
+  int m; 
+  int n; 
+  double float_n; 
+  double* data; 
+  double* corr; 
+  double* mean; 
+  double* stddev; 
+  kernel_correlation(m, n, float_n, data, corr, mean, stddev); 
+}
+[PAST] Final program interpreted:
+void kernel_correlation(int m, int n, double float_n, double data[(32 + 0)][(28 + 0)], double corr[(28 + 0)][(28 + 0)], double mean[(28 + 0)], double stddev[(28 + 0)])
+{
+  int i; 
+  int j; 
+  int k; 
+  double eps = _past_fp_value_0_100000; 
+  for (j = 0; j < 28; j = (j + 1))
+    {
+      mean[j] = _past_fp_value_0_000000; 
+      for (i = 0; i < 32; i = (i + 1))
+        {
+          mean[j] = (mean[j] + data[i][j]); 
+        }
+      
+      mean[j] = (mean[j] / float_n); 
+    }
+  
+  for (j = 0; j < 28; j = (j + 1))
+    {
+      stddev[j] = _past_fp_value_0_000000; 
+      for (i = 0; i < 32; i = (i + 1))
+        {
+          stddev[j] = (stddev[j] + ((data[i][j] - mean[j]) * (data[i][j] - mean[j]))); 
+        }
+      
+      stddev[j] = (stddev[j] / float_n); 
+      stddev[j] = sqrt(stddev[j]); 
+      stddev[j] = ((stddev[j] <= eps) ? _past_fp_value_1_000000 : stddev[j]); 
+    }
+  
+  for (i = 0; i < 32; i = (i + 1))
+    {
+      for (j = 0; j < 28; j = (j + 1))
+        {
+          data[i][j] = (data[i][j] - mean[j]); 
+          data[i][j] = (data[i][j] / (sqrt(float_n) * stddev[j])); 
+        }
+      
+    }
+  
+  for (i = 0; i < (28 - 1); i = (i + 1))
+    {
+      corr[i][i] = _past_fp_value_1_000000; 
+      for (j = (i + 1); j < 28; j = (j + 1))
+        {
+          corr[i][j] = _past_fp_value_0_000000; 
+          for (k = 0; k < 32; k = (k + 1))
+            {
+              corr[i][j] = (corr[i][j] + (data[k][i] * data[k][j])); 
+            }
+          
+          corr[j][i] = corr[i][j]; 
+        }
+      
+    }
+  
+  corr[(28 - 1)][(28 - 1)] = _past_fp_value_1_000000; 
+}
+{
+  int m; 
+  int n; 
+  double float_n; 
+  double* data; 
+  double* corr; 
+  double* mean; 
+  double* stddev; 
+  kernel_correlation(m, n, float_n, data, corr, mean, stddev); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x558a29c24350
+[INFO]	1 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	1 calls to evaluate funcalls
+[INFO]	497 calls to evaluate for loops
+[INFO]	48206 calls to evaluate statements
+[INFO]	16647 CDAGs created
+[INFO]	32368 non-CDFG operations in CDAGs
+[INFO]	30 symbols in symbol table
+[INFO]	37 variables
+[INFO]	33 scalar variables
+[INFO]	4 array variables
+[INFO]	1769 memory elements used
+[INFO]	2640 memory elements allocated
+[INFO]	141520 memory bytes used
+[INFO]	211200 memory bytes allocated
+[PAST][AI][Equivalence] Interpret program P2...
+[PAST][AI] Clone and normalize program before interpretation...
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_correlation(int func_arg_0, int func_arg_1, double func_arg_2, double* func_arg_3, double* func_arg_4, double* func_arg_5, double* func_arg_6)
+{
+  int arith_const_27_7 = 27; 
+  int arith_const_32_8 = 32; 
+  double arith_const_0_9 = _past_fp_value_1_000000; 
+  double arith_const_0_10 = _past_fp_value_0_000000; 
+  double arith_const_16_11 = _past_fp_value_0_100000; 
+  int arith_const_0_12 = 0; 
+  int arith_const_28_13 = 28; 
+  int arith_const_1_14 = 1; 
+  for (int for_iter_15 = arith_const_0_12; for_iter_15 < arith_const_28_13; for_iter_15 = (for_iter_15 + arith_const_1_14))
+    {
+      func_arg_5[for_iter_15] = arith_const_0_10; 
+      for (int for_iter_16 = arith_const_0_12; for_iter_16 < arith_const_32_8; for_iter_16 = (for_iter_16 + arith_const_1_14))
+        {
+          double memref_load_17 = func_arg_3[for_iter_16][for_iter_15]; 
+          double memref_load_18 = func_arg_5[for_iter_15]; 
+          double arith_addf_19 = (memref_load_18 + memref_load_17); 
+          func_arg_5[for_iter_15] = arith_addf_19; 
+        }
+      
+      double memref_load_20 = func_arg_5[for_iter_15]; 
+      double arith_divf_21 = (memref_load_20 / func_arg_2); 
+      func_arg_5[for_iter_15] = arith_divf_21; 
+    }
+  
+  for (int for_iter_22 = arith_const_0_12; for_iter_22 < arith_const_28_13; for_iter_22 = (for_iter_22 + arith_const_1_14))
+    {
+      func_arg_6[for_iter_22] = arith_const_0_10; 
+      for (int for_iter_23 = arith_const_0_12; for_iter_23 < arith_const_32_8; for_iter_23 = (for_iter_23 + arith_const_1_14))
+        {
+          double memref_load_24 = func_arg_3[for_iter_23][for_iter_22]; 
+          double memref_load_25 = func_arg_5[for_iter_22]; 
+          double arith_subf_26 = (memref_load_24 - memref_load_25); 
+          double arith_mulf_27 = (arith_subf_26 * arith_subf_26); 
+          double memref_load_28 = func_arg_6[for_iter_22]; 
+          double arith_addf_29 = (memref_load_28 + arith_mulf_27); 
+          func_arg_6[for_iter_22] = arith_addf_29; 
+        }
+      
+      double memref_load_30 = func_arg_6[for_iter_22]; 
+      double arith_divf_31 = (memref_load_30 / func_arg_2); 
+      double math_sqrt_32 = sqrt(arith_divf_31); 
+      int arith_cmpi_33 = (math_sqrt_32 <= arith_const_16_11); 
+      double arith_select_34 = (arith_cmpi_33 ? arith_const_0_9 : math_sqrt_32); 
+      func_arg_6[for_iter_22] = arith_select_34; 
+    }
+  
+  double math_sqrt_35 = sqrt(func_arg_2); 
+  for (int for_iter_36 = arith_const_0_12; for_iter_36 < arith_const_32_8; for_iter_36 = (for_iter_36 + arith_const_1_14))
+    {
+      for (int for_iter_37 = arith_const_0_12; for_iter_37 < arith_const_28_13; for_iter_37 = (for_iter_37 + arith_const_1_14))
+        {
+          double memref_load_38 = func_arg_5[for_iter_37]; 
+          double memref_load_39 = func_arg_3[for_iter_36][for_iter_37]; 
+          double arith_subf_40 = (memref_load_39 - memref_load_38); 
+          func_arg_3[for_iter_36][for_iter_37] = arith_subf_40; 
+          double memref_load_41 = func_arg_6[for_iter_37]; 
+          double arith_mulf_42 = (math_sqrt_35 * memref_load_41); 
+          double arith_divf_43 = (arith_subf_40 / arith_mulf_42); 
+          func_arg_3[for_iter_36][for_iter_37] = arith_divf_43; 
+        }
+      
+    }
+  
+  for (int for_iter_44 = arith_const_0_12; for_iter_44 < arith_const_27_7; for_iter_44 = (for_iter_44 + arith_const_1_14))
+    {
+      func_arg_4[for_iter_44][for_iter_44] = arith_const_0_9; 
+      int arith_addi_45 = (for_iter_44 + arith_const_1_14); 
+      for (int for_iter_46 = arith_addi_45; for_iter_46 < arith_const_28_13; for_iter_46 = (for_iter_46 + arith_const_1_14))
+        {
+          func_arg_4[for_iter_44][for_iter_46] = arith_const_0_10; 
+          for (int for_iter_47 = arith_const_0_12; for_iter_47 < arith_const_32_8; for_iter_47 = (for_iter_47 + arith_const_1_14))
+            {
+              double memref_load_48 = func_arg_3[for_iter_47][for_iter_44]; 
+              double memref_load_49 = func_arg_3[for_iter_47][for_iter_46]; 
+              double arith_mulf_50 = (memref_load_48 * memref_load_49); 
+              double memref_load_51 = func_arg_4[for_iter_44][for_iter_46]; 
+              double arith_addf_52 = (memref_load_51 + arith_mulf_50); 
+              func_arg_4[for_iter_44][for_iter_46] = arith_addf_52; 
+            }
+          
+          double memref_load_53 = func_arg_4[for_iter_44][for_iter_46]; 
+          func_arg_4[for_iter_46][for_iter_44] = memref_load_53; 
+        }
+      
+    }
+  
+  func_arg_4[arith_const_27_7][arith_const_27_7] = arith_const_0_9; 
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int m; 
+  int n; 
+  double float_n; 
+  double* data; 
+  double* corr; 
+  double* mean; 
+  double* stddev; 
+  kernel_correlation(m, n, float_n, data, corr, mean, stddev); 
+}
+[PAST] Final program interpreted:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_correlation(int func_arg_0, int func_arg_1, double func_arg_2, double* func_arg_3, double* func_arg_4, double* func_arg_5, double* func_arg_6)
+{
+  int arith_const_27_7 = 27; 
+  int arith_const_32_8 = 32; 
+  double arith_const_0_9 = _past_fp_value_1_000000; 
+  double arith_const_0_10 = _past_fp_value_0_000000; 
+  double arith_const_16_11 = _past_fp_value_0_100000; 
+  int arith_const_0_12 = 0; 
+  int arith_const_28_13 = 28; 
+  int arith_const_1_14 = 1; 
+  for (int for_iter_15 = arith_const_0_12; for_iter_15 < arith_const_28_13; for_iter_15 = (for_iter_15 + arith_const_1_14))
+    {
+      func_arg_5[for_iter_15] = arith_const_0_10; 
+      for (int for_iter_16 = arith_const_0_12; for_iter_16 < arith_const_32_8; for_iter_16 = (for_iter_16 + arith_const_1_14))
+        {
+          double memref_load_17 = func_arg_3[for_iter_16][for_iter_15]; 
+          double memref_load_18 = func_arg_5[for_iter_15]; 
+          double arith_addf_19 = (memref_load_18 + memref_load_17); 
+          func_arg_5[for_iter_15] = arith_addf_19; 
+        }
+      
+      double memref_load_20 = func_arg_5[for_iter_15]; 
+      double arith_divf_21 = (memref_load_20 / func_arg_2); 
+      func_arg_5[for_iter_15] = arith_divf_21; 
+    }
+  
+  for (int for_iter_22 = arith_const_0_12; for_iter_22 < arith_const_28_13; for_iter_22 = (for_iter_22 + arith_const_1_14))
+    {
+      func_arg_6[for_iter_22] = arith_const_0_10; 
+      for (int for_iter_23 = arith_const_0_12; for_iter_23 < arith_const_32_8; for_iter_23 = (for_iter_23 + arith_const_1_14))
+        {
+          double memref_load_24 = func_arg_3[for_iter_23][for_iter_22]; 
+          double memref_load_25 = func_arg_5[for_iter_22]; 
+          double arith_subf_26 = (memref_load_24 - memref_load_25); 
+          double arith_mulf_27 = (arith_subf_26 * arith_subf_26); 
+          double memref_load_28 = func_arg_6[for_iter_22]; 
+          double arith_addf_29 = (memref_load_28 + arith_mulf_27); 
+          func_arg_6[for_iter_22] = arith_addf_29; 
+        }
+      
+      double memref_load_30 = func_arg_6[for_iter_22]; 
+      double arith_divf_31 = (memref_load_30 / func_arg_2); 
+      double math_sqrt_32 = sqrt(arith_divf_31); 
+      int arith_cmpi_33 = (math_sqrt_32 <= arith_const_16_11); 
+      double arith_select_34 = (arith_cmpi_33 ? arith_const_0_9 : math_sqrt_32); 
+      func_arg_6[for_iter_22] = arith_select_34; 
+    }
+  
+  double math_sqrt_35 = sqrt(func_arg_2); 
+  for (int for_iter_36 = arith_const_0_12; for_iter_36 < arith_const_32_8; for_iter_36 = (for_iter_36 + arith_const_1_14))
+    {
+      for (int for_iter_37 = arith_const_0_12; for_iter_37 < arith_const_28_13; for_iter_37 = (for_iter_37 + arith_const_1_14))
+        {
+          double memref_load_38 = func_arg_5[for_iter_37]; 
+          double memref_load_39 = func_arg_3[for_iter_36][for_iter_37]; 
+          double arith_subf_40 = (memref_load_39 - memref_load_38); 
+          func_arg_3[for_iter_36][for_iter_37] = arith_subf_40; 
+          double memref_load_41 = func_arg_6[for_iter_37]; 
+          double arith_mulf_42 = (math_sqrt_35 * memref_load_41); 
+          double arith_divf_43 = (arith_subf_40 / arith_mulf_42); 
+          func_arg_3[for_iter_36][for_iter_37] = arith_divf_43; 
+        }
+      
+    }
+  
+  for (int for_iter_44 = arith_const_0_12; for_iter_44 < arith_const_27_7; for_iter_44 = (for_iter_44 + arith_const_1_14))
+    {
+      func_arg_4[for_iter_44][for_iter_44] = arith_const_0_9; 
+      int arith_addi_45 = (for_iter_44 + arith_const_1_14); 
+      for (int for_iter_46 = arith_addi_45; for_iter_46 < arith_const_28_13; for_iter_46 = (for_iter_46 + arith_const_1_14))
+        {
+          func_arg_4[for_iter_44][for_iter_46] = arith_const_0_10; 
+          for (int for_iter_47 = arith_const_0_12; for_iter_47 < arith_const_32_8; for_iter_47 = (for_iter_47 + arith_const_1_14))
+            {
+              double memref_load_48 = func_arg_3[for_iter_47][for_iter_44]; 
+              double memref_load_49 = func_arg_3[for_iter_47][for_iter_46]; 
+              double arith_mulf_50 = (memref_load_48 * memref_load_49); 
+              double memref_load_51 = func_arg_4[for_iter_44][for_iter_46]; 
+              double arith_addf_52 = (memref_load_51 + arith_mulf_50); 
+              func_arg_4[for_iter_44][for_iter_46] = arith_addf_52; 
+            }
+          
+          double memref_load_53 = func_arg_4[for_iter_44][for_iter_46]; 
+          func_arg_4[for_iter_46][for_iter_44] = memref_load_53; 
+        }
+      
+    }
+  
+  func_arg_4[arith_const_27_7][arith_const_27_7] = arith_const_0_9; 
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int m; 
+  int n; 
+  double float_n; 
+  double* data; 
+  double* corr; 
+  double* mean; 
+  double* stddev; 
+  kernel_correlation(m, n, float_n, data, corr, mean, stddev); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x558a29c24890
+[INFO]	3 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	2 calls to evaluate funcalls
+[INFO]	497 calls to evaluate for loops
+[INFO]	122686 calls to evaluate statements
+[INFO]	91088 CDAGs created
+[INFO]	0 non-CDFG operations in CDAGs
+[INFO]	105 symbols in symbol table
+[INFO]	87 variables
+[INFO]	83 scalar variables
+[INFO]	4 array variables
+[INFO]	1819 memory elements used
+[INFO]	3440 memory elements allocated
+[INFO]	145520 memory bytes used
+[INFO]	275200 memory bytes allocated
+[PAST][AI][Equivalence] Start checking states for equivalence...
+[PAST][AI][Equivalence] Success: variable data is compliant
+[PAST][AI][Equivalence] Success: variable corr is compliant
+[PAST][AI][Equivalence] Success: variable mean is compliant
+[PAST][AI][Equivalence] Success: variable stddev is compliant
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P1: total=101238, min=1, max=542
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P2: total=101238, min=1, max=542
+[PAST][AI][Equivalence] Approximate cumulative memory size: 11863488 Bytes
+[PAST][AI][Equivalence] Success: P1 and P2 are equivalent
+[PAST][AI] Timers:
+Time elapsed for timer 64 for Parsing: 0.025048 seconds
+Time elapsed for timer 65 for Interpret P1: 0.160329 seconds
+Time elapsed for timer 66 for Interpret P2: 0.362158 seconds
+Time elapsed for timer 67 for Equivalence checking: 0.010647 seconds
+[PAST] YES => Programs generated-polybench-mini-dataset-use-scalar-lb/interp/correlation-interp.c and pact26-mini-initial-exp/llvm21-no-args/translated/correlation-8-translated-noasyncepilogue.c are equivalent.

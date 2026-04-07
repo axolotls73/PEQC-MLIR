@@ -1,0 +1,481 @@
+command line: /usr/bin/time -v pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees generated-polybench-mini-dataset-use-scalar-lb/interp/trisolv-interp.c pact26-mini-initial-exp/llvm23-affine-unroll/translated/trisolv-8-translated-noasyncepilogue.c "L,x,b"
+return code: 0
+[PAST] Verify equivalence of programs by abstract interpretation.
+[PAST] Program P1:
+void kernel_trisolv(int n, double L[(40 + 0)][(40 + 0)], double x[(40 + 0)], double b[(40 + 0)])
+{
+  int i; 
+  int j; 
+  for (i = 0; i < 40; i++)
+    {
+      x[i] = b[i]; 
+      for (j = 0; j < i; j++)
+        {
+          x[i] -= (L[i][j] * x[j]); 
+        }
+      
+      x[i] = (x[i] / L[i][i]); 
+    }
+  
+}
+{
+  int n; 
+  double* L; 
+  double* x; 
+  double* b; 
+  kernel_trisolv(n, L, x, b); 
+}
+[PAST] Program P2:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i++)
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i++)
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j++)
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, double* func_arg_3)
+{
+  int arith_const_3_4 = 3; 
+  int arith_const_2_5 = 2; 
+  int arith_const_neg_1_6 = -(1); 
+  int arith_const_4_7 = 4; 
+  int arith_const_0_8 = 0; 
+  int arith_const_40_9 = 40; 
+  int arith_const_1_10 = 1; 
+  for (int for_iter_11 = arith_const_0_8; for_iter_11 < arith_const_40_9; for_iter_11 += arith_const_1_10)
+    {
+      double memref_load_12 = func_arg_3[for_iter_11]; 
+      func_arg_2[for_iter_11] = memref_load_12; 
+      int arith_cmpi_13 = (for_iter_11 < arith_const_0_8); 
+      int arith_subi_14 = (arith_const_neg_1_6 - for_iter_11); 
+      int arith_select_15 = (arith_cmpi_13 ? arith_subi_14 : for_iter_11); 
+      int arith_divi_16 = (arith_select_15 / arith_const_4_7); 
+      int arith_subi_17 = (arith_const_neg_1_6 - arith_divi_16); 
+      int arith_select_18 = (arith_cmpi_13 ? arith_subi_17 : arith_divi_16); 
+      int arith_muli_19 = (arith_select_18 * arith_const_4_7); 
+      for (int for_iter_20 = arith_const_0_8; for_iter_20 < arith_muli_19; for_iter_20 += arith_const_4_7)
+        {
+          double memref_load_21 = func_arg_1[for_iter_11][for_iter_20]; 
+          double memref_load_22 = func_arg_2[for_iter_20]; 
+          double arith_mulf_23 = (memref_load_21 * memref_load_22); 
+          double memref_load_24 = func_arg_2[for_iter_11]; 
+          double arith_subf_25 = (memref_load_24 - arith_mulf_23); 
+          func_arg_2[for_iter_11] = arith_subf_25; 
+          int arith_addi_26 = (for_iter_20 + arith_const_1_10); 
+          double memref_load_27 = func_arg_1[for_iter_11][arith_addi_26]; 
+          double memref_load_28 = func_arg_2[arith_addi_26]; 
+          double arith_mulf_29 = (memref_load_27 * memref_load_28); 
+          double memref_load_30 = func_arg_2[for_iter_11]; 
+          double arith_subf_31 = (memref_load_30 - arith_mulf_29); 
+          func_arg_2[for_iter_11] = arith_subf_31; 
+          int arith_addi_32 = (for_iter_20 + arith_const_2_5); 
+          double memref_load_33 = func_arg_1[for_iter_11][arith_addi_32]; 
+          double memref_load_34 = func_arg_2[arith_addi_32]; 
+          double arith_mulf_35 = (memref_load_33 * memref_load_34); 
+          double memref_load_36 = func_arg_2[for_iter_11]; 
+          double arith_subf_37 = (memref_load_36 - arith_mulf_35); 
+          func_arg_2[for_iter_11] = arith_subf_37; 
+          int arith_addi_38 = (for_iter_20 + arith_const_3_4); 
+          double memref_load_39 = func_arg_1[for_iter_11][arith_addi_38]; 
+          double memref_load_40 = func_arg_2[arith_addi_38]; 
+          double arith_mulf_41 = (memref_load_39 * memref_load_40); 
+          double memref_load_42 = func_arg_2[for_iter_11]; 
+          double arith_subf_43 = (memref_load_42 - arith_mulf_41); 
+          func_arg_2[for_iter_11] = arith_subf_43; 
+        }
+      
+      int arith_cmpi_44 = (for_iter_11 < arith_const_0_8); 
+      int arith_subi_45 = (arith_const_neg_1_6 - for_iter_11); 
+      int arith_select_46 = (arith_cmpi_44 ? arith_subi_45 : for_iter_11); 
+      int arith_divi_47 = (arith_select_46 / arith_const_4_7); 
+      int arith_subi_48 = (arith_const_neg_1_6 - arith_divi_47); 
+      int arith_select_49 = (arith_cmpi_44 ? arith_subi_48 : arith_divi_47); 
+      int arith_muli_50 = (arith_select_49 * arith_const_4_7); 
+      for (int for_iter_51 = arith_muli_50; for_iter_51 < for_iter_11; for_iter_51 += arith_const_1_10)
+        {
+          double memref_load_52 = func_arg_1[for_iter_11][for_iter_51]; 
+          double memref_load_53 = func_arg_2[for_iter_51]; 
+          double arith_mulf_54 = (memref_load_52 * memref_load_53); 
+          double memref_load_55 = func_arg_2[for_iter_11]; 
+          double arith_subf_56 = (memref_load_55 - arith_mulf_54); 
+          func_arg_2[for_iter_11] = arith_subf_56; 
+        }
+      
+      double memref_load_57 = func_arg_2[for_iter_11]; 
+      double memref_load_58 = func_arg_1[for_iter_11][for_iter_11]; 
+      double arith_divf_59 = (memref_load_57 / memref_load_58); 
+      func_arg_2[for_iter_11] = arith_divf_59; 
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int n; 
+  double* L; 
+  double* x; 
+  double* b; 
+  kernel_trisolv(n, L, x, b); 
+}
+[PAST] Live-out variables to be checked for equivalence: L x b 
+[PAST][AI][Equivalence] Interpret program P1...
+[PAST][AI] Clone and normalize program before interpretation...
+void kernel_trisolv(int n, double L[(40 + 0)][(40 + 0)], double x[(40 + 0)], double b[(40 + 0)])
+{
+  int i; 
+  int j; 
+  for (i = 0; i < 40; i = (i + 1))
+    {
+      x[i] = b[i]; 
+      for (j = 0; j < i; j = (j + 1))
+        {
+          x[i] = (x[i] - (L[i][j] * x[j])); 
+        }
+      
+      x[i] = (x[i] / L[i][i]); 
+    }
+  
+}
+{
+  int n; 
+  double* L; 
+  double* x; 
+  double* b; 
+  kernel_trisolv(n, L, x, b); 
+}
+[PAST] Final program interpreted:
+void kernel_trisolv(int n, double L[(40 + 0)][(40 + 0)], double x[(40 + 0)], double b[(40 + 0)])
+{
+  int i; 
+  int j; 
+  for (i = 0; i < 40; i = (i + 1))
+    {
+      x[i] = b[i]; 
+      for (j = 0; j < i; j = (j + 1))
+        {
+          x[i] = (x[i] - (L[i][j] * x[j])); 
+        }
+      
+      x[i] = (x[i] / L[i][i]); 
+    }
+  
+}
+{
+  int n; 
+  double* L; 
+  double* x; 
+  double* b; 
+  kernel_trisolv(n, L, x, b); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x55a2fc53d3f0
+[INFO]	1 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	1 calls to evaluate funcalls
+[INFO]	41 calls to evaluate for loops
+[INFO]	2597 calls to evaluate statements
+[INFO]	868 CDAGs created
+[INFO]	1600 non-CDFG operations in CDAGs
+[INFO]	19 symbols in symbol table
+[INFO]	16 variables
+[INFO]	13 scalar variables
+[INFO]	3 array variables
+[INFO]	1693 memory elements used
+[INFO]	4432 memory elements allocated
+[INFO]	135440 memory bytes used
+[INFO]	354560 memory bytes allocated
+[PAST][AI][Equivalence] Interpret program P2...
+[PAST][AI] Clone and normalize program before interpretation...
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, double* func_arg_3)
+{
+  int arith_const_3_4 = 3; 
+  int arith_const_2_5 = 2; 
+  int arith_const_neg_1_6 = -(1); 
+  int arith_const_4_7 = 4; 
+  int arith_const_0_8 = 0; 
+  int arith_const_40_9 = 40; 
+  int arith_const_1_10 = 1; 
+  for (int for_iter_11 = arith_const_0_8; for_iter_11 < arith_const_40_9; for_iter_11 = (for_iter_11 + arith_const_1_10))
+    {
+      double memref_load_12 = func_arg_3[for_iter_11]; 
+      func_arg_2[for_iter_11] = memref_load_12; 
+      int arith_cmpi_13 = (for_iter_11 < arith_const_0_8); 
+      int arith_subi_14 = (arith_const_neg_1_6 - for_iter_11); 
+      int arith_select_15 = (arith_cmpi_13 ? arith_subi_14 : for_iter_11); 
+      int arith_divi_16 = (arith_select_15 / arith_const_4_7); 
+      int arith_subi_17 = (arith_const_neg_1_6 - arith_divi_16); 
+      int arith_select_18 = (arith_cmpi_13 ? arith_subi_17 : arith_divi_16); 
+      int arith_muli_19 = (arith_select_18 * arith_const_4_7); 
+      for (int for_iter_20 = arith_const_0_8; for_iter_20 < arith_muli_19; for_iter_20 = (for_iter_20 + arith_const_4_7))
+        {
+          double memref_load_21 = func_arg_1[for_iter_11][for_iter_20]; 
+          double memref_load_22 = func_arg_2[for_iter_20]; 
+          double arith_mulf_23 = (memref_load_21 * memref_load_22); 
+          double memref_load_24 = func_arg_2[for_iter_11]; 
+          double arith_subf_25 = (memref_load_24 - arith_mulf_23); 
+          func_arg_2[for_iter_11] = arith_subf_25; 
+          int arith_addi_26 = (for_iter_20 + arith_const_1_10); 
+          double memref_load_27 = func_arg_1[for_iter_11][arith_addi_26]; 
+          double memref_load_28 = func_arg_2[arith_addi_26]; 
+          double arith_mulf_29 = (memref_load_27 * memref_load_28); 
+          double memref_load_30 = func_arg_2[for_iter_11]; 
+          double arith_subf_31 = (memref_load_30 - arith_mulf_29); 
+          func_arg_2[for_iter_11] = arith_subf_31; 
+          int arith_addi_32 = (for_iter_20 + arith_const_2_5); 
+          double memref_load_33 = func_arg_1[for_iter_11][arith_addi_32]; 
+          double memref_load_34 = func_arg_2[arith_addi_32]; 
+          double arith_mulf_35 = (memref_load_33 * memref_load_34); 
+          double memref_load_36 = func_arg_2[for_iter_11]; 
+          double arith_subf_37 = (memref_load_36 - arith_mulf_35); 
+          func_arg_2[for_iter_11] = arith_subf_37; 
+          int arith_addi_38 = (for_iter_20 + arith_const_3_4); 
+          double memref_load_39 = func_arg_1[for_iter_11][arith_addi_38]; 
+          double memref_load_40 = func_arg_2[arith_addi_38]; 
+          double arith_mulf_41 = (memref_load_39 * memref_load_40); 
+          double memref_load_42 = func_arg_2[for_iter_11]; 
+          double arith_subf_43 = (memref_load_42 - arith_mulf_41); 
+          func_arg_2[for_iter_11] = arith_subf_43; 
+        }
+      
+      int arith_cmpi_44 = (for_iter_11 < arith_const_0_8); 
+      int arith_subi_45 = (arith_const_neg_1_6 - for_iter_11); 
+      int arith_select_46 = (arith_cmpi_44 ? arith_subi_45 : for_iter_11); 
+      int arith_divi_47 = (arith_select_46 / arith_const_4_7); 
+      int arith_subi_48 = (arith_const_neg_1_6 - arith_divi_47); 
+      int arith_select_49 = (arith_cmpi_44 ? arith_subi_48 : arith_divi_47); 
+      int arith_muli_50 = (arith_select_49 * arith_const_4_7); 
+      for (int for_iter_51 = arith_muli_50; for_iter_51 < for_iter_11; for_iter_51 = (for_iter_51 + arith_const_1_10))
+        {
+          double memref_load_52 = func_arg_1[for_iter_11][for_iter_51]; 
+          double memref_load_53 = func_arg_2[for_iter_51]; 
+          double arith_mulf_54 = (memref_load_52 * memref_load_53); 
+          double memref_load_55 = func_arg_2[for_iter_11]; 
+          double arith_subf_56 = (memref_load_55 - arith_mulf_54); 
+          func_arg_2[for_iter_11] = arith_subf_56; 
+        }
+      
+      double memref_load_57 = func_arg_2[for_iter_11]; 
+      double memref_load_58 = func_arg_1[for_iter_11][for_iter_11]; 
+      double arith_divf_59 = (memref_load_57 / memref_load_58); 
+      func_arg_2[for_iter_11] = arith_divf_59; 
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int n; 
+  double* L; 
+  double* x; 
+  double* b; 
+  kernel_trisolv(n, L, x, b); 
+}
+[PAST] Final program interpreted:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_trisolv(int func_arg_0, double* func_arg_1, double* func_arg_2, double* func_arg_3)
+{
+  int arith_const_3_4 = 3; 
+  int arith_const_2_5 = 2; 
+  int arith_const_neg_1_6 = -(1); 
+  int arith_const_4_7 = 4; 
+  int arith_const_0_8 = 0; 
+  int arith_const_40_9 = 40; 
+  int arith_const_1_10 = 1; 
+  for (int for_iter_11 = arith_const_0_8; for_iter_11 < arith_const_40_9; for_iter_11 = (for_iter_11 + arith_const_1_10))
+    {
+      double memref_load_12 = func_arg_3[for_iter_11]; 
+      func_arg_2[for_iter_11] = memref_load_12; 
+      int arith_cmpi_13 = (for_iter_11 < arith_const_0_8); 
+      int arith_subi_14 = (arith_const_neg_1_6 - for_iter_11); 
+      int arith_select_15 = (arith_cmpi_13 ? arith_subi_14 : for_iter_11); 
+      int arith_divi_16 = (arith_select_15 / arith_const_4_7); 
+      int arith_subi_17 = (arith_const_neg_1_6 - arith_divi_16); 
+      int arith_select_18 = (arith_cmpi_13 ? arith_subi_17 : arith_divi_16); 
+      int arith_muli_19 = (arith_select_18 * arith_const_4_7); 
+      for (int for_iter_20 = arith_const_0_8; for_iter_20 < arith_muli_19; for_iter_20 = (for_iter_20 + arith_const_4_7))
+        {
+          double memref_load_21 = func_arg_1[for_iter_11][for_iter_20]; 
+          double memref_load_22 = func_arg_2[for_iter_20]; 
+          double arith_mulf_23 = (memref_load_21 * memref_load_22); 
+          double memref_load_24 = func_arg_2[for_iter_11]; 
+          double arith_subf_25 = (memref_load_24 - arith_mulf_23); 
+          func_arg_2[for_iter_11] = arith_subf_25; 
+          int arith_addi_26 = (for_iter_20 + arith_const_1_10); 
+          double memref_load_27 = func_arg_1[for_iter_11][arith_addi_26]; 
+          double memref_load_28 = func_arg_2[arith_addi_26]; 
+          double arith_mulf_29 = (memref_load_27 * memref_load_28); 
+          double memref_load_30 = func_arg_2[for_iter_11]; 
+          double arith_subf_31 = (memref_load_30 - arith_mulf_29); 
+          func_arg_2[for_iter_11] = arith_subf_31; 
+          int arith_addi_32 = (for_iter_20 + arith_const_2_5); 
+          double memref_load_33 = func_arg_1[for_iter_11][arith_addi_32]; 
+          double memref_load_34 = func_arg_2[arith_addi_32]; 
+          double arith_mulf_35 = (memref_load_33 * memref_load_34); 
+          double memref_load_36 = func_arg_2[for_iter_11]; 
+          double arith_subf_37 = (memref_load_36 - arith_mulf_35); 
+          func_arg_2[for_iter_11] = arith_subf_37; 
+          int arith_addi_38 = (for_iter_20 + arith_const_3_4); 
+          double memref_load_39 = func_arg_1[for_iter_11][arith_addi_38]; 
+          double memref_load_40 = func_arg_2[arith_addi_38]; 
+          double arith_mulf_41 = (memref_load_39 * memref_load_40); 
+          double memref_load_42 = func_arg_2[for_iter_11]; 
+          double arith_subf_43 = (memref_load_42 - arith_mulf_41); 
+          func_arg_2[for_iter_11] = arith_subf_43; 
+        }
+      
+      int arith_cmpi_44 = (for_iter_11 < arith_const_0_8); 
+      int arith_subi_45 = (arith_const_neg_1_6 - for_iter_11); 
+      int arith_select_46 = (arith_cmpi_44 ? arith_subi_45 : for_iter_11); 
+      int arith_divi_47 = (arith_select_46 / arith_const_4_7); 
+      int arith_subi_48 = (arith_const_neg_1_6 - arith_divi_47); 
+      int arith_select_49 = (arith_cmpi_44 ? arith_subi_48 : arith_divi_47); 
+      int arith_muli_50 = (arith_select_49 * arith_const_4_7); 
+      for (int for_iter_51 = arith_muli_50; for_iter_51 < for_iter_11; for_iter_51 = (for_iter_51 + arith_const_1_10))
+        {
+          double memref_load_52 = func_arg_1[for_iter_11][for_iter_51]; 
+          double memref_load_53 = func_arg_2[for_iter_51]; 
+          double arith_mulf_54 = (memref_load_52 * memref_load_53); 
+          double memref_load_55 = func_arg_2[for_iter_11]; 
+          double arith_subf_56 = (memref_load_55 - arith_mulf_54); 
+          func_arg_2[for_iter_11] = arith_subf_56; 
+        }
+      
+      double memref_load_57 = func_arg_2[for_iter_11]; 
+      double memref_load_58 = func_arg_1[for_iter_11][for_iter_11]; 
+      double arith_divf_59 = (memref_load_57 / memref_load_58); 
+      func_arg_2[for_iter_11] = arith_divf_59; 
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int n; 
+  double* L; 
+  double* x; 
+  double* b; 
+  kernel_trisolv(n, L, x, b); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x55a2fc53d930
+[INFO]	3 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	2 calls to evaluate funcalls
+[INFO]	81 calls to evaluate for loops
+[INFO]	6772 calls to evaluate statements
+[INFO]	4928 CDAGs created
+[INFO]	0 non-CDFG operations in CDAGs
+[INFO]	105 symbols in symbol table
+[INFO]	78 variables
+[INFO]	75 scalar variables
+[INFO]	3 array variables
+[INFO]	1755 memory elements used
+[INFO]	5424 memory elements allocated
+[INFO]	140400 memory bytes used
+[INFO]	433920 memory bytes allocated
+[PAST][AI][Equivalence] Start checking states for equivalence...
+[PAST][AI][Equivalence] Success: variable L is compliant
+[PAST][AI][Equivalence] Success: variable x is compliant
+[PAST][AI][Equivalence] Success: variable b is compliant
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P1: total=6637, min=1, max=281
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P2: total=6637, min=1, max=281
+[PAST][AI][Equivalence] Approximate cumulative memory size: 769568 Bytes
+[PAST][AI][Equivalence] Success: P1 and P2 are equivalent
+[PAST][AI] Timers:
+Time elapsed for timer 64 for Parsing: 0.025692 seconds
+Time elapsed for timer 65 for Interpret P1: 0.009155 seconds
+Time elapsed for timer 66 for Interpret P2: 0.021443 seconds
+Time elapsed for timer 67 for Equivalence checking: 0.000977 seconds
+[PAST] YES => Programs generated-polybench-mini-dataset-use-scalar-lb/interp/trisolv-interp.c and pact26-mini-initial-exp/llvm23-affine-unroll/translated/trisolv-8-translated-noasyncepilogue.c are equivalent.

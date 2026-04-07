@@ -1,0 +1,419 @@
+command line: /usr/bin/time -v pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees generated-polybench-mini-dataset-use-scalar-lb/interp/seidel-2d-interp.c pact26-mini-initial-exp/llvm21-affine-normalize/translated/seidel-2d-8-translated-noasyncepilogue.c "A"
+return code: 0
+[PAST] Verify equivalence of programs by abstract interpretation.
+[PAST] Program P1:
+void kernel_seidel_2d(int tsteps, int n, double A[(40 + 0)][(40 + 0)])
+{
+  int t; 
+  int i; 
+  int j; 
+  for (t = 0; t <= (20 - 1); t++)
+    {
+      for (i = 1; i <= (40 - 2); i++)
+        {
+          for (j = 1; j <= (40 - 2); j++)
+            {
+              A[i][j] = (((((((((A[(i - 1)][(j - 1)] + A[(i - 1)][j]) + A[(i - 1)][(j + 1)]) + A[i][(j - 1)]) + A[i][j]) + A[i][(j + 1)]) + A[(i + 1)][(j - 1)]) + A[(i + 1)][j]) + A[(i + 1)][(j + 1)]) / 9.000000); 
+            }
+          
+        }
+      
+    }
+  
+}
+{
+  int tsteps; 
+  int n; 
+  double* A; 
+  kernel_seidel_2d(tsteps, n, A); 
+}
+[PAST] Program P2:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i++)
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i++)
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j++)
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_seidel_2d(int func_arg_0, int func_arg_1, double* func_arg_2)
+{
+  int arith_const_neg_1_3 = -(1); 
+  int arith_const_38_4 = 38; 
+  double arith_const_0_5 = 9.000000; 
+  int arith_const_0_6 = 0; 
+  int arith_const_20_7 = 20; 
+  int arith_const_1_8 = 1; 
+  for (int for_iter_9 = arith_const_0_6; for_iter_9 < arith_const_20_7; for_iter_9 += arith_const_1_8)
+    {
+      for (int for_iter_10 = arith_const_0_6; for_iter_10 < arith_const_38_4; for_iter_10 += arith_const_1_8)
+        {
+          int arith_addi_11 = (for_iter_10 + arith_const_1_8); 
+          for (int for_iter_12 = arith_const_0_6; for_iter_12 < arith_const_38_4; for_iter_12 += arith_const_1_8)
+            {
+              int arith_addi_13 = (for_iter_12 + arith_const_1_8); 
+              int arith_addi_14 = (arith_addi_11 + arith_const_neg_1_3); 
+              int arith_addi_15 = (arith_addi_13 + arith_const_neg_1_3); 
+              double memref_load_16 = func_arg_2[arith_addi_14][arith_addi_15]; 
+              int arith_addi_17 = (arith_addi_11 + arith_const_neg_1_3); 
+              double memref_load_18 = func_arg_2[arith_addi_17][arith_addi_13]; 
+              double arith_addf_19 = (memref_load_16 + memref_load_18); 
+              int arith_addi_20 = (arith_addi_11 + arith_const_neg_1_3); 
+              int arith_addi_21 = (arith_addi_13 + arith_const_1_8); 
+              double memref_load_22 = func_arg_2[arith_addi_20][arith_addi_21]; 
+              double arith_addf_23 = (arith_addf_19 + memref_load_22); 
+              int arith_addi_24 = (arith_addi_13 + arith_const_neg_1_3); 
+              double memref_load_25 = func_arg_2[arith_addi_11][arith_addi_24]; 
+              double arith_addf_26 = (arith_addf_23 + memref_load_25); 
+              double memref_load_27 = func_arg_2[arith_addi_11][arith_addi_13]; 
+              double arith_addf_28 = (arith_addf_26 + memref_load_27); 
+              int arith_addi_29 = (arith_addi_13 + arith_const_1_8); 
+              double memref_load_30 = func_arg_2[arith_addi_11][arith_addi_29]; 
+              double arith_addf_31 = (arith_addf_28 + memref_load_30); 
+              int arith_addi_32 = (arith_addi_11 + arith_const_1_8); 
+              int arith_addi_33 = (arith_addi_13 + arith_const_neg_1_3); 
+              double memref_load_34 = func_arg_2[arith_addi_32][arith_addi_33]; 
+              double arith_addf_35 = (arith_addf_31 + memref_load_34); 
+              int arith_addi_36 = (arith_addi_11 + arith_const_1_8); 
+              double memref_load_37 = func_arg_2[arith_addi_36][arith_addi_13]; 
+              double arith_addf_38 = (arith_addf_35 + memref_load_37); 
+              int arith_addi_39 = (arith_addi_11 + arith_const_1_8); 
+              int arith_addi_40 = (arith_addi_13 + arith_const_1_8); 
+              double memref_load_41 = func_arg_2[arith_addi_39][arith_addi_40]; 
+              double arith_addf_42 = (arith_addf_38 + memref_load_41); 
+              double arith_divf_43 = (arith_addf_42 / arith_const_0_5); 
+              func_arg_2[arith_addi_11][arith_addi_13] = arith_divf_43; 
+            }
+          
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int tsteps; 
+  int n; 
+  double* A; 
+  kernel_seidel_2d(tsteps, n, A); 
+}
+[PAST] Live-out variables to be checked for equivalence: A 
+[PAST][AI][Equivalence] Interpret program P1...
+[PAST][AI] Clone and normalize program before interpretation...
+void kernel_seidel_2d(int tsteps, int n, double A[(40 + 0)][(40 + 0)])
+{
+  int t; 
+  int i; 
+  int j; 
+  for (t = 0; t <= (20 - 1); t = (t + 1))
+    {
+      for (i = 1; i <= (40 - 2); i = (i + 1))
+        {
+          for (j = 1; j <= (40 - 2); j = (j + 1))
+            {
+              A[i][j] = (((((((((A[(i - 1)][(j - 1)] + A[(i - 1)][j]) + A[(i - 1)][(j + 1)]) + A[i][(j - 1)]) + A[i][j]) + A[i][(j + 1)]) + A[(i + 1)][(j - 1)]) + A[(i + 1)][j]) + A[(i + 1)][(j + 1)]) / _past_fp_value_9_000000); 
+            }
+          
+        }
+      
+    }
+  
+}
+{
+  int tsteps; 
+  int n; 
+  double* A; 
+  kernel_seidel_2d(tsteps, n, A); 
+}
+[PAST] Final program interpreted:
+void kernel_seidel_2d(int tsteps, int n, double A[(40 + 0)][(40 + 0)])
+{
+  int t; 
+  int i; 
+  int j; 
+  for (t = 0; t <= (20 - 1); t = (t + 1))
+    {
+      for (i = 1; i <= (40 - 2); i = (i + 1))
+        {
+          for (j = 1; j <= (40 - 2); j = (j + 1))
+            {
+              A[i][j] = (((((((((A[(i - 1)][(j - 1)] + A[(i - 1)][j]) + A[(i - 1)][(j + 1)]) + A[i][(j - 1)]) + A[i][j]) + A[i][(j + 1)]) + A[(i + 1)][(j - 1)]) + A[(i + 1)][j]) + A[(i + 1)][(j + 1)]) / _past_fp_value_9_000000); 
+            }
+          
+        }
+      
+    }
+  
+}
+{
+  int tsteps; 
+  int n; 
+  double* A; 
+  kernel_seidel_2d(tsteps, n, A); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x55e73a9aa2f0
+[INFO]	1 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	1 calls to evaluate funcalls
+[INFO]	781 calls to evaluate for loops
+[INFO]	89775 calls to evaluate statements
+[INFO]	28886 CDAGs created
+[INFO]	259920 non-CDFG operations in CDAGs
+[INFO]	19 symbols in symbol table
+[INFO]	16 variables
+[INFO]	15 scalar variables
+[INFO]	1 array variables
+[INFO]	1615 memory elements used
+[INFO]	4336 memory elements allocated
+[INFO]	129200 memory bytes used
+[INFO]	346880 memory bytes allocated
+[PAST][AI][Equivalence] Interpret program P2...
+[PAST][AI] Clone and normalize program before interpretation...
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_seidel_2d(int func_arg_0, int func_arg_1, double* func_arg_2)
+{
+  int arith_const_neg_1_3 = -(1); 
+  int arith_const_38_4 = 38; 
+  double arith_const_0_5 = _past_fp_value_9_000000; 
+  int arith_const_0_6 = 0; 
+  int arith_const_20_7 = 20; 
+  int arith_const_1_8 = 1; 
+  for (int for_iter_9 = arith_const_0_6; for_iter_9 < arith_const_20_7; for_iter_9 = (for_iter_9 + arith_const_1_8))
+    {
+      for (int for_iter_10 = arith_const_0_6; for_iter_10 < arith_const_38_4; for_iter_10 = (for_iter_10 + arith_const_1_8))
+        {
+          int arith_addi_11 = (for_iter_10 + arith_const_1_8); 
+          for (int for_iter_12 = arith_const_0_6; for_iter_12 < arith_const_38_4; for_iter_12 = (for_iter_12 + arith_const_1_8))
+            {
+              int arith_addi_13 = (for_iter_12 + arith_const_1_8); 
+              int arith_addi_14 = (arith_addi_11 + arith_const_neg_1_3); 
+              int arith_addi_15 = (arith_addi_13 + arith_const_neg_1_3); 
+              double memref_load_16 = func_arg_2[arith_addi_14][arith_addi_15]; 
+              int arith_addi_17 = (arith_addi_11 + arith_const_neg_1_3); 
+              double memref_load_18 = func_arg_2[arith_addi_17][arith_addi_13]; 
+              double arith_addf_19 = (memref_load_16 + memref_load_18); 
+              int arith_addi_20 = (arith_addi_11 + arith_const_neg_1_3); 
+              int arith_addi_21 = (arith_addi_13 + arith_const_1_8); 
+              double memref_load_22 = func_arg_2[arith_addi_20][arith_addi_21]; 
+              double arith_addf_23 = (arith_addf_19 + memref_load_22); 
+              int arith_addi_24 = (arith_addi_13 + arith_const_neg_1_3); 
+              double memref_load_25 = func_arg_2[arith_addi_11][arith_addi_24]; 
+              double arith_addf_26 = (arith_addf_23 + memref_load_25); 
+              double memref_load_27 = func_arg_2[arith_addi_11][arith_addi_13]; 
+              double arith_addf_28 = (arith_addf_26 + memref_load_27); 
+              int arith_addi_29 = (arith_addi_13 + arith_const_1_8); 
+              double memref_load_30 = func_arg_2[arith_addi_11][arith_addi_29]; 
+              double arith_addf_31 = (arith_addf_28 + memref_load_30); 
+              int arith_addi_32 = (arith_addi_11 + arith_const_1_8); 
+              int arith_addi_33 = (arith_addi_13 + arith_const_neg_1_3); 
+              double memref_load_34 = func_arg_2[arith_addi_32][arith_addi_33]; 
+              double arith_addf_35 = (arith_addf_31 + memref_load_34); 
+              int arith_addi_36 = (arith_addi_11 + arith_const_1_8); 
+              double memref_load_37 = func_arg_2[arith_addi_36][arith_addi_13]; 
+              double arith_addf_38 = (arith_addf_35 + memref_load_37); 
+              int arith_addi_39 = (arith_addi_11 + arith_const_1_8); 
+              int arith_addi_40 = (arith_addi_13 + arith_const_1_8); 
+              double memref_load_41 = func_arg_2[arith_addi_39][arith_addi_40]; 
+              double arith_addf_42 = (arith_addf_38 + memref_load_41); 
+              double arith_divf_43 = (arith_addf_42 / arith_const_0_5); 
+              func_arg_2[arith_addi_11][arith_addi_13] = arith_divf_43; 
+            }
+          
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int tsteps; 
+  int n; 
+  double* A; 
+  kernel_seidel_2d(tsteps, n, A); 
+}
+[PAST] Final program interpreted:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_seidel_2d(int func_arg_0, int func_arg_1, double* func_arg_2)
+{
+  int arith_const_neg_1_3 = -(1); 
+  int arith_const_38_4 = 38; 
+  double arith_const_0_5 = _past_fp_value_9_000000; 
+  int arith_const_0_6 = 0; 
+  int arith_const_20_7 = 20; 
+  int arith_const_1_8 = 1; 
+  for (int for_iter_9 = arith_const_0_6; for_iter_9 < arith_const_20_7; for_iter_9 = (for_iter_9 + arith_const_1_8))
+    {
+      for (int for_iter_10 = arith_const_0_6; for_iter_10 < arith_const_38_4; for_iter_10 = (for_iter_10 + arith_const_1_8))
+        {
+          int arith_addi_11 = (for_iter_10 + arith_const_1_8); 
+          for (int for_iter_12 = arith_const_0_6; for_iter_12 < arith_const_38_4; for_iter_12 = (for_iter_12 + arith_const_1_8))
+            {
+              int arith_addi_13 = (for_iter_12 + arith_const_1_8); 
+              int arith_addi_14 = (arith_addi_11 + arith_const_neg_1_3); 
+              int arith_addi_15 = (arith_addi_13 + arith_const_neg_1_3); 
+              double memref_load_16 = func_arg_2[arith_addi_14][arith_addi_15]; 
+              int arith_addi_17 = (arith_addi_11 + arith_const_neg_1_3); 
+              double memref_load_18 = func_arg_2[arith_addi_17][arith_addi_13]; 
+              double arith_addf_19 = (memref_load_16 + memref_load_18); 
+              int arith_addi_20 = (arith_addi_11 + arith_const_neg_1_3); 
+              int arith_addi_21 = (arith_addi_13 + arith_const_1_8); 
+              double memref_load_22 = func_arg_2[arith_addi_20][arith_addi_21]; 
+              double arith_addf_23 = (arith_addf_19 + memref_load_22); 
+              int arith_addi_24 = (arith_addi_13 + arith_const_neg_1_3); 
+              double memref_load_25 = func_arg_2[arith_addi_11][arith_addi_24]; 
+              double arith_addf_26 = (arith_addf_23 + memref_load_25); 
+              double memref_load_27 = func_arg_2[arith_addi_11][arith_addi_13]; 
+              double arith_addf_28 = (arith_addf_26 + memref_load_27); 
+              int arith_addi_29 = (arith_addi_13 + arith_const_1_8); 
+              double memref_load_30 = func_arg_2[arith_addi_11][arith_addi_29]; 
+              double arith_addf_31 = (arith_addf_28 + memref_load_30); 
+              int arith_addi_32 = (arith_addi_11 + arith_const_1_8); 
+              int arith_addi_33 = (arith_addi_13 + arith_const_neg_1_3); 
+              double memref_load_34 = func_arg_2[arith_addi_32][arith_addi_33]; 
+              double arith_addf_35 = (arith_addf_31 + memref_load_34); 
+              int arith_addi_36 = (arith_addi_11 + arith_const_1_8); 
+              double memref_load_37 = func_arg_2[arith_addi_36][arith_addi_13]; 
+              double arith_addf_38 = (arith_addf_35 + memref_load_37); 
+              int arith_addi_39 = (arith_addi_11 + arith_const_1_8); 
+              int arith_addi_40 = (arith_addi_13 + arith_const_1_8); 
+              double memref_load_41 = func_arg_2[arith_addi_39][arith_addi_40]; 
+              double arith_addf_42 = (arith_addf_38 + memref_load_41); 
+              double arith_divf_43 = (arith_addf_42 / arith_const_0_5); 
+              func_arg_2[arith_addi_11][arith_addi_13] = arith_divf_43; 
+            }
+          
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int tsteps; 
+  int n; 
+  double* A; 
+  kernel_seidel_2d(tsteps, n, A); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x55e73a9aa800
+[INFO]	3 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	2 calls to evaluate funcalls
+[INFO]	781 calls to evaluate for loops
+[INFO]	985828 calls to evaluate statements
+[INFO]	548727 CDAGs created
+[INFO]	0 non-CDFG operations in CDAGs
+[INFO]	89 symbols in symbol table
+[INFO]	61 variables
+[INFO]	60 scalar variables
+[INFO]	1 array variables
+[INFO]	1660 memory elements used
+[INFO]	5056 memory elements allocated
+[INFO]	132800 memory bytes used
+[INFO]	404480 memory bytes allocated
+[PAST][AI][Equivalence] Start checking states for equivalence...
+[PAST][AI][Equivalence] Success: variable A is compliant
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P1: total=785846, min=1, max=114083
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P2: total=785846, min=1, max=114083
+[PAST][AI][Equivalence] Approximate cumulative memory size: 92196560 Bytes
+[PAST][AI][Equivalence] Success: P1 and P2 are equivalent
+[PAST][AI] Timers:
+Time elapsed for timer 64 for Parsing: 0.023237 seconds
+Time elapsed for timer 65 for Interpret P1: 0.916366 seconds
+Time elapsed for timer 66 for Interpret P2: 2.948972 seconds
+Time elapsed for timer 67 for Equivalence checking: 0.080976 seconds
+[PAST] YES => Programs generated-polybench-mini-dataset-use-scalar-lb/interp/seidel-2d-interp.c and pact26-mini-initial-exp/llvm21-affine-normalize/translated/seidel-2d-8-translated-noasyncepilogue.c are equivalent.

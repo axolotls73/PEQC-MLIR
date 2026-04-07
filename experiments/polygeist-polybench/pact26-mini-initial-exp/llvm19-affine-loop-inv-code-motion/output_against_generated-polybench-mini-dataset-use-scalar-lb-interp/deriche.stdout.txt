@@ -1,0 +1,1223 @@
+command line: /usr/bin/time -v pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees generated-polybench-mini-dataset-use-scalar-lb/interp/deriche-interp.c pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/translated/deriche-8-translated-noasyncepilogue.c "alpha,imgIn,imgOut,y1,y2"
+return code: 0
+[PAST] Verify equivalence of programs by abstract interpretation.
+[PAST] Program P1:
+void kernel_deriche(int w, int h, float alpha, float imgIn[(64 + 0)][(64 + 0)], float imgOut[(64 + 0)][(64 + 0)], float y1[(64 + 0)][(64 + 0)], float y2[(64 + 0)][(64 + 0)])
+{
+  int i; 
+  int j; 
+  float xm1; 
+  float tm1; 
+  float ym1; 
+  float ym2; 
+  float xp1; 
+  float xp2; 
+  float tp1; 
+  float tp2; 
+  float yp1; 
+  float yp2; 
+  float k; 
+  float a1; 
+  float a2; 
+  float a3; 
+  float a4; 
+  float a5; 
+  float a6; 
+  float a7; 
+  float a8; 
+  float b1; 
+  float b2; 
+  float c1; 
+  float c2; 
+  k = (((1.000000 - exp(-(alpha))) * (1.000000 - exp(-(alpha)))) / ((((alpha * exp(-(alpha))) * 2.000000) + 1.000000) - exp((alpha * 2.000000)))); 
+  a1 = (a5 = k); 
+  a2 = (a6 = ((k * exp(-(alpha))) * (alpha - 1.000000))); 
+  a3 = (a7 = ((k * exp(-(alpha))) * (alpha + 1.000000))); 
+  a4 = (a8 = (-(k) * exp((alpha * -(2.000000))))); 
+  b1 = pow(2.000000, -(alpha)); 
+  b2 = -(exp((alpha * -(2.000000)))); 
+  c1 = (c2 = 1); 
+  for (i = 0; i < 64; i++)
+    {
+      ym1 = 0.000000; 
+      ym2 = 0.000000; 
+      xm1 = 0.000000; 
+      for (j = 0; j < 64; j++)
+        {
+          y1[i][j] = ((((a1 * imgIn[i][j]) + (a2 * xm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          xm1 = imgIn[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i++)
+    {
+      yp1 = 0.000000; 
+      yp2 = 0.000000; 
+      xp1 = 0.000000; 
+      xp2 = 0.000000; 
+      for (j = (64 - 1); j >= 0; j--)
+        {
+          y2[i][j] = ((((a3 * xp1) + (a4 * xp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          xp2 = xp1; 
+          xp1 = imgIn[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i++)
+    {
+      for (j = 0; j < 64; j++)
+        {
+          imgOut[i][j] = (c1 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j++)
+    {
+      tm1 = 0.000000; 
+      ym1 = 0.000000; 
+      ym2 = 0.000000; 
+      for (i = 0; i < 64; i++)
+        {
+          y1[i][j] = ((((a5 * imgOut[i][j]) + (a6 * tm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          tm1 = imgOut[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j++)
+    {
+      tp1 = 0.000000; 
+      tp2 = 0.000000; 
+      yp1 = 0.000000; 
+      yp2 = 0.000000; 
+      for (i = (64 - 1); i >= 0; i--)
+        {
+          y2[i][j] = ((((a7 * tp1) + (a8 * tp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          tp2 = tp1; 
+          tp1 = imgOut[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i++)
+    {
+      for (j = 0; j < 64; j++)
+        {
+          imgOut[i][j] = (c2 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+}
+{
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+}
+[PAST] Program P2:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i++)
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i++)
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j++)
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* func_arg_3, float* func_arg_4, float* func_arg_5, float* func_arg_6)
+{
+  int arith_const_63_7 = 63; 
+  int arith_const_neg_1_8 = -(1); 
+  int arith_const_1_9 = 1; 
+  int arith_const_64_10 = 64; 
+  int arith_const_0_11 = 0; 
+  float arith_const_0_12 = 0.000000; 
+  float arith_const_0_13 = -(2.000000); 
+  float arith_const_0_14 = 2.000000; 
+  float arith_const_0_15 = 1.000000; 
+  float _16; 
+  float* memref_alloca_17; 
+  memref_alloca_17[0] = _16; 
+  float* memref_alloca_18; 
+  memref_alloca_18[0] = _16; 
+  float* memref_alloca_19; 
+  memref_alloca_19[0] = _16; 
+  float* memref_alloca_20; 
+  memref_alloca_20[0] = _16; 
+  float* memref_alloca_21; 
+  memref_alloca_21[0] = _16; 
+  float* memref_alloca_22; 
+  memref_alloca_22[0] = _16; 
+  float* memref_alloca_23; 
+  memref_alloca_23[0] = _16; 
+  float* memref_alloca_24; 
+  memref_alloca_24[0] = _16; 
+  float* memref_alloca_25; 
+  memref_alloca_25[0] = _16; 
+  float* memref_alloca_26; 
+  memref_alloca_26[0] = _16; 
+  float arith_negf_27 = -(func_arg_2); 
+  float math_exp_28 = exp(arith_negf_27); 
+  float arith_subf_29 = (arith_const_0_15 - math_exp_28); 
+  float arith_mulf_30 = (arith_subf_29 * arith_subf_29); 
+  float arith_mulf_31 = (func_arg_2 * math_exp_28); 
+  float arith_mulf_32 = (arith_mulf_31 * arith_const_0_14); 
+  float arith_addf_33 = (arith_mulf_32 + arith_const_0_15); 
+  float arith_mulf_34 = (func_arg_2 * arith_const_0_14); 
+  float math_exp_35 = exp(arith_mulf_34); 
+  float arith_subf_36 = (arith_addf_33 - math_exp_35); 
+  float arith_divf_37 = (arith_mulf_30 / arith_subf_36); 
+  float arith_mulf_38 = (arith_divf_37 * math_exp_28); 
+  float arith_subf_39 = (func_arg_2 - arith_const_0_15); 
+  float arith_mulf_40 = (arith_mulf_38 * arith_subf_39); 
+  float arith_addf_41 = (func_arg_2 + arith_const_0_15); 
+  float arith_mulf_42 = (arith_mulf_38 * arith_addf_41); 
+  float arith_negf_43 = -(arith_divf_37); 
+  float arith_mulf_44 = (func_arg_2 * arith_const_0_13); 
+  float math_exp_45 = exp(arith_mulf_44); 
+  float arith_mulf_46 = (arith_negf_43 * math_exp_45); 
+  float math_powf_47 = pow(arith_const_0_14, arith_negf_27); 
+  float arith_negf_48 = -(math_exp_45); 
+  for (int for_iter_49 = arith_const_0_11; for_iter_49 < arith_const_64_10; for_iter_49 += arith_const_1_9)
+    {
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      memref_alloca_26[0] = arith_const_0_12; 
+      for (int for_iter_50 = arith_const_0_11; for_iter_50 < arith_const_64_10; for_iter_50 += arith_const_1_9)
+        {
+          float memref_load_51 = func_arg_3[for_iter_49][for_iter_50]; 
+          float arith_mulf_52 = (arith_divf_37 * memref_load_51); 
+          float memref_load_53 = memref_alloca_26[0]; 
+          float arith_mulf_54 = (arith_mulf_40 * memref_load_53); 
+          float arith_addf_55 = (arith_mulf_52 + arith_mulf_54); 
+          float memref_load_56 = memref_alloca_24[0]; 
+          float arith_mulf_57 = (math_powf_47 * memref_load_56); 
+          float arith_addf_58 = (arith_addf_55 + arith_mulf_57); 
+          float memref_load_59 = memref_alloca_23[0]; 
+          float arith_mulf_60 = (arith_negf_48 * memref_load_59); 
+          float arith_addf_61 = (arith_addf_58 + arith_mulf_60); 
+          func_arg_5[for_iter_49][for_iter_50] = arith_addf_61; 
+          float memref_load_62 = func_arg_3[for_iter_49][for_iter_50]; 
+          memref_alloca_26[0] = memref_load_62; 
+          memref_alloca_23[0] = memref_load_56; 
+          float memref_load_63 = func_arg_5[for_iter_49][for_iter_50]; 
+          memref_alloca_24[0] = memref_load_63; 
+        }
+      
+    }
+  
+  for (int for_iter_64 = arith_const_0_11; for_iter_64 < arith_const_64_10; for_iter_64 += arith_const_1_9)
+    {
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      memref_alloca_22[0] = arith_const_0_12; 
+      memref_alloca_21[0] = arith_const_0_12; 
+      for (int for_iter_65 = arith_const_0_11; for_iter_65 < arith_const_64_10; for_iter_65 += arith_const_1_9)
+        {
+          float memref_load_66 = memref_alloca_22[0]; 
+          float arith_mulf_67 = (arith_mulf_42 * memref_load_66); 
+          float memref_load_68 = memref_alloca_21[0]; 
+          float arith_mulf_69 = (arith_mulf_46 * memref_load_68); 
+          float arith_addf_70 = (arith_mulf_67 + arith_mulf_69); 
+          float memref_load_71 = memref_alloca_18[0]; 
+          float arith_mulf_72 = (math_powf_47 * memref_load_71); 
+          float arith_addf_73 = (arith_addf_70 + arith_mulf_72); 
+          float memref_load_74 = memref_alloca_17[0]; 
+          float arith_mulf_75 = (arith_negf_48 * memref_load_74); 
+          float arith_addf_76 = (arith_addf_73 + arith_mulf_75); 
+          int arith_muli_77 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_78 = (arith_muli_77 + arith_const_63_7); 
+          func_arg_6[for_iter_64][arith_addi_78] = arith_addf_76; 
+          memref_alloca_21[0] = memref_load_66; 
+          int arith_muli_79 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_80 = (arith_muli_79 + arith_const_63_7); 
+          float memref_load_81 = func_arg_3[for_iter_64][arith_addi_80]; 
+          memref_alloca_22[0] = memref_load_81; 
+          memref_alloca_17[0] = memref_load_71; 
+          int arith_muli_82 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_83 = (arith_muli_82 + arith_const_63_7); 
+          float memref_load_84 = func_arg_6[for_iter_64][arith_addi_83]; 
+          memref_alloca_18[0] = memref_load_84; 
+        }
+      
+    }
+  
+  for (int for_iter_85 = arith_const_0_11; for_iter_85 < arith_const_64_10; for_iter_85 += arith_const_1_9)
+    {
+      for (int for_iter_86 = arith_const_0_11; for_iter_86 < arith_const_64_10; for_iter_86 += arith_const_1_9)
+        {
+          float memref_load_87 = func_arg_5[for_iter_85][for_iter_86]; 
+          float memref_load_88 = func_arg_6[for_iter_85][for_iter_86]; 
+          float arith_addf_89 = (memref_load_87 + memref_load_88); 
+          func_arg_4[for_iter_85][for_iter_86] = arith_addf_89; 
+        }
+      
+    }
+  
+  for (int for_iter_90 = arith_const_0_11; for_iter_90 < arith_const_64_10; for_iter_90 += arith_const_1_9)
+    {
+      memref_alloca_25[0] = arith_const_0_12; 
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      for (int for_iter_91 = arith_const_0_11; for_iter_91 < arith_const_64_10; for_iter_91 += arith_const_1_9)
+        {
+          float memref_load_92 = func_arg_4[for_iter_91][for_iter_90]; 
+          float arith_mulf_93 = (arith_divf_37 * memref_load_92); 
+          float memref_load_94 = memref_alloca_25[0]; 
+          float arith_mulf_95 = (arith_mulf_40 * memref_load_94); 
+          float arith_addf_96 = (arith_mulf_93 + arith_mulf_95); 
+          float memref_load_97 = memref_alloca_24[0]; 
+          float arith_mulf_98 = (math_powf_47 * memref_load_97); 
+          float arith_addf_99 = (arith_addf_96 + arith_mulf_98); 
+          float memref_load_100 = memref_alloca_23[0]; 
+          float arith_mulf_101 = (arith_negf_48 * memref_load_100); 
+          float arith_addf_102 = (arith_addf_99 + arith_mulf_101); 
+          func_arg_5[for_iter_91][for_iter_90] = arith_addf_102; 
+          float memref_load_103 = func_arg_4[for_iter_91][for_iter_90]; 
+          memref_alloca_25[0] = memref_load_103; 
+          memref_alloca_23[0] = memref_load_97; 
+          float memref_load_104 = func_arg_5[for_iter_91][for_iter_90]; 
+          memref_alloca_24[0] = memref_load_104; 
+        }
+      
+    }
+  
+  for (int for_iter_105 = arith_const_0_11; for_iter_105 < arith_const_64_10; for_iter_105 += arith_const_1_9)
+    {
+      memref_alloca_20[0] = arith_const_0_12; 
+      memref_alloca_19[0] = arith_const_0_12; 
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      for (int for_iter_106 = arith_const_0_11; for_iter_106 < arith_const_64_10; for_iter_106 += arith_const_1_9)
+        {
+          float memref_load_107 = memref_alloca_20[0]; 
+          float arith_mulf_108 = (arith_mulf_42 * memref_load_107); 
+          float memref_load_109 = memref_alloca_19[0]; 
+          float arith_mulf_110 = (arith_mulf_46 * memref_load_109); 
+          float arith_addf_111 = (arith_mulf_108 + arith_mulf_110); 
+          float memref_load_112 = memref_alloca_18[0]; 
+          float arith_mulf_113 = (math_powf_47 * memref_load_112); 
+          float arith_addf_114 = (arith_addf_111 + arith_mulf_113); 
+          float memref_load_115 = memref_alloca_17[0]; 
+          float arith_mulf_116 = (arith_negf_48 * memref_load_115); 
+          float arith_addf_117 = (arith_addf_114 + arith_mulf_116); 
+          int arith_muli_118 = (for_iter_106 * arith_const_neg_1_8); 
+          int arith_addi_119 = (arith_muli_118 + arith_const_63_7); 
+          func_arg_6[arith_addi_119][for_iter_105] = arith_addf_117; 
+          memref_alloca_19[0] = memref_load_107; 
+          int arith_muli_120 = (for_iter_106 * arith_const_neg_1_8); 
+          int arith_addi_121 = (arith_muli_120 + arith_const_63_7); 
+          float memref_load_122 = func_arg_4[arith_addi_121][for_iter_105]; 
+          memref_alloca_20[0] = memref_load_122; 
+          memref_alloca_17[0] = memref_load_112; 
+          int arith_muli_123 = (for_iter_106 * arith_const_neg_1_8); 
+          int arith_addi_124 = (arith_muli_123 + arith_const_63_7); 
+          float memref_load_125 = func_arg_6[arith_addi_124][for_iter_105]; 
+          memref_alloca_18[0] = memref_load_125; 
+        }
+      
+    }
+  
+  for (int for_iter_126 = arith_const_0_11; for_iter_126 < arith_const_64_10; for_iter_126 += arith_const_1_9)
+    {
+      for (int for_iter_127 = arith_const_0_11; for_iter_127 < arith_const_64_10; for_iter_127 += arith_const_1_9)
+        {
+          float memref_load_128 = func_arg_5[for_iter_126][for_iter_127]; 
+          float memref_load_129 = func_arg_6[for_iter_126][for_iter_127]; 
+          float arith_addf_130 = (memref_load_128 + memref_load_129); 
+          func_arg_4[for_iter_126][for_iter_127] = arith_addf_130; 
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+}
+[PAST] Live-out variables to be checked for equivalence: alpha imgIn imgOut y1 y2 
+[PAST][AI][Equivalence] Interpret program P1...
+[PAST][AI] Clone and normalize program before interpretation...
+void kernel_deriche(int w, int h, float alpha, float imgIn[(64 + 0)][(64 + 0)], float imgOut[(64 + 0)][(64 + 0)], float y1[(64 + 0)][(64 + 0)], float y2[(64 + 0)][(64 + 0)])
+{
+  int i; 
+  int j; 
+  float xm1; 
+  float tm1; 
+  float ym1; 
+  float ym2; 
+  float xp1; 
+  float xp2; 
+  float tp1; 
+  float tp2; 
+  float yp1; 
+  float yp2; 
+  float k; 
+  float a1; 
+  float a2; 
+  float a3; 
+  float a4; 
+  float a5; 
+  float a6; 
+  float a7; 
+  float a8; 
+  float b1; 
+  float b2; 
+  float c1; 
+  float c2; 
+  k = (((_past_fp_value_1_000000 - exp(-(alpha))) * (_past_fp_value_1_000000 - exp(-(alpha)))) / ((((alpha * exp(-(alpha))) * _past_fp_value_2_000000) + _past_fp_value_1_000000) - exp((alpha * _past_fp_value_2_000000)))); 
+  a5 = k; 
+  __tmp_past_ai_assign_worker_0_2 = a5; 
+  a1 = __tmp_past_ai_assign_worker_0_2; 
+  a6 = ((k * exp(-(alpha))) * (alpha - _past_fp_value_1_000000)); 
+  __tmp_past_ai_assign_worker_0_2 = a6; 
+  a2 = __tmp_past_ai_assign_worker_0_2; 
+  a7 = ((k * exp(-(alpha))) * (alpha + _past_fp_value_1_000000)); 
+  __tmp_past_ai_assign_worker_0_2 = a7; 
+  a3 = __tmp_past_ai_assign_worker_0_2; 
+  a8 = (-(k) * exp((alpha * -(_past_fp_value_2_000000)))); 
+  __tmp_past_ai_assign_worker_0_2 = a8; 
+  a4 = __tmp_past_ai_assign_worker_0_2; 
+  b1 = pow(_past_fp_value_2_000000, -(alpha)); 
+  b2 = -(exp((alpha * -(_past_fp_value_2_000000)))); 
+  c2 = 1; 
+  __tmp_past_ai_assign_worker_0_2 = c2; 
+  c1 = __tmp_past_ai_assign_worker_0_2; 
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      ym1 = _past_fp_value_0_000000; 
+      ym2 = _past_fp_value_0_000000; 
+      xm1 = _past_fp_value_0_000000; 
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          y1[i][j] = ((((a1 * imgIn[i][j]) + (a2 * xm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          xm1 = imgIn[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      yp1 = _past_fp_value_0_000000; 
+      yp2 = _past_fp_value_0_000000; 
+      xp1 = _past_fp_value_0_000000; 
+      xp2 = _past_fp_value_0_000000; 
+      for (j = (64 - 1); j >= 0; j = (j - 1))
+        {
+          y2[i][j] = ((((a3 * xp1) + (a4 * xp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          xp2 = xp1; 
+          xp1 = imgIn[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          imgOut[i][j] = (c1 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j = (j + 1))
+    {
+      tm1 = _past_fp_value_0_000000; 
+      ym1 = _past_fp_value_0_000000; 
+      ym2 = _past_fp_value_0_000000; 
+      for (i = 0; i < 64; i = (i + 1))
+        {
+          y1[i][j] = ((((a5 * imgOut[i][j]) + (a6 * tm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          tm1 = imgOut[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j = (j + 1))
+    {
+      tp1 = _past_fp_value_0_000000; 
+      tp2 = _past_fp_value_0_000000; 
+      yp1 = _past_fp_value_0_000000; 
+      yp2 = _past_fp_value_0_000000; 
+      for (i = (64 - 1); i >= 0; i = (i - 1))
+        {
+          y2[i][j] = ((((a7 * tp1) + (a8 * tp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          tp2 = tp1; 
+          tp1 = imgOut[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          imgOut[i][j] = (c2 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+}
+{
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+}
+[PAST] Final program interpreted:
+void kernel_deriche(int w, int h, float alpha, float imgIn[(64 + 0)][(64 + 0)], float imgOut[(64 + 0)][(64 + 0)], float y1[(64 + 0)][(64 + 0)], float y2[(64 + 0)][(64 + 0)])
+{
+  int i; 
+  int j; 
+  float xm1; 
+  float tm1; 
+  float ym1; 
+  float ym2; 
+  float xp1; 
+  float xp2; 
+  float tp1; 
+  float tp2; 
+  float yp1; 
+  float yp2; 
+  float k; 
+  float a1; 
+  float a2; 
+  float a3; 
+  float a4; 
+  float a5; 
+  float a6; 
+  float a7; 
+  float a8; 
+  float b1; 
+  float b2; 
+  float c1; 
+  float c2; 
+  k = (((_past_fp_value_1_000000 - exp(-(alpha))) * (_past_fp_value_1_000000 - exp(-(alpha)))) / ((((alpha * exp(-(alpha))) * _past_fp_value_2_000000) + _past_fp_value_1_000000) - exp((alpha * _past_fp_value_2_000000)))); 
+  a5 = k; 
+  __tmp_past_ai_assign_worker_0_2 = a5; 
+  a1 = __tmp_past_ai_assign_worker_0_2; 
+  a6 = ((k * exp(-(alpha))) * (alpha - _past_fp_value_1_000000)); 
+  __tmp_past_ai_assign_worker_0_2 = a6; 
+  a2 = __tmp_past_ai_assign_worker_0_2; 
+  a7 = ((k * exp(-(alpha))) * (alpha + _past_fp_value_1_000000)); 
+  __tmp_past_ai_assign_worker_0_2 = a7; 
+  a3 = __tmp_past_ai_assign_worker_0_2; 
+  a8 = (-(k) * exp((alpha * -(_past_fp_value_2_000000)))); 
+  __tmp_past_ai_assign_worker_0_2 = a8; 
+  a4 = __tmp_past_ai_assign_worker_0_2; 
+  b1 = pow(_past_fp_value_2_000000, -(alpha)); 
+  b2 = -(exp((alpha * -(_past_fp_value_2_000000)))); 
+  c2 = 1; 
+  __tmp_past_ai_assign_worker_0_2 = c2; 
+  c1 = __tmp_past_ai_assign_worker_0_2; 
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      ym1 = _past_fp_value_0_000000; 
+      ym2 = _past_fp_value_0_000000; 
+      xm1 = _past_fp_value_0_000000; 
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          y1[i][j] = ((((a1 * imgIn[i][j]) + (a2 * xm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          xm1 = imgIn[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      yp1 = _past_fp_value_0_000000; 
+      yp2 = _past_fp_value_0_000000; 
+      xp1 = _past_fp_value_0_000000; 
+      xp2 = _past_fp_value_0_000000; 
+      for (j = (64 - 1); j >= 0; j = (j - 1))
+        {
+          y2[i][j] = ((((a3 * xp1) + (a4 * xp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          xp2 = xp1; 
+          xp1 = imgIn[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          imgOut[i][j] = (c1 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j = (j + 1))
+    {
+      tm1 = _past_fp_value_0_000000; 
+      ym1 = _past_fp_value_0_000000; 
+      ym2 = _past_fp_value_0_000000; 
+      for (i = 0; i < 64; i = (i + 1))
+        {
+          y1[i][j] = ((((a5 * imgOut[i][j]) + (a6 * tm1)) + (b1 * ym1)) + (b2 * ym2)); 
+          tm1 = imgOut[i][j]; 
+          ym2 = ym1; 
+          ym1 = y1[i][j]; 
+        }
+      
+    }
+  
+  for (j = 0; j < 64; j = (j + 1))
+    {
+      tp1 = _past_fp_value_0_000000; 
+      tp2 = _past_fp_value_0_000000; 
+      yp1 = _past_fp_value_0_000000; 
+      yp2 = _past_fp_value_0_000000; 
+      for (i = (64 - 1); i >= 0; i = (i - 1))
+        {
+          y2[i][j] = ((((a7 * tp1) + (a8 * tp2)) + (b1 * yp1)) + (b2 * yp2)); 
+          tp2 = tp1; 
+          tp1 = imgOut[i][j]; 
+          yp2 = yp1; 
+          yp1 = y2[i][j]; 
+        }
+      
+    }
+  
+  for (i = 0; i < 64; i = (i + 1))
+    {
+      for (j = 0; j < 64; j = (j + 1))
+        {
+          imgOut[i][j] = (c2 * (y1[i][j] + y2[i][j])); 
+        }
+      
+    }
+  
+}
+{
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x559682303000
+[INFO]	1 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	1 calls to evaluate funcalls
+[INFO]	390 calls to evaluate for loops
+[INFO]	133581 calls to evaluate statements
+[INFO]	82845 CDAGs created
+[INFO]	122917 non-CDFG operations in CDAGs
+[INFO]	52 symbols in symbol table
+[INFO]	62 variables
+[INFO]	58 scalar variables
+[INFO]	4 array variables
+[INFO]	16442 memory elements used
+[INFO]	17312 memory elements allocated
+[INFO]	1315360 memory bytes used
+[INFO]	1384960 memory bytes allocated
+[PAST][AI][Equivalence] Interpret program P2...
+[PAST][AI] Clone and normalize program before interpretation...
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* func_arg_3, float* func_arg_4, float* func_arg_5, float* func_arg_6)
+{
+  int arith_const_63_7 = 63; 
+  int arith_const_neg_1_8 = -(1); 
+  int arith_const_1_9 = 1; 
+  int arith_const_64_10 = 64; 
+  int arith_const_0_11 = 0; 
+  float arith_const_0_12 = _past_fp_value_0_000000; 
+  float arith_const_0_13 = -(_past_fp_value_2_000000); 
+  float arith_const_0_14 = _past_fp_value_2_000000; 
+  float arith_const_0_15 = _past_fp_value_1_000000; 
+  float _16; 
+  float* memref_alloca_17; 
+  memref_alloca_17[0] = _16; 
+  float* memref_alloca_18; 
+  memref_alloca_18[0] = _16; 
+  float* memref_alloca_19; 
+  memref_alloca_19[0] = _16; 
+  float* memref_alloca_20; 
+  memref_alloca_20[0] = _16; 
+  float* memref_alloca_21; 
+  memref_alloca_21[0] = _16; 
+  float* memref_alloca_22; 
+  memref_alloca_22[0] = _16; 
+  float* memref_alloca_23; 
+  memref_alloca_23[0] = _16; 
+  float* memref_alloca_24; 
+  memref_alloca_24[0] = _16; 
+  float* memref_alloca_25; 
+  memref_alloca_25[0] = _16; 
+  float* memref_alloca_26; 
+  memref_alloca_26[0] = _16; 
+  float arith_negf_27 = -(func_arg_2); 
+  float math_exp_28 = exp(arith_negf_27); 
+  float arith_subf_29 = (arith_const_0_15 - math_exp_28); 
+  float arith_mulf_30 = (arith_subf_29 * arith_subf_29); 
+  float arith_mulf_31 = (func_arg_2 * math_exp_28); 
+  float arith_mulf_32 = (arith_mulf_31 * arith_const_0_14); 
+  float arith_addf_33 = (arith_mulf_32 + arith_const_0_15); 
+  float arith_mulf_34 = (func_arg_2 * arith_const_0_14); 
+  float math_exp_35 = exp(arith_mulf_34); 
+  float arith_subf_36 = (arith_addf_33 - math_exp_35); 
+  float arith_divf_37 = (arith_mulf_30 / arith_subf_36); 
+  float arith_mulf_38 = (arith_divf_37 * math_exp_28); 
+  float arith_subf_39 = (func_arg_2 - arith_const_0_15); 
+  float arith_mulf_40 = (arith_mulf_38 * arith_subf_39); 
+  float arith_addf_41 = (func_arg_2 + arith_const_0_15); 
+  float arith_mulf_42 = (arith_mulf_38 * arith_addf_41); 
+  float arith_negf_43 = -(arith_divf_37); 
+  float arith_mulf_44 = (func_arg_2 * arith_const_0_13); 
+  float math_exp_45 = exp(arith_mulf_44); 
+  float arith_mulf_46 = (arith_negf_43 * math_exp_45); 
+  float math_powf_47 = pow(arith_const_0_14, arith_negf_27); 
+  float arith_negf_48 = -(math_exp_45); 
+  for (int for_iter_49 = arith_const_0_11; for_iter_49 < arith_const_64_10; for_iter_49 = (for_iter_49 + arith_const_1_9))
+    {
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      memref_alloca_26[0] = arith_const_0_12; 
+      for (int for_iter_50 = arith_const_0_11; for_iter_50 < arith_const_64_10; for_iter_50 = (for_iter_50 + arith_const_1_9))
+        {
+          float memref_load_51 = func_arg_3[for_iter_49][for_iter_50]; 
+          float arith_mulf_52 = (arith_divf_37 * memref_load_51); 
+          float memref_load_53 = memref_alloca_26[0]; 
+          float arith_mulf_54 = (arith_mulf_40 * memref_load_53); 
+          float arith_addf_55 = (arith_mulf_52 + arith_mulf_54); 
+          float memref_load_56 = memref_alloca_24[0]; 
+          float arith_mulf_57 = (math_powf_47 * memref_load_56); 
+          float arith_addf_58 = (arith_addf_55 + arith_mulf_57); 
+          float memref_load_59 = memref_alloca_23[0]; 
+          float arith_mulf_60 = (arith_negf_48 * memref_load_59); 
+          float arith_addf_61 = (arith_addf_58 + arith_mulf_60); 
+          func_arg_5[for_iter_49][for_iter_50] = arith_addf_61; 
+          float memref_load_62 = func_arg_3[for_iter_49][for_iter_50]; 
+          memref_alloca_26[0] = memref_load_62; 
+          memref_alloca_23[0] = memref_load_56; 
+          float memref_load_63 = func_arg_5[for_iter_49][for_iter_50]; 
+          memref_alloca_24[0] = memref_load_63; 
+        }
+      
+    }
+  
+  for (int for_iter_64 = arith_const_0_11; for_iter_64 < arith_const_64_10; for_iter_64 = (for_iter_64 + arith_const_1_9))
+    {
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      memref_alloca_22[0] = arith_const_0_12; 
+      memref_alloca_21[0] = arith_const_0_12; 
+      for (int for_iter_65 = arith_const_0_11; for_iter_65 < arith_const_64_10; for_iter_65 = (for_iter_65 + arith_const_1_9))
+        {
+          float memref_load_66 = memref_alloca_22[0]; 
+          float arith_mulf_67 = (arith_mulf_42 * memref_load_66); 
+          float memref_load_68 = memref_alloca_21[0]; 
+          float arith_mulf_69 = (arith_mulf_46 * memref_load_68); 
+          float arith_addf_70 = (arith_mulf_67 + arith_mulf_69); 
+          float memref_load_71 = memref_alloca_18[0]; 
+          float arith_mulf_72 = (math_powf_47 * memref_load_71); 
+          float arith_addf_73 = (arith_addf_70 + arith_mulf_72); 
+          float memref_load_74 = memref_alloca_17[0]; 
+          float arith_mulf_75 = (arith_negf_48 * memref_load_74); 
+          float arith_addf_76 = (arith_addf_73 + arith_mulf_75); 
+          int arith_muli_77 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_78 = (arith_muli_77 + arith_const_63_7); 
+          func_arg_6[for_iter_64][arith_addi_78] = arith_addf_76; 
+          memref_alloca_21[0] = memref_load_66; 
+          int arith_muli_79 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_80 = (arith_muli_79 + arith_const_63_7); 
+          float memref_load_81 = func_arg_3[for_iter_64][arith_addi_80]; 
+          memref_alloca_22[0] = memref_load_81; 
+          memref_alloca_17[0] = memref_load_71; 
+          int arith_muli_82 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_83 = (arith_muli_82 + arith_const_63_7); 
+          float memref_load_84 = func_arg_6[for_iter_64][arith_addi_83]; 
+          memref_alloca_18[0] = memref_load_84; 
+        }
+      
+    }
+  
+  for (int for_iter_85 = arith_const_0_11; for_iter_85 < arith_const_64_10; for_iter_85 = (for_iter_85 + arith_const_1_9))
+    {
+      for (int for_iter_86 = arith_const_0_11; for_iter_86 < arith_const_64_10; for_iter_86 = (for_iter_86 + arith_const_1_9))
+        {
+          float memref_load_87 = func_arg_5[for_iter_85][for_iter_86]; 
+          float memref_load_88 = func_arg_6[for_iter_85][for_iter_86]; 
+          float arith_addf_89 = (memref_load_87 + memref_load_88); 
+          func_arg_4[for_iter_85][for_iter_86] = arith_addf_89; 
+        }
+      
+    }
+  
+  for (int for_iter_90 = arith_const_0_11; for_iter_90 < arith_const_64_10; for_iter_90 = (for_iter_90 + arith_const_1_9))
+    {
+      memref_alloca_25[0] = arith_const_0_12; 
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      for (int for_iter_91 = arith_const_0_11; for_iter_91 < arith_const_64_10; for_iter_91 = (for_iter_91 + arith_const_1_9))
+        {
+          float memref_load_92 = func_arg_4[for_iter_91][for_iter_90]; 
+          float arith_mulf_93 = (arith_divf_37 * memref_load_92); 
+          float memref_load_94 = memref_alloca_25[0]; 
+          float arith_mulf_95 = (arith_mulf_40 * memref_load_94); 
+          float arith_addf_96 = (arith_mulf_93 + arith_mulf_95); 
+          float memref_load_97 = memref_alloca_24[0]; 
+          float arith_mulf_98 = (math_powf_47 * memref_load_97); 
+          float arith_addf_99 = (arith_addf_96 + arith_mulf_98); 
+          float memref_load_100 = memref_alloca_23[0]; 
+          float arith_mulf_101 = (arith_negf_48 * memref_load_100); 
+          float arith_addf_102 = (arith_addf_99 + arith_mulf_101); 
+          func_arg_5[for_iter_91][for_iter_90] = arith_addf_102; 
+          float memref_load_103 = func_arg_4[for_iter_91][for_iter_90]; 
+          memref_alloca_25[0] = memref_load_103; 
+          memref_alloca_23[0] = memref_load_97; 
+          float memref_load_104 = func_arg_5[for_iter_91][for_iter_90]; 
+          memref_alloca_24[0] = memref_load_104; 
+        }
+      
+    }
+  
+  for (int for_iter_105 = arith_const_0_11; for_iter_105 < arith_const_64_10; for_iter_105 = (for_iter_105 + arith_const_1_9))
+    {
+      memref_alloca_20[0] = arith_const_0_12; 
+      memref_alloca_19[0] = arith_const_0_12; 
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      for (int for_iter_106 = arith_const_0_11; for_iter_106 < arith_const_64_10; for_iter_106 = (for_iter_106 + arith_const_1_9))
+        {
+          float memref_load_107 = memref_alloca_20[0]; 
+          float arith_mulf_108 = (arith_mulf_42 * memref_load_107); 
+          float memref_load_109 = memref_alloca_19[0]; 
+          float arith_mulf_110 = (arith_mulf_46 * memref_load_109); 
+          float arith_addf_111 = (arith_mulf_108 + arith_mulf_110); 
+          float memref_load_112 = memref_alloca_18[0]; 
+          float arith_mulf_113 = (math_powf_47 * memref_load_112); 
+          float arith_addf_114 = (arith_addf_111 + arith_mulf_113); 
+          float memref_load_115 = memref_alloca_17[0]; 
+          float arith_mulf_116 = (arith_negf_48 * memref_load_115); 
+          float arith_addf_117 = (arith_addf_114 + arith_mulf_116); 
+          int arith_muli_118 = (for_iter_106 * arith_const_neg_1_8); 
+          int arith_addi_119 = (arith_muli_118 + arith_const_63_7); 
+          func_arg_6[arith_addi_119][for_iter_105] = arith_addf_117; 
+          memref_alloca_19[0] = memref_load_107; 
+          int arith_muli_120 = (for_iter_106 * arith_const_neg_1_8); 
+          int arith_addi_121 = (arith_muli_120 + arith_const_63_7); 
+          float memref_load_122 = func_arg_4[arith_addi_121][for_iter_105]; 
+          memref_alloca_20[0] = memref_load_122; 
+          memref_alloca_17[0] = memref_load_112; 
+          int arith_muli_123 = (for_iter_106 * arith_const_neg_1_8); 
+          int arith_addi_124 = (arith_muli_123 + arith_const_63_7); 
+          float memref_load_125 = func_arg_6[arith_addi_124][for_iter_105]; 
+          memref_alloca_18[0] = memref_load_125; 
+        }
+      
+    }
+  
+  for (int for_iter_126 = arith_const_0_11; for_iter_126 < arith_const_64_10; for_iter_126 = (for_iter_126 + arith_const_1_9))
+    {
+      for (int for_iter_127 = arith_const_0_11; for_iter_127 < arith_const_64_10; for_iter_127 = (for_iter_127 + arith_const_1_9))
+        {
+          float memref_load_128 = func_arg_5[for_iter_126][for_iter_127]; 
+          float memref_load_129 = func_arg_6[for_iter_126][for_iter_127]; 
+          float arith_addf_130 = (memref_load_128 + memref_load_129); 
+          func_arg_4[for_iter_126][for_iter_127] = arith_addf_130; 
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+}
+[PAST] Final program interpreted:
+int __past_ai_global_nocheck_global_semaphore_counter = 1; 
+int PAST_TASK_INIT = 0; 
+int PAST_TASK_FINISHED = 1; 
+int* __past_internal_semaphores; 
+int max_nb_threads = 2; 
+void* __past_ai_global_nocheck_global_async_task_arguments; 
+void __internal_initialize_semaphores()
+{
+  _past_ai_api_concurrent_register_max_nb_workers(max_nb_threads); 
+}
+void _past_array_copy_1d(int* src, int soffs, int sstr, int* dst, int doffs, int dstr, int N)
+{
+  for (int i = 0; i < N; i = (i + 1))
+    {
+      dst[((i * dstr) + doffs)] = src[((i * sstr) + soffs)]; 
+    }
+  
+}
+void _past_array_copy_2d(int** __past_ai_global_nocheck_src, int __past_ai_global_nocheck_sof1, int __past_ai_global_nocheck_sof2, int __past_ai_global_nocheck_sstr1, int __past_ai_global_nocheck_sstr2, int** __past_ai_global_nocheck_dst, int __past_ai_global_nocheck_dof1, int __past_ai_global_nocheck_dof2, int __past_ai_global_nocheck_dstr1, int __past_ai_global_nocheck_dstr2, int __past_ai_global_nocheck_N1, int __past_ai_global_nocheck_N2)
+{
+  for (int __past_ai_global_nocheck_i = 0; __past_ai_global_nocheck_i < __past_ai_global_nocheck_N1; __past_ai_global_nocheck_i = (__past_ai_global_nocheck_i + 1))
+    {
+      for (int __past_ai_global_nocheck_j = 0; __past_ai_global_nocheck_j < __past_ai_global_nocheck_N2; __past_ai_global_nocheck_j = (__past_ai_global_nocheck_j + 1))
+        {
+          __past_ai_global_nocheck_dst[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_dstr1) + __past_ai_global_nocheck_dof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_dstr2) + __past_ai_global_nocheck_dof2)] = __past_ai_global_nocheck_src[((__past_ai_global_nocheck_i * __past_ai_global_nocheck_sstr1) + __past_ai_global_nocheck_sof1)][((__past_ai_global_nocheck_j * __past_ai_global_nocheck_sstr2) + __past_ai_global_nocheck_sof2)]; 
+        }
+      
+    }
+  
+}
+void kernel_deriche(int func_arg_0, int func_arg_1, float func_arg_2, float* func_arg_3, float* func_arg_4, float* func_arg_5, float* func_arg_6)
+{
+  int arith_const_63_7 = 63; 
+  int arith_const_neg_1_8 = -(1); 
+  int arith_const_1_9 = 1; 
+  int arith_const_64_10 = 64; 
+  int arith_const_0_11 = 0; 
+  float arith_const_0_12 = _past_fp_value_0_000000; 
+  float arith_const_0_13 = -(_past_fp_value_2_000000); 
+  float arith_const_0_14 = _past_fp_value_2_000000; 
+  float arith_const_0_15 = _past_fp_value_1_000000; 
+  float _16; 
+  float* memref_alloca_17; 
+  memref_alloca_17[0] = _16; 
+  float* memref_alloca_18; 
+  memref_alloca_18[0] = _16; 
+  float* memref_alloca_19; 
+  memref_alloca_19[0] = _16; 
+  float* memref_alloca_20; 
+  memref_alloca_20[0] = _16; 
+  float* memref_alloca_21; 
+  memref_alloca_21[0] = _16; 
+  float* memref_alloca_22; 
+  memref_alloca_22[0] = _16; 
+  float* memref_alloca_23; 
+  memref_alloca_23[0] = _16; 
+  float* memref_alloca_24; 
+  memref_alloca_24[0] = _16; 
+  float* memref_alloca_25; 
+  memref_alloca_25[0] = _16; 
+  float* memref_alloca_26; 
+  memref_alloca_26[0] = _16; 
+  float arith_negf_27 = -(func_arg_2); 
+  float math_exp_28 = exp(arith_negf_27); 
+  float arith_subf_29 = (arith_const_0_15 - math_exp_28); 
+  float arith_mulf_30 = (arith_subf_29 * arith_subf_29); 
+  float arith_mulf_31 = (func_arg_2 * math_exp_28); 
+  float arith_mulf_32 = (arith_mulf_31 * arith_const_0_14); 
+  float arith_addf_33 = (arith_mulf_32 + arith_const_0_15); 
+  float arith_mulf_34 = (func_arg_2 * arith_const_0_14); 
+  float math_exp_35 = exp(arith_mulf_34); 
+  float arith_subf_36 = (arith_addf_33 - math_exp_35); 
+  float arith_divf_37 = (arith_mulf_30 / arith_subf_36); 
+  float arith_mulf_38 = (arith_divf_37 * math_exp_28); 
+  float arith_subf_39 = (func_arg_2 - arith_const_0_15); 
+  float arith_mulf_40 = (arith_mulf_38 * arith_subf_39); 
+  float arith_addf_41 = (func_arg_2 + arith_const_0_15); 
+  float arith_mulf_42 = (arith_mulf_38 * arith_addf_41); 
+  float arith_negf_43 = -(arith_divf_37); 
+  float arith_mulf_44 = (func_arg_2 * arith_const_0_13); 
+  float math_exp_45 = exp(arith_mulf_44); 
+  float arith_mulf_46 = (arith_negf_43 * math_exp_45); 
+  float math_powf_47 = pow(arith_const_0_14, arith_negf_27); 
+  float arith_negf_48 = -(math_exp_45); 
+  for (int for_iter_49 = arith_const_0_11; for_iter_49 < arith_const_64_10; for_iter_49 = (for_iter_49 + arith_const_1_9))
+    {
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      memref_alloca_26[0] = arith_const_0_12; 
+      for (int for_iter_50 = arith_const_0_11; for_iter_50 < arith_const_64_10; for_iter_50 = (for_iter_50 + arith_const_1_9))
+        {
+          float memref_load_51 = func_arg_3[for_iter_49][for_iter_50]; 
+          float arith_mulf_52 = (arith_divf_37 * memref_load_51); 
+          float memref_load_53 = memref_alloca_26[0]; 
+          float arith_mulf_54 = (arith_mulf_40 * memref_load_53); 
+          float arith_addf_55 = (arith_mulf_52 + arith_mulf_54); 
+          float memref_load_56 = memref_alloca_24[0]; 
+          float arith_mulf_57 = (math_powf_47 * memref_load_56); 
+          float arith_addf_58 = (arith_addf_55 + arith_mulf_57); 
+          float memref_load_59 = memref_alloca_23[0]; 
+          float arith_mulf_60 = (arith_negf_48 * memref_load_59); 
+          float arith_addf_61 = (arith_addf_58 + arith_mulf_60); 
+          func_arg_5[for_iter_49][for_iter_50] = arith_addf_61; 
+          float memref_load_62 = func_arg_3[for_iter_49][for_iter_50]; 
+          memref_alloca_26[0] = memref_load_62; 
+          memref_alloca_23[0] = memref_load_56; 
+          float memref_load_63 = func_arg_5[for_iter_49][for_iter_50]; 
+          memref_alloca_24[0] = memref_load_63; 
+        }
+      
+    }
+  
+  for (int for_iter_64 = arith_const_0_11; for_iter_64 < arith_const_64_10; for_iter_64 = (for_iter_64 + arith_const_1_9))
+    {
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      memref_alloca_22[0] = arith_const_0_12; 
+      memref_alloca_21[0] = arith_const_0_12; 
+      for (int for_iter_65 = arith_const_0_11; for_iter_65 < arith_const_64_10; for_iter_65 = (for_iter_65 + arith_const_1_9))
+        {
+          float memref_load_66 = memref_alloca_22[0]; 
+          float arith_mulf_67 = (arith_mulf_42 * memref_load_66); 
+          float memref_load_68 = memref_alloca_21[0]; 
+          float arith_mulf_69 = (arith_mulf_46 * memref_load_68); 
+          float arith_addf_70 = (arith_mulf_67 + arith_mulf_69); 
+          float memref_load_71 = memref_alloca_18[0]; 
+          float arith_mulf_72 = (math_powf_47 * memref_load_71); 
+          float arith_addf_73 = (arith_addf_70 + arith_mulf_72); 
+          float memref_load_74 = memref_alloca_17[0]; 
+          float arith_mulf_75 = (arith_negf_48 * memref_load_74); 
+          float arith_addf_76 = (arith_addf_73 + arith_mulf_75); 
+          int arith_muli_77 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_78 = (arith_muli_77 + arith_const_63_7); 
+          func_arg_6[for_iter_64][arith_addi_78] = arith_addf_76; 
+          memref_alloca_21[0] = memref_load_66; 
+          int arith_muli_79 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_80 = (arith_muli_79 + arith_const_63_7); 
+          float memref_load_81 = func_arg_3[for_iter_64][arith_addi_80]; 
+          memref_alloca_22[0] = memref_load_81; 
+          memref_alloca_17[0] = memref_load_71; 
+          int arith_muli_82 = (for_iter_65 * arith_const_neg_1_8); 
+          int arith_addi_83 = (arith_muli_82 + arith_const_63_7); 
+          float memref_load_84 = func_arg_6[for_iter_64][arith_addi_83]; 
+          memref_alloca_18[0] = memref_load_84; 
+        }
+      
+    }
+  
+  for (int for_iter_85 = arith_const_0_11; for_iter_85 < arith_const_64_10; for_iter_85 = (for_iter_85 + arith_const_1_9))
+    {
+      for (int for_iter_86 = arith_const_0_11; for_iter_86 < arith_const_64_10; for_iter_86 = (for_iter_86 + arith_const_1_9))
+        {
+          float memref_load_87 = func_arg_5[for_iter_85][for_iter_86]; 
+          float memref_load_88 = func_arg_6[for_iter_85][for_iter_86]; 
+          float arith_addf_89 = (memref_load_87 + memref_load_88); 
+          func_arg_4[for_iter_85][for_iter_86] = arith_addf_89; 
+        }
+      
+    }
+  
+  for (int for_iter_90 = arith_const_0_11; for_iter_90 < arith_const_64_10; for_iter_90 = (for_iter_90 + arith_const_1_9))
+    {
+      memref_alloca_25[0] = arith_const_0_12; 
+      memref_alloca_24[0] = arith_const_0_12; 
+      memref_alloca_23[0] = arith_const_0_12; 
+      for (int for_iter_91 = arith_const_0_11; for_iter_91 < arith_const_64_10; for_iter_91 = (for_iter_91 + arith_const_1_9))
+        {
+          float memref_load_92 = func_arg_4[for_iter_91][for_iter_90]; 
+          float arith_mulf_93 = (arith_divf_37 * memref_load_92); 
+          float memref_load_94 = memref_alloca_25[0]; 
+          float arith_mulf_95 = (arith_mulf_40 * memref_load_94); 
+          float arith_addf_96 = (arith_mulf_93 + arith_mulf_95); 
+          float memref_load_97 = memref_alloca_24[0]; 
+          float arith_mulf_98 = (math_powf_47 * memref_load_97); 
+          float arith_addf_99 = (arith_addf_96 + arith_mulf_98); 
+          float memref_load_100 = memref_alloca_23[0]; 
+          float arith_mulf_101 = (arith_negf_48 * memref_load_100); 
+          float arith_addf_102 = (arith_addf_99 + arith_mulf_101); 
+          func_arg_5[for_iter_91][for_iter_90] = arith_addf_102; 
+          float memref_load_103 = func_arg_4[for_iter_91][for_iter_90]; 
+          memref_alloca_25[0] = memref_load_103; 
+          memref_alloca_23[0] = memref_load_97; 
+          float memref_load_104 = func_arg_5[for_iter_91][for_iter_90]; 
+          memref_alloca_24[0] = memref_load_104; 
+        }
+      
+    }
+  
+  for (int for_iter_105 = arith_const_0_11; for_iter_105 < arith_const_64_10; for_iter_105 = (for_iter_105 + arith_const_1_9))
+    {
+      memref_alloca_20[0] = arith_const_0_12; 
+      memref_alloca_19[0] = arith_const_0_12; 
+      memref_alloca_18[0] = arith_const_0_12; 
+      memref_alloca_17[0] = arith_const_0_12; 
+      for (int for_iter_106 = arith_const_0_11; for_iter_106 < arith_const_64_10; for_iter_106 = (for_iter_106 + arith_const_1_9))
+        {
+          float memref_load_107 = memref_alloca_20[0]; 
+          float arith_mulf_108 = (arith_mulf_42 * memref_load_107); 
+          float memref_load_109 = memref_alloca_19[0]; 
+          float arith_mulf_110 = (arith_mulf_46 * memref_load_109); 
+          float arith_addf_111 = (arith_mulf_108 + arith_mulf_110); 
+          float memref_load_112 = memref_alloca_18[0]; 
+          float arith_mulf_113 = (math_powf_47 * memref_load_112); 
+          float arith_addf_114 = (arith_addf_111 + arith_mulf_113); 
+          float memref_load_115 = memref_alloca_17[0]; 
+          float arith_mulf_116 = (arith_negf_48 * memref_load_115); 
+          float arith_addf_117 = (arith_addf_114 + arith_mulf_116); 
+          int arith_muli_118 = (for_iter_106 * arith_const_neg_1_8); 
+          int arith_addi_119 = (arith_muli_118 + arith_const_63_7); 
+          func_arg_6[arith_addi_119][for_iter_105] = arith_addf_117; 
+          memref_alloca_19[0] = memref_load_107; 
+          int arith_muli_120 = (for_iter_106 * arith_const_neg_1_8); 
+          int arith_addi_121 = (arith_muli_120 + arith_const_63_7); 
+          float memref_load_122 = func_arg_4[arith_addi_121][for_iter_105]; 
+          memref_alloca_20[0] = memref_load_122; 
+          memref_alloca_17[0] = memref_load_112; 
+          int arith_muli_123 = (for_iter_106 * arith_const_neg_1_8); 
+          int arith_addi_124 = (arith_muli_123 + arith_const_63_7); 
+          float memref_load_125 = func_arg_6[arith_addi_124][for_iter_105]; 
+          memref_alloca_18[0] = memref_load_125; 
+        }
+      
+    }
+  
+  for (int for_iter_126 = arith_const_0_11; for_iter_126 < arith_const_64_10; for_iter_126 = (for_iter_126 + arith_const_1_9))
+    {
+      for (int for_iter_127 = arith_const_0_11; for_iter_127 < arith_const_64_10; for_iter_127 = (for_iter_127 + arith_const_1_9))
+        {
+          float memref_load_128 = func_arg_5[for_iter_126][for_iter_127]; 
+          float memref_load_129 = func_arg_6[for_iter_126][for_iter_127]; 
+          float arith_addf_130 = (memref_load_128 + memref_load_129); 
+          func_arg_4[for_iter_126][for_iter_127] = arith_addf_130; 
+        }
+      
+    }
+  
+  return; 
+}
+{
+  __internal_initialize_semaphores(); 
+  int w; 
+  int h; 
+  float alpha; 
+  float* imgIn; 
+  float* imgOut; 
+  float* y1; 
+  float* y2; 
+  kernel_deriche(w, h, alpha, imgIn, imgOut, y1, y2); 
+}
+
+[PAST][AI] Start interpretation...
+[INFO]	State: 0x559682303510
+[INFO]	3 maximum concurrent workers
+[INFO]	0 concurrent regions started/ended
+[INFO]	0 semaphores (concurrent mode)
+[INFO]	0 blocking FIFOs (concurrent mode)
+[INFO]	0 context switches (concurrent mode)
+[INFO]	0 Semaphore values restored (concurrent mode)
+[INFO]	2 calls to evaluate funcalls
+[INFO]	390 calls to evaluate for loops
+[INFO]	420320 calls to evaluate statements
+[INFO]	320434 CDAGs created
+[INFO]	0 non-CDFG operations in CDAGs
+[INFO]	182 symbols in symbol table
+[INFO]	167 variables
+[INFO]	163 scalar variables
+[INFO]	4 array variables
+[INFO]	16547 memory elements used
+[INFO]	18992 memory elements allocated
+[INFO]	1323760 memory bytes used
+[INFO]	1519360 memory bytes allocated
+[PAST][AI][Equivalence] Start checking states for equivalence...
+[PAST][AI][Equivalence] Success: variable alpha is compliant
+[PAST][AI][Equivalence] Success: variable imgIn is compliant
+[PAST][AI][Equivalence] Success: variable imgOut is compliant
+[PAST][AI][Equivalence] Success: variable y1 is compliant
+[PAST][AI][Equivalence] Success: variable y2 is compliant
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P1: total=401506, min=1, max=93113
+[PAST][AI][Equivalence] Number of nodes in CDAGs for P2: total=401506, min=1, max=93113
+[PAST][AI][Equivalence] Approximate cumulative memory size: 47066128 Bytes
+[PAST][AI][Equivalence] Success: P1 and P2 are equivalent
+[PAST][AI] Timers:
+Time elapsed for timer 64 for Parsing: 0.029279 seconds
+Time elapsed for timer 65 for Interpret P1: 0.351906 seconds
+Time elapsed for timer 66 for Interpret P2: 1.074519 seconds
+Time elapsed for timer 67 for Equivalence checking: 0.052123 seconds
+[PAST] YES => Programs generated-polybench-mini-dataset-use-scalar-lb/interp/deriche-interp.c and pact26-mini-initial-exp/llvm19-affine-loop-inv-code-motion/translated/deriche-8-translated-noasyncepilogue.c are equivalent.

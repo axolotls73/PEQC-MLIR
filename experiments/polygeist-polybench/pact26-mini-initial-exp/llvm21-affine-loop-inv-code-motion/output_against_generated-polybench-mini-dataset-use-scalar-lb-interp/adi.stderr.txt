@@ -1,0 +1,26 @@
+[PAST][AI][Equivalence] Error: for coordinate (1,1)
+[PAST][AI][Equivalence] Mismatch: computation trees differ: variable P1:u (ptr=0x5612f71f9800) vs variable P2:u (ptr=0x5612f8a0a910)
+[PAST][AI][Equivalence] ERROR: P1 and P2 are NOT equivalent!
+	Command being timed: "pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees generated-polybench-mini-dataset-use-scalar-lb/interp/adi-interp.c pact26-mini-initial-exp/llvm21-affine-loop-inv-code-motion/translated/adi-8-translated-noasyncepilogue.c u,v,p,q"
+	User time (seconds): 2.12
+	System time (seconds): 0.02
+	Percent of CPU this job got: 100%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.14
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 62276
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 20204
+	Voluntary context switches: 70
+	Involuntary context switches: 10
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 32
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
