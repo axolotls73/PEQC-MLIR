@@ -67,7 +67,7 @@ $> ./script/make_tables.py config/mini-affine-options-no-polymer.json config/min
 ## PACT 2026 Experiments
 
 ```sh
-
 ./script/convert_polybenches.py ./config/pact26/mini-initial-exp.json
+./script/run.py ./config/pact26/mini-initial-exp.json --timeout 600 --compare-against generated-polybench-mini-dataset-use-scalar-lb/interp
 ```
 

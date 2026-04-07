@@ -58,6 +58,27 @@ def pathtoname(path):
 
 BASEDIR = os.path.abspath(f'{os.path.dirname(__file__)}/..')
 
+def expand_configs(configobj):
+  """Apply options_all and expand mlir_opt_versions cartesian product."""
+  options_all = configobj.get('options_all', {})
+  configs = [{**options_all, **c} for c in configobj['optionsets']]
+  if 'mlir_opt_versions' in configobj:
+    mlir_opt_versions = configobj['mlir_opt_versions']
+  else:
+    mlir_opt_versions = [{'name': None, 'path': 'mlir-opt'}]
+  expanded = []
+  for v in mlir_opt_versions:
+    for config in configs:
+      overrides = config.get('version_overrides', {}).get(v['name'], {})
+      c = {**config, **overrides}
+      c['_mlir_opt_path'] = v['path']
+      c['_mlir_opt_name'] = v['name']
+      c['_optionset'] = c['output_dir']
+      if v['name'] is not None:
+        c['output_dir'] = f'{v["name"]}-{c["output_dir"]}'
+      expanded.append(c)
+  return expanded
+
 # get all bench names
 benchnames = [os.path.basename(f).replace('.c', '') for f in glob(f'{BASEDIR}/polybench-input/*.c')]
 

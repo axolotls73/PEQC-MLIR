@@ -38,10 +38,10 @@ args = argparser.parse_args()
 
 configobj = json.load(open(args.config_file))
 # print(configobj)
-options_all = configobj.get('options_all', {})
-configs = [{**options_all, **c} for c in configobj['optionsets']]
 pbdir = configobj['polybench_dir']
 cgeist_dir = f'{BASEDIR}/' + configobj.get('cgeist_dir', 'polybench-cgeist')
+
+expanded_configs = expand_configs(configobj)
 
 executables = [
   'verif-opt',
@@ -49,51 +49,32 @@ executables = [
 ]
 if args.regenerate_cgeist:
   executables += ['cgeist']
-if any('polymer_args' in c for c in configs):
+if any('polymer_args' in c for c in expanded_configs):
   executables += ['polymer-opt']
 for ex in executables:
   if shutil.which(ex) is None:
     print(f'{ex} must be in PATH', file=sys.stderr)
     exit(1)
 
-if not(type(configs) is list): configs = [configs]
-
-topdir = configobj['topdir']
-runsh(f'mkdir -p {topdir}')
-
-# Build the list of (mlir_opt_path, mlir_opt_name) pairs
-if 'mlir_opt_versions' in configobj:
-  mlir_opt_versions = configobj['mlir_opt_versions']
-else:
-  mlir_opt_versions = [{'name': None, 'path': 'mlir-opt'}]
-
 # Check that mlir-opt executables exist
-for v in mlir_opt_versions:
-  path = v['path']
+for c in expanded_configs:
+  path = c['_mlir_opt_path']
   if shutil.which(path) is None and not os.path.isfile(path):
     print(f'mlir-opt not found: {path}', file=sys.stderr)
     exit(1)
 
-# Expand configs into cartesian product with mlir_opt_versions
-expanded_configs = []
-for v in mlir_opt_versions:
-  for config in configs:
-    overrides = config.get('version_overrides', {}).get(v['name'], {})
-    c = {**config, **overrides}
-    c['_mlir_opt_path'] = v['path']
-    if v['name'] is not None:
-      c['output_dir'] = f'{v["name"]}-{c["output_dir"]}'
-    expanded_configs.append(c)
+topdir = configobj['topdir']
+runsh(f'mkdir -p {topdir}')
 
 configdirs = [config['output_dir'] for config in expanded_configs]
 assert len(configdirs) == len(set(configdirs)), 'configs must have different output directories!'
 
 csvfile = f'{topdir}/conversion_stats.csv'
 cw = csv.writer(open(csvfile, 'w'))
-cw.writerow(['name', 'output_dir', 'all_pass', 'fail_command', 'flag_did_nothing'])
+cw.writerow(['name', 'output_dir', 'optionset', 'mlir_opt_version', 'all_pass', 'fail_command', 'flag_did_nothing'])
 
 # returns stdout if successful; writes stderr to stderrfile unconditionally
-def runorrecord(command, listtoadd, stage, name=None, log=None, outdir=None, stderrfile=None):
+def runorrecord(command, listtoadd, stage, name=None, log=None, outdir=None, stderrfile=None, optionset=None, mlir_opt_name=None):
   global args
   global cw
   log += [f'    {command}']
@@ -109,7 +90,7 @@ def runorrecord(command, listtoadd, stage, name=None, log=None, outdir=None, std
     timeoutstr = "(timeout)" if rc is None else ""
     print(f'{CLR_RED}  failed{empty}{timeoutstr}: {command}{CLR_NONE}')
     log += [f'    failed{empty}{timeoutstr}']
-    cw.writerow([name, re.sub(r'.*/', '', outdir), 'no', command, 'N/A'])
+    cw.writerow([name, re.sub(r'.*/', '', outdir), optionset, mlir_opt_name, 'no', command, 'N/A'])
     if args.debug == stage:
       print(stderr, file=sys.stderr)
     if args.die == stage:
@@ -146,6 +127,8 @@ def convertbenches(config):
   mliropt_args = config['mliropt_args']
   inline = config['inline'] if 'inline' in config else True
   mlir_opt = config['_mlir_opt_path']
+  mlir_opt_name = config['_mlir_opt_name']
+  optionset = config['_optionset']
 
   logfile = f'{outdir}/logs/command_log.txt'
   log = []
@@ -187,7 +170,7 @@ def convertbenches(config):
     print('converting ' + name)
     log += ['converting ' + name]
 
-    nrunorrecord = ft.partial(runorrecord, name=name, log=log, outdir=outdir)
+    nrunorrecord = ft.partial(runorrecord, name=name, log=log, outdir=outdir, optionset=optionset, mlir_opt_name=mlir_opt_name)
 
     file_original_mlir = f'{outdir}/conversion/{name}-1-original.mlir'
     file_original_stderr = f'{outdir}/conversion/{name}-1-original.stderr'
@@ -285,7 +268,7 @@ def convertbenches(config):
       _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {file_translated_no_includes} {pbdir}/epilogue/{name}-epilogue-noasync.c {outdir}/translated/{name}-8-translated-noasyncepilogue.c {VERIFREPO}')
       assert not rc
 
-    cw.writerow([name, config['output_dir'], 'yes', 'N/A', 'yes' if uselesspass else 'no'])
+    cw.writerow([name, config['output_dir'], optionset, mlir_opt_name, 'yes', 'N/A', 'yes' if uselesspass else 'no'])
 
   log += ['\n\nfail before conversion:']
   for name, command in runmlirfailed:

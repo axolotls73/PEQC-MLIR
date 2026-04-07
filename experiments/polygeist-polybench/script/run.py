@@ -40,7 +40,7 @@ for ex in executables:
     exit(1)
 
 configobj = json.load(open(args.config_file))
-configs = configobj['optionsets']
+configs = expand_configs(configobj)
 pbdir = configobj['polybench_dir']
 topdir = configobj['topdir']
 
