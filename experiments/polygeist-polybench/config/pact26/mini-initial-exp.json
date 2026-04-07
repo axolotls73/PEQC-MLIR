@@ -45,11 +45,21 @@
 {
     "mliropt_args": "--affine-loop-unroll",
 
+    "version_overrides": {
+        "llvm21": { "mliropt_args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll))\"" },
+        "llvm23": { "mliropt_args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll))\"" }
+    },
+
     "output_dir": "affine-unroll"
 },
 
 {
     "mliropt_args": "--affine-loop-unroll-jam",
+
+    "version_overrides": {
+        "llvm21": { "mliropt_args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll-jam))\"" },
+        "llvm23": { "mliropt_args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll-jam))\"" }
+    },
 
     "output_dir": "affine-unroll-jam"
 },

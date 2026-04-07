@@ -78,10 +78,11 @@ for v in mlir_opt_versions:
 expanded_configs = []
 for v in mlir_opt_versions:
   for config in configs:
-    c = dict(config)
+    overrides = config.get('version_overrides', {}).get(v['name'], {})
+    c = {**config, **overrides}
     c['_mlir_opt_path'] = v['path']
     if v['name'] is not None:
-      c['output_dir'] = f'{v["name"]}-{config["output_dir"]}'
+      c['output_dir'] = f'{v["name"]}-{c["output_dir"]}'
     expanded_configs.append(c)
 
 configdirs = [config['output_dir'] for config in expanded_configs]
