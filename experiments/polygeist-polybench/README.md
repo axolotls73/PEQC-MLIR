@@ -63,3 +63,11 @@ $> ./script/make_tables.py config/mini-affine-options-no-polymer.json config/min
     --csv-name run_stats_against_generated-polybench-mini-dataset-use-scalar-lb-interp.csv \
     --out-prefix mini-all-affine
 ```
+
+## PACT 2026 Experiments
+
+```sh
+
+./script/convert_polybenches.py ./config/pact26/mini-initial-exp.json
+```
+

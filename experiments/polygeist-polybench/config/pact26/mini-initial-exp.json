@@ -1,0 +1,64 @@
+{
+
+    "topdir": "pact26-mini-initial-exp",
+    "polybench_dir": "generated-polybench-mini-dataset-use-scalar-lb",
+    "cgeist_dir": "polybench-cgeist",
+
+    "inline": false,
+
+    "mlir_opt_versions": [
+        { "name": "llvm19", "path": "/opt/mlir-air-1124/llvm/install/bin/mlir-opt" },
+        { "name": "llvm21", "path": "/opt/mlir-air-0525/llvm/install/bin/mlir-opt" },
+        { "name": "llvm23", "path": "/opt/mlir-air-0326/my_install/mlir/bin/mlir-opt" }
+    ],
+
+    "options_all": {
+        "cgeist_args": "-raise-scf-to-affine"
+    },
+
+    "optionsets": [
+
+{
+    "mliropt_args": "--affine-loop-fusion",
+
+    "output_dir": "affine-loop-fusion"
+},
+
+{
+    "mliropt_args": "--affine-loop-invariant-code-motion",
+
+    "output_dir": "affine-loop-inv-code-motion"
+},
+
+{
+    "mliropt_args": "--affine-loop-normalize",
+
+    "output_dir": "affine-normalize"
+},
+
+{
+    "mliropt_args": "--affine-loop-tile=\"tile-size=32\"",
+
+    "output_dir": "affine-tile"
+},
+
+{
+    "mliropt_args": "--affine-loop-unroll",
+
+    "output_dir": "affine-unroll"
+},
+
+{
+    "mliropt_args": "--affine-loop-unroll-jam",
+
+    "output_dir": "affine-unroll-jam"
+},
+
+{
+    "mliropt_args": "--affine-parallelize=\"max-nested=1\"",
+
+    "output_dir": "affine-parallelize"
+}
+
+]
+}
