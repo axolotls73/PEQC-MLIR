@@ -19,6 +19,12 @@
     "optionsets": [
 
 {
+    "mliropt_args": "",
+
+    "output_dir": "no-args"
+},
+
+{
     "mliropt_args": "--affine-loop-fusion",
 
     "output_dir": "affine-loop-fusion"
