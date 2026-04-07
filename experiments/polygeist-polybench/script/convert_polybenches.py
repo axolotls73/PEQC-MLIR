@@ -119,8 +119,6 @@ def convertbenches(config):
   runconvfailed = []
   runtranfailed = []
 
-  uselesspass = False
-
   outdir = topdir + '/' + config['output_dir']
   cgeist_args = config['cgeist_args']
   polymer_args = config.get('polymer_args', None)
@@ -162,6 +160,7 @@ def convertbenches(config):
       exit(1)
 
   for file in source_files:
+    uselesspass = False
     name = get_name(file)
     if (args.only and name not in args.only) or (args.skip and name in args.skip):
       print(f'{CLR_YLW}skipping {file}{CLR_NONE}')
@@ -231,9 +230,8 @@ def convertbenches(config):
     if not stdout: continue
     with open(file_after_mliropt, 'w') as f:
       f.write(stdout)
-    if len(mliropt_args):
-      diff = checkdiff(mliropt_input, file_after_mliropt, command, log)
-      if not diff: uselesspass = True
+    diff = checkdiff(mliropt_input, file_after_mliropt, command, log)
+    if not diff: uselesspass = True
 
 
     file_after_loweraffine = f'{outdir}/conversion/{name}-5-after-loweraffine.mlir'
