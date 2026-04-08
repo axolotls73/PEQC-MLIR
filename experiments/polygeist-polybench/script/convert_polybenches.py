@@ -32,13 +32,12 @@ argparser.add_argument('--debug', choices=debugopts, default=[],
     help='print stderr from this stage')
 argparser.add_argument('--die', choices=debugopts, default=[],
     help='stop after first error from this stage')
-argparser.add_argument('--regenerate-cgeist', action='store_true',
-    help='re-run cgeist instead of using cached files from cgeist_dir')
+argparser.add_argument('--use-cached-cgeist', action='store_true',
+    help='use cached cgeist files from cgeist_dir instead of re-running cgeist')
 args = argparser.parse_args()
 
 configobj = json.load(open(args.config_file))
 # print(configobj)
-pbdir = configobj['polybench_dir']
 cgeist_dir = f'{BASEDIR}/' + configobj.get('cgeist_dir', 'polybench-cgeist')
 
 expanded_configs = expand_configs(configobj)
@@ -47,7 +46,7 @@ executables = [
   'verif-opt',
   'verif-translate',
 ]
-if args.regenerate_cgeist:
+if not args.use_cached_cgeist:
   executables += ['cgeist']
 baseline_checked = {'mlir-opt', 'verif-opt', 'verif-translate', 'cgeist'}
 extra_tools = set()
@@ -115,7 +114,6 @@ def checkdiff(f1, f2, command, log):
 
 def convertbenches(config):
   print(f'PROCESSING DIR: {config["output_dir"]}')
-  global pbdir
   global mlirstepsfailed
   global conversionfailed
   global translationfailed
@@ -125,6 +123,7 @@ def convertbenches(config):
   runconvfailed = []
   runtranfailed = []
 
+  pbdir = config['polybench_dir']
   outdir = topdir + '/' + config['output_dir']
   mlir_opt = config['_mlir_opt_path']
   mlir_opt_name = config['_mlir_opt_name']
@@ -147,7 +146,7 @@ def convertbenches(config):
     print('polybench_dir should be the output of generate_polybenches.py')
     exit(1)
 
-  if args.regenerate_cgeist:
+  if not args.use_cached_cgeist:
     source_files = glob(f'{pbdir}/kernel/*.c')
     def get_name(file): return os.path.basename(file).replace('.c', '')
   else:
@@ -185,7 +184,7 @@ def convertbenches(config):
       stderrfile = f'{outdir}/conversion/{name}-{step_num}-{label}.stderr'
 
       if tool_name == 'cgeist':
-        if args.regenerate_cgeist:
+        if not args.use_cached_cgeist:
           stdout = nrunorrecord(
               f'cgeist {file} -S -function=kernel_{name.replace("-", "_")} {step_args}',
               runmlirfailed, 'mlir', stderrfile=stderrfile)
