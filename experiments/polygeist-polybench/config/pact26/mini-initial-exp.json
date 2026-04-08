@@ -12,6 +12,10 @@
         { "name": "llvm23", "path": "/opt/mlir-air-0326/my_install/mlir/bin/mlir-opt" }
     ],
 
+    "ignore_benches": [
+        "adi", "durbin"
+    ],
+
     "options_all": {
         "cgeist_args": "-raise-scf-to-affine"
     },
