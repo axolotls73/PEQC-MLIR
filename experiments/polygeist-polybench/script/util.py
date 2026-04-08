@@ -15,6 +15,19 @@ def run(*args, timeout=None):
   out = subprocess_run(args, capture_output=True, timeout=timeout)
   return out.stdout.decode(), out.stderr.decode(), out.returncode
 
+def runsh_combined(command, timeout=None):
+  """Like runsh but merges stderr into stdout, interleaved as in a terminal."""
+  from subprocess import STDOUT
+  with Popen(command, shell=True, stdout=PIPE, stderr=STDOUT, start_new_session=True) as process:
+    try:
+        output, _ = process.communicate(timeout=timeout)
+        returncode = process.returncode
+    except TimeoutExpired:
+        os.killpg(process.pid, SIGINT)
+        output, _ = process.communicate()
+        returncode = None
+  return output.decode() if output else None, returncode
+
 def runsh(command, timeout=None):
   #https://stackoverflow.com/a/36955420
   with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, start_new_session=True) as process:

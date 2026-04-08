@@ -90,12 +90,11 @@ def processdir(dir, outdir):
   ])
 
 
-  files = glob(f'{outdir}/*.stdout.txt')
+  files = glob(f'{outdir}/*.output.txt')
   for file in files:
-    stdout = open(getfilepath(file)).read()
-    stderr = open(getfilepath(file.replace('stdout', 'stderr'))).read()
-    name, = re.match('.*/([\w-]+).stdout.txt', file).groups()
-    processfile(cw, name, stdout, stderr, dir)
+    output = open(getfilepath(file)).read()
+    name, = re.match('.*/([\w-]+).output.txt', file).groups()
+    processfile(cw, name, output, output, dir)
 
 
 for dir in dirs:

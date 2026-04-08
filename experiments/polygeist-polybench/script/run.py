@@ -90,16 +90,14 @@ def checkpairs(pairs, outdir, configdir):
       print(f'{CLR_YLW}skipping run "{file1} {file2}"{CLR_NONE}')
       continue
     command = f'/usr/bin/time -v {PASTCOMMAND} {file1} {file2} "{liveout}"'
-    stdout, stderr, rc = runsh(command, timeout=args.timeout)
+    output, rc = runsh_combined(command, timeout=args.timeout)
 
-    with open(f'{outdir}/{getbenchname(file1)}.stdout.txt', 'w') as f:
+    with open(f'{outdir}/{getbenchname(file1)}.output.txt', 'w') as f:
       f.write('command line: ' + command + '\n')
       f.write('return code: ' + str(rc) + '\n')
-      f.write(stdout if stdout else "")
-    with open(f'{outdir}/{getbenchname(file1)}.stderr.txt', 'w') as f:
-      f.write(stderr if stderr else "")
+      f.write(output if output else "")
 
-    runpass = stdout and 'YES' in stdout
+    runpass = output and 'YES' in output
     if runpass:
       print(f'pass: {name}: {file1} {file2} {CLR_GRAY}(command line: {command}){CLR_NONE}')
       numpass += 1
