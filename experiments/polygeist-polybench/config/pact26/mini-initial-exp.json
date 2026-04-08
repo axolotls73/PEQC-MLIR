@@ -4,6 +4,8 @@
     "polybench_dir": "generated-polybench-mini-dataset-use-scalar-lb",
     "cgeist_dir": "polybench-cgeist",
 
+    "pastchecker": "/opt/peqc-mlir-volume/past-release/install/bin/pastchecker",
+
     "inline": false,
 
     "mlir_opt_versions": [

@@ -10,7 +10,7 @@ import argparse
 import shutil
 
 
-PASTCOMMAND = 'pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees'
+PASTCOMMAND = '{pastchecker} --verbose --timing-mode --enable-preprocessor --enable-subtrees --happens-before'
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('config_file', type=str, default=f'{BASEDIR}/config/default-config.json', nargs='?',
@@ -30,19 +30,21 @@ argparser.add_argument('--seq-verif-only', action='store_true',
     help='run pastchecker with --seq-verif-only')
 args = argparser.parse_args()
 
+configobj = json.load(open(args.config_file))
+configs = expand_configs(configobj)
+pbdir = configobj['polybench_dir']
+topdir = configobj['topdir']
+
 executables = [
   'pastchecker',
-  '/usr/bin/time'
+  configobj['pastchecker'],
 ]
 for ex in executables:
   if shutil.which(ex) is None:
     print(f'{ex} must exist/be in PATH', file=sys.stderr)
     exit(1)
 
-configobj = json.load(open(args.config_file))
-configs = expand_configs(configobj)
-pbdir = configobj['polybench_dir']
-topdir = configobj['topdir']
+PASTCOMMAND = PASTCOMMAND.format(pastchecker=configobj['pastchecker'])
 
 if args.self:
   check_suffix = 'self_check'
