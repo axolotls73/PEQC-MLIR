@@ -6,8 +6,6 @@
 
     "pastchecker": "/opt/peqc-mlir-volume/past-release/install/bin/pastchecker",
 
-    "inline": false,
-
     "mlir_opt_versions": [
         { "name": "llvm19", "path": "/opt/mlir-air-1124/llvm/install/bin/mlir-opt" },
         { "name": "llvm21", "path": "/opt/mlir-air-0525/llvm/install/bin/mlir-opt" },
@@ -18,68 +16,166 @@
         "adi", "durbin"
     ],
 
-    "options_all": {
-        "cgeist_args": "-raise-scf-to-affine"
-    },
+    "pipeline_comparisons": [
+    ],
 
     "optionsets": [
 
 {
-    "mliropt_args": "",
-
-    "output_dir": "no-args"
+    "output_dir": "no-args",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
 },
 
 {
-    "mliropt_args": "--affine-loop-fusion",
-
-    "output_dir": "affine-loop-fusion"
+    "output_dir": "affine-loop-fusion",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-fusion",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
 },
 
 {
-    "mliropt_args": "--affine-loop-invariant-code-motion",
-
-    "output_dir": "affine-loop-inv-code-motion"
+    "output_dir": "affine-loop-inv-code-motion",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-invariant-code-motion",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
 },
 
 {
-    "mliropt_args": "--affine-loop-normalize",
-
-    "output_dir": "affine-normalize"
+    "output_dir": "affine-normalize",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-normalize",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
 },
 
 {
-    "mliropt_args": "--affine-loop-tile=\"tile-size=32\"",
-
-    "output_dir": "affine-tile"
+    "output_dir": "affine-tile",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-tile=\"tile-size=32\"",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
 },
 
 {
-    "mliropt_args": "--affine-loop-unroll",
-
+    "output_dir": "affine-unroll",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-unroll",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ],
     "version_overrides": {
-        "llvm21": { "mliropt_args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll))\"" },
-        "llvm23": { "mliropt_args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll))\"" }
-    },
-
-    "output_dir": "affine-unroll"
+        "llvm21": { "pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll))\"",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]},
+        "llvm23": { "pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll))\"",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]}
+    }
 },
 
 {
-    "mliropt_args": "--affine-loop-unroll-jam",
-
+    "output_dir": "affine-unroll-jam",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-unroll-jam",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ],
     "version_overrides": {
-        "llvm21": { "mliropt_args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll-jam))\"" },
-        "llvm23": { "mliropt_args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll-jam))\"" }
-    },
-
-    "output_dir": "affine-unroll-jam"
+        "llvm21": { "pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll-jam))\"",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]},
+        "llvm23": { "pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll-jam))\"",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]}
+    }
 },
 
 {
-    "mliropt_args": "--affine-parallelize=\"max-nested=1\"",
+    "output_dir": "affine-parallelize-maxnest1",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-parallelize=\"max-nested=1\"",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
+},
 
-    "output_dir": "affine-parallelize"
+{
+    "output_dir": "affine-parallelize",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-parallelize",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
 }
 
 ]

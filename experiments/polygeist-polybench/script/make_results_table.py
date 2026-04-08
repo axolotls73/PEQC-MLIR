@@ -24,12 +24,18 @@ configs = expand_configs(configobj)
 ignore_benches = set(configobj.get('ignore_benches', []))
 active_benches = [b for b in benchnames if b not in ignore_benches]
 
-# Base mliropt_args per optionset name — before version overrides
 options_all = configobj.get('options_all', {})
-base_mliropt_args = {
-    c['output_dir']: {**options_all, **c}.get('mliropt_args', '')
-    for c in configobj['optionsets']
-}
+
+def get_mliropt_args(config):
+    # New pipeline format: prefer track_did_nothing step, then first mlir-opt step with args
+    for step in config.get('pipeline', []):
+        if step['tool'] == 'mlir-opt' and step.get('track_did_nothing'):
+            return step.get('args', '')
+    for step in config.get('pipeline', []):
+        if step['tool'] == 'mlir-opt' and step.get('args'):
+            return step.get('args', '')
+    # Legacy flat format
+    return {**options_all, **config}.get('mliropt_args', '')
 
 # Load conversion stats — indexed by (output_dir, name)
 conv_df = pd.read_csv(f'{topdir}/conversion_stats.csv').set_index(['output_dir', 'name'])
@@ -41,7 +47,7 @@ for config in configs:
     output_dir = config['output_dir']
     optionset = config['_optionset']
     mlir_opt_name = config['_mlir_opt_name']
-    mliropt_args = base_mliropt_args.get(optionset, config.get('mliropt_args', ''))
+    mliropt_args = get_mliropt_args(config)
     if mliropt_args.startswith('-'):
       mliropt_args = ' ' + mliropt_args
 

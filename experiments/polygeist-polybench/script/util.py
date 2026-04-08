@@ -75,6 +75,11 @@ def expand_configs(configobj):
   """Apply options_all and expand mlir_opt_versions cartesian product."""
   options_all = configobj.get('options_all', {})
   configs = [{**options_all, **c} for c in configobj['optionsets']]
+  # Apply top-level "pipeline" as fallback for optionsets that don't define one
+  top_pipeline = configobj.get('pipeline', None)
+  if top_pipeline is not None:
+    for c in configs:
+      c.setdefault('pipeline', top_pipeline)
   if 'mlir_opt_versions' in configobj:
     mlir_opt_versions = configobj['mlir_opt_versions']
   else:
