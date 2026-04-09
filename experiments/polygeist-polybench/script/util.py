@@ -65,7 +65,7 @@ def getfilepath(f): return getpath(f, os.path.isfile)
 
 def pathtoname(path):
   name = path.replace('/', '-')
-  if name[-1] == '-':
+  if name and name[-1] == '-':
     name = name[:-1]
   return name
 
@@ -80,6 +80,11 @@ def expand_configs(configobj):
   if top_pipeline is not None:
     for c in configs:
       c.setdefault('pipeline', top_pipeline)
+  # Apply top-level "polybench_dir" as fallback
+  top_polybench_dir = configobj.get('polybench_dir')
+  if top_polybench_dir is not None:
+    for c in configs:
+      c.setdefault('polybench_dir', top_polybench_dir)
   if 'mlir_opt_versions' in configobj:
     mlir_opt_versions = configobj['mlir_opt_versions']
   else:

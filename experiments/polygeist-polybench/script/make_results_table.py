@@ -11,8 +11,6 @@ import pandas as pd
 argparser = argparse.ArgumentParser()
 argparser.add_argument('config_file', type=str,
     help='json config file used with convert_polybenches.py and run.py')
-argparser.add_argument('--csv-name', type=str, required=True,
-    help='run_stats csv filename produced by collect_csv.py, e.g. run_stats_against_generated-polybench-mini-dataset-use-scalar-lb-interp.csv')
 argparser.add_argument('--out', type=str, required=True,
     help='output csv file path (version summary written to <out>_version_summary.csv)')
 args = argparser.parse_args()
@@ -52,7 +50,9 @@ for config in configs:
       mliropt_args = ' ' + mliropt_args
 
     # Load run stats for this config if present
-    run_stats_path = f'{topdir}/{output_dir}/{args.csv_name}'
+    config_pbdir = config.get('polybench_dir', configobj.get('polybench_dir', ''))
+    csv_name = f'run_stats_against_polybench_{pathtoname(config_pbdir)}.csv'
+    run_stats_path = f'{topdir}/{output_dir}/{csv_name}'
     if os.path.isfile(run_stats_path):
         run_df = pd.read_csv(run_stats_path).set_index('name')
     else:

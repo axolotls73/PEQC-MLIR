@@ -24,6 +24,8 @@ rungroup.add_argument('--compare-against', metavar='compare-dir', type=str,
     help='only compare against corresponding benches in compare-dir (instead of cartesian product of all)')
 rungroup.add_argument('--compare-pipelines', metavar='dir', nargs='*', type=str,
     help='compare pipeline outputs: with no args runs all pairs from config pipeline_comparisons; with two args (dir-A dir-B) runs that one pair')
+rungroup.add_argument('--compare-against-polybench', action='store_true',
+    help='compare each bench against the corresponding polybench interp file from polybench_dir in config')
 argparser.add_argument('--skip', type=lambda t: [s.strip() for s in t.split(',')], default=[],
     help='comma-separated list of bench names to skip')
 argparser.add_argument('--only', type=lambda t: [s.strip() for s in t.split(',')], default=[],
@@ -52,6 +54,8 @@ if args.self:
   check_suffix = 'self_check'
 elif args.compare_against:
   check_suffix = f'against_{pathtoname(args.compare_against)}'
+elif args.compare_against_polybench:
+  check_suffix = None  # computed per-config inside loop
 elif args.compare_pipelines is not None:
   if len(args.compare_pipelines) == 2:
     pipeline_pairs = [args.compare_pipelines]
@@ -63,7 +67,7 @@ elif args.compare_pipelines is not None:
   else:
     print('--compare-pipelines takes 0 args (read from config) or exactly 2 args (dir-A dir-B)', file=sys.stderr)
     exit(1)
-if args.only and args.compare_pipelines is None:
+if check_suffix is not None and args.only and args.compare_pipelines is None:
   check_suffix += '-only-' + '-'.join(args.only)
 
 if args.seq_verif_only:
@@ -140,8 +144,15 @@ if args.compare_pipelines is not None:
 
 else:
   for config in configs:
+    if args.compare_against_polybench:
+      config_pbdir = config.get('polybench_dir', pbdir)
+      config_check_suffix = f'against_polybench_{pathtoname(config_pbdir)}'
+      if args.only:
+        config_check_suffix += '-only-' + '-'.join(args.only)
+    else:
+      config_check_suffix = check_suffix
     benchdir = f'{topdir}/{config["output_dir"]}/translated'
-    outdir = f'{topdir}/{config["output_dir"]}/output_{check_suffix}'
+    outdir = f'{topdir}/{config["output_dir"]}/output_{config_check_suffix}'
     runsh(f'mkdir -p {outdir}')
 
     benches = getbenches(benchdir)
@@ -156,6 +167,14 @@ else:
         otherfiles = [(file, name) for file, name in benches if name == cbname]
         if not len(otherfiles): continue
         pairs += [(cbfile, file, cbname, benchtoliveout[cbname]) for file, _ in otherfiles]
+
+    elif args.compare_against_polybench:
+      pbinterp = getbenches(f'{config_pbdir}/interp')
+      pairs = []
+      for pbfile, pbname in pbinterp:
+        otherfiles = [(file, name) for file, name in benches if name == pbname]
+        if not len(otherfiles): continue
+        pairs += [(pbfile, file, pbname, benchtoliveout[pbname]) for file, _ in otherfiles]
 
     checkpairs(pairs, outdir, config["output_dir"])
 

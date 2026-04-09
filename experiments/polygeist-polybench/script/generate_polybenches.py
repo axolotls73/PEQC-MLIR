@@ -12,6 +12,26 @@ PB_DIR = f'{BASEDIR}/polybench-input'
 CPP_SCRIPT = f'{PB_DIR}/create_cpped_version.pl'
 
 flags = argv[1:]
+
+def get_int_param_values(name, int_params):
+  """Evaluate polybench size defines for each int scalar param via CPP.
+  Uses the convention that param 'ni' corresponds to define 'NI'."""
+  if not int_params:
+    return {}
+  stub = f'#include "{name}.h"\n'
+  stub += '\n'.join(f'int {p} = {p.upper()};' for p in int_params)
+  import tempfile
+  with tempfile.NamedTemporaryFile(suffix='.c', dir=PB_DIR, mode='w', delete=False) as f:
+    f.write(stub)
+    tmppath = f.name
+  stdout, _, _ = runsh(f'gcc -E -I {PB_DIR} {" ".join(flags)} {tmppath} 2>/dev/null')
+  os.unlink(tmppath)
+  values = {}
+  for line in stdout.splitlines():
+    m = re.match(r'\s*int (\w+) = (\d+);', line)
+    if m:
+      values[m.group(1)] = int(m.group(2))
+  return values
 newdir = BASEDIR + "/generated-polybench-" + "-".join(
     [f.replace("-D", "").replace("POLYBENCH_", "").lower().replace("_", "-") for f in flags])
 
@@ -40,10 +60,18 @@ for cfile in glob(f'{PB_DIR}/*.preproc.c'):
   kernel, signature = re.search(f'(void kernel_{name.replace("-", "_")}\((.*?)\).*)int main',
       filestr, flags=re.DOTALL | re.MULTILINE).groups()
   signature = re.sub('\s\s+', ' ', signature)
+  int_params = [var.strip().split()[1] for var in signature.split(',')
+                if '[' not in var and var.strip().startswith('int')]
+  param_values = get_int_param_values(name, int_params)
   decls = ''
   for var in signature.split(','):
     typename, varname = var.replace('[', '').split()[:2]
-    decls += f'  {typename}{"*" if "[" in var else ""} {varname};\n'
+    if '[' in var:
+      decls += f'  {typename}* {varname};\n'
+    elif varname in param_values:
+      decls += f'  {typename} {varname} = {param_values[varname]};\n'
+    else:
+      decls += f'  {typename} {varname};\n'
   signature = ', '.join([re.sub('\[.*\]', '', ''.join(s.split()[1:])) for s in signature.split(',')])
 
   includes = '''
