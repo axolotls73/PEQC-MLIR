@@ -1,0 +1,91 @@
+{
+
+    "topdir": "pact26-parallel",
+    "polybench_dir": "generated-polybench-mini-dataset-use-scalar-lb",
+    "cgeist_dir": "polybench-cgeist",
+
+    "pastchecker": "/opt/peqc-mlir-volume/past-release/install/bin/pastchecker",
+
+    "mlir_opt_versions": [
+        { "name": "llvm19", "path": "/opt/mlir-air-1124/llvm/install/bin/mlir-opt" },
+        { "name": "llvm21", "path": "/opt/mlir-air-0525/llvm/install/bin/mlir-opt" },
+        { "name": "llvm23", "path": "/opt/mlir-air-0326/my_install/mlir/bin/mlir-opt" }
+    ],
+
+    "ignore_benches": [
+        "adi", "durbin"
+    ],
+
+    "pipeline_comparisons": [
+    ],
+
+    "optionsets": [
+
+{
+    "output_dir": "max-fuse",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-fusion=\"fusion-maximal\"",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ],
+    "version_overrides": {
+        "llvm21": {"pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--affine-loop-fusion=\"maximal\"",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]},
+        "llvm23": {"pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--affine-loop-fusion=\"maximal\"",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]}
+    }
+},
+
+{
+    "output_dir": "max-fuse-parallelize",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-fusion=\"fusion-maximal\" --affine-parallelize",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ],
+    "version_overrides": {
+        "llvm21": {"pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--affine-loop-fusion=\"maximal\" --affine-parallelize",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]},
+        "llvm23": {"pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--affine-loop-fusion=\"maximal\" --affine-parallelize",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]}
+    }
+}
+
+]
+}
