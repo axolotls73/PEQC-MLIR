@@ -102,13 +102,30 @@ def expand_configs(configobj):
       expanded.append(c)
   return expanded
 
-# get all bench names
-benchnames = [os.path.basename(f).replace('.c', '') for f in glob(f'{BASEDIR}/polybench-input/*.c')]
+benchnames = []
+benchtoliveout = {}
 
-# get liveout vars for benches
-getliveoutvarfile = lambda name : f'{BASEDIR}/liveoutvars/polybench_{name.replace("-", "_")}-liveoutvars.txt'
-benchtoliveout = {name:
-    ''.join(open(getliveoutvarfile(name)).readlines()).strip()
-        if os.path.isfile(getliveoutvarfile(name))
-        else print(f'{CLR_YLW}no liveout var file found for bench "{name}" (checked at {getliveoutvarfile(name)}){CLR_NONE}')
-      for name in benchnames}
+def init_bench_registry(configobj):
+    global benchtoliveout
+    input_dir = configobj.get('input_dir', 'polybench-input')
+    input_ext = configobj.get('input_ext', '.c')
+    liveout_dir = configobj.get('liveout_dir', 'liveoutvars')
+    liveout_prefix = configobj.get('liveout_prefix', 'polybench_')
+
+    benchnames.clear()
+    benchnames.extend(
+        os.path.basename(f).replace(input_ext, '')
+        for f in glob(f'{BASEDIR}/{input_dir}/*{input_ext}')
+    )
+
+    def getliveoutvarfile(name):
+        return f'{BASEDIR}/{liveout_dir}/{liveout_prefix}{name.replace("-", "_")}-liveoutvars.txt'
+
+    benchtoliveout.clear()
+    for name in benchnames:
+        liveoutfile = getliveoutvarfile(name)
+        if os.path.isfile(liveoutfile):
+            benchtoliveout[name] = open(liveoutfile).read().strip()
+        else:
+            print(f'{CLR_YLW}no liveout var file found for bench "{name}" (checked at {liveoutfile}){CLR_NONE}')
+            benchtoliveout[name] = None

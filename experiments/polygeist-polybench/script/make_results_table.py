@@ -18,6 +18,7 @@ args = argparser.parse_args()
 configobj = json.load(open(args.config_file))
 topdir = getdirpath(configobj['topdir'])
 configs = expand_configs(configobj)
+init_bench_registry(configobj)
 
 ignore_benches = set(configobj.get('ignore_benches', []))
 active_benches = [b for b in benchnames if b not in ignore_benches]

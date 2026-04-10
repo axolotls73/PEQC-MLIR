@@ -35,8 +35,9 @@ argparser.add_argument('--seq-verif-only', action='store_true',
 args = argparser.parse_args()
 
 configobj = json.load(open(args.config_file))
+init_bench_registry(configobj)
 configs = expand_configs(configobj)
-pbdir = configobj['polybench_dir']
+pbdir = configobj.get('polybench_dir')
 topdir = configobj['topdir']
 
 executables = [
@@ -57,6 +58,7 @@ elif args.compare_against:
 elif args.compare_against_polybench:
   check_suffix = None  # computed per-config inside loop
 elif args.compare_pipelines is not None:
+  check_suffix = None  # computed per-pair inside loop
   if len(args.compare_pipelines) == 2:
     pipeline_pairs = [args.compare_pipelines]
   elif len(args.compare_pipelines) == 0:
@@ -127,20 +129,24 @@ def checkpairs(pairs, outdir, configdir):
 
 
 if args.compare_pipelines is not None:
+  version_names = list(dict.fromkeys(c['_mlir_opt_name'] for c in configs))
   for dir_a, dir_b in pipeline_pairs:
-    suffix = f'against_pipeline_{dir_b}'
-    if args.only:
-      suffix += '-only-' + '-'.join(args.only)
-    outdir = f'{topdir}/{dir_a}/output_{suffix}'
-    runsh(f'mkdir -p {outdir}')
-    benches_a = getbenches(f'{topdir}/{dir_a}/translated')
-    benches_b = getbenches(f'{topdir}/{dir_b}/translated')
-    pairs = []
-    for bfile, bname in benches_b:
-      afiles = [(file, name) for file, name in benches_a if name == bname]
-      if not len(afiles): continue
-      pairs += [(bfile, file, bname, benchtoliveout[bname]) for file, _ in afiles]
-    checkpairs(pairs, outdir, dir_a)
+    for vname in version_names:
+      versioned_a = f'{vname}-{dir_a}' if vname else dir_a
+      versioned_b = f'{vname}-{dir_b}' if vname else dir_b
+      suffix = f'against_pipeline_{versioned_b}'
+      if args.only:
+        suffix += '-only-' + '-'.join(args.only)
+      outdir = f'{topdir}/{versioned_a}/output_{suffix}'
+      runsh(f'mkdir -p {outdir}')
+      benches_a = getbenches(f'{topdir}/{versioned_a}/translated')
+      benches_b = getbenches(f'{topdir}/{versioned_b}/translated')
+      pairs = []
+      for bfile, bname in benches_b:
+        afiles = [(file, name) for file, name in benches_a if name == bname]
+        if not len(afiles): continue
+        pairs += [(bfile, file, bname, benchtoliveout[bname]) for file, _ in afiles]
+      checkpairs(pairs, outdir, versioned_a)
 
 else:
   for config in configs:

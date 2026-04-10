@@ -123,7 +123,6 @@ def convertbenches(config):
   runconvfailed = []
   runtranfailed = []
 
-  pbdir = config['polybench_dir']
   outdir = topdir + '/' + config['output_dir']
   mlir_opt = config['_mlir_opt_path']
   mlir_opt_name = config['_mlir_opt_name']
@@ -142,22 +141,33 @@ def convertbenches(config):
   runsh(f'mkdir -p {outdir}/conversion')
   runsh(f'mkdir -p {outdir}/logs')
 
-  if not os.path.isdir(f'{pbdir}/kernel') or not os.path.isdir(f'{pbdir}/epilogue'):
-    print('polybench_dir should be the output of generate_polybenches.py')
-    exit(1)
-
-  if not args.use_cached_cgeist:
-    source_files = glob(f'{pbdir}/kernel/*.c')
-    def get_name(file): return os.path.basename(file).replace('.c', '')
-  else:
-    if not os.path.isdir(cgeist_dir):
-      print(f'cgeist_dir not found: {cgeist_dir}', file=sys.stderr)
-      exit(1)
-    source_files = glob(f'{cgeist_dir}/*.mlir')
-    def get_name(file): return os.path.basename(file).replace('.mlir', '')
+  input_dir = configobj.get('input_dir', None)
+  if input_dir:
+    input_ext = config.get('input_ext', '.mlir')
+    epilogue_dir = f'{BASEDIR}/{input_dir}/epilogue'
+    source_files = glob(f'{BASEDIR}/{input_dir}/*{input_ext}')
+    def get_name(file): return os.path.basename(file).replace(input_ext, '')
     if not source_files:
-      print(f'no .mlir files found in cgeist_dir: {cgeist_dir}', file=sys.stderr)
+      print(f'no {input_ext} files found in input_dir: {BASEDIR}/{input_dir}', file=sys.stderr)
       exit(1)
+  else:
+    pbdir = config['polybench_dir']
+    epilogue_dir = f'{pbdir}/epilogue'
+    if not os.path.isdir(f'{pbdir}/kernel') or not os.path.isdir(f'{pbdir}/epilogue'):
+      print('polybench_dir should be the output of generate_polybenches.py')
+      exit(1)
+    if not args.use_cached_cgeist:
+      source_files = glob(f'{pbdir}/kernel/*.c')
+      def get_name(file): return os.path.basename(file).replace('.c', '')
+    else:
+      if not os.path.isdir(cgeist_dir):
+        print(f'cgeist_dir not found: {cgeist_dir}', file=sys.stderr)
+        exit(1)
+      source_files = glob(f'{cgeist_dir}/*.mlir')
+      def get_name(file): return os.path.basename(file).replace('.mlir', '')
+      if not source_files:
+        print(f'no .mlir files found in cgeist_dir: {cgeist_dir}', file=sys.stderr)
+        exit(1)
 
   for file in source_files:
     uselesspass = False
@@ -171,7 +181,7 @@ def convertbenches(config):
 
     nrunorrecord = ft.partial(runorrecord, name=name, log=log, outdir=outdir, optionset=optionset, mlir_opt_name=mlir_opt_name)
 
-    current_file = None
+    current_file = file if input_dir else None
     failed = False
 
     for i, step in enumerate(steps):
@@ -184,7 +194,7 @@ def convertbenches(config):
       stderrfile = f'{outdir}/conversion/{name}-{step_num}-{label}.stderr'
 
       if tool_name == 'cgeist':
-        if not args.use_cached_cgeist:
+        if not args.use_cached_cgeist and not input_dir:
           stdout = nrunorrecord(
               f'cgeist {file} -S -function=kernel_{name.replace("-", "_")} {step_args}',
               runmlirfailed, 'mlir', stderrfile=stderrfile)
@@ -249,10 +259,10 @@ def convertbenches(config):
     with open(file_translated_no_includes, 'w') as f:
       f.write(stdout)
     if 'async' in stdout:
-      _, _, rc = runsh(f'{EPILOGUE_SCRIPT_ASYNC} {file_translated_no_includes} {pbdir}/epilogue/{name}-epilogue.c {outdir}/translated/{name}-{n+4}-translated.c {VERIFREPO}')
+      _, _, rc = runsh(f'{EPILOGUE_SCRIPT_ASYNC} {file_translated_no_includes} {epilogue_dir}/{name}-epilogue.c {outdir}/translated/{name}-{n+4}-translated.c {VERIFREPO}')
       assert not rc
     else:
-      _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {file_translated_no_includes} {pbdir}/epilogue/{name}-epilogue-noasync.c {outdir}/translated/{name}-{n+4}-translated-noasyncepilogue.c {VERIFREPO}')
+      _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {file_translated_no_includes} {epilogue_dir}/{name}-epilogue-noasync.c {outdir}/translated/{name}-{n+4}-translated-noasyncepilogue.c {VERIFREPO}')
       assert not rc
 
     cw.writerow([name, config['output_dir'], optionset, mlir_opt_name, 'yes', 'N/A', 'yes' if uselesspass else 'no'])
