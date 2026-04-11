@@ -44,7 +44,7 @@
     "output_dir": "unroll",
     "pipeline": [
         {"tool": "cgeist",
-            "args": "--unroll-loops",
+            "args": "-raise-scf-to-affine --unroll-loops",
             "label": "after-cgeist"}
     ]
 },
@@ -74,7 +74,7 @@
     "polybench_dir": "generated-polybench-mini-dataset",
     "pipeline": [
         {"tool": "cgeist",
-            "args": "",
+            "args": "--scal-rep",
             "label": "after-cgeist"}
     ]
 },
@@ -84,7 +84,7 @@
     "polybench_dir": "generated-polybench-mini-dataset",
     "pipeline": [
         {"tool": "cgeist",
-            "args": "--unroll-loops",
+            "args": "-raise-scf-to-affine --unroll-loops",
             "label": "after-cgeist"}
     ]
 },
@@ -124,7 +124,7 @@
     "polybench_dir": "generated-polybench-small-dataset-use-scalar-lb",
     "pipeline": [
         {"tool": "cgeist",
-            "args": "--unroll-loops",
+            "args": "-raise-scf-to-affine --unroll-loops",
             "label": "after-cgeist"}
     ]
 },
@@ -164,7 +164,7 @@
     "polybench_dir": "generated-polybench-small-dataset",
     "pipeline": [
         {"tool": "cgeist",
-            "args": "--unroll-loops",
+            "args": "-raise-scf-to-affine --unroll-loops",
             "label": "after-cgeist"}
     ]
 }
