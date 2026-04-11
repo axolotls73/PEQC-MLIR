@@ -176,6 +176,72 @@
             "label": "after-mliropt",
             "track_did_nothing": true}
     ]
+},
+
+{
+    "output_dir": "max-fuse",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-fusion=\"fusion-maximal\"",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ],
+    "version_overrides": {
+        "llvm21": {"pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--affine-loop-fusion=\"maximal\"",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]},
+        "llvm23": {"pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--affine-loop-fusion=\"maximal\"",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]}
+    }
+},
+
+{
+    "output_dir": "max-fuse-parallelize",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-fusion=\"fusion-maximal\" --affine-parallelize",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ],
+    "version_overrides": {
+        "llvm21": {"pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--affine-loop-fusion=\"maximal\" --affine-parallelize",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]},
+        "llvm23": {"pipeline": [
+            {"tool": "cgeist",
+                "args": "-raise-scf-to-affine",
+                "label": "original"},
+            {"tool": "mlir-opt",
+                "args": "--affine-loop-fusion=\"maximal\" --affine-parallelize",
+                "label": "after-mliropt",
+                "track_did_nothing": true}
+        ]}
+    }
 }
 
 ]
