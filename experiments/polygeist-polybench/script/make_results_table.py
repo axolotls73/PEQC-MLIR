@@ -72,9 +72,12 @@ for config in configs:
         # Run info
         if run_df is not None and bench in run_df.index:
             run_row = run_df.loc[bench]
-            correct = 'yes' if run_row['result'] == 'pass' else 'no'
             errors = [col for col in ERROR_COLS if run_row.get(col) == 'yes']
             error = ', '.join(errors)
+            if run_row.get('timeout') == 'yes':
+                correct = 'N/A'
+            else:
+                correct = 'yes' if run_row['result'] == 'pass' else 'no'
         elif not converted:
             correct = 'N/A'
             error = 'conversion failed'
