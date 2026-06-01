@@ -41,6 +41,24 @@ conv_df = pd.read_csv(f'{topdir}/conversion_stats.csv').set_index(['output_dir',
 
 ERROR_COLS = ['timeout', 'conflict', 'tree_difference', 'interp_error', 'out_of_bounds']
 
+pipeline_comparisons = configobj.get('pipeline_comparisons', [])
+pair_optionsets = {opt for pair in pipeline_comparisons for opt in pair}
+
+def load_run_result(run_df, bench):
+    """Return (correct, error) from a run stats dataframe row."""
+    if run_df is not None and bench in run_df.index:
+        run_row = run_df.loc[bench]
+        errors = [col for col in ERROR_COLS if run_row.get(col) == 'yes']
+        error = ', '.join(errors)
+        if run_row.get('timeout') == 'yes':
+            correct = 'N/A'
+        else:
+            correct = 'yes' if run_row['result'] == 'pass' else 'no'
+    else:
+        correct = 'N/A'
+        error = 'not run'
+    return correct, error
+
 rows = []
 for config in configs:
     output_dir = config['output_dir']
@@ -49,6 +67,10 @@ for config in configs:
     mliropt_args = get_mliropt_args(config)
     if mliropt_args.startswith('-'):
       mliropt_args = ' ' + mliropt_args
+
+    # Skip optionsets covered by pipeline_comparisons — handled below
+    if optionset in pair_optionsets:
+        continue
 
     # Load run stats for this config if present
     config_pbdir = config.get('polybench_dir', configobj.get('polybench_dir', ''))
@@ -87,6 +109,25 @@ for config in configs:
 
         rows.append([bench, optionset, mliropt_args, mlir_opt_name, flag_did_nothing, correct, error])
 
+# Generate rows for pipeline comparison pairs
+mlir_opt_versions_cfg = configobj.get('mlir_opt_versions', [{'name': None, 'path': 'mlir-opt'}])
+for pair in pipeline_comparisons:
+    opt_a, opt_b = pair[0], pair[1]
+    pair_label = f'{opt_a} vs {opt_b}'
+    for v in mlir_opt_versions_cfg:
+        ver = v['name']
+        ver_prefix = f'{ver}-' if ver else ''
+        output_dir_a = f'{ver_prefix}{opt_a}'
+        output_dir_b = f'{ver_prefix}{opt_b}'
+        csv_path = f'{topdir}/{output_dir_a}/run_stats_against_pipeline_{output_dir_b}.csv'
+        if os.path.isfile(csv_path):
+            pair_run_df = pd.read_csv(csv_path).set_index('name')
+        else:
+            pair_run_df = None
+        for bench in sorted(active_benches):
+            correct, error = load_run_result(pair_run_df, bench)
+            rows.append([bench, pair_label, '', ver, 'N/A', correct, error])
+
 with open(args.out, 'w', newline='') as f:
     cw = csv.writer(f)
     cw.writerow(['bench', 'optionset', 'mliropt_args', 'mlir_opt_version', 'flag_did_nothing', 'correct', 'error'])
@@ -103,7 +144,11 @@ def make_version_summary(rows, configobj, out_path):
 
     versions = [v['name'] for v in versions_cfg]
     df = pd.DataFrame(rows, columns=['bench', 'optionset', 'mliropt_args', 'mlir_opt_version', 'flag_did_nothing', 'correct', 'error'])
-    optionsets = [c['output_dir'] for c in configobj['optionsets']]
+    pipeline_comparisons = configobj.get('pipeline_comparisons', [])
+    if pipeline_comparisons:
+        optionsets = [f'{a} vs {b}' for a, b in pipeline_comparisons]
+    else:
+        optionsets = [c['output_dir'] for c in configobj['optionsets']]
 
     # Pivot correct values: index=(bench, optionset), columns=version
     correct_pivot = df.pivot_table(
