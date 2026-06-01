@@ -16,12 +16,19 @@ and optionally MLIR-AIR commit 28004ae8 and MLIR-AIE commit 9f977440. A Docker i
 MLIR_AIR is an optional dependency: if installed, PEQC-MLIR will support a subset of operations in the AIR dialect.
 
 Instructions for building MLIR-AIR can be found
-[here](https://xilinx.github.io/mlir-air/buildingRyzenLin.html), copied below with the install directory for aienginev2 fixed:
+[here](https://xilinx.github.io/mlir-air/buildingRyzenLin.html), 
+
+Below are instructions to build with the 2025 llvm21 version of MLIR-AIR:
 
 ```sh
+# Install dependencies, e.g. for Ubuntu 22.04
+apt-get update && apt-get install -y --no-install-recommends ninja-build clang lld unzip python3 python3-pip python3-dev python3-venv cmake libssl-dev
+
 # clone repo
 git clone https://github.com/Xilinx/mlir-air.git
 cd mlir-air
+# Checkout MLIR-AIR commit 28004ae
+git checkout 28004ae8932fda6afa0e54c1f6ed84804f1c3ab0
 source utils/setup_python_packages.sh
 
 # clone and build dependencies
@@ -29,11 +36,14 @@ source utils/setup_python_packages.sh
 ./utils/build-llvm-local.sh llvm
 ./utils/github-clone-build-libxaie.sh
 ./utils/clone-mlir-aie.sh
+cd mlir-aie && python3 -m pip install -r python/requirements.txt && cd ..
 ./utils/build-mlir-aie-local.sh llvm mlir-aie/cmake/modulesXilinx aienginev2/install mlir-aie
 
 # build
-./utils/build-mlir-air-xrt.sh llvm mlir-aie/cmake/modulesXilinx mlir-aie aienginev2/install /opt/xilinx/xrt
-source utils/env_setup.sh install-xrt/ mlir-aie/install/ llvm/install/
+./utils/build-mlir-air.sh / llvm mlir-aie/cmake/modulesXilinx mlir-aie
+## If XRT available, do instead:
+## ./utils/build-mlir-air-xrt.sh llvm mlir-aie/cmake/modulesXilinx mlir-aie aienginev2/install /opt/xilinx/xrt
+source utils/env_setup.sh install/ mlir-aie/install/ llvm/install/
 ```
 
 
@@ -44,7 +54,7 @@ To install
 run the commands below:
 
 ```sh
-wget -O past-0.7.3-peqc-mlir.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/unstable-testing/past-0.7.3-peqc-mlir.tar.gz/download'
+wget -O past-0.7.3-peqc-mlir.tar.gz 'https://sourceforge.net/projects/pocc/files/1.6/testing/modules/unstable-testing/past-0.7.3-peqc-mlir.tar.gz'
 tar -xf past-0.7.3-peqc-mlir.tar.gz
 cd past-0.7.3-peqc-mlir
 ./configure
