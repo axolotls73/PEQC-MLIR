@@ -13,7 +13,7 @@
  *
  */
 
-max_nb_threads = 1000;
+max_nb_threads = 5000;
 
 __internal_initialize_semaphores();
 

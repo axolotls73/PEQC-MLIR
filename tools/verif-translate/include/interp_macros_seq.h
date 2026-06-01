@@ -73,3 +73,55 @@ void _past_array_copy_2d
     }
   }
 }
+
+#define _past_array_copy_3d(src, sof1, sof2, sof3, sstr1, sstr2, sstr3, dst, dof1, dof2, dof3, dstr1, dstr2, dstr3, N1, N2, N3) { \
+  for (int i = 0; i < (N1); i++) { \
+    for (int j = 0; j < (N2); j++) { \
+      for (int k = 0; k < (N3); k++) { \
+dst[i * (dstr1) + (dof1)][j * (dstr2) + (dof2)][k*(dstr3) + (dof3)] = src[i * (sstr1) + (sof1)][j * (sstr2) + (sof2)][k*(sstr3) + (sof3)]; \
+       } \
+     } \
+  } \
+}
+
+#define _past_array_copy_4d(src, sof1, sof2, sof3, sof4, sstr1, sstr2, sstr3, sstr4, dst, dof1, dof2, dof3, dof4, dstr1, dstr2, dstr3, dstr4, N1, N2, N3, N4) { \
+  for (int i = 0; i < (N1); i++) { \
+    for (int j = 0; j < (N2); j++) { \
+      for (int k = 0; k < (N3); k++) { \
+for (int l = 0; l < (N4); l++) { \
+dst[i * (dstr1) + (dof1)][j * (dstr2) + (dof2)][k*(dstr3) + (dof3)][l*(dstr4) + (dof4)] = src[i * (sstr1) + (sof1)][j * (sstr2) + (sof2)][k*(sstr3) + (sof3)][l*(sstr4) + (sof4)]; \
+       } \
+       } \
+     } \
+  } \
+}
+
+#define _past_array_copy_5d(src, sof1, sof2, sof3, sof4, sof5, sstr1, sstr2, sstr3, sstr4, sstr5, dst, dof1, dof2, dof3, dof4, dof5, dstr1, dstr2, dstr3, dstr4, dstr5, N1, N2, N3, N4, N5) { \
+  for (int i = 0; i < (N1); i++) { \
+    for (int j = 0; j < (N2); j++) { \
+      for (int k = 0; k < (N3); k++) { \
+for (int l = 0; l < (N4); l++) { \
+ for (int m = 0; m < (N5); m++) { \
+dst[i * (dstr1) + (dof1)][j * (dstr2) + (dof2)][k*(dstr3) + (dof3)][l*(dstr4) + (dof4)][m*(dstr5) + (dof5)] = src[i * (sstr1) + (sof1)][j * (sstr2) + (sof2)][k*(sstr3) + (sof3)][l*(sstr4) + (sof4)][m*(sstr5) + (sof5)]; \
+       } \
+     } \
+       } \
+     } \
+  } \
+}
+
+#define _past_array_copy_6d(src, sof1, sof2, sof3, sof4, sof5, sof6, sstr1, sstr2, sstr3, sstr4, sstr5, sstr6, dst, dof1, dof2, dof3, dof4, dof5, dof6, dstr1, dstr2, dstr3, dstr4, dstr5, dstr6, N1, N2, N3, N4, N5, N6) { \
+  for (int i = 0; i < (N1); i++) { \
+    for (int j = 0; j < (N2); j++) { \
+      for (int k = 0; k < (N3); k++) { \
+for (int l = 0; l < (N4); l++) { \
+ for (int m = 0; m < (N5); m++) { \
+   for (int n = 0; n < (N6); n++) { \
+dst[i * (dstr1) + (dof1)][j * (dstr2) + (dof2)][k*(dstr3) + (dof3)][l*(dstr4) + (dof4)][m*(dstr5) + (dof5)][n*(dstr6) + (dof6)] = src[i * (sstr1) + (sof1)][j * (sstr2) + (sof2)][k*(sstr3) + (sof3)][l*(sstr4) + (sof4)][m*(sstr5) + (sof5)][n*(sstr6) + (sof6)]; \
+       } \
+       } \
+     } \
+       } \
+     } \
+  } \
+}
