@@ -59,6 +59,8 @@ tar -xf past-0.7.3-peqc-mlir.tar.gz
 cd past-0.7.3-peqc-mlir
 ./configure
 make
+## Make sure 'pastchecker' is in PATH:
+export PATH=$PATH:`pwd`/src
 cd ..
 ```
 
