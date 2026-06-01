@@ -96,6 +96,9 @@ cmake -G Ninja .. \
 
 cmake --build . --target mlir-doc
 cmake --build . --target check-verif
+
+## For later use of verif-opt and associated tools and scripts:
+export PATH=$PATH:`pwd`/bin
 ```
 
 If `AIR_DIR` isn't passed to CMake as a definition, PEQC-MLIR will be built without MLIR-AIR passes.
