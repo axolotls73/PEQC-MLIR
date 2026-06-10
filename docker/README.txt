@@ -4,6 +4,9 @@ peqc-mlir-2026-llvm23
 NOTE: 50 GB of free space is needed before starting this process. Eventually,
 only 25 GB will be occupied.
 
+Direct download (no other file necessary): 
+https://raw.githubusercontent.com/axolotls73/PEQC-MLIR/main/docker/peqc-mlir-2026-llvm23.tar.gz
+
 Build the bundled Docker image:
 
     ./image/build.sh
