@@ -1,0 +1,32 @@
+peqc-mlir-2025-llvm21
+=====================
+
+NOTE: up to 100 GB of space is needed to complete the full process, due to
+temporary build files and copies. Final space is around 30 GB.
+
+Direct download (no other file necessary): 
+https://raw.githubusercontent.com/axolotls73/PEQC-MLIR/main/docker/peqc-mlir-2025-llvm21.tar.gz
+
+
+Build the bundled Docker image:
+
+    ./image/build.sh
+
+Run the bundled launcher(s):
+
+    bin/dockergen-peqc-mlir-2025-llvm21-command ls
+    bin/dockergen-peqc-mlir-2025-llvm21-interactive
+
+The data-host-share/ directory is bind-mounted as /data-host-share
+inside every launcher — drop files there to expose them to the container.
+
+Optional: extract a directory from the image into a docker volume
+and auto-mount it in every launcher:
+
+    ./image/image-to-volume.sh <src-path> <volume-name> [<mount-point>]
+
+Collapse the image into a single layer (reclaims the bytes hidden
+by image-to-volume's whiteouts):
+
+    ./image/flatten-image.sh
+
