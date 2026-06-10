@@ -15,7 +15,9 @@
 
 #include "llvm/ADT/STLExtras.h"
 #include "mlir/InitAllDialects.h"
+#include "mlir/IR/IRMapping.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Dialect/MemRef/IR/MemRef.h"
 
 #include "VerifPasses.h"
 #include "VerifDialect.h"

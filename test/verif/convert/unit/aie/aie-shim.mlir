@@ -18,7 +18,7 @@
 // RUN: verif-opt --verif-convert-aie %s | FileCheck %s
 
 module {
-  aie.device(npu1_4col) {
+  aie.device(npu1) {
     memref.global "private" @A : memref<16x16xi32>
 
     func.func @main () -> () {
@@ -34,7 +34,7 @@ module {
     aie.flow(%tile_0_0, DMA : 0, %tile_1_2, DMA : 0)
 // CHECK: async.execute
 // CHECK-NOT: aie.shim_dma_allocation
-    aie.shim_dma_allocation @airMemcpyId4(MM2S, 0, 0)
+    aie.shim_dma_allocation @airMemcpyId4(%tile_0_0, MM2S, 0)
   }
 }
 

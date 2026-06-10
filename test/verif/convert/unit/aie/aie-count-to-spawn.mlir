@@ -18,7 +18,7 @@
 // RUN: verif-opt --verif-convert-aie=counting-semaphore-to-spawn %s | FileCheck %s
 
 module {
-  aie.device(npu1_4col) {
+  aie.device(npu1) {
 
     %tile_0_1 = aie.tile(0, 1)
     %tile34 = aie.tile(3, 4)

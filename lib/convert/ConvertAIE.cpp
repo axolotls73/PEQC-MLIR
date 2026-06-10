@@ -19,6 +19,7 @@
 #include "mlir/Support/LogicalResult.h"
 
 #include "mlir/IR/BuiltinDialect.h"
+#include "mlir/IR/IRMapping.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
@@ -568,7 +569,7 @@ LogicalResult AIEConverter::processDMABD(xilinx::AIE::DMABDOp op, Value tile, in
   }
   else {
     // default size is the number of elements in the memref
-    MemRefType mrtype = op.getBuffer().getType();
+    MemRefType mrtype = cast<MemRefType>(op.getBuffer().getType());
     int64_t size = 1;
     for (auto d : mrtype.getShape()) {
       size *= d;
@@ -580,7 +581,8 @@ LogicalResult AIEConverter::processDMABD(xilinx::AIE::DMABDOp op, Value tile, in
   }
 
   auto builder = OpBuilder(op);
-  auto res = createDMABDCopy(op.getOperation(), tile, channel, op.getBuffer(), dir, builder,
+  auto bufTyped = cast<TypedValue<MemRefType>>(Value(op.getBuffer()));
+  auto res = createDMABDCopy(op.getOperation(), tile, channel, bufTyped, dir, builder,
       dma_offset, dma_offsets, dma_sizes, dma_strides);
   if (res.failed()) return failure();
 
@@ -895,7 +897,7 @@ LogicalResult AIEConverter::processShimOp(xilinx::AIE::ShimDMAAllocationOp shimo
 
   SmallVector<xilinx::AIEX::NpuDmaMemcpyNdOp> dmaops;
   module.walk([&] (xilinx::AIEX::NpuDmaMemcpyNdOp op) {
-    if (op.getMetadataAttr().getAttr() == shimop.getSymName())
+    if (op.getMetadataAttr().getRootReference() == shimop.getSymNameAttr())
       dmaops.push_back(op);
     return WalkResult::advance();
   });
@@ -903,7 +905,7 @@ LogicalResult AIEConverter::processShimOp(xilinx::AIE::ShimDMAAllocationOp shimo
   // get tile: shim tiles are always row 0
   Value tile = nullptr;
   module.walk([&] (xilinx::AIE::TileOp op) {
-    if (op.getRow() == 0 && op.getCol() == shimop.getCol()) {
+    if (op.getRow() == 0 && op.getCol() == shimop.getTileOp().getCol()) {
       tile = op.getResult();
       return WalkResult::interrupt();
     }
