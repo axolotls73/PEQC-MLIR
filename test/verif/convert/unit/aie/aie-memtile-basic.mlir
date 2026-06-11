@@ -19,7 +19,7 @@
 
 module {
 // need this so the memtile verifies
-aie.device(npu1_4col) {
+aie.device(npu1) {
   %tile14 = aie.tile(0, 1)
 
 // function generated for dma_start ^bd0

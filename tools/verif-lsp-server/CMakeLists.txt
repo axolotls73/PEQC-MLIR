@@ -5,6 +5,7 @@ set(LIBS
     ${conversion_libs}
     MLIRArithDialect
     MLIRLspServerLib
+    MLIRRegisterAllDialects
     MLIRVerif
 )
 add_llvm_executable(verif-lsp-server verif-lsp-server.cpp)

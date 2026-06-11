@@ -89,7 +89,7 @@ module {
       // }
       aie.end
     } {link_with = "mm_8x8x4.o"}
-    aiex.runtime_sequence @sequence(%arg0: memref<256xi16>, %arg1: memref<256xi16>, %arg2: memref<256xi32>) {
+    aie.runtime_sequence @sequence(%arg0: memref<256xi16>, %arg1: memref<256xi16>, %arg2: memref<256xi32>) {
       aiex.npu.dma_memcpy_nd(%arg2[0, 0, 0, 0][2, 4, 8, 4][128, 4, 16, 1]) {id = 0 : i64, metadata = @outC} : memref<256xi32>
       aiex.npu.dma_memcpy_nd(%arg0[0, 0, 0, 0][4, 2, 8, 8][0, 8, 16, 1]) {id = 1 : i64, metadata = @inA} : memref<256xi16>
       aiex.npu.dma_memcpy_nd(%arg1[0, 0, 0, 0][4, 2, 8, 4][4, 128, 16, 1]) {id = 2 : i64, metadata = @inB} : memref<256xi16>

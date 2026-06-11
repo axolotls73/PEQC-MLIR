@@ -11,7 +11,7 @@ mlir_tablegen(VerifTypes.cpp.inc -gen-typedef-defs)
 add_public_tablegen_target(MLIRVerifTypesIncGen)
 
 add_mlir_doc(VerifDialect VerifDialect Dialect/ -gen-dialect-doc)
-add_mlir_doc(VerifOps VerifOps Dialect/ -gen-op-doc)
+add_mlir_doc(VerifOps VerifOps Dialect/ -gen-op-doc -dialect=verif)
 add_mlir_doc(VerifTypes VerifTypes Dialect/ -gen-typedef-doc)
 add_mlir_doc(VerifPasses VerifPasses Dialect/ -gen-pass-doc)
 add_mlir_doc(VerifAirPasses VerifAirPasses Dialect/ -gen-pass-doc)

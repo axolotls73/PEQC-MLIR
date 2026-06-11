@@ -6,10 +6,14 @@ PEQC-MLIR is in active development and subject to arbitrary changes without noti
 
 ## Building PEQC-MLIR
 
+### 2025 version, if needed
+
+You can build the 2025 MLIR AIR and AIE frameworks, and the PEQC-MLIR version for it by fetching the tag 1.0-airaie-2025-llvm21 and following the Readme.md for this version. Below are instructions for building the 2026 / current version.
+
 ### Prerequisites
 
-To build PEQC-MLIR, first install its dependencies: LLVM version 21.0.0git with MLIR,
-and optionally MLIR-AIR commit 28004ae8 and MLIR-AIE commit 9f977440. A Docker image is available in the docker/ directory that contains all required packages to successfully install all the tools below, including mlir-air and llvm.
+To build PEQC-MLIR, first install its dependencies: LLVM version 23.0.0git with MLIR,
+and optionally MLIR-AIR commit 3f0a65a and associated MLIR-AIE. A Docker image is available in the docker/ directory that contains all required packages to successfully install all the tools below, including mlir-air and llvm.
 
 #### MLIR-AIR
 
@@ -18,7 +22,7 @@ MLIR_AIR is an optional dependency: if installed, PEQC-MLIR will support a subse
 Instructions for building MLIR-AIR can be found
 [here](https://xilinx.github.io/mlir-air/buildingRyzenLin.html), 
 
-Below are instructions to build with the 2025 llvm21 version of MLIR-AIR:
+Below are instructions to build with the 2026 llvm23 version of MLIR-AIR:
 
 ```sh
 # Install dependencies, e.g. for Ubuntu 22.04
@@ -27,24 +31,19 @@ apt-get update && apt-get install -y --no-install-recommends ninja-build clang l
 # clone repo
 git clone https://github.com/Xilinx/mlir-air.git
 cd mlir-air
-# Checkout MLIR-AIR commit 28004ae
-git checkout 28004ae8932fda6afa0e54c1f6ed84804f1c3ab0
+# Checkout MLIR-AIR commit 3f0a65a
+git checkout 3f0a65a324b267cb27f2df9fa862a4e76ca0a71f
 source utils/setup_python_packages.sh
-
-# clone and build dependencies
-./utils/clone-llvm.sh
-./utils/build-llvm-local.sh llvm
-./utils/github-clone-build-libxaie.sh
-./utils/clone-mlir-aie.sh
-cd mlir-aie && python3 -m pip install -r python/requirements.txt && cd ..
-./utils/build-mlir-aie-local.sh llvm mlir-aie/cmake/modulesXilinx aienginev2/install mlir-aie
-
-# build
-./utils/build-mlir-air.sh / llvm mlir-aie/cmake/modulesXilinx mlir-aie
-## If XRT available, do instead:
-## ./utils/build-mlir-air-xrt.sh llvm mlir-aie/cmake/modulesXilinx mlir-aie aienginev2/install /opt/xilinx/xrt
-source utils/env_setup.sh install/ mlir-aie/install/ llvm/install/
+python3 -m pip install mlir_aie -f https://github.com/Xilinx/mlir-aie/releases/expanded_assets/latest-wheels-3
+./utils/build-mlir-air-using-wheels.sh
 ```
+
+
+Then, make sure for every use of the tools above that the environment is properly set:
+```sh
+source utils/env_setup.sh [install_dir] $(python3 -m pip show mlir_aie | grep Location | awk '{print $2}')/mlir_aie $(python3 -m pip show llvm-aie | grep Location | awk '{print $2}')/llvm-aie my_install/mlir
+```
+
 
 
 #### PAST/PEQC
@@ -67,24 +66,29 @@ cd ..
 
 ### Building
 
-#### Option 1: Build via script
-
-This script downloads and installs PAST/PEQC in the current directory (as described
-[above](#pastpeqc)),
-then configures and builds via CMake:
-
-```sh
-source install-and-build.sh [path to llvm build/lib/cmake directory] [optional: path to mlir-air project root]
-# e.g. source install-and-build.sh /opt/mlir-air/llvm/build/lib/cmake /opt/mlir-air
-```
-
-#### Option 2: Manual build
+## Configure                                                                    
+RUN cd ${PEQC_MLIR_BUNDLE_DIR}/${PEQC_MLIR_GIT_DIRNAME} && \                    
+    bash -c 'source /local/loaders/mlir-air-2026-bundle.sh && \                 
+    cd ${PEQC_MLIR_BUNDLE_DIR}/${PEQC_MLIR_GIT_DIRNAME} && \                    
+    mkdir -p build && cd build && \                                             
+    cmake -G Ninja .. \                                                         
+      -DLLVM_DIR='"${MLIR_AIR_2026_BUNDLE_DIR}"'/mlir-air/my_install/mlir/lib/c\
+make/llvm \                                                                     
+      -DMLIR_DIR='"${MLIR_AIR_2026_BUNDLE_DIR}"'/mlir-air/my_install/mlir/lib/c\
+make/mlir \                                                                     
+      -DAIR_DIR='"${MLIR_AIR_2026_BUNDLE_DIR}"'/mlir-air \                      
+      -DMLIR_AIE_DIR='"${MLIR_AIR_2026_BUNDLE_DIR}"'/mlir-air/sandbox/lib/pytho\
+n3.10/site-packages/mlir_aie \                                                  
+      -DPAST_DIR='"${PAST_BUNDLE_DIR}"'/install \                               
+      -DLLVM_EXTERNAL_LIT='"${MLIR_AIR_2026_BUNDLE_DIR}"'/mlir-air/sandbox/bin/\
+lit'  
 
 After installing the prerequisites, run the commands below to build PEQC-MLIR with the following substitutions:
 
-* `[llvm-cmake]` replaced with LLVM's CMake configuration directory, e.g. `/opt/mlir-air/llvm/build/lib/cmake`.
+* `[llvm-cmake]` replaced with LLVM's CMake configuration directory, e.g. `/opt/mlir-air/my_install/mlir/lib/cmake`.
 * `[air-repo]` replaced with the MLIR-AIR project root, e.g. `/opt/mlir-air`. This line should be omitted if compiling without AIR.
-* `[past]` replaced with the location of PAST/PEQC, e.g. `./past-0.7.3-beta`.
+* `[aie-repo]` replaced with the MLIR-AIE project root, e.g. `/opt/mlir-air/sandbox/lib/python3.10/site-packages/mlir_aie`. This line should be omitted if compiling without AIE.
+* `[past]` replaced with the location of PAST/PEQC, e.g. `./past-0.7.3-peqc-mlir`.
 
 ```sh
 mkdir -p build && cd build
@@ -92,7 +96,9 @@ cmake -G Ninja .. \
   -DLLVM_DIR=[llvm-cmake]/llvm \
   -DMLIR_DIR=[llvm-cmake]/mlir \
   -DAIR_DIR=[air-repo] \
+  -DMLIR_AIE_DIR=[aie-repo] \
   -DPAST_DIR=[past]
+  -DLLVM_EXTERNAL_LIT=[lit]
 
 cmake --build . --target mlir-doc
 cmake --build . --target check-verif

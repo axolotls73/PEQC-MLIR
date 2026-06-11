@@ -1,12 +1,11 @@
-peqc-mlir-2025-llvm21
+peqc-mlir-2026-llvm23
 =====================
 
-NOTE: up to 100 GB of space is needed to complete the full process, due to
-temporary build files and copies. Final space is around 30 GB.
+NOTE: 50 GB of free space is needed before starting this process. Eventually,
+only 25 GB will be occupied.
 
 Direct download (no other file necessary): 
-https://raw.githubusercontent.com/axolotls73/PEQC-MLIR/main/docker/peqc-mlir-2025-llvm21.tar.gz
-
+https://raw.githubusercontent.com/axolotls73/PEQC-MLIR/main/docker/peqc-mlir-2026-llvm23.tar.gz
 
 Build the bundled Docker image:
 
@@ -14,8 +13,8 @@ Build the bundled Docker image:
 
 Run the bundled launcher(s):
 
-    bin/dockergen-peqc-mlir-2025-llvm21-command ls
-    bin/dockergen-peqc-mlir-2025-llvm21-interactive
+    bin/dockergen-peqc-mlir-2026-llvm23-command ls
+    bin/dockergen-peqc-mlir-2026-llvm23-interactive
 
 The data-host-share/ directory is bind-mounted as /data-host-share
 inside every launcher — drop files there to expose them to the container.

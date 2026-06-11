@@ -28,7 +28,7 @@
 //--- input.mlir
 
 module @tutorial_4 {
-    aie.device(npu1_4col) {
+    aie.device(npu1) {
         %tile14 = aie.tile(1, 4)
         %tile24 = aie.tile(2, 4)
         %tile34 = aie.tile(3, 4)

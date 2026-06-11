@@ -21,7 +21,7 @@
 //--- input.mlir
 
 module {
-  aie.device(npu1_4col) {
+  aie.device(npu1) {
     func.func private @zero_i16(memref<8x4xi16>)
     func.func private @matmul_i16_i16(memref<8x8xi16>, memref<8x4xi16>, memref<8x4xi16>)
     %shim_noc_tile_0_0 = aie.tile(0, 0)
@@ -560,7 +560,7 @@ module {
       }
       aie.end
     } {link_with = "mm_8x8x4.o"}
-    aiex.runtime_sequence @sequence(%arg0: memref<1024xi16>, %arg1: memref<1024xi16>, %arg2: memref<1024xi16>) {
+    aie.runtime_sequence @sequence(%arg0: memref<1024xi16>, %arg1: memref<1024xi16>, %arg2: memref<1024xi16>) {
       aiex.npu.dma_memcpy_nd(%arg2[0, 0, 0, 0][1, 2, 32, 4][1024, 16, 32, 1]) {id = 0 : i64, metadata = @C_L2L3_0} : memref<1024xi16>
       aiex.npu.dma_memcpy_nd(%arg0[0, 0, 0, 0][2, 4, 8, 8][0, 8, 32, 1]) {id = 1 : i64, metadata = @A_L3L2_0} : memref<1024xi16>
       aiex.npu.dma_memcpy_nd(%arg1[0, 0, 0, 0][2, 4, 8, 4][16, 256, 32, 1]) {id = 2 : i64, metadata = @B_L3L2_0} : memref<1024xi16>

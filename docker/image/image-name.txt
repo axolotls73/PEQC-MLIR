@@ -1,1 +1,1 @@
-dockergen/peqc-mlir-2025-llvm21
+dockergen/peqc-mlir-2026-llvm23

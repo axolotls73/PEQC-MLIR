@@ -37,7 +37,7 @@
 //--- input.mlir
 
 module {
-  aie.device(npu1_4col) {
+  aie.device(npu1) {
     %shim_noc_tile_3_0 = aie.tile(3, 0)
     %shim_noc_tile_1_0 = aie.tile(1, 0)
     %shim_noc_tile_2_0 = aie.tile(2, 0)
@@ -203,7 +203,7 @@ module {
       }
       aie.use_lock(%lock_1_5_22, Release, 1)
       cf.br ^bb1
-    } {elf_file = "forward_0_core_1_5.elf"}
+    }
     %mem_1_4 = aie.mem(%tile_1_4) {
       %0 = aie.dma_start(S2MM, 0, ^bb1, ^bb7)
     ^bb1:  // 2 preds: ^bb0, ^bb2
@@ -289,7 +289,7 @@ module {
       }
       aie.use_lock(%lock_1_4_17, Release, 1)
       cf.br ^bb1
-    } {elf_file = "forward_0_core_1_4.elf"}
+    }
     %mem_1_3 = aie.mem(%tile_1_3) {
       %0 = aie.dma_start(S2MM, 0, ^bb1, ^bb7)
     ^bb1:  // 2 preds: ^bb0, ^bb2
@@ -375,7 +375,7 @@ module {
       }
       aie.use_lock(%lock_1_3_12, Release, 1)
       cf.br ^bb1
-    } {elf_file = "forward_0_core_1_3.elf"}
+    }
     %mem_1_2 = aie.mem(%tile_1_2) {
       %0 = aie.dma_start(S2MM, 0, ^bb1, ^bb7)
     ^bb1:  // 2 preds: ^bb0, ^bb2
@@ -461,7 +461,7 @@ module {
       }
       aie.use_lock(%lock_1_2_7, Release, 1)
       cf.br ^bb1
-    } {elf_file = "forward_0_core_1_2.elf"}
+    }
     %memtile_dma_0_1 = aie.memtile_dma(%mem_tile_0_1) {
       %0 = aie.dma_start(S2MM, 0, ^bb1, ^bb9)
     ^bb1:  // 2 preds: ^bb0, ^bb1
@@ -580,12 +580,12 @@ module {
     //   aie.packet_source<%tile_1_5, Trace : 0>
     //   aie.packet_dest<%shim_noc_tile_1_0, DMA : 1>
     // } {keep_pkt_header = true}
-    aie.shim_dma_allocation @airMemcpyId23(S2MM, 0, 0)
-    memref.global "public" @airMemcpyId23 : memref<8x8xi32, 1>
-    aie.shim_dma_allocation @airMemcpyId4(MM2S, 0, 1)
-    memref.global "public" @airMemcpyId4 : memref<8x16xi32, 1>
-    aie.shim_dma_allocation @airMemcpyId5(MM2S, 0, 2)
-    memref.global "public" @airMemcpyId5 : memref<16x8xi32, 1>
+    aie.shim_dma_allocation @airMemcpyId23(%shim_noc_tile_0_0, S2MM, 0)
+    // memref.global "public" @airMemcpyId23 : memref<8x8xi32, 1>
+    aie.shim_dma_allocation @airMemcpyId4(%shim_noc_tile_1_0, MM2S, 0)
+    // memref.global "public" @airMemcpyId4 : memref<8x16xi32, 1>
+    aie.shim_dma_allocation @airMemcpyId5(%shim_noc_tile_2_0, MM2S, 0)
+    // memref.global "public" @airMemcpyId5 : memref<16x8xi32, 1>
 
     memref.global "private" @A : memref<16x16xi32>
     memref.global "private" @B : memref<16x16xi32>

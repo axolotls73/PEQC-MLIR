@@ -14,7 +14,7 @@ scriptname=`basename $0`;
 
 ## Default config file.
 if [ -z "$CLI_CONFIG_FILE" ]; then 
-    CLI_CONFIG_FILE="$scriptdir/configs/config.dockergen-peqc-mlir-2025-llvm21-command.txt";
+    CLI_CONFIG_FILE="$scriptdir/configs/config.dockergen-peqc-mlir-2026-llvm23-command.txt";
 fi;
 
 ## Load option parser, config file loader, mount file loader

@@ -22,7 +22,10 @@
 #include "mlir/IR/Dominance.h"
 
 #include "mlir/IR/BuiltinDialect.h"
+#include "mlir/IR/IRMapping.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
+#include "mlir/Dialect/Async/IR/Async.h"
+#include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
@@ -796,7 +799,7 @@ void convertDMACopyConsume(MLIRContext* context, xilinx::AIE::DeviceOp device, O
       MemRefType::get(SmallVector<int64_t>{outputnumelts}, localelttype)).getResult();
   Value localperoutputval = builder.create<arith::ConstantIndexOp>(loc, outputnumelts / ofnumelts).getResult();
 
-  builder.create<scf::ForOp>(loc, cst_0, localperoutputval, cst_1, std::nullopt,
+  builder.create<scf::ForOp>(loc, cst_0, localperoutputval, cst_1, ValueRange{},
       [&](OpBuilder& b, Location loc, Value outeri, ValueRange) {
     auto subviewtype = xilinx::AIE::AIEObjectFifoSubviewType::get(ofelttype);
     auto subview = b.create<xilinx::AIE::ObjectFifoAcquireOp>(loc, subviewtype,
@@ -804,7 +807,7 @@ void convertDMACopyConsume(MLIRContext* context, xilinx::AIE::DeviceOp device, O
     auto ofbuf = b.create<xilinx::AIE::ObjectFifoSubviewAccessOp>(loc,
         ofelttype, subview, IntegerAttr::get(IntegerType::get(context, 32), 0));
 
-    b.create<scf::ForOp>(loc, cst_0, cst_ofnumelts, cst_1, std::nullopt,
+    b.create<scf::ForOp>(loc, cst_0, cst_ofnumelts, cst_1, ValueRange{},
         [&](OpBuilder& b, Location loc, Value inneri, ValueRange) {
       Value localindex = b.create<affine::AffineLinearizeIndexOp>(loc, SmallVector<Value>{outeri, inneri}, ofnumelts).getResult();
       auto ofbufindex = b.create<affine::AffineDelinearizeIndexOp>(loc, inneri, ofbuf.getType().getShape()).getResults();
@@ -862,7 +865,7 @@ void convertDMACopyConsume(MLIRContext* context, xilinx::AIE::DeviceOp device, O
   builder.setInsertionPointAfter(outerloop);
 }
 
-LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp device, xilinx::AIEX::RuntimeSequenceOp op) {
+LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp device, xilinx::AIE::RuntimeSequenceOp op) {
   auto builder = OpBuilder(op);
   auto loc = op.getLoc();
 
@@ -897,7 +900,7 @@ LogicalResult convertRuntimeSequence(MLIRContext* context, xilinx::AIE::DeviceOp
   // so need to separate them accordingly
   std::unordered_map<std::string, SmallVector<xilinx::AIEX::NpuDmaMemcpyNdOp>> dmaopmap;
   for (auto dmaop : block.getOps<xilinx::AIEX::NpuDmaMemcpyNdOp>()) {
-    auto ofname = dmaop.getProperties().getMetadata().getValue().str();
+    auto ofname = dmaop.getProperties().getMetadata().getRootReference().getValue().str();
     dmaopmap[ofname].push_back(dmaop);
   }
 
@@ -975,7 +978,7 @@ public:
     });
     assert(device);
 
-    WalkResult res = module.walk([&] (xilinx::AIEX::RuntimeSequenceOp op) {
+    WalkResult res = module.walk([&] (xilinx::AIE::RuntimeSequenceOp op) {
       if (convertRuntimeSequence(context, device, op).failed()) return WalkResult::interrupt();
       return WalkResult::advance();
     });

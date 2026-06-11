@@ -18,6 +18,20 @@
 #include "mlir/InitAllPasses.h"
 #include "mlir/Support/FileUtilities.h"
 #include "mlir/Tools/mlir-opt/MlirOptMain.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
+#include "mlir/Dialect/Async/IR/Async.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Dialect/Math/IR/Math.h"
+#include "mlir/Dialect/MemRef/IR/MemRef.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
+#include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
+#include "mlir/Dialect/Bufferization/IR/Bufferization.h"
+#include "mlir/Dialect/LLVMIR/LLVMDialect.h"
+#include "mlir/Dialect/Tensor/IR/Tensor.h"
+#include "mlir/Conversion/Passes.h"
+#include "mlir/Dialect/Async/Passes.h"
+#include "mlir/Dialect/Affine/Transforms/Passes.h"
 
 #include "VerifDialect.h"
 #include "VerifPasses.h"
@@ -30,14 +44,13 @@
 #endif
 
 int main(int argc, char **argv) {
-  // mlir::registerAllPasses();
   mlir::verif::registerPasses();
 #ifdef COMPILE_WITH_AIR
   mlir::verif::air::registerPasses();
 #endif
   mlir::registerAsyncParallelForPass();
   mlir::registerLowerAffinePass();
-  mlir::affine::registerAffineExpandIndexOps();
+  mlir::affine::registerAffineExpandIndexOpsPass();
 
 
   mlir::DialectRegistry registry;

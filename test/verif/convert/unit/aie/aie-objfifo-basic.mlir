@@ -18,7 +18,7 @@
 // RUN: verif-opt --verif-aie-convert-objfifo %s | FileCheck %s
 
 module {
-  aie.device(npu1_4col) {
+  aie.device(npu1) {
     %tile14 = aie.tile(1, 4)
     %tile34 = aie.tile(3, 4)
 
