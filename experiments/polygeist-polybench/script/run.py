@@ -10,7 +10,7 @@ import argparse
 import shutil
 
 
-PASTCOMMAND = 'pastchecker --verbose --timing-mode --enable-preprocessor --enable-subtrees'
+PASTCOMMAND = '{pastchecker} --verbose --timing-mode --enable-preprocessor --enable-subtrees --happens-before'
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('config_file', type=str, default=f'{BASEDIR}/config/default-config.json', nargs='?',
@@ -22,6 +22,10 @@ rungroup.add_argument('--self', action='store_true',
     help='only compare all benches with themselves')
 rungroup.add_argument('--compare-against', metavar='compare-dir', type=str,
     help='only compare against corresponding benches in compare-dir (instead of cartesian product of all)')
+rungroup.add_argument('--compare-pipelines', metavar='dir', nargs='*', type=str,
+    help='compare pipeline outputs: with no args runs all pairs from config pipeline_comparisons; with two args (dir-A dir-B) runs that one pair')
+rungroup.add_argument('--compare-against-polybench', action='store_true',
+    help='compare each bench against the corresponding polybench interp file from polybench_dir in config')
 argparser.add_argument('--skip', type=lambda t: [s.strip() for s in t.split(',')], default=[],
     help='comma-separated list of bench names to skip')
 argparser.add_argument('--only', type=lambda t: [s.strip() for s in t.split(',')], default=[],
@@ -30,25 +34,42 @@ argparser.add_argument('--seq-verif-only', action='store_true',
     help='run pastchecker with --seq-verif-only')
 args = argparser.parse_args()
 
+configobj = json.load(open(args.config_file))
+init_bench_registry(configobj)
+configs = expand_configs(configobj)
+pbdir = configobj.get('polybench_dir')
+topdir = configobj['topdir']
+
 executables = [
   'pastchecker',
-  '/usr/bin/time'
+  configobj['pastchecker'],
 ]
 for ex in executables:
   if shutil.which(ex) is None:
     print(f'{ex} must exist/be in PATH', file=sys.stderr)
     exit(1)
 
-configobj = json.load(open(args.config_file))
-configs = configobj['optionsets']
-pbdir = configobj['polybench_dir']
-topdir = configobj['topdir']
+PASTCOMMAND = PASTCOMMAND.format(pastchecker=configobj['pastchecker'])
 
 if args.self:
   check_suffix = 'self_check'
 elif args.compare_against:
   check_suffix = f'against_{pathtoname(args.compare_against)}'
-if args.only:
+elif args.compare_against_polybench:
+  check_suffix = None  # computed per-config inside loop
+elif args.compare_pipelines is not None:
+  check_suffix = None  # computed per-pair inside loop
+  if len(args.compare_pipelines) == 2:
+    pipeline_pairs = [args.compare_pipelines]
+  elif len(args.compare_pipelines) == 0:
+    pipeline_pairs = configobj.get('pipeline_comparisons', [])
+    if not pipeline_pairs:
+      print('--compare-pipelines with no args requires pipeline_comparisons in config', file=sys.stderr)
+      exit(1)
+  else:
+    print('--compare-pipelines takes 0 args (read from config) or exactly 2 args (dir-A dir-B)', file=sys.stderr)
+    exit(1)
+if check_suffix is not None and args.only and args.compare_pipelines is None:
   check_suffix += '-only-' + '-'.join(args.only)
 
 if args.seq_verif_only:
@@ -90,16 +111,14 @@ def checkpairs(pairs, outdir, configdir):
       print(f'{CLR_YLW}skipping run "{file1} {file2}"{CLR_NONE}')
       continue
     command = f'/usr/bin/time -v {PASTCOMMAND} {file1} {file2} "{liveout}"'
-    stdout, stderr, rc = runsh(command, timeout=args.timeout)
+    output, rc = runsh_combined(command, timeout=args.timeout)
 
-    with open(f'{outdir}/{getbenchname(file1)}.stdout.txt', 'w') as f:
+    with open(f'{outdir}/{getbenchname(file1)}.output.txt', 'w') as f:
       f.write('command line: ' + command + '\n')
       f.write('return code: ' + str(rc) + '\n')
-      f.write(stdout if stdout else "")
-    with open(f'{outdir}/{getbenchname(file1)}.stderr.txt', 'w') as f:
-      f.write(stderr if stderr else "")
+      f.write(output if output else "")
 
-    runpass = stdout and 'YES' in stdout
+    runpass = output and 'YES' in output
     if runpass:
       print(f'pass: {name}: {file1} {file2} {CLR_GRAY}(command line: {command}){CLR_NONE}')
       numpass += 1
@@ -109,26 +128,60 @@ def checkpairs(pairs, outdir, configdir):
 
 
 
-for config in configs:
-  benchdir = f'{topdir}/{config["output_dir"]}/translated'
-  outdir = f'{topdir}/{config["output_dir"]}/output_{check_suffix}'
-  runsh(f'mkdir -p {outdir}')
+if args.compare_pipelines is not None:
+  version_names = list(dict.fromkeys(c['_mlir_opt_name'] for c in configs))
+  for dir_a, dir_b in pipeline_pairs:
+    for vname in version_names:
+      versioned_a = f'{vname}-{dir_a}' if vname else dir_a
+      versioned_b = f'{vname}-{dir_b}' if vname else dir_b
+      suffix = f'against_pipeline_{versioned_b}'
+      if args.only:
+        suffix += '-only-' + '-'.join(args.only)
+      outdir = f'{topdir}/{versioned_a}/output_{suffix}'
+      runsh(f'mkdir -p {outdir}')
+      benches_a = getbenches(f'{topdir}/{versioned_a}/translated')
+      benches_b = getbenches(f'{topdir}/{versioned_b}/translated')
+      pairs = []
+      for bfile, bname in benches_b:
+        afiles = [(file, name) for file, name in benches_a if name == bname]
+        if not len(afiles): continue
+        pairs += [(bfile, file, bname, benchtoliveout[bname]) for file, _ in afiles]
+      checkpairs(pairs, outdir, versioned_a)
 
-  benches = getbenches(benchdir)
-  # print(benches)
+else:
+  for config in configs:
+    if args.compare_against_polybench:
+      config_pbdir = config.get('polybench_dir', pbdir)
+      config_check_suffix = f'against_polybench_{pathtoname(config_pbdir)}'
+      if args.only:
+        config_check_suffix += '-only-' + '-'.join(args.only)
+    else:
+      config_check_suffix = check_suffix
+    benchdir = f'{topdir}/{config["output_dir"]}/translated'
+    outdir = f'{topdir}/{config["output_dir"]}/output_{config_check_suffix}'
+    runsh(f'mkdir -p {outdir}')
 
-  if args.self:
-    pairs = [(file, file, name, benchtoliveout[name]) for file, name in benches]
+    benches = getbenches(benchdir)
 
-  elif args.compare_against:
-    compareagainstbenches = getbenches(args.compare_against)
-    # print(compareagainstbenches)
-    pairs = []
-    for cbfile, cbname in compareagainstbenches:
-      otherfiles = [(file, name) for file, name in benches if name == cbname]
-      if not len(otherfiles): continue
-      pairs += [(cbfile, file, cbname, benchtoliveout[cbname]) for file, _ in otherfiles]
+    if args.self:
+      pairs = [(file, file, name, benchtoliveout[name]) for file, name in benches]
 
-  checkpairs(pairs, outdir, config["output_dir"])
+    elif args.compare_against:
+      compareagainstbenches = getbenches(args.compare_against)
+      pairs = []
+      for cbfile, cbname in compareagainstbenches:
+        otherfiles = [(file, name) for file, name in benches if name == cbname]
+        if not len(otherfiles): continue
+        pairs += [(cbfile, file, cbname, benchtoliveout[cbname]) for file, _ in otherfiles]
+
+    elif args.compare_against_polybench:
+      pbinterp = getbenches(f'{config_pbdir}/interp')
+      pairs = []
+      for pbfile, pbname in pbinterp:
+        otherfiles = [(file, name) for file, name in benches if name == pbname]
+        if not len(otherfiles): continue
+        pairs += [(pbfile, file, pbname, benchtoliveout[pbname]) for file, _ in otherfiles]
+
+    checkpairs(pairs, outdir, config["output_dir"])
 
 print(f'FAILED: {numfail}\nPASSED: {numpass}')

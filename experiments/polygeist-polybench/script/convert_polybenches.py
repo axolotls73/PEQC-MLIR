@@ -32,43 +32,61 @@ argparser.add_argument('--debug', choices=debugopts, default=[],
     help='print stderr from this stage')
 argparser.add_argument('--die', choices=debugopts, default=[],
     help='stop after first error from this stage')
+argparser.add_argument('--use-cached-cgeist', action='store_true',
+    help='use cached cgeist files from cgeist_dir instead of re-running cgeist')
 args = argparser.parse_args()
 
+configobj = json.load(open(args.config_file))
+# print(configobj)
+cgeist_dir = f'{BASEDIR}/' + configobj.get('cgeist_dir', 'polybench-cgeist')
+
+expanded_configs = expand_configs(configobj)
+
 executables = [
-  'mlir-opt',
-  'cgeist',
-  'polymer-opt',
-  'mlir-opt',
   'verif-opt',
   'verif-translate',
 ]
+if not args.use_cached_cgeist:
+  executables += ['cgeist']
+baseline_checked = {'mlir-opt', 'verif-opt', 'verif-translate', 'cgeist'}
+extra_tools = set()
+for c in expanded_configs:
+  for step in c.get('pipeline', []):
+    tool = step['tool']
+    if tool not in baseline_checked:
+      extra_tools.add(tool)
+executables += list(extra_tools)
 for ex in executables:
   if shutil.which(ex) is None:
     print(f'{ex} must be in PATH', file=sys.stderr)
     exit(1)
 
-configobj = json.load(open(args.config_file))
-# print(configobj)
-configs = configobj['optionsets']
-pbdir = configobj['polybench_dir']
-
-if not(type(configs) is list): configs = [configs]
-configdirs = [config['output_dir'] for config in configs]
-assert len(configdirs) == len(set(configdirs)), 'configs must have different output directories!'
+# Check that mlir-opt executables exist
+for c in expanded_configs:
+  path = c['_mlir_opt_path']
+  if shutil.which(path) is None and not os.path.isfile(path):
+    print(f'mlir-opt not found: {path}', file=sys.stderr)
+    exit(1)
 
 topdir = configobj['topdir']
 runsh(f'mkdir -p {topdir}')
 
+configdirs = [config['output_dir'] for config in expanded_configs]
+assert len(configdirs) == len(set(configdirs)), 'configs must have different output directories!'
+
 csvfile = f'{topdir}/conversion_stats.csv'
 cw = csv.writer(open(csvfile, 'w'))
-cw.writerow(['name', 'output_dir', 'all_pass', 'fail_command', 'flag_did_nothing'])
+cw.writerow(['name', 'output_dir', 'optionset', 'mlir_opt_version', 'all_pass', 'fail_command', 'flag_did_nothing'])
 
-# returns stdout if successful
-def runorrecord(command, listtoadd, stage, name=None, log=None, outdir=None):
+# returns stdout if successful; writes stderr to stderrfile unconditionally
+def runorrecord(command, listtoadd, stage, name=None, log=None, outdir=None, stderrfile=None, optionset=None, mlir_opt_name=None):
   global args
   global cw
   log += [f'    {command}']
   stdout, stderr, rc = runsh(command, timeout=args.timeout)
+  if stderrfile is not None:
+    with open(stderrfile, 'w') as f:
+      f.write(stderr if stderr else '')
   emptymodule = '''module {
 }'''
   if (rc or rc is None) or emptymodule in stdout:
@@ -77,7 +95,7 @@ def runorrecord(command, listtoadd, stage, name=None, log=None, outdir=None):
     timeoutstr = "(timeout)" if rc is None else ""
     print(f'{CLR_RED}  failed{empty}{timeoutstr}: {command}{CLR_NONE}')
     log += [f'    failed{empty}{timeoutstr}']
-    cw.writerow([name, re.sub(r'.*/', '', outdir), 'no', command, 'N/A'])
+    cw.writerow([name, re.sub(r'.*/', '', outdir), optionset, mlir_opt_name, 'no', command, 'N/A'])
     if args.debug == stage:
       print(stderr, file=sys.stderr)
     if args.die == stage:
@@ -96,7 +114,6 @@ def checkdiff(f1, f2, command, log):
 
 def convertbenches(config):
   print(f'PROCESSING DIR: {config["output_dir"]}')
-  global pbdir
   global mlirstepsfailed
   global conversionfailed
   global translationfailed
@@ -106,13 +123,12 @@ def convertbenches(config):
   runconvfailed = []
   runtranfailed = []
 
-  uselesspass = False
-
   outdir = topdir + '/' + config['output_dir']
-  cgeist_args = config['cgeist_args']
-  polymer_args = config['polymer_args']
-  mliropt_args = config['mliropt_args']
-  inline = config['inline'] if 'inline' in config else True
+  mlir_opt = config['_mlir_opt_path']
+  mlir_opt_name = config['_mlir_opt_name']
+  optionset = config['_optionset']
+  steps = config['pipeline']
+  n = len(steps)
 
   logfile = f'{outdir}/logs/command_log.txt'
   log = []
@@ -120,20 +136,42 @@ def convertbenches(config):
   log += [f'config file: {args.config_file}, output dir {outdir}']
   log += [f'{config}']
 
-  # if os.path.isdir(outdir):
-  #   print('output directory already exists')
-  #   exit(1)
   runsh(f'mkdir -p {outdir}')
   runsh(f'mkdir -p {outdir}/translated')
   runsh(f'mkdir -p {outdir}/conversion')
   runsh(f'mkdir -p {outdir}/logs')
 
-  if not os.path.isdir(f'{pbdir}/kernel') or not os.path.isdir(f'{pbdir}/epilogue'):
-    print('polybench_dir should be the output of generate_polybenches.py')
-    exit(1)
+  input_dir = configobj.get('input_dir', None)
+  if input_dir:
+    input_ext = config.get('input_ext', '.mlir')
+    epilogue_dir = f'{BASEDIR}/{input_dir}/epilogue'
+    source_files = glob(f'{BASEDIR}/{input_dir}/*{input_ext}')
+    def get_name(file): return os.path.basename(file).replace(input_ext, '')
+    if not source_files:
+      print(f'no {input_ext} files found in input_dir: {BASEDIR}/{input_dir}', file=sys.stderr)
+      exit(1)
+  else:
+    pbdir = config['polybench_dir']
+    epilogue_dir = f'{pbdir}/epilogue'
+    if not os.path.isdir(f'{pbdir}/kernel') or not os.path.isdir(f'{pbdir}/epilogue'):
+      print('polybench_dir should be the output of generate_polybenches.py')
+      exit(1)
+    if not args.use_cached_cgeist:
+      source_files = glob(f'{pbdir}/kernel/*.c')
+      def get_name(file): return os.path.basename(file).replace('.c', '')
+    else:
+      if not os.path.isdir(cgeist_dir):
+        print(f'cgeist_dir not found: {cgeist_dir}', file=sys.stderr)
+        exit(1)
+      source_files = glob(f'{cgeist_dir}/*.mlir')
+      def get_name(file): return os.path.basename(file).replace('.mlir', '')
+      if not source_files:
+        print(f'no .mlir files found in cgeist_dir: {cgeist_dir}', file=sys.stderr)
+        exit(1)
 
-  for file in glob(f'{pbdir}/kernel/*.c'):
-    name = os.path.basename(file).replace('.c', '')
+  for file in source_files:
+    uselesspass = False
+    name = get_name(file)
     if (args.only and name not in args.only) or (args.skip and name in args.skip):
       print(f'{CLR_YLW}skipping {file}{CLR_NONE}')
       log += [f'skipping {file}']
@@ -141,83 +179,93 @@ def convertbenches(config):
     print('converting ' + name)
     log += ['converting ' + name]
 
-    nrunorrecord = ft.partial(runorrecord, name=name, log=log, outdir=outdir)
+    nrunorrecord = ft.partial(runorrecord, name=name, log=log, outdir=outdir, optionset=optionset, mlir_opt_name=mlir_opt_name)
 
-    file_original_mlir = f'{outdir}/conversion/{name}-1-original.mlir'
-    stdout = nrunorrecord(f'cgeist {file} -S -function=kernel_{name.replace("-", "_")} {cgeist_args}',
-                        runmlirfailed, 'mlir')
-    if not stdout: continue
-    # remove module and function attributes
-    stdout = re.sub(r'module attributes {.*}', 'module', stdout)
-    stdout = re.sub(r'func.func (.+) attributes {.*}', r'func.func \1', stdout)
-    with open(file_original_mlir, 'w') as f:
-      f.write(stdout)
+    current_file = file if input_dir else None
+    failed = False
 
+    for i, step in enumerate(steps):
+      tool_name = step['tool']
+      step_args = step.get('args', '')
+      label = step.get('label', tool_name)
+      step_num = i + 1
+      tool = mlir_opt if tool_name == 'mlir-opt' else tool_name
+      outfile = f'{outdir}/conversion/{name}-{step_num}-{label}.mlir'
+      stderrfile = f'{outdir}/conversion/{name}-{step_num}-{label}.stderr'
 
-    file_after_polymer = f'{outdir}/conversion/{name}-2-after-polymer.mlir'
-    command = f'polymer-opt {file_original_mlir} {polymer_args}'
-    stdout = nrunorrecord(command, runmlirfailed, 'mlir')
-    if not stdout: continue
-    # get rid of symbol()
-    stdout = re.sub(r'symbol\((.*?)\)', r'\1', stdout)
-    with open(file_after_polymer, 'w') as f:
-      f.write(stdout)
-    if len(polymer_args):
-      diff = checkdiff(file_original_mlir, file_after_polymer, command, log)
-      if not diff: uselesspass = True
+      if tool_name == 'cgeist':
+        if not args.use_cached_cgeist and not input_dir:
+          stdout = nrunorrecord(
+              f'cgeist {file} -S -function=kernel_{name.replace("-", "_")} {step_args}',
+              runmlirfailed, 'mlir', stderrfile=stderrfile)
+          if not stdout:
+            failed = True
+            break
+          stdout = re.sub(r'module attributes {.*}', 'module', stdout)
+          stdout = re.sub(r'func.func (.+) attributes {.*}', r'func.func \1', stdout)
+        else:
+          stdout = open(file).read()
+          stdout = re.sub(r'module attributes {.*}', 'module', stdout)
+          stdout = re.sub(r'func.func (.+) attributes {.*}', r'func.func \1', stdout)
+          with open(stderrfile, 'w') as f:
+            pass  # empty — no cgeist run
+        with open(outfile, 'w') as f:
+          f.write(stdout)
 
-    file_after_inline = f'{outdir}/conversion/{name}-3-after-inline.mlir'
-    if inline:
-      stdout = nrunorrecord(f'mlir-opt --inline {file_after_polymer}',
-                          runmlirfailed, 'mlir')
-      if not stdout: continue
-      # get rid of symbol()
-      stdout = re.sub(r'symbol\((.*?)\)', r'\1', stdout)
-      with open(file_after_inline, 'w') as f:
-        f.write(stdout)
+      else:
+        stdout = nrunorrecord(f'{tool} {current_file} {step_args}',
+                              runmlirfailed, 'mlir', stderrfile=stderrfile)
+        if not stdout:
+          failed = True
+          break
+        stdout = re.sub(r'symbol\((.*?)\)', r'\1', stdout)
+        with open(outfile, 'w') as f:
+          f.write(stdout)
+        if step.get('track_did_nothing', False):
+          diff = checkdiff(current_file, outfile, f'{tool} {step_args}', log)
+          if not diff:
+            uselesspass = True
 
-    mliropt_input = file_after_polymer if not inline else file_after_inline
+      current_file = outfile
 
+    if failed:
+      continue
 
-    file_after_mliropt = f'{outdir}/conversion/{name}-4-after-mliropt.mlir'
-    command = f'mlir-opt {mliropt_input} {mliropt_args}'
-    stdout = nrunorrecord(command, runmlirfailed, 'mlir')
-    if not stdout: continue
-    with open(file_after_mliropt, 'w') as f:
-      f.write(stdout)
-    if len(mliropt_args):
-      diff = checkdiff(mliropt_input, file_after_mliropt, command, log)
-      if not diff: uselesspass = True
-
-
-    file_after_loweraffine = f'{outdir}/conversion/{name}-5-after-loweraffine.mlir'
-    stdout = nrunorrecord(f'mlir-opt --lower-affine {file_after_mliropt}',
-                        runmlirfailed, 'mlir')
-    if not stdout: continue
+    # --- hardcoded tail ---
+    file_after_loweraffine = f'{outdir}/conversion/{name}-{n+1}-after-loweraffine.mlir'
+    stdout = nrunorrecord(f'{mlir_opt} --lower-affine {current_file}',
+                        runmlirfailed, 'mlir',
+                        stderrfile=f'{outdir}/conversion/{name}-{n+1}-after-loweraffine.stderr')
+    if not stdout:
+      continue
     with open(file_after_loweraffine, 'w') as f:
       f.write(stdout)
 
-
+    file_after_conversion = f'{outdir}/conversion/{name}-{n+2}-after-conversion.mlir'
     stdout = nrunorrecord(f'verif-opt --verif-scf-parallel-to-async {file_after_loweraffine}',
-                        runconvfailed, 'convert')
-    if not stdout: continue
-    with open(f'{outdir}/conversion/{name}-6-after-conversion.mlir', 'w') as f:
+                        runconvfailed, 'convert',
+                        stderrfile=f'{outdir}/conversion/{name}-{n+2}-after-conversion.stderr')
+    if not stdout:
+      continue
+    with open(file_after_conversion, 'w') as f:
       f.write(stdout)
 
-
-    stdout = nrunorrecord(f'verif-translate --translate-to-past {outdir}/conversion/{name}-6-after-conversion.mlir',
-                        runtranfailed, 'translate')
-    if not stdout: continue
-    with open(f'{outdir}/conversion/{name}-7-translated-no-includes.c', 'w') as f:
+    file_translated_no_includes = f'{outdir}/conversion/{name}-{n+3}-translated-no-includes.c'
+    stdout = nrunorrecord(f'verif-translate --translate-to-past {file_after_conversion}',
+                        runtranfailed, 'translate',
+                        stderrfile=f'{outdir}/conversion/{name}-{n+3}-translated-no-includes.stderr')
+    if not stdout:
+      continue
+    with open(file_translated_no_includes, 'w') as f:
       f.write(stdout)
     if 'async' in stdout:
-      _, _, rc = runsh(f'{EPILOGUE_SCRIPT_ASYNC} {outdir}/conversion/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue.c {outdir}/translated/{name}-8-translated.c {VERIFREPO}')
+      _, _, rc = runsh(f'{EPILOGUE_SCRIPT_ASYNC} {file_translated_no_includes} {epilogue_dir}/{name}-epilogue.c {outdir}/translated/{name}-{n+4}-translated.c {VERIFREPO}')
       assert not rc
     else:
-      _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {outdir}/conversion/{name}-7-translated-no-includes.c {pbdir}/epilogue/{name}-epilogue-noasync.c {outdir}/translated/{name}-8-translated-noasyncepilogue.c {VERIFREPO}')
+      _, _, rc = runsh(f'{EPILOGUE_SCRIPT} {file_translated_no_includes} {epilogue_dir}/{name}-epilogue-noasync.c {outdir}/translated/{name}-{n+4}-translated-noasyncepilogue.c {VERIFREPO}')
       assert not rc
 
-    cw.writerow([name, config['output_dir'], 'yes', 'N/A', 'yes' if uselesspass else 'no'])
+    cw.writerow([name, config['output_dir'], optionset, mlir_opt_name, 'yes', 'N/A', 'yes' if uselesspass else 'no'])
 
   log += ['\n\nfail before conversion:']
   for name, command in runmlirfailed:
@@ -242,7 +290,7 @@ mlirstepsfailed = []
 conversionfailed = []
 translationfailed = []
 
-for config in configs:
+for config in expanded_configs:
   convertbenches(config)
 
 
@@ -255,4 +303,3 @@ for name, command in conversionfailed:
 print('fail during translation:')
 for name, command in translationfailed:
   print(f'    {name}: {command}')
-
