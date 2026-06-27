@@ -1,6 +1,6 @@
 {
 
-    "topdir": "pact26-cgeist",
+    "topdir": "cgeist",
     "polybench_dir": "generated-polybench-mini-dataset-use-scalar-lb",
 
     "pastchecker": "/opt/peqc-mlir-volume/past-release/install/bin/pastchecker",

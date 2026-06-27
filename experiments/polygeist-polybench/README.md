@@ -27,7 +27,7 @@ Tools you need in your PATH:
 
 ## Config file format
 
-Both `convert_polybenches.py` and `run.py` take a JSON config file as their first argument. The PACT26 configs are in `config/pact26/`.
+Both `convert_polybenches.py` and `run.py` take a JSON config file as their first argument. The configs are in `config/`.
 
 **Top-level fields:**
 
@@ -143,39 +143,39 @@ $> ./script/run.py --self config/default-config.json
 $> ./script/run.py config/default-config.json --compare-against generated-polybench-mini-dataset-use-scalar-lb/interp
 ```
 
-## PACT 2026 Experiments
+## Experiments
 
 ```sh
 ./script/generate_polybenches.py -DMINI_DATASET -DPOLYBENCH_USE_SCALAR_LB
 ./script/generate_polybenches.py -DSMALL_DATASET -DPOLYBENCH_USE_SCALAR_LB
 
 # initial pb mlir-opt exps
-./script/convert_polybenches.py ./config/pact26/mini-initial-exp.json --use-cached-cgeist
-./script/run.py ./config/pact26/mini-initial-exp.json --timeout 600 --compare-against generated-polybench-mini-dataset-use-scalar-lb/interp
-./script/collect_csv.py pact26-mini-initial-exp/
-./script/make_results_table.py config/pact26/mini-initial-exp.json \
-     --out pact26-mini-initial-exp/results.csv
+./script/convert_polybenches.py ./config/mini-initial-exp.json --use-cached-cgeist
+./script/run.py ./config/mini-initial-exp.json --timeout 600 --compare-against generated-polybench-mini-dataset-use-scalar-lb/interp
+./script/collect_csv.py mini-initial-exp/
+./script/make_results_table.py config/mini-initial-exp.json \
+     --out mini-initial-exp/results.csv
 
 # cgeist exps
-./script/convert_polybenches.py ./config/pact26/cgeist.json
-./script/run.py ./config/pact26/cgeist.json --timeout 600 --compare-against-polybench
-./script/collect_csv.py pact26-cgeist/
-./script/make_results_table.py config/pact26/cgeist.json \
-     --out pact26-cgeist/results.csv
+./script/convert_polybenches.py ./config/cgeist.json
+./script/run.py ./config/cgeist.json --timeout 600 --compare-against-polybench
+./script/collect_csv.py cgeist/
+./script/make_results_table.py config/cgeist.json \
+     --out cgeist/results.csv
 
 # linalg exps
-./script/convert_polybenches.py ./config/pact26/linalg.json
-./script/run.py ./config/pact26/linalg.json --timeout 600 --compare-pipelines
-./script/collect_csv.py pact26-linalg/
-./script/make_results_table.py config/pact26/linalg.json \
-     --out pact26-linalg/results.csv
+./script/convert_polybenches.py ./config/linalg.json
+./script/run.py ./config/linalg.json --timeout 600 --compare-pipelines
+./script/collect_csv.py linalg/
+./script/make_results_table.py config/linalg.json \
+     --out linalg/results.csv
 
 # parallel exps
-./script/convert_polybenches.py ./config/pact26/parallel.json --use-cached-cgeist
-./script/run.py ./config/pact26/parallel.json --timeout 180 --compare-against-polybench
-./script/collect_csv.py pact26-parallel/
-./script/make_results_table.py config/pact26/parallel.json \
-     --out pact26-parallel/results.csv
+./script/convert_polybenches.py ./config/parallel.json --use-cached-cgeist
+./script/run.py ./config/parallel.json --timeout 180 --compare-against-polybench
+./script/collect_csv.py parallel/
+./script/make_results_table.py config/parallel.json \
+     --out parallel/results.csv
 ```
 
 to try:

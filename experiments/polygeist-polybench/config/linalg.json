@@ -1,6 +1,6 @@
 {
 
-    "topdir": "pact26-linalg",
+    "topdir": "linalg",
 
     "input_dir": "linalg-input",
     "input_ext": ".mlir",

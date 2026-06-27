@@ -1,6 +1,6 @@
 {
 
-    "topdir": "pact26-parallel",
+    "topdir": "parallel",
     "polybench_dir": "generated-polybench-mini-dataset-use-scalar-lb",
     "cgeist_dir": "polybench-cgeist",
 
