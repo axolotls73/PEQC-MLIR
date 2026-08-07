@@ -1,0 +1,53 @@
+{
+
+    "topdir": "cgeist",
+    "polybench_dir": "generated-polybench-mini-dataset-use-scalar-lb",
+
+    "pastchecker": "pastchecker",
+
+    "ignore_benches": [
+    ],
+
+    "pipeline_comparisons": [
+    ],
+
+    "optionsets": [
+
+{
+    "output_dir": "no-args",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "scf-to-affine",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "scal-rep",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "--scal-rep",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "unroll",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine --unroll-loops",
+            "label": "after-cgeist"}
+    ]
+}
+
+]
+}
