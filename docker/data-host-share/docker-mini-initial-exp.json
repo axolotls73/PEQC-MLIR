@@ -1,0 +1,127 @@
+{
+
+    "topdir": "mini-initial-exp",
+    "polybench_dir": "generated-polybench-mini-dataset-use-scalar-lb",
+    "cgeist_dir": "polybench-cgeist",
+
+    "pastchecker": "pastchecker",
+
+    "mlir_opt_versions": [
+        { "name": "llvm23", "path": "mlir-opt" }
+    ],
+
+    "ignore_benches": [
+        "adi", "durbin"
+    ],
+
+    "pipeline_comparisons": [
+    ],
+
+    "optionsets": [
+
+{
+    "output_dir": "no-args",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
+},
+
+{
+    "output_dir": "affine-loop-fusion",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-fusion",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
+},
+
+{
+    "output_dir": "affine-loop-inv-code-motion",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-invariant-code-motion",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
+},
+
+{
+    "output_dir": "affine-normalize",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-normalize",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
+},
+
+{
+    "output_dir": "affine-tile",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-loop-tile=\"tile-size=32\"",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
+},
+
+{
+    "output_dir": "affine-unroll",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll))\"",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
+},
+
+{
+    "output_dir": "affine-unroll-jam",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--pass-pipeline=\"builtin.module(func.func(affine-loop-unroll-jam))\"",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
+},
+
+{
+    "output_dir": "affine-parallelize",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "original"},
+        {"tool": "mlir-opt",
+            "args": "--affine-parallelize",
+            "label": "after-mliropt",
+            "track_did_nothing": true}
+    ]
+}
+
+]
+}

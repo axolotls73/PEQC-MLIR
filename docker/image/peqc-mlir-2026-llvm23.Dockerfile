@@ -192,7 +192,7 @@ RUN cat ${MLIR_AIR_2026_BUNDLE_DIR}/mlir_air_2026_environment.sh \
 
 USER root
 
-RUN apt-get update && apt-get install -y --no-install-recommends vim emacs
+RUN apt-get update && apt-get install -y --no-install-recommends vim emacs time
 
 # --- module 'past-bundle' (past-release-bundle.df) ---
 # -----------------------------------------------------------------------------

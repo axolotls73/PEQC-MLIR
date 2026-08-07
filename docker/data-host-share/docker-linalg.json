@@ -1,0 +1,71 @@
+{
+
+    "topdir": "linalg",
+
+    "input_dir": "linalg-input",
+    "input_ext": ".mlir",
+    "liveout_prefix": "",
+
+    "pastchecker": "pastchecker",
+
+    "mlir_opt_versions": [
+        { "name": "llvm23", "path": "mlir-opt" }
+    ],
+
+    "ignore_benches": [
+    ],
+
+    "pipeline_comparisons": [
+        ["affine-loops", "loops"],
+        ["affine-loops", "parallel-loops"],
+        ["affine-loops", "generic-parallel"]
+    ],
+
+    "optionsets": [
+
+{
+    "output_dir": "affine-loops",
+    "pipeline": [
+        {"tool": "mlir-opt",
+            "args": "--convert-linalg-to-affine-loops",
+            "label": "after-mliropt",
+            "track_did_nothing": false}
+    ]
+},
+
+{
+    "output_dir": "loops",
+    "pipeline": [
+        {"tool": "mlir-opt",
+            "args": "--convert-linalg-to-loops",
+            "label": "after-mliropt",
+            "track_did_nothing": false}
+    ]
+},
+
+{
+    "output_dir": "parallel-loops",
+    "pipeline": [
+        {"tool": "mlir-opt",
+            "args": "--convert-linalg-to-parallel-loops",
+            "label": "after-mliropt",
+            "track_did_nothing": false}
+    ]
+},
+
+{
+    "output_dir": "generic-parallel",
+    "pipeline": [
+        {"tool": "mlir-opt",
+            "args": "--linalg-generalize-named-ops",
+            "label": "after-mliropt",
+            "track_did_nothing": false},
+        {"tool": "mlir-opt",
+            "args": "--convert-linalg-to-parallel-loops",
+            "label": "after-mliropt",
+            "track_did_nothing": false}
+    ]
+}
+
+]
+}
