@@ -1,0 +1,19 @@
+atax: y[i] = 0; ==> y[i] = 0.0;
+bicg: s[i] = 0; ==> s[i] = 0.0;
+symm: as above
+
+for multiplication, put constant on the rhs.
+benches:
+fdtd-2d
+heat3d
+jacobi-1d
+jacobi-2d
+seidel-2d
+deriche
+
+nussinov: base ==> char
+
+change medium dataset size to be smaller:
+floyd-warshall
+ludcmp
+nussinov

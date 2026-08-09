@@ -1,0 +1,131 @@
+from subprocess import run as subprocess_run, Popen, PIPE, TimeoutExpired
+from signal import SIGINT
+import os
+from glob import glob
+
+STDOUT = 0
+STDERR = 1
+RETURNCODE = 2
+
+def runsh_success(*args, timeout=None):
+  out = subprocess_run(args, capture_output=True, shell=True, timeout=timeout)
+  return out.returncode == 0
+
+def run(*args, timeout=None):
+  out = subprocess_run(args, capture_output=True, timeout=timeout)
+  return out.stdout.decode(), out.stderr.decode(), out.returncode
+
+def runsh_combined(command, timeout=None):
+  """Like runsh but merges stderr into stdout, interleaved as in a terminal."""
+  from subprocess import STDOUT
+  with Popen(command, shell=True, stdout=PIPE, stderr=STDOUT, start_new_session=True) as process:
+    try:
+        output, _ = process.communicate(timeout=timeout)
+        returncode = process.returncode
+    except TimeoutExpired:
+        os.killpg(process.pid, SIGINT)
+        output, _ = process.communicate()
+        returncode = None
+  return output.decode() if output else None, returncode
+
+def runsh(command, timeout=None):
+  #https://stackoverflow.com/a/36955420
+  with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, start_new_session=True) as process:
+    try:
+        output = process.communicate(timeout=timeout)
+        returncode = process.returncode
+    except TimeoutExpired:
+        os.killpg(process.pid, SIGINT) # send signal to the process group
+        output = process.communicate()
+        returncode = None
+  stdout, stderr = output
+
+  # out = subprocess_run(args, capture_output=True, shell=True, timeout=timeout)
+  return stdout.decode() if stdout else None, stderr.decode() if stderr else None, returncode
+
+CLR_RED = '\033[31m'
+CLR_GRN = '\033[32m'
+CLR_YLW = '\033[33m'
+CLR_GRAY = '\033[90m'
+CLR_NONE = '\033[0m'
+NL = '\n'
+
+SCRIPTDIR = os.path.dirname(os.path.realpath(__file__))
+BASEDIR = os.getcwd()
+
+def getpath(s, isfunc):
+  if isfunc(f'{BASEDIR}/{s}'):
+    return f'{BASEDIR}/{s}'
+  elif isfunc(s):
+    return s
+  else: assert 0, f'[run_exps] invalid file path {s}'
+
+def getdirpath(d): return getpath(d, os.path.isdir)
+def getfilepath(f): return getpath(f, os.path.isfile)
+
+def pathtoname(path):
+  name = path.replace('/', '-')
+  if name and name[-1] == '-':
+    name = name[:-1]
+  return name
+
+BASEDIR = os.path.abspath(f'{os.path.dirname(__file__)}/..')
+
+def expand_configs(configobj):
+  """Apply options_all and expand mlir_opt_versions cartesian product."""
+  options_all = configobj.get('options_all', {})
+  configs = [{**options_all, **c} for c in configobj['optionsets']]
+  # Apply top-level "pipeline" as fallback for optionsets that don't define one
+  top_pipeline = configobj.get('pipeline', None)
+  if top_pipeline is not None:
+    for c in configs:
+      c.setdefault('pipeline', top_pipeline)
+  # Apply top-level "polybench_dir" as fallback
+  top_polybench_dir = configobj.get('polybench_dir')
+  if top_polybench_dir is not None:
+    for c in configs:
+      c.setdefault('polybench_dir', top_polybench_dir)
+  if 'mlir_opt_versions' in configobj:
+    mlir_opt_versions = configobj['mlir_opt_versions']
+  else:
+    mlir_opt_versions = [{'name': None, 'path': 'mlir-opt'}]
+  expanded = []
+  for v in mlir_opt_versions:
+    for config in configs:
+      overrides = config.get('version_overrides', {}).get(v['name'], {})
+      c = {**config, **overrides}
+      c['_mlir_opt_path'] = v['path']
+      c['_mlir_opt_name'] = v['name']
+      c['_optionset'] = c['output_dir']
+      if v['name'] is not None:
+        c['output_dir'] = f'{v["name"]}-{c["output_dir"]}'
+      expanded.append(c)
+  return expanded
+
+benchnames = []
+benchtoliveout = {}
+
+def init_bench_registry(configobj):
+    global benchtoliveout
+    input_dir = configobj.get('input_dir', 'polybench-input')
+    input_ext = configobj.get('input_ext', '.c')
+    liveout_dir = configobj.get('liveout_dir', 'liveoutvars')
+    liveout_prefix = configobj.get('liveout_prefix', 'polybench_')
+
+    benchnames.clear()
+    benchnames.extend(
+        os.path.basename(f).replace(input_ext, '')
+        for f in glob(f'{BASEDIR}/{input_dir}/*{input_ext}')
+    )
+
+    def getliveoutvarfile(name):
+        return f'{BASEDIR}/{liveout_dir}/{liveout_prefix}{name.replace("-", "_")}-liveoutvars.txt'
+
+    benchtoliveout.clear()
+    for name in benchnames:
+        liveoutfile = getliveoutvarfile(name)
+        if os.path.isfile(liveoutfile):
+            benchtoliveout[name] = open(liveoutfile).read().strip()
+        else:
+            print(f'{CLR_YLW}no liveout var file found for bench "{name}" (checked at {liveoutfile}){CLR_NONE}')
+            benchtoliveout[name] = None

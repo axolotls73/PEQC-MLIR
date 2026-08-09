@@ -1,0 +1,174 @@
+{
+
+    "topdir": "cgeist",
+    "polybench_dir": "generated-polybench-mini-dataset-use-scalar-lb",
+
+    "pastchecker": "pastchecker",
+
+    "ignore_benches": [
+    ],
+
+    "pipeline_comparisons": [
+    ],
+
+    "optionsets": [
+
+{
+    "output_dir": "no-args",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "scf-to-affine",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "scal-rep",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "--scal-rep",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "unroll",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine --unroll-loops",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "param-no-args",
+    "polybench_dir": "generated-polybench-mini-dataset",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "param-scf-to-affine",
+    "polybench_dir": "generated-polybench-mini-dataset",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "param-scal-rep",
+    "polybench_dir": "generated-polybench-mini-dataset",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "--scal-rep",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "param-unroll",
+    "polybench_dir": "generated-polybench-mini-dataset",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine --unroll-loops",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "small-no-args",
+    "polybench_dir": "generated-polybench-small-dataset-use-scalar-lb",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "small-scf-to-affine",
+    "polybench_dir": "generated-polybench-small-dataset-use-scalar-lb",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "small-scal-rep",
+    "polybench_dir": "generated-polybench-small-dataset-use-scalar-lb",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "--scal-rep",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "small-unroll",
+    "polybench_dir": "generated-polybench-small-dataset-use-scalar-lb",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine --unroll-loops",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "small-param-no-args",
+    "polybench_dir": "generated-polybench-small-dataset",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "small-param-scf-to-affine",
+    "polybench_dir": "generated-polybench-small-dataset",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "small-param-scal-rep",
+    "polybench_dir": "generated-polybench-small-dataset",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "--scal-rep",
+            "label": "after-cgeist"}
+    ]
+},
+
+{
+    "output_dir": "small-param-unroll",
+    "polybench_dir": "generated-polybench-small-dataset",
+    "pipeline": [
+        {"tool": "cgeist",
+            "args": "-raise-scf-to-affine --unroll-loops",
+            "label": "after-cgeist"}
+    ]
+}
+
+
+]
+}

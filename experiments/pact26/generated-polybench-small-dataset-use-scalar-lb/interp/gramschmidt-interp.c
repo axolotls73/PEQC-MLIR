@@ -1,0 +1,50 @@
+
+#define expf exp
+#define powf pow
+
+#pragma pocc-region-start
+void kernel_gramschmidt(int m, int n,
+   double A[ 60 + 0][80 + 0],
+   double R[ 80 + 0][80 + 0],
+   double Q[ 60 + 0][80 + 0])
+{
+  int i, j, k;
+
+  double nrm;
+
+#pragma scop
+  for (k = 0; k < 80; k++)
+    {
+      nrm = 0.0;
+      for (i = 0; i < 60; i++)
+        nrm += A[i][k] * A[i][k];
+      R[k][k] = sqrt(nrm);
+      for (i = 0; i < 60; i++)
+        Q[i][k] = A[i][k] / R[k][k];
+      for (j = k + 1; j < 80; j++)
+ {
+   R[k][j] = 0.0;
+   for (i = 0; i < 60; i++)
+     R[k][j] += Q[i][k] * A[i][j];
+   for (i = 0; i < 60; i++)
+     A[i][j] = A[i][j] - Q[i][k] * R[k][j];
+ }
+    }
+#pragma endscop
+
+}
+
+
+
+{
+  int m = 60;
+  int n = 80;
+  double* A;
+  double* R;
+  double* Q;
+
+
+  kernel_gramschmidt(m, n, A, R, Q);
+
+}
+#pragma pocc-region-end
