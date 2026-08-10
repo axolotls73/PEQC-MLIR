@@ -54,15 +54,17 @@ args = argparser.parse_args()
 
 pastcheckerpath = args.pastchecker_path if args.pastchecker_path else 'pastchecker'
 
-executables = [
-  'mlir-opt',
-]
+executables = []
 if not args.pastchecker_path:
   executables += [pastcheckerpath]
 for ex in executables:
   if shutil.which(ex) is None:
     print(f'{ex} must be in PATH', file=sys.stderr)
     exit(1)
+
+# mlir-opt is only required to lower inputs that use the linalg dialect;
+# scf/affine-level inputs can be lowered by verif-opt itself
+have_mlir_opt = shutil.which('mlir-opt') is not None
 
 file1 = args.file1
 file2 = args.file2
@@ -128,10 +130,20 @@ for filename, id in zip([file1, file2], ['1', '2']):
   tempfiles += [tfilename, cfilename, lfilename]
 
 
-  out, err, rc = run(f'mlir-opt --convert-linalg-to-affine-loops --lower-affine {filename} > {lfilename}')
-  if rc:
-    print(f'{err}\n{CLR_RED}mlir-opt error{CLR_NONE}')
-    die()
+  if have_mlir_opt:
+    out, err, rc = run(f'mlir-opt --convert-linalg-to-affine-loops --lower-affine {filename} > {lfilename}')
+    if rc:
+      print(f'{err}\n{CLR_RED}mlir-opt error{CLR_NONE}')
+      die()
+  else:
+    if 'linalg.' in re.sub(r'//.*', '', open(filename).read()):
+      print(f'{CLR_RED}{filename} uses the linalg dialect: lowering it requires '
+            f'mlir-opt in PATH (verif-opt only provides --lower-affine){CLR_NONE}')
+      die()
+    out, err, rc = run(f'{VERIFDIR}/build/bin/verif-opt --lower-affine {filename} > {lfilename}')
+    if rc:
+      print(f'{err}\n{CLR_RED}verif-opt error{CLR_NONE}')
+      die()
 
   out, err, rc = run(f'{VERIFDIR}/build/bin/verif-opt --verif-scf-parallel-to-async {lfilename} > {cfilename}')
   if rc:

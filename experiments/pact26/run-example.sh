@@ -17,14 +17,14 @@ PASTCHECKER_PATH="$(command -v pastchecker)"
 # note: peqc-mlir.py always exits 0; the verdict is the YES/NO line it prints
 echo "=== [1/2] sequential matmul vs tiled matmul (expected: equivalent) ==="
 out1=$("$PEQC" --pastchecker-path="$PASTCHECKER_PATH" \
-    example/matmul-linalg.mlir example/matmul-tile-and-parallelize.mlir A,B,C)
+    example/matmul-sequential.mlir example/matmul-tile-and-parallelize.mlir A,B,C)
 echo "$out1" | tail -1
 echo "$out1" | grep -q "^.*YES," ; r1=$?
 
 echo
 echo "=== [2/2] sequential matmul vs BUGGY tiled matmul (expected: NOT equivalent) ==="
 out2=$("$PEQC" --pastchecker-path="$PASTCHECKER_PATH" \
-    example/matmul-linalg.mlir example/matmul-tile-and-parallelize-buggy.mlir A,B,C)
+    example/matmul-sequential.mlir example/matmul-tile-and-parallelize-buggy.mlir A,B,C)
 echo "$out2" | tail -1
 echo "$out2" | grep -q "NO," ; r2=$?
 

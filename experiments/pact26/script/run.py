@@ -35,6 +35,18 @@ argparser.add_argument('--seq-verif-only', action='store_true',
 args = argparser.parse_args()
 
 configobj = json.load(open(args.config_file))
+
+# Benches the config declares out of scope are skipped here, not merely dropped
+# from the results table by make_results_table.py — equivalence checking is the
+# expensive step, and checking a bench only to discard its row is pure cost.
+# (adi and durbin are ~14% of mini-initial-exp's check time; the paper's suite
+# drops both. Conversion is deliberately left unfiltered so that the
+# cached-lowered/ snapshot stays a complete superset.)
+ignore_benches = configobj.get('ignore_benches', [])
+if ignore_benches:
+    args.skip = sorted(set(args.skip) | set(ignore_benches))
+    print(f'skipping benches listed in ignore_benches: {", ".join(ignore_benches)}')
+
 init_bench_registry(configobj)
 configs = expand_configs(configobj)
 pbdir = configobj.get('polybench_dir')

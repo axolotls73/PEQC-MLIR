@@ -1,7 +1,6 @@
 # experiment outputs (topdir of each config)
 /mini-initial-exp/
 /linalg/
-/parallel/
 # cgeist experiment: only the raw cgeist outputs are tracked
 /cgeist/**
 !/cgeist/*/
@@ -11,3 +10,5 @@
 run-all.log
 core
 .peqc-files/
+# pastchecker scratch (fixed-name temp files written into the CWD)
+._input?.pastchecker.c

@@ -34,6 +34,9 @@ argparser.add_argument('--die', choices=debugopts, default=[],
     help='stop after first error from this stage')
 argparser.add_argument('--use-cached-cgeist', action='store_true',
     help='use cached cgeist files from cgeist_dir instead of re-running cgeist')
+argparser.add_argument('--use-cached-mliropt', action='store_true',
+    help='resume from cached post-lower-affine files (lowered_cache_dir, default '
+         'cached-lowered/<topdir>); skips cgeist and all mlir-opt invocations')
 args = argparser.parse_args()
 
 configobj = json.load(open(args.config_file))
@@ -46,7 +49,7 @@ executables = [
   'verif-opt',
   'verif-translate',
 ]
-if not args.use_cached_cgeist:
+if not args.use_cached_cgeist and not args.use_cached_mliropt:
   executables += ['cgeist']
 baseline_checked = {'mlir-opt', 'verif-opt', 'verif-translate', 'cgeist'}
 extra_tools = set()
@@ -62,11 +65,27 @@ for ex in executables:
     exit(1)
 
 # Check that mlir-opt executables exist
-for c in expanded_configs:
-  path = c['_mlir_opt_path']
-  if shutil.which(path) is None and not os.path.isfile(path):
-    print(f'mlir-opt not found: {path}', file=sys.stderr)
-    exit(1)
+if not args.use_cached_mliropt:
+  for c in expanded_configs:
+    path = c['_mlir_opt_path']
+    if shutil.which(path) is None and not os.path.isfile(path):
+      print(f'mlir-opt not found: {path}', file=sys.stderr)
+      exit(1)
+
+lowered_cache_dir = configobj.get('lowered_cache_dir', f'cached-lowered/{configobj["topdir"]}')
+
+# flag_did_nothing and conversion-failure rows can't be recomputed without
+# running mlir-opt; restore them from the conversion_stats.csv snapshot stored
+# alongside the cache
+cached_did_nothing = {}
+cached_failed_rows = {}
+if args.use_cached_mliropt:
+  cache_stats = f'{lowered_cache_dir}/conversion_stats.csv'
+  if os.path.isfile(cache_stats):
+    for row in csv.DictReader(open(cache_stats)):
+      cached_did_nothing[(row['name'], row['output_dir'])] = row['flag_did_nothing']
+      if row['all_pass'] != 'yes':
+        cached_failed_rows.setdefault(row['output_dir'], []).append(row)
 
 topdir = configobj['topdir']
 runsh(f'mkdir -p {topdir}')
@@ -169,6 +188,15 @@ def convertbenches(config):
         print(f'no .mlir files found in cgeist_dir: {cgeist_dir}', file=sys.stderr)
         exit(1)
 
+  if args.use_cached_mliropt:
+    cache_dir = f'{lowered_cache_dir}/{config["output_dir"]}'
+    source_files = glob(f'{cache_dir}/*-after-loweraffine.mlir')
+    def get_name(file):
+      return re.sub(r'-\d+-after-loweraffine\.mlir$', '', os.path.basename(file))
+    if not source_files:
+      print(f'no cached lowered files found in {cache_dir}', file=sys.stderr)
+      exit(1)
+
   for file in source_files:
     uselesspass = False
     name = get_name(file)
@@ -184,7 +212,7 @@ def convertbenches(config):
     current_file = file if input_dir else None
     failed = False
 
-    for i, step in enumerate(steps):
+    for i, step in enumerate([] if args.use_cached_mliropt else steps):
       tool_name = step['tool']
       step_args = step.get('args', '')
       label = step.get('label', tool_name)
@@ -233,13 +261,17 @@ def convertbenches(config):
 
     # --- hardcoded tail ---
     file_after_loweraffine = f'{outdir}/conversion/{name}-{n+1}-after-loweraffine.mlir'
-    stdout = nrunorrecord(f'{mlir_opt} --lower-affine {current_file}',
-                        runmlirfailed, 'mlir',
-                        stderrfile=f'{outdir}/conversion/{name}-{n+1}-after-loweraffine.stderr')
-    if not stdout:
-      continue
-    with open(file_after_loweraffine, 'w') as f:
-      f.write(stdout)
+    if args.use_cached_mliropt:
+      shutil.copyfile(file, file_after_loweraffine)
+      uselesspass = cached_did_nothing.get((name, config['output_dir']), 'no') == 'yes'
+    else:
+      stdout = nrunorrecord(f'{mlir_opt} --lower-affine {current_file}',
+                          runmlirfailed, 'mlir',
+                          stderrfile=f'{outdir}/conversion/{name}-{n+1}-after-loweraffine.stderr')
+      if not stdout:
+        continue
+      with open(file_after_loweraffine, 'w') as f:
+        f.write(stdout)
 
     file_after_conversion = f'{outdir}/conversion/{name}-{n+2}-after-conversion.mlir'
     stdout = nrunorrecord(f'verif-opt --verif-scf-parallel-to-async {file_after_loweraffine}',
@@ -266,6 +298,20 @@ def convertbenches(config):
       assert not rc
 
     cw.writerow([name, config['output_dir'], optionset, mlir_opt_name, 'yes', 'N/A', 'yes' if uselesspass else 'no'])
+
+  # Replay conversion-failure rows for benches that have no cached lowered file.
+  # A bench whose lowering succeeded but whose *later* steps failed (e.g. adi in
+  # the param-* cgeist optionsets: mlir-opt fine, verif-translate not) still has
+  # a cached lowered file, so the loop above already emitted its row — replaying
+  # it too would put a duplicate (output_dir, name) key in conversion_stats.csv,
+  # which make_results_table.py then reads back as a Series instead of a row.
+  cached_names = {get_name(f) for f in source_files} if args.use_cached_mliropt else set()
+  for row in cached_failed_rows.get(config['output_dir'], []):
+    if row['name'] in cached_names:
+      continue
+    cw.writerow([row['name'], row['output_dir'], row['optionset'],
+                 row['mlir_opt_version'], row['all_pass'], row['fail_command'],
+                 row['flag_did_nothing']])
 
   log += ['\n\nfail before conversion:']
   for name, command in runmlirfailed:

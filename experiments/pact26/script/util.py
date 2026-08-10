@@ -1,5 +1,5 @@
 from subprocess import run as subprocess_run, Popen, PIPE, TimeoutExpired
-from signal import SIGINT
+from signal import SIGINT, SIGKILL
 import os
 from glob import glob
 
@@ -24,7 +24,12 @@ def runsh_combined(command, timeout=None):
         returncode = process.returncode
     except TimeoutExpired:
         os.killpg(process.pid, SIGINT)
-        output, _ = process.communicate()
+        try:
+            output, _ = process.communicate(timeout=15)
+        except TimeoutExpired:
+            # some tools (e.g. pastchecker mid-search) ignore SIGINT
+            os.killpg(process.pid, SIGKILL)
+            output, _ = process.communicate()
         returncode = None
   return output.decode() if output else None, returncode
 
@@ -36,7 +41,11 @@ def runsh(command, timeout=None):
         returncode = process.returncode
     except TimeoutExpired:
         os.killpg(process.pid, SIGINT) # send signal to the process group
-        output = process.communicate()
+        try:
+            output = process.communicate(timeout=15)
+        except TimeoutExpired:
+            os.killpg(process.pid, SIGKILL)
+            output = process.communicate()
         returncode = None
   stdout, stderr = output
 
