@@ -178,23 +178,13 @@ version, `PASSED: 9` / `FAILED: 0`.) (With `--only`, every non-selected benchmar
   only the final `YES`/`NO` verdict and the mismatch reports matter.
 * `skipping version summary: no mlir_opt_versions in config` (cgeist
   experiment): expected — that experiment does not vary the LLVM version.
-* Rows with `error=timeout` are expected for the incorrect parallelized
-  variants, as reported in the paper's counts.
 
 ## Claims supported by this artifact
 
 * Table 3 verification outcomes for mlir-opt affine passes, LLVM 19/21/23 (`mini-initial-exp`)
 * Cgeist raising validated correct for all benchmarks except ADI (`cgeist`)
 * Linalg lowering flags verified equivalent (`linalg`)
-* PEQC-MLIR detects injected bugs and reports computation-tree mismatches (smoke test)
-
-## Claims NOT supported by this artifact (and why)
-
-* **AIR/AIE case studies (Sec 5.1, 5.2, Table 1, Fig. 4):** require the
-  MLIR-AIR/MLIR-AIE toolchains; provided separately (see `examples/` and the
-  docker image), not part of this directory.
-* **polymer-opt research-tool results (Sec 5.4):** the polymer experiment
-  configuration is not yet included here (pending consolidation).
+* PEQC-MLIR detects injected bugs and reports computation-tree mismatches
 
 ## Regenerating the cached inputs (optional)
 
